@@ -34,19 +34,31 @@ export default class FileSave {
     // Button: Commit to GitHub
     //
     $("#fileSaveDialog .okButton").off("click").on("click", () => {
-      canvas.setCurrentSelection(null)
-      writer.marshal(canvas, json => {
-        let name = $("#fileSaveDialog .githubFileName").val()
-        // to forbid path in the file names you must uncomment this line
-        name = name.replace(conf.fileSuffix, "")
-        name = name + conf.fileSuffix
-        storage.saveFile(json, name)
-          .then(function () {
-            Mousetrap.unpause()
-            app.fileName = name
-            $('#fileSaveDialog').modal('hide')
-          })
+      let name = $("#fileSaveDialog .githubFileName").val()
+      name = name.replace(conf.fileSuffix, "")
+      name = name + conf.fileSuffix
+      this.save(canvas, name, ()=>{
+        Mousetrap.unpause()
+        $('#fileSaveDialog').modal('hide')
       })
+    })
+  }
+
+  save(canvas, name, callback){
+    canvas.setCurrentSelection(null)
+    writer.marshal(canvas, json => {
+      // to forbid path in the file names you must uncomment this line
+      storage.saveFile(json, name)
+        .then(function (response) {
+          let data = response.data
+          if(typeof data === "string"){
+            data = JSON.parse(data)
+          }
+          app.historyFile(data.filePath)
+          if(callback) {
+            callback()
+          }
+        })
     })
   }
 }

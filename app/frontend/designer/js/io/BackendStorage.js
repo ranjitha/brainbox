@@ -31,7 +31,7 @@ export default class BackendStorage{
 
   getFiles(path){
       return $.ajax({
-        url: conf.backend.file.list,
+        url: conf.backend.shape.list,
         xhrFields: {
           withCredentials: true
         },
@@ -67,7 +67,7 @@ export default class BackendStorage{
 
   saveFile(json, imageDataUrl, fileName, commitMessage){
     return $.ajax({
-        url: conf.backend.file.save,
+        url: conf.backend.shape.save,
         method: "POST",
         xhrFields: {
           withCredentials: true
@@ -89,7 +89,7 @@ export default class BackendStorage{
    */
   loadFile(fileName){
     return $.ajax({
-      url: conf.backend.file.get(fileName),
+      url: conf.backend.shape.get(fileName),
       xhrFields: {
         withCredentials: true
       }

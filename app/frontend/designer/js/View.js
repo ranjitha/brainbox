@@ -1,7 +1,7 @@
 
 export default draw2d.Canvas.extend({
 
-  init: function (app, id) {
+  init: function (app, id, permissions) {
     this._super(id, 16000, 16000)
     this.clippboardFigure = null
     this.app = app

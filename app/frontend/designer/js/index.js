@@ -12,8 +12,6 @@ $.widget.bridge('uibutton', $.ui.button)
 $.widget.bridge('uitooltip', $.ui.tooltip)
 
 
-
-
 import "./figure/index"
 import "./filter/index"
 
@@ -49,7 +47,11 @@ if (!jQuery.browser) {
 }
 
 
-import Application from "./Application"
+
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = conf
+
 
 $(window).load(function () {
 
@@ -65,14 +67,10 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("serverless", () => {
-    conf.serverless =true
-    conf.backend.file.get = file => `./shapes/${file}`
-  });
-
-  socket.on("connect", () => {
-    app = shape_designer.app = new Application()
-  });
-
+  socket.on("permissions", (permissions) => {
+    app = require("./Application")
+    app.init(permissions)
+    shape_designer.app = app
+  })
 
 })

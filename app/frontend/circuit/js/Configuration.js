@@ -10,7 +10,11 @@
 //
 export default {
   fileSuffix: ".brain",
+
   backend: {
+
+    configuration:  `../backend/configuration`,
+
     file: {
       list:   path       => `../backend/brain/list?path=${path}`,
       get:    file       => `../backend/brain/get?filePath=${file}`,
@@ -19,26 +23,32 @@ export default {
       rename:  `../backend/brain/rename`,
       save:    `../backend/brain/save`
     },
+
     demo:{
       list:   path       => `../backend/demo/list?path=${path}`,
       get:    file       => `../backend/demo/get?filePath=${file}`,
       image:  file       => `../backend/demo/image?filePath=${file}`
     }
   },
+
   issues: {
     url:"dddddd"
   },
+
   designer: {
     url: "../designer/"
   },
+
   updates: {
     url: "../backend/updates",
     shapes: "../backend/updates/shapes"
   },
+
   shapes: {
     url: "./shapes/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
+
   color: {
     high: "#C21B7A",
     low:  "#0078F2"

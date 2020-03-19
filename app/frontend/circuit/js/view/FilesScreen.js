@@ -16,34 +16,74 @@ export default class Files {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  constructor() {
-    this.render()
+  constructor(permissions) {
+    this.render(permissions)
   }
 
-  render() {
+  render(permissions) {
 
-    $('#material-tabs').each(function () {
-      let $active, $content, $links = $(this).find('a');
-      $active = $($links[0]);
-      $active.addClass('active');
-      $content = $($active[0].hash);
-      $links.not($active).each(function () {
-        $(this.hash).hide()
-      })
+    this.initTabs(permissions)
+    this.initDemos(permissions)
+    this.initFiles(permissions)
 
-      $(this).on('click', 'a', function (e) {
-        $active.removeClass('active')
-        $content.hide()
 
-        $active = $(this)
-        $content = $(this.hash)
-
-        $active.addClass('active')
-        $content.show()
-
-        e.preventDefault()
-      })
+    socket.on("brain:generated", msg => {
+      let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
+      if (preview.length === 0) {
+        this.render()
+      } else {
+        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
+      }
     })
+  }
+
+  initTabs(permissions) {
+    // user can see personal files and the demo files
+    //
+    if(permissions.brains.list===true && permissions.brains.demos===true) {
+      $('#material-tabs').each(function () {
+        let $active, $content, $links = $(this).find('a');
+        $active = $($links[0]);
+        $active.addClass('active');
+        $content = $($active[0].hash);
+        $links.not($active).each(function () {
+          $(this.hash).hide()
+        })
+
+        $(this).on('click', 'a', function (e) {
+          $active.removeClass('active')
+          $content.hide()
+
+          $active = $(this)
+          $content = $(this.hash)
+
+          $active.addClass('active')
+          $content.show()
+
+          e.preventDefault()
+        })
+      })
+    }
+    else if (permissions.brains.list===false && permissions.brains.demos===true){
+      $('#material-tabs').remove()
+      $("#demoBrainFiles").show()
+      $("#userBrainFiles").remove()
+      $("#files .title span").html("Load a demo Circuit")
+    }
+    else if (permissions.brains.list===true && permissions.brains.demos===false){
+      $('#material-tabs').remove()
+      $("#demoBrainFiles").remove()
+      $("#userBrainFiles").show()
+      $("#files .title span").html("Load a Circuit")
+    }
+    else if (permissions.brains.list===true && permissions.brains.demos===false) {
+    }
+  }
+
+  initDemos(permissions) {
+    if(permissions.brains.demos===false){
+      return
+    }
 
     // load demo files
     //
@@ -91,10 +131,19 @@ export default class Files {
         })
       })
     }
+
     loadDemos("")
+  }
+
+  initFiles(permissions) {
+    if(permissions.brains.list===false){
+      return
+    }
 
     // load user files
     //
+    let _this = this
+
     function loadFiles(path) {
       storage.getFiles(path).then((files) => {
         files = files.filter(file => file.name.endsWith(conf.fileSuffix) || file.type === "dir")
@@ -137,58 +186,66 @@ export default class Files {
           placement: "bottom" // (top, right, bottom, left)
         })
 
-        $("#userBrainFiles .list-group-item h4").on("click", (event) => {
-          Mousetrap.pause()
-          let $el = $(event.currentTarget)
-          let parent = $el.closest(".list-group-item")
-          let name = parent.data("name")
-          let type = parent.data("type")
-          let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />')
-          $el.hide()
-          $el.after($replaceWith)
-          $replaceWith.focus()
-          $replaceWith.on("click", (event) => {
+        if (!_this.serverless) {
+          $("#userBrainFiles .list-group-item h4").on("click", (event) => {
+            // can happen if the "serverless" websocket event comes too late
+            //
+            if (_this.serverless) {
+              return
+            }
+
+            Mousetrap.pause()
+            let $el = $(event.currentTarget)
+            let parent = $el.closest(".list-group-item")
+            let name = parent.data("name")
+            let type = parent.data("type")
+            let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />')
+            $el.hide()
+            $el.after($replaceWith)
+            $replaceWith.focus()
+            $replaceWith.on("click", (event) => {
+              return false
+            })
+
+            let fire = () => {
+              Mousetrap.unpause()
+              let newName = $replaceWith.val()
+              if (newName !== "") {
+                if (type !== "dir") {
+                  newName = storage.sanitize(newName) + conf.fileSuffix
+                }
+                $.ajax({
+                    url: conf.backend.file.rename,
+                    method: "POST",
+                    xhrFields: {withCredentials: true},
+                    data: {
+                      from: name,
+                      to: newName
+                    }
+                  }
+                ).then(() => {
+                  $replaceWith.remove()
+                  $el.html(newName.replace(conf.fileSuffix, ""))
+                  $el.show()
+                  parent.data("name", newName)
+                })
+              } else {
+                // get the value and post them here
+                $replaceWith.remove()
+                $el.show()
+              }
+            }
+            $replaceWith.blur(fire)
+            $replaceWith.keypress((e) => {
+              if (e.which === 13) {
+                fire()
+              }
+            })
+            event.preventDefault()
+            event.stopPropagation()
             return false
           })
-
-          let fire = () => {
-            Mousetrap.unpause()
-            let newName = $replaceWith.val()
-            if (newName !== "") {
-              if(type !=="dir") {
-                newName = storage.sanitize(newName) + conf.fileSuffix
-              }
-              $.ajax({
-                  url: conf.backend.file.rename,
-                  method: "POST",
-                  xhrFields: {withCredentials: true},
-                  data: {
-                    from: name,
-                    to: newName
-                  }
-                }
-              ).then(() => {
-                $replaceWith.remove()
-                $el.html(newName.replace(conf.fileSuffix, ""))
-                $el.show()
-                parent.data("name", newName)
-              })
-            } else {
-              // get the value and post them here
-              $replaceWith.remove()
-              $el.show()
-            }
-          }
-          $replaceWith.blur(fire)
-          $replaceWith.keypress((e) => {
-            if (e.which === 13) {
-              fire()
-            }
-          })
-          event.preventDefault()
-          event.stopPropagation()
-          return false
-        })
+        }
 
         $("#userBrainFiles .list-group-item[data-type='dir']").on("click", (event) => {
           let $el = $(event.currentTarget)
@@ -209,17 +266,6 @@ export default class Files {
         })
       })
     }
-
     loadFiles("")
-
-    socket.on("brain:generated", msg => {
-      let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
-      if (preview.length === 0) {
-        this.render()
-      } else {
-        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
-      }
-    })
-
   }
 }

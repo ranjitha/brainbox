@@ -36,14 +36,16 @@ function checkElement(selector) {
 }
 
 
-export default class Application {
+class Application {
   /**
    * @constructor
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   constructor() {
+  }
 
+  init(permissions){
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
       code: $("#shape-edit-template").text().trim()
@@ -72,10 +74,10 @@ export default class Application {
     this.documentConfiguration = $.extend({}, this.documentConfigurationTempl)
 
     this.storage = new Storage()
-    this.view = new View(this, "canvas")
-    this.toolbar = new Toolbar(this, ".toolbar", this.view)
-    this.layer = new Layer(this, "layer_elements", this.view)
-    this.filter = new FilterPane(this, "#filter .filter_actions", this.view)
+    this.view = new View(this, "canvas", permissions)
+    this.toolbar = new Toolbar(this, ".toolbar", this.view, permissions)
+    this.layer = new Layer(this, "layer_elements", this.view, permissions)
+    this.filter = new FilterPane(this, "#filter .filter_actions", this.view, permissions)
 
     this.view.installEditPolicy(new SelectionToolPolicy())
 
@@ -260,3 +262,7 @@ export default class Application {
     }
   }
 }
+
+
+let app = new Application()
+export default app

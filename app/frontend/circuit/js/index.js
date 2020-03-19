@@ -48,60 +48,47 @@ if (!jQuery.browser) {
 
 import conf from './Configuration'
 
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = conf
+
 $(window).load(function () {
-  socket = io(
-    {
-      path: '/socket.io'
-    })
+  socket = io( { path: '/socket.io'})
 
   socket.on("shape:updated", () => {
     new UpdateSuccessDialog().show()
   })
 
-  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // Init the UI after we have receive the UI/UX permissions of this kind of installation
   // (fake event from the socket.io mock )
   //
-  socket.on("serverless", () => {
-    $("#leftTabStrip .editor").click()
-    $("#fileOpen, #editorFileOpen").remove();
-    $("#fileSave, #editorFileSave").remove();
-    $("#statusRaspi").addClass("disabled")
-
-    // patch the URL for the backedn to deliver predefined files
-    // for the static website with a nodeJS backend
-    //
-    conf.backend.file.list = path => `../brain/index.json`
-    conf.backend.file.get = file => `../brain/${file}`
-    conf.backend.file.image = () => `../brain/img`
-  });
-
-  let global = require("./global")
-  for (let k in global) window[k] = global[k];
-
-
-  // export all required classes for deserialize JSON with "eval"
-  // "eval" code didn't sees imported class or code
-  //
-  let addonScreen = require("./view/AddonScreen")
-  $("#leftTabStrip .addon").click(addonScreen.onShow)
-
-  // we must load the "shape/index.js" in the global scope.
-  $.getScript(conf.shapes.url + "index.js", function () {
-
+  socket.on("permissions", (permissions) => {
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    app = require("./Application")
-    require("./hardware").init(socket)
-    inlineSVG.init()
-  }).fail(function () {
-    if (arguments[0].readyState == 0) {
-      //script failed to load
-    } else {
-      //script loaded but failed to parse
-      alert(arguments[2].toString());
-    }
+    let global = require("./global")
+    for (let k in global) window[k] = global[k];
+
+    // we must load the "shape/index.js" in the global scope.
+    $.getScript(conf.shapes.url + "index.js", function () {
+
+      // export all required classes for deserialize JSON with "eval"
+      // "eval" code didn't sees imported class or code
+      //
+      app = require("./Application")
+      app.init(permissions)
+      require("./hardware").init(socket)
+      inlineSVG.init()
+    }).fail(function () {
+      if (arguments[0].readyState == 0) {
+        //script failed to load
+      } else {
+        //script loaded but failed to parse
+        alert(arguments[2].toString());
+      }
+    });
   });
+
 
   Split(['#paletteElementsFilter', '#paletteElementsScroll'], {
     gutterSize: 10,

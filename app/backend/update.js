@@ -9,7 +9,6 @@ const GITHUB_ORG = process.env.GITHUB_ORG || 'freegroup'
 const GITHUB_REPO = process.env.GITHUB_REPO || 'brainbox.shapes'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || null
 
-console.log(`Connected https://github.com repo "https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/".`)
 if(GITHUB_TOKEN === null) {
   console.log('Upload of Shapes to the Repo is not possible due of missing GITHUB_TOKEN environment variable.')
 }

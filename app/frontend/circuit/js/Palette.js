@@ -15,7 +15,7 @@ export default class Palette {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  constructor() {
+  constructor(permissions) {
 
     $.getJSON(conf.shapes.url + "index.json", (data) => {
       conf.shapes.version = data[0].version

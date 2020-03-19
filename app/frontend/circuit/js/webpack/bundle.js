@@ -163,6 +163,10 @@ var _FilesScreen = __webpack_require__(/*! ./view/FilesScreen */ "./app/frontend
 
 var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
 
+var _AddonScreen = __webpack_require__(/*! ./view/AddonScreen */ "./app/frontend/circuit/js/view/AddonScreen.js");
+
+var _AddonScreen2 = _interopRequireDefault(_AddonScreen);
+
 var _FileOpen = __webpack_require__(/*! ./dialog/FileOpen */ "./app/frontend/circuit/js/dialog/FileOpen.js");
 
 var _FileOpen2 = _interopRequireDefault(_FileOpen);
@@ -198,6 +202,7 @@ function rafAsync() {
     requestAnimationFrame(resolve); //faster than set time out
   });
 }
+
 function checkElement(selector) {
   if (document.querySelector(selector) === null) {
     return rafAsync().then(function () {
@@ -216,80 +221,85 @@ var Application = function () {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   function Application() {
-    var _this = this;
-
     _classCallCheck(this, Application);
-
-    this.palette = new _Palette2.default();
-    this.view = new _View2.default("draw2dCanvas");
-    this.filePane = new _FilesScreen2.default();
-
-    $("#fileOpen, #editorFileOpen").on("click", function () {
-      new _FileOpen2.default().show(_this.view);
-    });
-    $("#fileNew").on("click", function () {
-      _this.fileNew();
-    });
-
-    $("#fileSave, #editorFileSave").on("click", function () {
-      new _FileSave2.default().show(_this.view, _this.fileName);
-    });
-
-    $("#appHelp").on("click", function () {
-      $("#leftTabStrip .gitbook").click();
-    });
-
-    $("#appAbout").on("click", function () {
-      $("#leftTabStrip .about").click();
-    });
-
-    /*
-     * Replace all SVG images with inline SVG
-     */
-    $('img.svg').each(function (e) {
-      var $img = $(e);
-      var imgURL = $img.attr('src');
-
-      $.get(imgURL, function (data) {
-        // Get the SVG tag, ignore the rest
-        var $svg = $(data).find('svg');
-        // Remove any invalid XML tags as per http://validator.w3.org
-        $svg = $svg.removeAttr('xmlns:a');
-        // Replace image with new SVG
-        $img.replaceWith($svg);
-      }, 'xml');
-    });
-
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
-    this.fileName = this.getParam("file");
-    if (this.fileName) {
-      $("#leftTabStrip .editor").click();
-      this.load(_Configuration2.default.backend.file.get(this.fileName));
-    }
-
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
-    var demo = this.getParam("demo");
-    if (demo) {
-      $("#leftTabStrip .editor").click();
-      this.load(_Configuration2.default.backend.demo.get(demo));
-    }
-
-    // listen on the history object to load files
-    //
-    window.onpopstate = function (event) {
-      if (history.state && history.state.id === 'editor') {
-        // Render new content for the homepage
-        $("#leftTabStrip .editor").click();
-        _this.load(history.state.file);
-      }
-    };
   }
 
   _createClass(Application, [{
+    key: "init",
+    value: function init(permissions) {
+      var _this = this;
+
+      this.permissions = permissions;
+      this.palette = new _Palette2.default(permissions);
+      this.view = new _View2.default("draw2dCanvas", permissions);
+      this.filePane = new _FilesScreen2.default(permissions);
+      this.addonPane = new _AddonScreen2.default(permissions);
+
+      if (permissions.brains.list) {
+        $("#fileOpen, #editorFileOpen").show();
+        $("#fileOpen, #editorFileOpen").on("click", function () {
+          new _FileOpen2.default().show(_this.view);
+        });
+      } else {
+        $("#fileOpen, #editorFileOpen").remove();
+      }
+
+      $("#editorFileSave").on("click", function () {
+        if (_this.permissions.brains.create && _this.permissions.brains.update) {
+          // allow the user to enter a file name....
+          new _FileSave2.default().show(_this.view, _this.fileName);
+        } else if (_this.permissions.brains.create) {
+          // just save the file with a generated filename. It is a codepen-like modus
+          new _FileSave2.default().save(_this.view, _this.fileName);
+        }
+      });
+
+      /*
+       * Replace all SVG images with inline SVG
+       */
+      $('img.svg').each(function (e) {
+        var $img = $(e);
+        var imgURL = $img.attr('src');
+
+        $.get(imgURL, function (data) {
+          // Get the SVG tag, ignore the rest
+          var $svg = $(data).find('svg');
+          // Remove any invalid XML tags as per http://validator.w3.org
+          $svg = $svg.removeAttr('xmlns:a');
+          // Replace image with new SVG
+          $img.replaceWith($svg);
+        }, 'xml');
+      });
+
+      // check if the user has added a "file" parameter. In this case we load the shape from
+      // the draw2d.shape github repository
+      //
+      this.fileName = this.getParam("file");
+      if (this.fileName) {
+        $("#leftTabStrip .editor").click();
+        this.load(_Configuration2.default.backend.file.get(this.fileName));
+      }
+
+      // check if the user has added a "file" parameter. In this case we load the shape from
+      // the draw2d.shape github repository
+      //
+      var demo = this.getParam("demo");
+      if (demo) {
+        $("#leftTabStrip .editor").click();
+        this.load(_Configuration2.default.backend.demo.get(demo));
+      }
+
+      // listen on the history object to load files
+      //
+      window.onpopstate = function (event) {
+        if (history.state && history.state.id === 'editor') {
+          // Render new content for the homepage
+          $("#leftTabStrip .editor").click();
+          _this.load(history.state.file);
+        }
+      };
+    }
+  }, {
     key: "load",
     value: function load(file) {
       var _this2 = this;
@@ -410,7 +420,11 @@ Object.defineProperty(exports, "__esModule", {
 //
 exports.default = {
   fileSuffix: ".brain",
+
   backend: {
+
+    configuration: "../backend/configuration",
+
     file: {
       list: function list(path) {
         return "../backend/brain/list?path=" + path;
@@ -425,6 +439,7 @@ exports.default = {
       rename: "../backend/brain/rename",
       save: "../backend/brain/save"
     },
+
     demo: {
       list: function list(path) {
         return "../backend/demo/list?path=" + path;
@@ -437,20 +452,25 @@ exports.default = {
       }
     }
   },
+
   issues: {
     url: "dddddd"
   },
+
   designer: {
     url: "../designer/"
   },
+
   updates: {
     url: "../backend/updates",
     shapes: "../backend/updates/shapes"
   },
+
   shapes: {
     url: "./shapes/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
+
   color: {
     high: "#C21B7A",
     low: "#0078F2"
@@ -1062,7 +1082,7 @@ var Palette = function () {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  function Palette() {
+  function Palette(permissions) {
     var _this = this;
 
     _classCallCheck(this, Palette);
@@ -1653,7 +1673,7 @@ __webpack_require__(/*! bootstrap-toggle/js/bootstrap-toggle.min */ "./node_modu
 
 exports.default = draw2d.Canvas.extend({
 
-  init: function init(id) {
+  init: function init(id, permissions) {
     var _this2 = this;
 
     var _this = this;
@@ -1662,6 +1682,7 @@ exports.default = draw2d.Canvas.extend({
 
     this.probeWindow = new _ProbeWindow2.default(this);
 
+    this.permissions = permissions;
     this.simulate = false;
     this.animationFrameFunc = this._calculate.bind(this);
 
@@ -1747,29 +1768,29 @@ exports.default = draw2d.Canvas.extend({
       return false;
     });
     Mousetrap.bindGlobal(['left'], function (event) {
-      var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
-      _this.getSelection().each(function (i, f) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
         f.translate(-diff, 0);
       });
       return false;
     });
     Mousetrap.bindGlobal(['up'], function (event) {
-      var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
-      _this.getSelection().each(function (i, f) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
         f.translate(0, -diff);
       });
       return false;
     });
     Mousetrap.bindGlobal(['right'], function (event) {
-      var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
-      _this.getSelection().each(function (i, f) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
         f.translate(diff, 0);
       });
       return false;
     });
     Mousetrap.bindGlobal(['down'], function (event) {
-      var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
-      _this.getSelection().each(function (i, f) {
+      var diff = _this2.getZoom(8) < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
         f.translate(0, diff);
       });
       return false;
@@ -1824,11 +1845,11 @@ exports.default = draw2d.Canvas.extend({
     }
 
     this.deleteSelectionCallback = function () {
-      var selection = _this.getSelection();
-      _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape);
+      var selection = _this2.getSelection();
+      _this2.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape);
       selection.each(function (index, figure) {
 
-        // Don't delete the conection if the source or target node part of the
+        // Don't delete the connection if the source or target node part of the
         // selection. In this case the nodes deletes all connections by itself.
         //
         if (figure instanceof draw2d.Connection) {
@@ -1839,30 +1860,30 @@ exports.default = draw2d.Canvas.extend({
 
         var cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE));
         if (cmd !== null) {
-          _this.getCommandStack().execute(cmd);
+          _this2.getCommandStack().execute(cmd);
         }
       });
       // execute all single commands at once.
-      _this.getCommandStack().commitTransaction();
+      _this2.getCommandStack().commitTransaction();
     };
 
     $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback);
     Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
-      _this.getCommandStack().undo();
+      _this2.getCommandStack().undo();
     });
 
     $(".toolbar").delegate("#editRedo:not(.disabled)", "click", function () {
-      _this.getCommandStack().redo();
+      _this2.getCommandStack().redo();
     });
 
     $("#simulationStartStop").on("click", function () {
-      _this.simulationToggle();
+      _this2.simulationToggle();
     });
 
-    // Register a Selection listener for the state hnadling
-    // of the Delete Button
+    // Register a Selection listener for the state handling
+    // of the delete Button
     //
     this.on("select", function (emitter, event) {
       $("#editDelete").removeClass("disabled");
@@ -1890,14 +1911,25 @@ exports.default = draw2d.Canvas.extend({
         var items = {};
 
         if (figure instanceof CircuitFigure) {
-          items = {
-            "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
-            "delete": { name: "Delete", icon: "x ion-ios-close-outline" },
-            "sep1": "---------",
-            "design": { name: "Edit Shape", icon: "x ion-ios-compose-outline" },
-            "code": { name: "Show JS Code", icon: "x ion-code" },
-            "help": { name: "Description", icon: "x ion-ios-information-outline" }
-          };
+          if (_this.permissions.shapes.update) {
+            items = {
+              "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
+              "delete": { name: "Delete", icon: "x ion-ios-close-outline" },
+              "sep1": "---------",
+              "design": { name: "Edit Design", icon: "x ion-ios-compose-outline" },
+              "code": { name: "Show JS Code", icon: "x ion-code" },
+              "help": { name: "Description", icon: "x ion-ios-information-outline" }
+            };
+          } else {
+            items = {
+              "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
+              "delete": { name: "Delete", icon: "x ion-ios-close-outline" },
+              "sep1": "---------",
+              "design": { name: "Show Design", icon: "x ion-ios-compose-outline" },
+              "code": { name: "Show JS Code", icon: "x ion-code" },
+              "help": { name: "Description", icon: "x ion-ios-information-outline" }
+            };
+          }
         } else if (figure instanceof draw2d.shape.basic.Label) {
           items = {
             "delete": { name: "Delete", icon: "x ion-ios-close-outline" }
@@ -1915,9 +1947,11 @@ exports.default = draw2d.Canvas.extend({
 
         $.contextMenu({
           selector: 'body',
-          events: { hide: function hide() {
+          events: {
+            hide: function hide() {
               $.contextMenu('destroy');
-            } },
+            }
+          },
           callback: $.proxy(function (key, options) {
             switch (key) {
               case "code":
@@ -2654,6 +2688,8 @@ var FileSave = function () {
   _createClass(FileSave, [{
     key: "show",
     value: function show(canvas, defaultFileName) {
+      var _this = this;
+
       Mousetrap.pause();
       $("#fileSaveDialog .githubFileName").val(defaultFileName);
 
@@ -2665,17 +2701,30 @@ var FileSave = function () {
       // Button: Commit to GitHub
       //
       $("#fileSaveDialog .okButton").off("click").on("click", function () {
-        canvas.setCurrentSelection(null);
-        _Writer2.default.marshal(canvas, function (json) {
-          var name = $("#fileSaveDialog .githubFileName").val();
-          // to forbid path in the file names you must uncomment this line
-          name = name.replace(_Configuration2.default.fileSuffix, "");
-          name = name + _Configuration2.default.fileSuffix;
-          _BackendStorage2.default.saveFile(json, name).then(function () {
-            Mousetrap.unpause();
-            app.fileName = name;
-            $('#fileSaveDialog').modal('hide');
-          });
+        var name = $("#fileSaveDialog .githubFileName").val();
+        name = name.replace(_Configuration2.default.fileSuffix, "");
+        name = name + _Configuration2.default.fileSuffix;
+        _this.save(canvas, name, function () {
+          Mousetrap.unpause();
+          $('#fileSaveDialog').modal('hide');
+        });
+      });
+    }
+  }, {
+    key: "save",
+    value: function save(canvas, name, callback) {
+      canvas.setCurrentSelection(null);
+      _Writer2.default.marshal(canvas, function (json) {
+        // to forbid path in the file names you must uncomment this line
+        _BackendStorage2.default.saveFile(json, name).then(function (response) {
+          var data = response.data;
+          if (typeof data === "string") {
+            data = JSON.parse(data);
+          }
+          app.historyFile(data.filePath);
+          if (callback) {
+            callback();
+          }
         });
       });
     }
@@ -4498,63 +4547,45 @@ if (!jQuery.browser) {
   jQuery.browser = browser;
 }
 
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = _Configuration2.default;
+
 $(window).load(function () {
-  socket = io({
-    path: '/socket.io'
-  });
+  socket = io({ path: '/socket.io' });
 
   socket.on("shape:updated", function () {
     new _UpdateSuccessDialog2.default().show();
   });
 
-  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // Init the UI after we have receive the UI/UX permissions of this kind of installation
   // (fake event from the socket.io mock )
   //
-  socket.on("serverless", function () {
-    $("#leftTabStrip .editor").click();
-    $("#fileOpen, #editorFileOpen").remove();
-    $("#fileSave, #editorFileSave").remove();
-    $("#statusRaspi").addClass("disabled");
-
-    // patch the URL for the backedn to deliver predefined files
-    // for the static website with a nodeJS backend
-    //
-    _Configuration2.default.backend.file.list = function (path) {
-      return "../brain/index.json";
-    };
-    _Configuration2.default.backend.file.get = function (file) {
-      return "../brain/" + file;
-    };
-    _Configuration2.default.backend.file.image = function () {
-      return "../brain/img";
-    };
-  });
-
-  var global = __webpack_require__(/*! ./global */ "./app/frontend/circuit/js/global.js");
-  for (var k in global) {
-    window[k] = global[k];
-  } // export all required classes for deserialize JSON with "eval"
-  // "eval" code didn't sees imported class or code
-  //
-  var addonScreen = __webpack_require__(/*! ./view/AddonScreen */ "./app/frontend/circuit/js/view/AddonScreen.js");
-  $("#leftTabStrip .addon").click(addonScreen.onShow);
-
-  // we must load the "shape/index.js" in the global scope.
-  $.getScript(_Configuration2.default.shapes.url + "index.js", function () {
-
+  socket.on("permissions", function (permissions) {
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    app = __webpack_require__(/*! ./Application */ "./app/frontend/circuit/js/Application.js");
-    __webpack_require__(/*! ./hardware */ "./app/frontend/circuit/js/hardware.js").init(socket);
-    inlineSVG.init();
-  }).fail(function () {
-    if (arguments[0].readyState == 0) {
-      //script failed to load
-    } else {
-      //script loaded but failed to parse
-      alert(arguments[2].toString());
-    }
+    var global = __webpack_require__(/*! ./global */ "./app/frontend/circuit/js/global.js");
+    for (var k in global) {
+      window[k] = global[k];
+    } // we must load the "shape/index.js" in the global scope.
+    $.getScript(_Configuration2.default.shapes.url + "index.js", function () {
+
+      // export all required classes for deserialize JSON with "eval"
+      // "eval" code didn't sees imported class or code
+      //
+      app = __webpack_require__(/*! ./Application */ "./app/frontend/circuit/js/Application.js");
+      app.init(permissions);
+      __webpack_require__(/*! ./hardware */ "./app/frontend/circuit/js/hardware.js").init(socket);
+      inlineSVG.init();
+    }).fail(function () {
+      if (arguments[0].readyState == 0) {
+        //script failed to load
+      } else {
+        //script loaded but failed to parse
+        alert(arguments[2].toString());
+      }
+    });
   });
 
   (0, _split2.default)(['#paletteElementsFilter', '#paletteElementsScroll'], {
@@ -5176,13 +5207,26 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var AddonScreen = function () {
-  function AddonScreen() {
+  function AddonScreen(permissions) {
     _classCallCheck(this, AddonScreen);
+
+    this.permissions = permissions;
+
+    // track to onShow event and refresh the screen
+    if (permissions.updates.list == false) {
+      $("#leftTabStrip .addon").remove();
+      $("#addon").remove();
+      return;
+    }
+
+    $("#leftTabStrip .addon").click(this.onShow);
   }
 
   _createClass(AddonScreen, [{
     key: 'onShow',
     value: function onShow() {
+      var _this = this;
+
       _axios2.default.get(_Configuration2.default.updates.shapes).then(function (response) {
         // happens in "serverless" mode on the gh-pages/docs installation
         //
@@ -5199,11 +5243,15 @@ var AddonScreen = function () {
         });
 
         $("#addon .content").html(html);
-        $("#addon .installButton").click(function (event) {
-          var element = $(event.target);
-          element.append("<i class=\"fa fa-spinner fa-spin\"></i>");
-          screen.onSelect(element.data("url"));
-        });
+        if (_this.permissions.updates.update) {
+          $("#addon .installButton").click(function (event) {
+            var element = $(event.target);
+            element.append("<i class=\"fa fa-spinner fa-spin\"></i>");
+            screen.onSelect(element.data("url"));
+          });
+        } else {
+          $("#addon .installButton").remove();
+        }
       }).catch(function (error) {
         var tmpl = _hogan2.default.compile($("#uptodateTemplate").html());
         var html = tmpl.render({
@@ -5231,8 +5279,7 @@ var AddonScreen = function () {
   return AddonScreen;
 }();
 
-var screen = new AddonScreen();
-exports.default = screen;
+exports.default = AddonScreen;
 module.exports = exports['default'];
 
 /***/ }),
@@ -5285,41 +5332,78 @@ var Files = function () {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  function Files() {
+  function Files(permissions) {
     _classCallCheck(this, Files);
 
-    this.render();
+    this.render(permissions);
   }
 
   _createClass(Files, [{
     key: "render",
-    value: function render() {
-      var _this = this;
+    value: function render(permissions) {
+      var _this2 = this;
 
-      $('#material-tabs').each(function () {
-        var $active = void 0,
-            $content = void 0,
-            $links = $(this).find('a');
-        $active = $($links[0]);
-        $active.addClass('active');
-        $content = $($active[0].hash);
-        $links.not($active).each(function () {
-          $(this.hash).hide();
-        });
+      this.initTabs(permissions);
+      this.initDemos(permissions);
+      this.initFiles(permissions);
 
-        $(this).on('click', 'a', function (e) {
-          $active.removeClass('active');
-          $content.hide();
-
-          $active = $(this);
-          $content = $(this.hash);
-
-          $active.addClass('active');
-          $content.show();
-
-          e.preventDefault();
-        });
+      socket.on("brain:generated", function (msg) {
+        var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
+        if (preview.length === 0) {
+          _this2.render();
+        } else {
+          $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: _Configuration2.default.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
+        }
       });
+    }
+  }, {
+    key: "initTabs",
+    value: function initTabs(permissions) {
+      // user can see personal files and the demo files
+      //
+      if (permissions.brains.list === true && permissions.brains.demos === true) {
+        $('#material-tabs').each(function () {
+          var $active = void 0,
+              $content = void 0,
+              $links = $(this).find('a');
+          $active = $($links[0]);
+          $active.addClass('active');
+          $content = $($active[0].hash);
+          $links.not($active).each(function () {
+            $(this.hash).hide();
+          });
+
+          $(this).on('click', 'a', function (e) {
+            $active.removeClass('active');
+            $content.hide();
+
+            $active = $(this);
+            $content = $(this.hash);
+
+            $active.addClass('active');
+            $content.show();
+
+            e.preventDefault();
+          });
+        });
+      } else if (permissions.brains.list === false && permissions.brains.demos === true) {
+        $('#material-tabs').remove();
+        $("#demoBrainFiles").show();
+        $("#userBrainFiles").remove();
+        $("#files .title span").html("Load a demo Circuit");
+      } else if (permissions.brains.list === true && permissions.brains.demos === false) {
+        $('#material-tabs').remove();
+        $("#demoBrainFiles").remove();
+        $("#userBrainFiles").show();
+        $("#files .title span").html("Load a Circuit");
+      } else if (permissions.brains.list === true && permissions.brains.demos === false) {}
+    }
+  }, {
+    key: "initDemos",
+    value: function initDemos(permissions) {
+      if (permissions.brains.demos === false) {
+        return;
+      }
 
       // load demo files
       //
@@ -5368,10 +5452,20 @@ var Files = function () {
           });
         });
       }
+
       loadDemos("");
+    }
+  }, {
+    key: "initFiles",
+    value: function initFiles(permissions) {
+      if (permissions.brains.list === false) {
+        return;
+      }
 
       // load user files
       //
+      var _this = this;
+
       function loadFiles(path) {
         _BackendStorage2.default.getFiles(path).then(function (files) {
           files = files.filter(function (file) {
@@ -5417,57 +5511,65 @@ var Files = function () {
             placement: "bottom" // (top, right, bottom, left)
           });
 
-          $("#userBrainFiles .list-group-item h4").on("click", function (event) {
-            Mousetrap.pause();
-            var $el = $(event.currentTarget);
-            var parent = $el.closest(".list-group-item");
-            var name = parent.data("name");
-            var type = parent.data("type");
-            var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(_Configuration2.default.fileSuffix, "") + '" />');
-            $el.hide();
-            $el.after($replaceWith);
-            $replaceWith.focus();
-            $replaceWith.on("click", function (event) {
+          if (!_this.serverless) {
+            $("#userBrainFiles .list-group-item h4").on("click", function (event) {
+              // can happen if the "serverless" websocket event comes too late
+              //
+              if (_this.serverless) {
+                return;
+              }
+
+              Mousetrap.pause();
+              var $el = $(event.currentTarget);
+              var parent = $el.closest(".list-group-item");
+              var name = parent.data("name");
+              var type = parent.data("type");
+              var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(_Configuration2.default.fileSuffix, "") + '" />');
+              $el.hide();
+              $el.after($replaceWith);
+              $replaceWith.focus();
+              $replaceWith.on("click", function (event) {
+                return false;
+              });
+
+              var fire = function fire() {
+                Mousetrap.unpause();
+                var newName = $replaceWith.val();
+                if (newName !== "") {
+                  if (type !== "dir") {
+                    newName = _BackendStorage2.default.sanitize(newName) + _Configuration2.default.fileSuffix;
+                  }
+                  $.ajax({
+                    url: _Configuration2.default.backend.file.rename,
+                    method: "POST",
+                    xhrFields: { withCredentials: true },
+                    data: {
+                      from: name,
+                      to: newName
+                    }
+                  }).then(function () {
+                    $replaceWith.remove();
+                    $el.html(newName.replace(_Configuration2.default.fileSuffix, ""));
+                    $el.show();
+                    parent.data("name", newName);
+                  });
+                } else {
+                  // get the value and post them here
+                  $replaceWith.remove();
+                  $el.show();
+                }
+              };
+              $replaceWith.blur(fire);
+              $replaceWith.keypress(function (e) {
+                if (e.which === 13) {
+                  fire();
+                }
+              });
+              event.preventDefault();
+              event.stopPropagation();
               return false;
             });
-
-            var fire = function fire() {
-              Mousetrap.unpause();
-              var newName = $replaceWith.val();
-              if (newName !== "") {
-                if (type !== "dir") {
-                  newName = _BackendStorage2.default.sanitize(newName) + _Configuration2.default.fileSuffix;
-                }
-                $.ajax({
-                  url: _Configuration2.default.backend.file.rename,
-                  method: "POST",
-                  xhrFields: { withCredentials: true },
-                  data: {
-                    from: name,
-                    to: newName
-                  }
-                }).then(function () {
-                  $replaceWith.remove();
-                  $el.html(newName.replace(_Configuration2.default.fileSuffix, ""));
-                  $el.show();
-                  parent.data("name", newName);
-                });
-              } else {
-                // get the value and post them here
-                $replaceWith.remove();
-                $el.show();
-              }
-            };
-            $replaceWith.blur(fire);
-            $replaceWith.keypress(function (e) {
-              if (e.which === 13) {
-                fire();
-              }
-            });
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-          });
+          }
 
           $("#userBrainFiles .list-group-item[data-type='dir']").on("click", function (event) {
             var $el = $(event.currentTarget);
@@ -5488,17 +5590,7 @@ var Files = function () {
           });
         });
       }
-
       loadFiles("");
-
-      socket.on("brain:generated", function (msg) {
-        var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
-        if (preview.length === 0) {
-          _this.render();
-        } else {
-          $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: _Configuration2.default.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
-        }
-      });
     }
   }]);
 

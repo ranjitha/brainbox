@@ -28,13 +28,14 @@ require("bootstrap-toggle/js/bootstrap-toggle.min")
 
 export default draw2d.Canvas.extend({
 
-  init: function (id) {
+  init: function (id, permissions) {
     let _this = this
 
     this._super(id, 6000, 6000)
 
     this.probeWindow = new ProbeWindow(this)
 
+    this.permissions = permissions
     this.simulate = false
     this.animationFrameFunc = this._calculate.bind(this)
 
@@ -50,7 +51,7 @@ export default draw2d.Canvas.extend({
 
     let router = new ConnectionRouter()
     router.abortRoutingOnFirstVertexNode = false
-    let createConnection = this.createConnection =  (sourcePort, targetPort) => {
+    let createConnection = this.createConnection = (sourcePort, targetPort) => {
       let c = new Connection({
         color: "#000000",
         router: router,
@@ -121,35 +122,34 @@ export default draw2d.Canvas.extend({
       }
       return false
     })
-    Mousetrap.bindGlobal(['left'], function (event) {
-      let diff = _this.getZoom() < 0.5 ? 0.5 : 1
-      _this.getSelection().each(function (i, f) {
+    Mousetrap.bindGlobal(['left'], (event) => {
+      let diff = this.getZoom() < 0.5 ? 0.5 : 1
+      this.getSelection().each((i, f) => {
         f.translate(-diff, 0)
       })
       return false
     })
-    Mousetrap.bindGlobal(['up'], function (event) {
-      let diff = _this.getZoom() < 0.5 ? 0.5 : 1
-      _this.getSelection().each(function (i, f) {
+    Mousetrap.bindGlobal(['up'], (event) => {
+      let diff = this.getZoom() < 0.5 ? 0.5 : 1
+      this.getSelection().each((i, f) => {
         f.translate(0, -diff)
       })
       return false
     })
-    Mousetrap.bindGlobal(['right'], function (event) {
-      let diff = _this.getZoom() < 0.5 ? 0.5 : 1
-      _this.getSelection().each(function (i, f) {
+    Mousetrap.bindGlobal(['right'], (event) => {
+      let diff = this.getZoom() < 0.5 ? 0.5 : 1
+      this.getSelection().each((i, f) => {
         f.translate(diff, 0)
       })
       return false
     })
-    Mousetrap.bindGlobal(['down'], function (event) {
-      let diff = _this.getZoom() < 0.5 ? 0.5 : 1
-      _this.getSelection().each(function (i, f) {
+    Mousetrap.bindGlobal(['down'], (event) => {
+      let diff = this.getZoom(8) < 0.5 ? 0.5 : 1
+      this.getSelection().each((i, f) => {
         f.translate(0, diff)
       })
       return false
     })
-
 
     let setZoom = (newZoom) => {
       let bb = this.getBoundingBox().getCenter()
@@ -166,13 +166,13 @@ export default draw2d.Canvas.extend({
 
     // OneToOne Button
     //
-    $("#canvas_zoom_normal").on("click", ()=>setZoom(1.0))
+    $("#canvas_zoom_normal").on("click", () => setZoom(1.0))
 
     //ZoomOut Button and the callback
     //
-    $("#canvas_zoom_out").on("click", ()=>setZoom(_this.getZoom()*0.8))
+    $("#canvas_zoom_out").on("click", () => setZoom(_this.getZoom() * 0.8))
 
-    $("#statusWebUSB .help-link").on("click", ()=>new WebUSBHelpDialog().show())
+    $("#statusWebUSB .help-link").on("click", () => new WebUSBHelpDialog().show())
 
     hardware.arduino.on("disconnect", this.hardwareChanged.bind(this))
     hardware.arduino.on("connect", this.hardwareChanged.bind(this))
@@ -186,23 +186,21 @@ export default draw2d.Canvas.extend({
       $('#statusWebUSB').on("click", () => {
         if (hardware.arduino.connected) {
           hardware.arduino.disconnect()
-        }
-        else {
+        } else {
           hardware.arduino.connect()
         }
       })
-    }
-    else {
+    } else {
       $('#statusWebUSB').addClass("disabled")
     }
 
 
-    this.deleteSelectionCallback = function () {
-      let selection = _this.getSelection()
-      _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
-      selection.each(function (index, figure) {
+    this.deleteSelectionCallback = () => {
+      let selection = this.getSelection()
+      this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
+      selection.each((index, figure) => {
 
-        // Don't delete the conection if the source or target node part of the
+        // Don't delete the connection if the source or target node part of the
         // selection. In this case the nodes deletes all connections by itself.
         //
         if (figure instanceof draw2d.Connection) {
@@ -213,38 +211,38 @@ export default draw2d.Canvas.extend({
 
         let cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE))
         if (cmd !== null) {
-          _this.getCommandStack().execute(cmd)
+          this.getCommandStack().execute(cmd)
         }
       })
       // execute all single commands at once.
-      _this.getCommandStack().commitTransaction()
+      this.getCommandStack().commitTransaction()
     }
 
     $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback)
     Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback)
 
 
-    $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
-      _this.getCommandStack().undo()
+    $(".toolbar").delegate("#editUndo:not(.disabled)", "click", () => {
+      this.getCommandStack().undo()
     })
 
-    $(".toolbar").delegate("#editRedo:not(.disabled)", "click", function () {
-      _this.getCommandStack().redo()
+    $(".toolbar").delegate("#editRedo:not(.disabled)", "click", () => {
+      this.getCommandStack().redo()
     })
 
-    $("#simulationStartStop").on("click", function () {
-      _this.simulationToggle()
+    $("#simulationStartStop").on("click", () => {
+      this.simulationToggle()
     })
 
 
-    // Register a Selection listener for the state hnadling
-    // of the Delete Button
+    // Register a Selection listener for the state handling
+    // of the delete Button
     //
     this.on("select", (emitter, event) => {
-        $("#editDelete").removeClass("disabled")
+      $("#editDelete").removeClass("disabled")
     })
     this.on("unselect", (emitter, event) => {
-        $("#editDelete").addClass("disabled")
+      $("#editDelete").addClass("disabled")
     })
 
     this.on("contextmenu", function (emitter, event) {
@@ -265,25 +263,34 @@ export default draw2d.Canvas.extend({
 
         let items = {}
 
-        if(figure instanceof CircuitFigure) {
-          items = {
-            "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
-            "delete": {name: "Delete", icon: "x ion-ios-close-outline"},
-            "sep1": "---------",
-            "design": {name: "Edit Shape", icon: "x ion-ios-compose-outline"},
-            "code": {name: "Show JS Code", icon: "x ion-code"},
-            "help": {name: "Description", icon: "x ion-ios-information-outline"}
+        if (figure instanceof CircuitFigure) {
+          if(_this.permissions.shapes.update) {
+            items = {
+              "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
+              "delete": {name: "Delete", icon: "x ion-ios-close-outline"},
+              "sep1": "---------",
+              "design": {name: "Edit Design", icon: "x ion-ios-compose-outline"},
+              "code": {name: "Show JS Code", icon: "x ion-code"},
+              "help": {name: "Description", icon: "x ion-ios-information-outline"}
+            }
           }
-        }
-        else if (figure instanceof draw2d.shape.basic.Label){
+          else {
+            items = {
+              "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
+              "delete": {name: "Delete", icon: "x ion-ios-close-outline"},
+              "sep1": "---------",
+              "design": {name: "Show Design", icon: "x ion-ios-compose-outline"},
+              "code": {name: "Show JS Code", icon: "x ion-code"},
+              "help": {name: "Description", icon: "x ion-ios-information-outline"}
+            }
+          }
+        } else if (figure instanceof draw2d.shape.basic.Label) {
           items = {
             "delete": {name: "Delete", icon: "x ion-ios-close-outline"}
           }
-        }
-        else if (figure instanceof draw2d.Port){
+        } else if (figure instanceof draw2d.Port) {
           return
-        }
-        else{
+        } else {
           items = {
             "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
             "help": {name: "Description", icon: "x ion-ios-information-outline"},
@@ -294,7 +301,11 @@ export default draw2d.Canvas.extend({
 
         $.contextMenu({
           selector: 'body',
-          events: { hide: () => { $.contextMenu('destroy')} },
+          events: {
+            hide: () => {
+              $.contextMenu('destroy')
+            }
+          },
           callback: $.proxy(function (key, options) {
             switch (key) {
               case "code":
@@ -317,7 +328,7 @@ export default draw2d.Canvas.extend({
                 new MarkdownDialog().show(figure)
                 break
               case "delete":
-                _this.getCommandStack().execute( new draw2d.command.CommandDelete(figure))
+                _this.getCommandStack().execute(new draw2d.command.CommandDelete(figure))
                 break
               default:
                 break
@@ -363,8 +374,7 @@ export default draw2d.Canvas.extend({
         //
         if (event.value < 100) {
           this.timerBase = parseInt(100 - ((event.value - 50) * (100 - 10) / (100 - 50) + 10))
-        }
-        else {
+        } else {
           this.timerBase = parseInt(11 - ((event.value - 100) * (10 - 2) / (500 - 100) + 2))
         }
       })
@@ -375,17 +385,17 @@ export default draw2d.Canvas.extend({
   },
 
 
-  getTimerBase: function (){
+  getTimerBase: function () {
     return this.timerBase
   },
 
-  setTimerBase: function( timerBase ){
+  setTimerBase: function (timerBase) {
     this.timerBase = timerBase
 
-    if(this.timerBase>10)
-       this.slider.slider("setValue", - ((timerBase-100)* ((100 - 50) + 10))/(100 - 10)+50)
+    if (this.timerBase > 10)
+      this.slider.slider("setValue", -((timerBase - 100) * ((100 - 50) + 10)) / (100 - 10) + 50)
     else
-       this.slider.slider("setValue", (((-(timerBase-11)-2)*(500 - 100))/ (10 - 2))+100)
+      this.slider.slider("setValue", (((-(timerBase - 11) - 2) * (500 - 100)) / (10 - 2)) + 100)
   },
 
   /**
@@ -432,7 +442,7 @@ export default draw2d.Canvas.extend({
     let file = $(droppedDomNode).data("file")
 
     let figure = eval("new " + type + "();") // jshint ignore:line
-    figure.attr("userData.file",file)
+    figure.attr("userData.file", file)
 
     // create a command for the undo/redo support
     let command = new draw2d.command.CommandAdd(this, figure, x, y)
@@ -557,8 +567,7 @@ export default draw2d.Canvas.extend({
     //
     if (arduinoRequired === false && raspiRequired === false) {
       $("#editConnections").attr("src", imgConnectionStatusNeutral)
-    }
-    else {
+    } else {
       let error =
         (raspiRequired === true && raspiConnected === false) ||
         (arduinoRequired === true && arduinoConnected === false)
@@ -569,8 +578,7 @@ export default draw2d.Canvas.extend({
     //
     if (arduinoConnected) {
       $("#statusWebUSB").removeClass("error")
-    }
-    else {
+    } else {
       $("#statusWebUSB").addClass("error")
     }
 
@@ -578,8 +586,7 @@ export default draw2d.Canvas.extend({
     //
     if (raspiConnected) {
       $("#statusRaspi").removeClass("error")
-    }
-    else {
+    } else {
       $("#statusRaspi").addClass("error")
     }
   },
@@ -608,7 +615,6 @@ export default draw2d.Canvas.extend({
   },
 
 
-
   centerDocument: function () {
     this.setZoom(1.0)
 
@@ -618,9 +624,8 @@ export default draw2d.Canvas.extend({
       // into the center of the canvas. Scroll to the top left corner after them
       //
       let bb = this.getBoundingBox()
-      this.scrollTo(bb.y - c.height()/2 + bb.h/2, bb.x - c.width()/2 + bb.w/2)
-    }
-    else {
+      this.scrollTo(bb.y - c.height() / 2 + bb.h / 2, bb.x - c.width() / 2 + bb.w / 2)
+    } else {
       let bb = {
         x: this.getWidth() / 2,
         y: this.getHeight() / 2

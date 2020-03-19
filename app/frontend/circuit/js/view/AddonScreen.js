@@ -2,9 +2,19 @@ import Hogan from 'hogan.js'
 import conf from '../Configuration'
 import axios from 'axios'
 
-class AddonScreen {
+export default class AddonScreen {
 
-  constructor() {
+  constructor(permissions) {
+    this.permissions = permissions
+
+    // track to onShow event and refresh the screen
+    if(permissions.updates.list == false){
+      $("#leftTabStrip .addon").remove()
+      $("#addon").remove()
+      return
+    }
+
+    $("#leftTabStrip .addon").click(this.onShow)
   }
 
   onShow() {
@@ -28,11 +38,17 @@ class AddonScreen {
         });
 
         $("#addon .content").html(html);
-        $("#addon .installButton").click(event =>{
-          let element = $(event.target)
-          element.append("<i class=\"fa fa-spinner fa-spin\"></i>")
-          screen.onSelect(element.data("url"))
-        })
+        if(this.permissions.updates.update){
+          $("#addon .installButton").click(event =>{
+            let element = $(event.target)
+            element.append("<i class=\"fa fa-spinner fa-spin\"></i>")
+            screen.onSelect(element.data("url"))
+          })
+        }
+        else {
+          $("#addon .installButton").remove()
+        }
+
       })
       .catch( error => {
         let  tmpl = Hogan.compile($("#uptodateTemplate").html());
@@ -57,6 +73,3 @@ class AddonScreen {
     )
   }
 }
-
-let screen = new AddonScreen()
-export default screen

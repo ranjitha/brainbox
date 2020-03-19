@@ -20903,6 +20903,9 @@ _packages2.default.io.json.Reader = _packages2.default.io.Reader.extend(
     var _this = this;
 
     var result = new _packages2.default.util.ArrayList();
+    if (typeof json === "undefined") {
+      debugger
+    }
 
     if (typeof json === "string") {
       json = JSON.parse(json);

@@ -7,6 +7,7 @@
 import Palette from "./Palette"
 import View from "./View"
 import Files from "./view/FilesScreen"
+import Addons from "./view/AddonScreen"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
 import storage from './io/BackendStorage'
@@ -24,6 +25,7 @@ function rafAsync() {
     requestAnimationFrame(resolve); //faster than set time out
   });
 }
+
 function checkElement(selector) {
   if (document.querySelector(selector) === null) {
     return rafAsync().then(() => checkElement(selector));
@@ -41,28 +43,33 @@ class Application {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   constructor() {
-    this.palette = new Palette()
-    this.view = new View("draw2dCanvas")
-    this.filePane = new Files()
+  }
 
-    $("#fileOpen, #editorFileOpen").on("click", () => {
-      new FileOpen().show(this.view)
-    })
-    $("#fileNew").on("click", () => {
-      this.fileNew()
-    })
-
-    $("#fileSave, #editorFileSave").on("click", () => {
-      new FileSave().show(this.view, this.fileName)
-    })
+  init(permissions) {
+    this.permissions = permissions
+    this.palette = new Palette(permissions)
+    this.view = new View("draw2dCanvas", permissions)
+    this.filePane = new Files(permissions)
+    this.addonPane = new Addons(permissions)
 
 
-    $("#appHelp").on("click", () => {
-      $("#leftTabStrip .gitbook").click()
-    })
+    if(permissions.brains.list){
+      $("#fileOpen, #editorFileOpen").show()
+      $("#fileOpen, #editorFileOpen").on("click", () => { new FileOpen().show(this.view) })
+    }
+    else{
+      $("#fileOpen, #editorFileOpen").remove()
+    }
 
-    $("#appAbout").on("click", () => {
-      $("#leftTabStrip .about").click()
+
+    $("#editorFileSave").on("click", () => {
+      if (this.permissions.brains.create && this.permissions.brains.update) {
+        // allow the user to enter a file name....
+        new FileSave().show(this.view, this.fileName)
+      } else if (this.permissions.brains.create) {
+        // just save the file with a generated filename. It is a codepen-like modus
+        new FileSave().save(this.view, this.fileName)
+      }
     })
 
     /*
@@ -124,31 +131,31 @@ class Application {
         // check if a tutorial exists for the named file and load/activate them
         //
         storage.loadUrl(file.replace(conf.fileSuffix, ".guide"))
-          .then( content => {
-            if(typeof content === "string"){
+          .then(content => {
+            if (typeof content === "string") {
               content = JSON.parse(content)
             }
             $(content.screen).click()
-            checkElement("#paletteElementsScroll").then( ()=>{
-                let anno = new Anno(content.steps)
-                anno.show()
+            checkElement("#paletteElementsScroll").then(() => {
+              let anno = new Anno(content.steps)
+              anno.show()
             })
           })
-          .catch( error => {
+          .catch(error => {
             // ignore 404 HTTP error silently
           })
         return content
       })
   }
 
-  historyDemo(file){
+  historyDemo(file) {
     history.pushState({
       id: 'editor',
       file: name
     }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?demo=' + file)
   }
 
-  historyFile(file){
+  historyFile(file) {
     this.fileName = file
     history.pushState({
       id: 'editor',
@@ -186,9 +193,8 @@ class Application {
     }
 
     if (fileName) {
-      this.fileName = storage.sanitize(fileName)+conf.fileSuffix
-    }
-    else {
+      this.fileName = storage.sanitize(fileName) + conf.fileSuffix
+    } else {
       this.fileName = "MyNewBrain" + conf.fileSuffix
     }
     this.view.centerDocument()

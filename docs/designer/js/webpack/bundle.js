@@ -297,70 +297,73 @@ var Application = function () {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   function Application() {
-    var _this = this;
-
     _classCallCheck(this, Application);
-
-    this.documentConfigurationTempl = {
-      baseClass: "draw2d.SetFigure",
-      code: $("#shape-edit-template").text().trim()
-    };
-
-    this.localStorage = [];
-    try {
-      if ('localStorage' in window && window.localStorage !== null) {
-        this.localStorage = localStorage;
-      }
-    } catch (e) {}
-
-    $("body").delegate(".mousetrap-pause", "focus", function () {
-      Mousetrap.pause();
-    }).delegate(".mousetrap-pause", "blur", function () {
-      Mousetrap.unpause();
-    });
-
-    // automatic add the configuration to the very first shape
-    // in the document as userData
-    //
-    this.documentConfiguration = $.extend({}, this.documentConfigurationTempl);
-
-    this.storage = new _BackendStorage2.default();
-    this.view = new _View2.default(this, "canvas");
-    this.toolbar = new _Toolbar2.default(this, ".toolbar", this.view);
-    this.layer = new _Layer2.default(this, "layer_elements", this.view);
-    this.filter = new _FilterPane2.default(this, "#filter .filter_actions", this.view);
-
-    this.view.installEditPolicy(new _SelectionToolPolicy2.default());
-
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
-    var file = this.getParam("file");
-    if (file) {
-      this._load(file);
-    } else {
-      this.fileNew();
-    }
-
-    // listen on the history object to load files
-    //
-    window.addEventListener('popstate', function (event) {
-      if (event.state && event.state.id === 'editor') {
-        // Render new content for the hompage
-        _this._load(event.state.file);
-      }
-    });
-
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
-    var tutorial = this.getParam("tutorial");
-    if (tutorial) {
-      this.checkForTutorialMode();
-    }
   }
 
   _createClass(Application, [{
+    key: "init",
+    value: function init(permissions) {
+      var _this = this;
+
+      this.documentConfigurationTempl = {
+        baseClass: "draw2d.SetFigure",
+        code: $("#shape-edit-template").text().trim()
+      };
+
+      this.localStorage = [];
+      try {
+        if ('localStorage' in window && window.localStorage !== null) {
+          this.localStorage = localStorage;
+        }
+      } catch (e) {}
+
+      $("body").delegate(".mousetrap-pause", "focus", function () {
+        Mousetrap.pause();
+      }).delegate(".mousetrap-pause", "blur", function () {
+        Mousetrap.unpause();
+      });
+
+      // automatic add the configuration to the very first shape
+      // in the document as userData
+      //
+      this.documentConfiguration = $.extend({}, this.documentConfigurationTempl);
+
+      this.storage = new _BackendStorage2.default();
+      this.view = new _View2.default(this, "canvas", permissions);
+      this.toolbar = new _Toolbar2.default(this, ".toolbar", this.view, permissions);
+      this.layer = new _Layer2.default(this, "layer_elements", this.view, permissions);
+      this.filter = new _FilterPane2.default(this, "#filter .filter_actions", this.view, permissions);
+
+      this.view.installEditPolicy(new _SelectionToolPolicy2.default());
+
+      // check if the user has added a "file" parameter. In this case we load the shape from
+      // the draw2d.shape github repository
+      //
+      var file = this.getParam("file");
+      if (file) {
+        this._load(file);
+      } else {
+        this.fileNew();
+      }
+
+      // listen on the history object to load files
+      //
+      window.addEventListener('popstate', function (event) {
+        if (event.state && event.state.id === 'editor') {
+          // Render new content for the hompage
+          _this._load(event.state.file);
+        }
+      });
+
+      // check if the user has added a "file" parameter. In this case we load the shape from
+      // the draw2d.shape github repository
+      //
+      var tutorial = this.getParam("tutorial");
+      if (tutorial) {
+        this.checkForTutorialMode();
+      }
+    }
+  }, {
     key: "checkForTutorialMode",
     value: function checkForTutorialMode() {
       var tutorial = this.getParam("tutorial");
@@ -513,7 +516,8 @@ var Application = function () {
   return Application;
 }();
 
-exports.default = Application;
+var app = new Application();
+exports.default = app;
 module.exports = exports["default"];
 
 /***/ }),
@@ -533,9 +537,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   fileSuffix: ".shape",
-  serverless: false,
   backend: {
-    file: {
+    shape: {
       list: "/backend/shape/list",
       get: function get(file) {
         return "../backend/shape/get?filePath=" + file;
@@ -974,7 +977,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Toolbar = function () {
-  function Toolbar(app, elementId, view) {
+  function Toolbar(app, elementId, view, permissions) {
     var _this = this;
 
     _classCallCheck(this, Toolbar);
@@ -996,12 +999,11 @@ var Toolbar = function () {
     view.on("unselect", this.onSelectionChanged.bind(this));
 
     this.fileName = null;
-    var buttonGroup = null;
 
-    if (_Configuration2.default.serverless === false) {
-      buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
-      this.html.append(buttonGroup);
+    var buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
+    this.html.append(buttonGroup);
 
+    if (permissions.shapes.list) {
       this.openButton = $('<div class="image-button" id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>');
       buttonGroup.append(this.openButton);
       this.openButton.on("click", function () {
@@ -1012,7 +1014,9 @@ var Toolbar = function () {
         _this.openButton.click();
         return false;
       });
+    }
 
+    if (permissions.shapes.update) {
       this.saveButton = $('<div class="image-button"  id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>');
       buttonGroup.append(this.saveButton);
       this.saveButton.on("click", function () {
@@ -1297,7 +1301,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = draw2d.Canvas.extend({
 
-  init: function init(app, id) {
+  init: function init(app, id, permissions) {
     var _this = this;
 
     this._super(id, 16000, 16000);
@@ -5608,10 +5612,6 @@ __webpack_require__(/*! ./figure/index */ "../../app/frontend/designer/js/figure
 
 __webpack_require__(/*! ./filter/index */ "../../app/frontend/designer/js/filter/index.js");
 
-var _Application = __webpack_require__(/*! ./Application */ "../../app/frontend/designer/js/Application.js");
-
-var _Application2 = _interopRequireDefault(_Application);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
@@ -5647,6 +5647,10 @@ if (!jQuery.browser) {
   jQuery.browser = browser;
 }
 
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = _Configuration2.default;
+
 $(window).load(function () {
 
   // export all required classes for deserialize JSON with "eval"
@@ -5661,15 +5665,10 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("serverless", function () {
-    _Configuration2.default.serverless = true;
-    _Configuration2.default.backend.file.get = function (file) {
-      return "./shapes/" + file;
-    };
-  });
-
-  socket.on("connect", function () {
-    app = shape_designer.app = new _Application2.default();
+  socket.on("permissions", function (permissions) {
+    app = __webpack_require__(/*! ./Application */ "../../app/frontend/designer/js/Application.js");
+    app.init(permissions);
+    shape_designer.app = app;
   });
 });
 
@@ -5716,7 +5715,7 @@ var BackendStorage = function () {
     key: 'getFiles',
     value: function getFiles(path) {
       return $.ajax({
-        url: _Configuration2.default.backend.file.list,
+        url: _Configuration2.default.backend.shape.list,
         xhrFields: {
           withCredentials: true
         },
@@ -5750,7 +5749,7 @@ var BackendStorage = function () {
     key: 'saveFile',
     value: function saveFile(json, imageDataUrl, fileName, commitMessage) {
       return $.ajax({
-        url: _Configuration2.default.backend.file.save,
+        url: _Configuration2.default.backend.shape.save,
         method: "POST",
         xhrFields: {
           withCredentials: true
@@ -5774,7 +5773,7 @@ var BackendStorage = function () {
     key: 'loadFile',
     value: function loadFile(fileName) {
       return $.ajax({
-        url: _Configuration2.default.backend.file.get(fileName),
+        url: _Configuration2.default.backend.shape.get(fileName),
         xhrFields: {
           withCredentials: true
         }

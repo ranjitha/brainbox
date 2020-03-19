@@ -16,7 +16,7 @@ import conf from "./Configuration"
 
 export default class Toolbar {
 
-  constructor(app, elementId, view) {
+  constructor(app, elementId, view, permissions) {
     this.html = $(elementId)
     this.view = view
     this.app = app
@@ -34,12 +34,11 @@ export default class Toolbar {
     view.on("unselect", this.onSelectionChanged.bind(this))
 
     this.fileName = null
-    let buttonGroup = null
 
-    if (conf.serverless === false) {
-      buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
-      this.html.append(buttonGroup)
+    let buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
+    this.html.append(buttonGroup)
 
+    if(permissions.shapes.list) {
       this.openButton = $('<div class="image-button" id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>')
       buttonGroup.append(this.openButton)
       this.openButton.on("click", () => {
@@ -50,7 +49,9 @@ export default class Toolbar {
         this.openButton.click()
         return false
       })
+    }
 
+    if(permissions.shapes.update) {
       this.saveButton = $('<div class="image-button"  id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>')
       buttonGroup.append(this.saveButton)
       this.saveButton.on("click", () => {
@@ -62,7 +63,6 @@ export default class Toolbar {
         return false
       })
     }
-
 
     // Inject the UNDO Button and the callbacks
     //

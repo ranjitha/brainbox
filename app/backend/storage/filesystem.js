@@ -24,6 +24,7 @@ module.exports = {
 
   getJSONFile: function (baseDir, subDir, res) {
     let file = baseDir + subDir
+    console.log(file)
     if (!fs.existsSync(file)) {
       res.status(404).send('Not found')
       return
@@ -85,9 +86,8 @@ module.exports = {
 
     fs.writeFile(file, content, err => {
       if (err) console.log(err)
-      res.send('true')
       if(typeof callback === "function") {
-        callback(err)
+        callback(subDir, err)
       }
     })
   },
