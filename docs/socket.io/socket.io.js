@@ -14,6 +14,7 @@ function io(){
 
   if(window.conf.backend.demo) {
     window.conf.backend.demo.list  = function(path) { return '../brain/index.json'}
+    window.conf.backend.demo.get   = function(file) { return '../brain/'+file }
     window.conf.backend.demo.image = function(file) { return '../brain/'+file.replace(".brain", ".png") }
   }
 
