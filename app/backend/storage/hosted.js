@@ -3,26 +3,13 @@ const path = require('path')
 const fs = require('fs-extra')
 const express = require('express')
 const shortid = require('shortid')
-
-const brainboxHomeDir = process.env.HOME + "/.brainbox/"
-const brainsHomeDir   = brainboxHomeDir + "brains_hosted/"
-const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
-const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
-
-// Ensure that the required storage folder exists
-//
-if (!fs.existsSync(brainboxHomeDir)) {
-  fs.mkdirSync(brainboxHomeDir)
-}
-if (!fs.existsSync(brainsHomeDir)) {
-  fs.mkdirSync(brainsHomeDir)
-}
+const colors = require('colors')
 
 // Storage backend for the personal usage
 //
 module.exports = {
-  // the permissions are exposed to the UI. The UI can enable/disable features regardings
-  // this settings
+  // the permissions are exposed to the UI. The UI can enable/disable features regarding
+  // to the settings
   permissions: {
     authentication:{
       enabled: false
@@ -48,11 +35,29 @@ module.exports = {
     }
   },
 
-  init: function(app){
-    console.log("| You are using file storage on your local disc                            |")
-    console.log("| This kind of storage is perfect for personal usage                       |")
+  init: function(app, args){
+    const brainsHomeDir   = args.folder + "brains_hosted/"
+    const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
+    const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
+
+    // Ensure that the required storage folder exists
+    //
+    if (!fs.existsSync(args.folder)) {
+      fs.mkdirSync(args.folder)
+    }
+    if (!fs.existsSync(brainsHomeDir)) {
+      fs.mkdirSync(brainsHomeDir)
+    }
+
+    console.log("| You are using the "+"'hosted'".bold.green+" file storage engine.                          |")
+    console.log("| This kind of installation is perfect for public access. It works by      |")
+    console.log("| allowing "+"anyone".bold+" to create “circuits” and save them without user/pwd.     |")
+    console.log("| You can then display those circuits on your profile, take feedback, and  |")
+    console.log("| continue to edit those circuits at any time. Each save operation creates |")
+    console.log("| a new file and access URL. It is not possible to change a file, the      |")
+    console.log("| System creates always a new one. It works like https://codepen.io        |")
     console.log("|                                                                          |")
-    console.log("| File Location:                                                           |")
+    console.log("| "+"File Location:".bold+"                                                           |")
     console.log("|    "+brainsHomeDir)
     // =================================================================
     // Handle brain files

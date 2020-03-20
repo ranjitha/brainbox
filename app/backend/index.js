@@ -2,23 +2,24 @@
 const express = require('express')
 const app = express()
 const http = require('http').Server(app)
-const { program } = require('commander');
+const { program } = require('commander')
 const bodyParser = require('body-parser')
-
+const colors = require('colors')
 const io = require('./comm/websocket').connect(http, {path: '/socket.io'})
 const mqtt = require('./comm/hive-mqtt').connect(io, "freegroup/brainbox")
 const raspi = require("./comm/raspi").connect(io)
 
 program
-  .option('--storage <string>',       'The storage bakcend to use. Possible values are ["personal", "hosted"]', "personal")
-  .option('--port <number>', 'The port number for the server to use', 7400)
+  .option('--storage <string>', 'The storage backend to use. Possible values are ["personal", "hosted"]', "personal")
+  .option('--folder <string>',  'The storage folder to use if the type of storage supports it', process.env.HOME + "/.brainbox/" )
+  .option('--port <number>',    'The port number for the server to use', 7400)
 
 
 program.parse(process.argv)
 
 
 console.log("+==========================================================================+")
-console.log('| Welcome to brainbox - the beginning of something awesome                 |');
+console.log('| '+'    Welcome to brainbox - the beginning of something awesome'.red+'             |');
 console.log("|==========================================================================|")
 
 // application specific configuration settings
@@ -62,30 +63,31 @@ function runServer() {
   app.use(bodyParser.urlencoded({extended: true}));
   app.get('/', (req, res) => res.redirect('/circuit'));
 
-  storage.init(app)
+  storage.init(app, program)
+
   console.log("|                                                                          |")
-  console.log("| Enabled Features:                                                        |")
-  console.log("|   Authentication                                                         |")
+  console.log("| "+"Enabled Features:".bold+"                                                        |")
+  console.log("|   "+"Authentication".bold+"                                                         |")
   console.log(`|   [${storage.permissions.authentication.enabled?'X':' '}] Login Screen                                                       |`)
   console.log("|                                                                          |")
-  console.log("|   Circuit Simulator                                                      |")
-  console.log(`|   [${storage.permissions.brains.create?'X':' '}] Save new circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.update?'X':' '}] Update circuit diagrams                                            |`)
-  console.log(`|   [${storage.permissions.brains.list  ?'X':' '}] Show all circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.demos ?'X':' '}] Show demo circuit diagrams                                         |`)
-  console.log(`|   [${storage.permissions.brains.delete?'X':' '}] Delete a circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.read  ?'X':' '}] Open a circuit diagrams                                            |`)
+  console.log("|   "+"Circuit Simulator".bold+"                                                      |")
+  console.log(`|   [${storage.permissions.brains.create?'X'.green:' '}] Save new circuit diagrams                                          |`)
+  console.log(`|   [${storage.permissions.brains.update?'X'.green:' '}] Update circuit diagrams                                            |`)
+  console.log(`|   [${storage.permissions.brains.list  ?'X'.green:' '}] Show all circuit diagrams                                          |`)
+  console.log(`|   [${storage.permissions.brains.demos ?'X'.green:' '}] Show demo circuit diagrams                                         |`)
+  console.log(`|   [${storage.permissions.brains.delete?'X'.green:' '}] Delete a circuit diagrams                                          |`)
+  console.log(`|   [${storage.permissions.brains.read  ?'X'.green:' '}] Open a circuit diagrams                                            |`)
   console.log("|                                                                          |")
-  console.log("|   Shape Designer                                                         |")
-  console.log(`|   [${storage.permissions.shapes.create?'X':' '}] Create new shapes                                                  |`)
-  console.log(`|   [${storage.permissions.shapes.update?'X':' '}] Change existing shapes                                             |`)
-  console.log(`|   [${storage.permissions.shapes.list  ?'X':' '}] Show all shapes                                                    |`)
-  console.log(`|   [${storage.permissions.shapes.delete?'X':' '}] Delete an existing shape                                           |`)
-  console.log(`|   [${storage.permissions.shapes.read  ?'X':' '}] Using a shape                                                      |`)
+  console.log("|   "+"Shape Designer".bold+"                                                         |")
+  console.log(`|   [${storage.permissions.shapes.create?'X'.green:' '}] Create new shapes                                                  |`)
+  console.log(`|   [${storage.permissions.shapes.update?'X'.green:' '}] Change existing shapes                                             |`)
+  console.log(`|   [${storage.permissions.shapes.list  ?'X'.green:' '}] Show all shapes                                                    |`)
+  console.log(`|   [${storage.permissions.shapes.delete?'X'.green:' '}] Delete an existing shape                                           |`)
+  console.log(`|   [${storage.permissions.shapes.read  ?'X'.green:' '}] Using a shape                                                      |`)
   console.log("|                                                                          |")
-  console.log("|   Updates                                                                       |")
-  console.log(`|   [${storage.permissions.updates.list?'X':' '}] Show available updates                                             |`)
-  console.log(`|   [${storage.permissions.updates.update?'X':' '}] Allow to install available updates                                 |`)
+  console.log("|   "+"Updates".bold+"                                                                |")
+  console.log(`|   [${storage.permissions.updates.list?'X'.green:' '}] Show available updates                                             |`)
+  console.log(`|   [${storage.permissions.updates.update?'X'.green:' '}] Allow to install available updates                                 |`)
 
   console.log("|==========================================================================|")
 

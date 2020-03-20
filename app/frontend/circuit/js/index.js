@@ -70,9 +70,10 @@ $(window).load(function () {
     for (let k in global) window[k] = global[k];
 
     // we must load the "shape/index.js" in the global scope.
+    //
     $.getScript(conf.shapes.url + "index.js", function () {
 
-      // export all required classes for deserialize JSON with "eval"
+      // export all required classes for deserialize JSON with "eval".
       // "eval" code didn't sees imported class or code
       //
       app = require("./Application")

@@ -4569,9 +4569,10 @@ $(window).load(function () {
     for (var k in global) {
       window[k] = global[k];
     } // we must load the "shape/index.js" in the global scope.
+    //
     $.getScript(_Configuration2.default.shapes.url + "index.js", function () {
 
-      // export all required classes for deserialize JSON with "eval"
+      // export all required classes for deserialize JSON with "eval".
       // "eval" code didn't sees imported class or code
       //
       app = __webpack_require__(/*! ./Application */ "../../app/frontend/circuit/js/Application.js");

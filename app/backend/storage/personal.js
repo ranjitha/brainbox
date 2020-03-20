@@ -5,19 +5,6 @@ const fs = require('fs-extra')
 const express = require('express')
 const {thumbnail} = require("../converter/thumbnail")
 
-const brainboxHomeDir = process.env.HOME + "/.brainbox/"
-const brainsHomeDir   = brainboxHomeDir + "brains/"
-const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
-const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
-
-// Ensure that the required storage folder exists
-//
-if (!fs.existsSync(brainboxHomeDir)) {
-  fs.mkdirSync(brainboxHomeDir)
-}
-if (!fs.existsSync(brainsHomeDir)) {
-  fs.mkdirSync(brainsHomeDir)
-}
 
 // Storage backend for the personal usage
 //
@@ -50,7 +37,19 @@ module.exports = {
   },
 
 
-  init: function(app){
+  init: function(app, args){
+    const brainsHomeDir   = args.folder + "brains/"
+    const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
+    const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
+
+    // Ensure that the required storage folder exists
+    //
+    if (!fs.existsSync(args.folder)) {
+      fs.mkdirSync(args.folder)
+    }
+    if (!fs.existsSync(brainsHomeDir)) {
+      fs.mkdirSync(brainsHomeDir)
+    }
     console.log("| You are using a storage engine which save files on your local disc.      |")
     console.log("| This kind of storage is perfect for personal usage.                      |")
     console.log("| You can choose another storage with the '--storage' command line argument|")
