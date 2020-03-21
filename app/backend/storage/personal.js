@@ -1,9 +1,11 @@
-const generic = require("./filesystem")
+const generic = require("./_base_")
 const update = require("../update")
 const path = require('path')
 const fs = require('fs-extra')
 const express = require('express')
 const {thumbnail} = require("../converter/thumbnail")
+const colors = require('colors')
+const makeDir = require('make-dir');
 
 
 // Storage backend for the personal usage
@@ -44,13 +46,9 @@ module.exports = {
 
     // Ensure that the required storage folder exists
     //
-    if (!fs.existsSync(args.folder)) {
-      fs.mkdirSync(args.folder)
-    }
-    if (!fs.existsSync(brainsHomeDir)) {
-      fs.mkdirSync(brainsHomeDir)
-    }
-    console.log("| You are using a storage engine which save files on your local disc.      |")
+    makeDir(brainsHomeDir)
+
+    console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
     console.log("| This kind of storage is perfect for personal usage.                      |")
     console.log("| You can choose another storage with the '--storage' command line argument|")
     console.log("|                                                                          |")

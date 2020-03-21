@@ -1,9 +1,12 @@
-const generic = require("./filesystem")
+const generic = require("./_base_")
 const path = require('path')
-const fs = require('fs-extra')
 const express = require('express')
 const shortid = require('shortid')
 const colors = require('colors')
+const makeDir = require('make-dir')
+
+
+let leveldb = null
 
 // Storage backend for the personal usage
 //
@@ -35,19 +38,18 @@ module.exports = {
     }
   },
 
-  init: function(app, args){
-    const brainsHomeDir   = args.folder + "brains_hosted/"
+  init: async function(app, args){
+    const brainsHomeDir   = args.folder + "brains_db"
     const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
     const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
 
     // Ensure that the required storage folder exists
     //
-    if (!fs.existsSync(args.folder)) {
-      fs.mkdirSync(args.folder)
-    }
-    if (!fs.existsSync(brainsHomeDir)) {
-      fs.mkdirSync(brainsHomeDir)
-    }
+    await makeDir(brainsHomeDir)
+
+    var levelup = require('levelup')
+    var leveldown = require('leveldown')
+    leveldb = levelup(leveldown(brainsHomeDir))
 
     console.log("| You are using the "+"'hosted'".bold.green+" file storage engine.                          |")
     console.log("| This kind of installation is perfect for public access. It works by      |")
@@ -94,7 +96,7 @@ module.exports = {
     //
     // =================================================================
     app.use('/circuit/shapes', express.static(shapeAppDir));
-    app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapeAppDir, req.query.path, res))
+    // app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapeAppDir, req.query.path, res))
     app.get('/backend/shape/get', (req, res) => module.exports.getJSONFile(shapeAppDir, req.query.filePath, res))
     app.get('/backend/shape/image', (req, res) => module.exports.getBase64Image(shapeAppDir, req.query.filePath, res))
     // app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
@@ -103,20 +105,39 @@ module.exports = {
   },
 
   listFiles: generic.listFiles,
-  getJSONFile: generic.getJSONFile,
+  getJSONFile: function (baseDir, subDir, res) {
+    leveldb.get(subDir, (err, value) => {
+        if(err) {
+          res.status(404).send('Not found')
+
+        }
+        else {
+          res.setHeader('Content-Type', 'application/json')
+          res.send(value)
+        }
+    })
+  },
   getBase64Image: generic.getBase64Image,
   renameFile: ()=>{},
   deleteFile: ()=>{},
   writeShape: ()=>{},
-  writeFile:  ()=>{},
 
   writeBrain: (baseDir, subDir, content, res ) => {
     // every save of a file ends in a NEW file. Like a codepen page.
     // The new filename is the return value of this call
     //
-    generic.writeBrain(baseDir, shortid.generate()+".brain", content, res, (subDir, err)=>{
+    module.exports.writeFile(baseDir, shortid.generate()+".brain", content, res, (subDir, err)=>{
       res.setHeader('Content-Type', 'application/json')
       res.send({ filePath: subDir })
+    })
+  },
+
+  writeFile: function (baseDir, subDir, content, res, callback) {
+    leveldb.put(subDir, content, err => {
+      if (err) console.log(err)
+      if(typeof callback === "function") {
+        callback(subDir, err)
+      }
     })
   }
 }

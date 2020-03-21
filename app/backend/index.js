@@ -54,7 +54,7 @@ arduino.init(io, runServer);
 // is running on an Raspberry Pi
 //
 // =======================================================================
-function runServer() {
+async function  runServer() {
   // provide the  WebApp with this very simple
   // HTTP server. Good enough for an private raspi access
   //
@@ -63,7 +63,7 @@ function runServer() {
   app.use(bodyParser.urlencoded({extended: true}));
   app.get('/', (req, res) => res.redirect('/circuit'));
 
-  storage.init(app, program)
+  await storage.init(app, program)
 
   console.log("|                                                                          |")
   console.log("| "+"Enabled Features:".bold+"                                                        |")

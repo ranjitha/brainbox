@@ -4562,6 +4562,8 @@ $(window).load(function () {
   // (fake event from the socket.io mock )
   //
   socket.on("permissions", function (permissions) {
+    socket.off(permissions);
+    console.log(permissions);
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
