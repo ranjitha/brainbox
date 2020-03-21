@@ -132,7 +132,7 @@ module.exports = {
     // every save of a file ends in a NEW file. Like a codepen page.
     // The new filename is the return value of this call
     //
-    module.exports.writeFile(baseDir, shortid.generate(), content, res, (subDir, err)=>{
+    module.exports.writeFile(baseDir, shortid.generate()+".brain", content, res, (subDir, err)=>{
       res.setHeader('Content-Type', 'application/json')
       res.send({ filePath: subDir })
     })
