@@ -53,6 +53,8 @@ class Application {
     this.addonPane = new Addons(permissions)
 
 
+    this.view.getCommandStack().addEventListener(this)
+
     if(permissions.brains.list){
       $("#fileOpen, #editorFileOpen").show()
       $("#fileOpen, #editorFileOpen").on("click", () => { new FileOpen().show(this.view) })
@@ -65,10 +67,10 @@ class Application {
     $("#editorFileSave").on("click", () => {
       if (this.permissions.brains.create && this.permissions.brains.update) {
         // allow the user to enter a file name....
-        new FileSave().show(this.view, this.fileName)
+        new FileSave().show(this.view, this.fileName, ()=>{this.view.getCommandStack().markSaveLocation()})
       } else if (this.permissions.brains.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        new FileSave().save(this.view, this.fileName)
+        new FileSave().save(this.view, this.fileName, ()=>{this.view.getCommandStack().markSaveLocation()})
       }
     })
 
@@ -199,6 +201,18 @@ class Application {
     }
     this.view.centerDocument()
   }
+
+  stackChanged(event) {
+    if (event.isPreChangeEvent()) {
+      return // silently
+    }
+    if( event.getStack().canUndo())
+      $("#editorFileSave div").addClass("highlight")
+    else {
+      $("#editorFileSave div").removeClass("highlight")
+    }
+  }
+
 }
 
 let app = new Application()

@@ -141,8 +141,10 @@ module.exports = {
     generic.writeBrain(baseDir, subDir, content, res, (err) => {
       const io = require('../comm/websocket').io
       io.sockets.emit("brain:generated", {
-        filePath: filePath
+        filePath: subDir
       })
+      res.setHeader('Content-Type', 'application/json')
+      res.send({ filePath: subDir })
     })
   }
 }

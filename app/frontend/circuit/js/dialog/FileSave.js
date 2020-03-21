@@ -22,7 +22,7 @@ export default class FileSave {
    *
    * @since 4.0.0
    */
-  show(canvas, defaultFileName) {
+  show(canvas, defaultFileName, callback) {
     Mousetrap.pause()
     $("#fileSaveDialog .githubFileName").val(defaultFileName)
 
@@ -40,6 +40,9 @@ export default class FileSave {
       this.save(canvas, name, ()=>{
         Mousetrap.unpause()
         $('#fileSaveDialog').modal('hide')
+        if(callback) {
+          callback()
+        }
       })
     })
   }
@@ -58,6 +61,7 @@ export default class FileSave {
           if(callback) {
             callback()
           }
+          $( "#notificationToast" ).animate({top:"+=20"}, 500 ).delay(700).animate({top:"-=20"}, 300 )
         })
     })
   }

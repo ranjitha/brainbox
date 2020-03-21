@@ -549,6 +549,7 @@ export default draw2d.Canvas.extend({
       $("#editRedo").removeClass("disabled")
     }
 
+
     this.hardwareChanged()
   },
 
