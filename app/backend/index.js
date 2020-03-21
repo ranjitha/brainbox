@@ -68,7 +68,7 @@ async function  runServer() {
   app.use('/.well-known/acme-challenge', express.static(__dirname +'/../ssl/'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));
-  app.get('/', (req, res) => res.redirect('/circuit'));
+  app.get('/', (req, res) => res.redirect('/circuit/'));
 
   await storage.init(app, program)
 

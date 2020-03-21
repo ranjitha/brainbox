@@ -64,7 +64,7 @@ $(window).load(function () {
   //
   socket.on("permissions", (permissions) => {
     socket.off(permissions)
-    console.log(permissions)
+
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
@@ -82,6 +82,8 @@ $(window).load(function () {
       app.init(permissions)
       require("./hardware").init(socket)
       inlineSVG.init()
+
+      $(".loader").fadeOut(500, function() { $(this).remove(); })
     }).fail(function () {
       if (arguments[0].readyState == 0) {
         //script failed to load
