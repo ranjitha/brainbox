@@ -39,7 +39,11 @@ module.exports = {
   },
 
   init: async function(app, args){
-    const brainsHomeDir   = args.folder + "brains_db"
+    let folder = args.folder
+    if(!folder.endsWith("/")){
+      folder = folder + "/"
+    }
+    const brainsHomeDir   = folder + "brains_db"
     const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
     const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
 
