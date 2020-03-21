@@ -10,6 +10,7 @@ const mqtt = require('./comm/hive-mqtt').connect(io, "freegroup/brainbox")
 const raspi = require("./comm/raspi").connect(io)
 
 program
+  .option('--arduino <boolean>','Allow the server to communicate to an Arduino which is connected via USB', false)
   .option('--storage <string>', 'The storage backend to use. Possible values are ["personal", "hosted"]', "personal")
   .option('--folder <string>',  'The storage folder to use if the type of storage supports it', process.env.HOME + "/.brainbox/" )
   .option('--port <number>',    'The port number for the server to use', 7400)
@@ -24,7 +25,6 @@ console.log("|==================================================================
 
 // application specific configuration settings
 //
-const arduino = require("./comm/arduino")
 const storage = require("./storage/"+program.storage)
 
 
@@ -44,7 +44,13 @@ const address = require("./network")
 // ask to user which one to use.
 //
 // =======================================================================
-arduino.init(io, runServer);
+if(program.arduino){
+  const arduino = require("./comm/arduino")
+  arduino.init(io, runServer)
+}
+else {
+  runServer()
+}
 
 
 // =======================================================================
@@ -88,6 +94,9 @@ async function  runServer() {
   console.log("|   "+"Updates".bold+"                                                                |")
   console.log(`|   [${storage.permissions.updates.list?'X'.green:' '}] Show available updates                                             |`)
   console.log(`|   [${storage.permissions.updates.update?'X'.green:' '}] Allow to install available updates                                 |`)
+  console.log("|                                                                          |")
+  console.log("| "+"Hardware Connection:".bold+"                                                     |")
+  console.log(`|   [${program.arduino?'X'.green:' '}] Connect Arduino via USB                                            |`)
 
   console.log("|==========================================================================|")
 
