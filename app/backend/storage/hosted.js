@@ -45,7 +45,9 @@ module.exports = {
 
     // Ensure that the required storage folder exists
     //
-    await makeDir(brainsHomeDir)
+    await makeDir(brainsHomeDir).catch( err => {
+      console.log(err)
+    })
 
     var levelup = require('levelup')
     var leveldown = require('leveldown')
