@@ -65,6 +65,7 @@ async function  runServer() {
   // HTTP server. Good enough for an private raspi access
   //
   app.use(express.static(__dirname + '/../frontend'));
+  app.use('/.well-known/acme-challenge', express.static(__dirname +'/../ssl/'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));
   app.get('/', (req, res) => res.redirect('/circuit'));
