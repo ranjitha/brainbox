@@ -104,7 +104,7 @@ module.exports = {
     app.use('/circuit/shapes', express.static(shapeAppDir));
     app.use('/designer/shapes', express.static(shapeAppDir));
     app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapeAppDir, req.query.path, res))
-    app.get('/backend/shape/get', (req, res) => module.exports.getJSONFile(shapeAppDir, req.query.filePath, res))
+    app.get('/backend/shape/get', (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
     app.get('/backend/shape/image', (req, res) => module.exports.getBase64Image(shapeAppDir, req.query.filePath, res))
     // app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
     // app.post('/backend/shape/rename', (req, res) => module.exports.renameFile(shapeAppDir, req.body.from, req.body.to, res))
