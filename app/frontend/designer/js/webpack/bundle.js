@@ -5686,9 +5686,13 @@ $(window).load(function () {
   // (fake event from the socket.io mock )
   //
   socket.on("permissions", function (permissions) {
+    socket.off("permissions");
     app = __webpack_require__(/*! ./Application */ "./app/frontend/designer/js/Application.js");
     app.init(permissions);
     shape_designer.app = app;
+    $(".loader").fadeOut(500, function () {
+      $(this).remove();
+    });
   });
 });
 

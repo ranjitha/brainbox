@@ -68,9 +68,11 @@ $(window).load(function () {
   // (fake event from the socket.io mock )
   //
   socket.on("permissions", (permissions) => {
+    socket.off("permissions")
     app = require("./Application")
     app.init(permissions)
     shape_designer.app = app
+    $(".loader").fadeOut(500, function() { $(this).remove(); })
   })
 
 })
