@@ -34,7 +34,7 @@ module.exports = {
       update: false,
       delete: false,
       read: true,
-      list: false
+      list: true
     }
   },
 
