@@ -3,11 +3,12 @@ import View from "./View"
 import Toolbar from "./Toolbar"
 import Layer from "./Layer"
 import FilterPane from "./FilterPane"
-import Storage from "./io/BackendStorage"
+import storage from "./io/BackendStorage"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
 import FileSaveAs from "./dialog/FileSaveAs"
+import Files from "./view/FilesScreen"
 
 /**
  *
@@ -46,6 +47,8 @@ class Application {
   }
 
   init(permissions){
+    this.filePane = new Files(permissions)
+
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
       code: $("#shape-edit-template").text().trim()
@@ -73,7 +76,7 @@ class Application {
     //
     this.documentConfiguration = $.extend({}, this.documentConfigurationTempl)
 
-    this.storage = new Storage()
+    this.storage = storage
     this.view = new View(this, "canvas", permissions)
     this.toolbar = new Toolbar(this, ".toolbar", this.view, permissions)
     this.layer = new Layer(this, "layer_elements", this.view, permissions)
@@ -86,7 +89,7 @@ class Application {
     //
     let file = this.getParam("file")
     if (file) {
-      this._load(file)
+      this.load(file)
     }
     else {
       this.fileNew()
@@ -97,7 +100,7 @@ class Application {
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.id === 'editor') {
         // Render new content for the hompage
-        this._load(event.state.file)
+        this.load(event.state.file)
       }
     })
 
@@ -180,8 +183,11 @@ class Application {
     }
   }
 
-  _load(file){
-     this.storage.loadFile(file)
+  load(file){
+    this.view.clear()
+    $("#leftTabStrip .editor").click()
+
+    return this.storage.loadUrl(file)
       .then((content) => {
         this.view.clear()
         this.view.centerDocument()
@@ -261,6 +267,14 @@ class Application {
       figures.first().setUserData(this.documentConfiguration)
     }
   }
+
+  historyShape(file) {
+    history.pushState({
+      id: 'editor',
+      file: name
+    }, 'Brainbox Designer | ' + name, window.location.href.split('?')[0] + '?file=' + file)
+  }
+
 }
 
 

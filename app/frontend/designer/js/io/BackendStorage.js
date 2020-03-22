@@ -1,6 +1,7 @@
 import conf from '../Configuration'
+import axios from "axios";
 
-export default class BackendStorage{
+class BackendStorage{
 
   /**
    * @constructor
@@ -81,33 +82,32 @@ export default class BackendStorage{
     )
   }
 
+  loadFile(fileName){
+    return this.loadUrl(conf.backend.shape.get(fileName))
+  }
+
   /**
    * Load the file content of the given path
    *
    * @param fileName
    * @returns {*}
    */
-  loadFile(fileName){
-    return $.ajax({
-      url: conf.backend.shape.get(fileName),
-      xhrFields: {
-        withCredentials: true
-      }
-    })
-      .fail(function(error) {
-        console.log(arguments)
-      })
-      .then((response)=>{
+  loadUrl(url){
+    return axios.get(url)
+      .then((response) => {
         // happens in "serverless" mode on the gh-pages/docs installation
         //
         if (typeof response === "string")
-          response = JSON.parse(response)
+          response = JSON.parse(response).data
+        else
+          response = response.data
 
         if(response.draw2d)
-        return response.draw2d
-      return response
-    })
+          return response.draw2d
+        return response
+      })
   }
+
 
   dirname(path) {
     if (path===undefined || path===null || path.length === 0)
@@ -131,3 +131,6 @@ export default class BackendStorage{
   }
 
 }
+
+let storage = new BackendStorage()
+export default storage

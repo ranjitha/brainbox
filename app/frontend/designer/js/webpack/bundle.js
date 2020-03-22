@@ -258,6 +258,10 @@ var _FileSaveAs = __webpack_require__(/*! ./dialog/FileSaveAs */ "./app/frontend
 
 var _FileSaveAs2 = _interopRequireDefault(_FileSaveAs);
 
+var _FilesScreen = __webpack_require__(/*! ./view/FilesScreen */ "./app/frontend/designer/js/view/FilesScreen.js");
+
+var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -305,6 +309,8 @@ var Application = function () {
     value: function init(permissions) {
       var _this = this;
 
+      this.filePane = new _FilesScreen2.default(permissions);
+
       this.documentConfigurationTempl = {
         baseClass: "draw2d.SetFigure",
         code: $("#shape-edit-template").text().trim()
@@ -328,7 +334,7 @@ var Application = function () {
       //
       this.documentConfiguration = $.extend({}, this.documentConfigurationTempl);
 
-      this.storage = new _BackendStorage2.default();
+      this.storage = _BackendStorage2.default;
       this.view = new _View2.default(this, "canvas", permissions);
       this.toolbar = new _Toolbar2.default(this, ".toolbar", this.view, permissions);
       this.layer = new _Layer2.default(this, "layer_elements", this.view, permissions);
@@ -341,7 +347,7 @@ var Application = function () {
       //
       var file = this.getParam("file");
       if (file) {
-        this._load(file);
+        this.load(file);
       } else {
         this.fileNew();
       }
@@ -351,7 +357,7 @@ var Application = function () {
       window.addEventListener('popstate', function (event) {
         if (event.state && event.state.id === 'editor') {
           // Render new content for the hompage
-          _this._load(event.state.file);
+          _this.load(event.state.file);
         }
       });
 
@@ -424,11 +430,14 @@ var Application = function () {
       }
     }
   }, {
-    key: "_load",
-    value: function _load(file) {
+    key: "load",
+    value: function load(file) {
       var _this2 = this;
 
-      this.storage.loadFile(file).then(function (content) {
+      this.view.clear();
+      $("#leftTabStrip .editor").click();
+
+      return this.storage.loadUrl(file).then(function (content) {
         _this2.view.clear();
         _this2.view.centerDocument();
         var reader = new draw2d.io.json.Reader();
@@ -511,6 +520,14 @@ var Application = function () {
         figures.first().setUserData(this.documentConfiguration);
       }
     }
+  }, {
+    key: "historyShape",
+    value: function historyShape(file) {
+      history.pushState({
+        id: 'editor',
+        file: name
+      }, 'Brainbox Designer | ' + name, window.location.href.split('?')[0] + '?file=' + file);
+    }
   }]);
 
   return Application;
@@ -540,6 +557,9 @@ exports.default = {
   backend: {
     shape: {
       list: "/backend/shape/list",
+      image: function image(file) {
+        return "./shapes/" + file;
+      },
       get: function get(file) {
         return "../backend/shape/get?filePath=" + file;
       },
@@ -5694,6 +5714,10 @@ var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
 
+var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -5712,7 +5736,7 @@ var BackendStorage = function () {
   }
 
   _createClass(BackendStorage, [{
-    key: 'getFiles',
+    key: "getFiles",
     value: function getFiles(path) {
       return $.ajax({
         url: _Configuration2.default.backend.shape.list,
@@ -5746,7 +5770,7 @@ var BackendStorage = function () {
       });
     }
   }, {
-    key: 'saveFile',
+    key: "saveFile",
     value: function saveFile(json, imageDataUrl, fileName, commitMessage) {
       return $.ajax({
         url: _Configuration2.default.backend.shape.save,
@@ -5761,6 +5785,11 @@ var BackendStorage = function () {
         }
       });
     }
+  }, {
+    key: "loadFile",
+    value: function loadFile(fileName) {
+      return this.loadUrl(_Configuration2.default.backend.shape.get(fileName));
+    }
 
     /**
      * Load the file content of the given path
@@ -5770,26 +5799,19 @@ var BackendStorage = function () {
      */
 
   }, {
-    key: 'loadFile',
-    value: function loadFile(fileName) {
-      return $.ajax({
-        url: _Configuration2.default.backend.shape.get(fileName),
-        xhrFields: {
-          withCredentials: true
-        }
-      }).fail(function (error) {
-        console.log(arguments);
-      }).then(function (response) {
+    key: "loadUrl",
+    value: function loadUrl(url) {
+      return _axios2.default.get(url).then(function (response) {
         // happens in "serverless" mode on the gh-pages/docs installation
         //
-        if (typeof response === "string") response = JSON.parse(response);
+        if (typeof response === "string") response = JSON.parse(response).data;else response = response.data;
 
         if (response.draw2d) return response.draw2d;
         return response;
       });
     }
   }, {
-    key: 'dirname',
+    key: "dirname",
     value: function dirname(path) {
       if (path === undefined || path === null || path.length === 0) return null;
 
@@ -5803,7 +5825,7 @@ var BackendStorage = function () {
       return path === "" ? null : path + "/";
     }
   }, {
-    key: 'basename',
+    key: "basename",
     value: function basename(path) {
       if (path === null || path === "" || path === undefined) {
         return null;
@@ -5811,12 +5833,12 @@ var BackendStorage = function () {
       return path.split(/[\\/]/).pop();
     }
   }, {
-    key: 'currentDir',
+    key: "currentDir",
     get: function get() {
       return this.dirname(this.dirname());
     }
   }, {
-    key: 'currentFile',
+    key: "currentFile",
     get: function get() {
       return this.fileName;
     },
@@ -5831,8 +5853,9 @@ var BackendStorage = function () {
   return BackendStorage;
 }();
 
-exports.default = BackendStorage;
-module.exports = exports['default'];
+var storage = new BackendStorage();
+exports.default = storage;
+module.exports = exports["default"];
 
 /***/ }),
 
@@ -7121,6 +7144,128 @@ module.exports = exports["default"];
 
   Mousetrap.init();
 })(Mousetrap);
+
+/***/ }),
+
+/***/ "./app/frontend/designer/js/view/FilesScreen.js":
+/*!******************************************************!*\
+  !*** ./app/frontend/designer/js/view/FilesScreen.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/designer/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "./app/frontend/designer/js/io/BackendStorage.js");
+
+var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *
+ * The **GraphicalEditor** is responsible for layout and dialog handling.
+ *
+ * @author Andreas Herz
+ */
+
+var Files = function () {
+
+  /**
+   * @constructor
+   *
+   * @param {String} canvasId the id of the DOM element to use as paint container
+   */
+  function Files(permissions) {
+    _classCallCheck(this, Files);
+
+    this.render(permissions);
+  }
+
+  _createClass(Files, [{
+    key: "render",
+    value: function render(permissions) {
+
+      if (permissions.shapes.list === false) {
+        return;
+      }
+
+      // load demo files
+      //
+      function loadShapes(path) {
+        _BackendStorage2.default.getFiles(path).then(function (files) {
+          files = files.filter(function (file) {
+            return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
+          });
+          files = files.map(function (file) {
+            return _extends({}, file, {
+              readonly: true,
+              folder: path,
+              title: file.name.replace(_Configuration2.default.fileSuffix, ""),
+              image: _Configuration2.default.backend.shape.image(path + file.name.replace(_Configuration2.default.fileSuffix, ".png"))
+            });
+          });
+          if (path.length !== 0) {
+            files.unshift({
+              name: _BackendStorage2.default.dirname(path),
+              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
+              type: "dir",
+              dir: true,
+              readonly: true,
+              title: ".."
+            });
+          }
+
+          var compiled = _hogan2.default.compile($("#filesTemplate").html());
+          var output = compiled.render({ folder: path, files: files });
+          $("#appShapeFiles").html($(output));
+          $("#appShapeFiles .list-group-item[data-type='dir']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            loadShapes(name);
+          });
+
+          $("#appShapeFiles .list-group-item[data-type='file']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            $el.addClass("spinner");
+            var file = _Configuration2.default.backend.shape.get(name);
+            app.load(file).then(function () {
+              $el.removeClass("spinner");
+              app.historyShape(name);
+            });
+          });
+        });
+      }
+
+      loadShapes("");
+    }
+  }]);
+
+  return Files;
+}();
+
+exports.default = Files;
+module.exports = exports["default"];
 
 /***/ }),
 
@@ -8617,6 +8762,1819 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /***/ }),
 
+/***/ "./node_modules/axios/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/axios/index.js ***!
+  \*************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/lib/axios.js");
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/adapters/xhr.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/axios/lib/core/settle.js");
+var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/axios/lib/core/buildFullPath.js");
+var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
+var isURLSameOrigin = __webpack_require__(/*! ./../helpers/isURLSameOrigin */ "./node_modules/axios/lib/helpers/isURLSameOrigin.js");
+var createError = __webpack_require__(/*! ../core/createError */ "./node_modules/axios/lib/core/createError.js");
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password || '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
+
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (requestData === undefined) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/axios.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/axios.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+var Axios = __webpack_require__(/*! ./core/Axios */ "./node_modules/axios/lib/core/Axios.js");
+var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var defaults = __webpack_require__(/*! ./defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(/*! ./cancel/Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+axios.CancelToken = __webpack_require__(/*! ./cancel/CancelToken */ "./node_modules/axios/lib/cancel/CancelToken.js");
+axios.isCancel = __webpack_require__(/*! ./cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/axios/lib/helpers/spread.js");
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/Cancel.js":
+/*!*************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/CancelToken.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(/*! ./Cancel */ "./node_modules/axios/lib/cancel/Cancel.js");
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/cancel/isCancel.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/Axios.js":
+/*!**********************************************!*\
+  !*** ./node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
+var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
+var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
+var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/InterceptorManager.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/buildFullPath.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ "./node_modules/axios/lib/helpers/isAbsoluteURL.js");
+var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ "./node_modules/axios/lib/helpers/combineURLs.js");
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/createError.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/createError.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var enhanceError = __webpack_require__(/*! ./enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/dispatchRequest.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var transformData = __webpack_require__(/*! ./transformData */ "./node_modules/axios/lib/core/transformData.js");
+var isCancel = __webpack_require__(/*! ../cancel/isCancel */ "./node_modules/axios/lib/cancel/isCancel.js");
+var defaults = __webpack_require__(/*! ../defaults */ "./node_modules/axios/lib/defaults.js");
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/enhanceError.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/mergeConfig.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
+    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath'
+  ];
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
+    if (utils.isObject(config2[prop])) {
+      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
+    } else if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (utils.isObject(config1[prop])) {
+      config[prop] = utils.deepMerge(config1[prop]);
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys);
+
+  var otherKeys = Object
+    .keys(config2)
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
+    if (typeof config2[prop] !== 'undefined') {
+      config[prop] = config2[prop];
+    } else if (typeof config1[prop] !== 'undefined') {
+      config[prop] = config1[prop];
+    }
+  });
+
+  return config;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/settle.js":
+/*!***********************************************!*\
+  !*** ./node_modules/axios/lib/core/settle.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__(/*! ./createError */ "./node_modules/axios/lib/core/createError.js");
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/core/transformData.js":
+/*!******************************************************!*\
+  !*** ./node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/defaults.js":
+/*!********************************************!*\
+  !*** ./node_modules/axios/lib/defaults.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
+var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/axios/lib/helpers/normalizeHeaderName.js");
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(/*! ./adapters/xhr */ "./node_modules/axios/lib/adapters/xhr.js");
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(/*! ./adapters/http */ "./node_modules/axios/lib/adapters/xhr.js");
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../process/browser.js */ "./node_modules/process/browser.js")))
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/bind.js":
+/*!************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/buildURL.js":
+/*!****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/combineURLs.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/cookies.js":
+/*!***************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isAbsoluteURL.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isURLSameOrigin.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/normalizeHeaderName.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ../utils */ "./node_modules/axios/lib/utils.js");
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/parseHeaders.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/spread.js":
+/*!**************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/utils.js":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/lib/utils.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = merge(result[key], val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Function equal to merge with the difference being that no reference
+ * to original objects is kept.
+ *
+ * @see merge
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function deepMerge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (typeof result[key] === 'object' && typeof val === 'object') {
+      result[key] = deepMerge(result[key], val);
+    } else if (typeof val === 'object') {
+      result[key] = deepMerge({}, val);
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  deepMerge: deepMerge,
+  extend: extend,
+  trim: trim
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/font-awesome/css/font-awesome.css":
 /*!**********************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/font-awesome/css/font-awesome.css ***!
@@ -8650,7 +10608,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C21B7A;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C21B7A;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C21B7A;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C21B7A;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C21B7A;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(194, 27, 122, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C21B7A;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(194, 27, 122, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 270px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C21B7A;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n}\n.tooltip {\n  z-index: 1000000;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n.content {\n  position: absolute;\n  top: 60px;\n  right: 250px;\n  left: 220px;\n  overflow: scroll;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  bottom: 0;\n  background-color: #FFFFFF;\n}\n#canvas {\n  width: 6000px;\n  height: 6000px;\n}\n#canvas_config {\n  position: fixed;\n  width: 40px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n  border: 1px solid transparent;\n  background-color: rgba(178, 226, 242, 0.3);\n}\n#canvas_config:hover {\n  border: 1px solid #C21B7A !important;\n}\n#canvas_config:hover {\n  color: #C21B7A;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C21B7A;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C21B7A;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C21B7A;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #95155e;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n}\n#layer .title {\n  left: 10px;\n  right: 0px;\n  top: 10px;\n  position: absolute;\n}\n#layer .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n}\n#layer .title div {\n  position: absolute;\n  left: 90px;\n}\n#layer .title div h1 {\n  font-size: 25px;\n  font-weight: 200;\n  line-height: 45px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n#layer .title div h2 {\n  font-size: 15px;\n  font-weight: 200;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 90px;\n  border-bottom: 1px solid #222222;\n  font-weight: 500;\n  font-size: 12px;\n  padding: 4px 4px 4px 20px;\n  letter-spacing: 5px;\n  text-align: left;\n  color: #C21B7A;\n  box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);\n}\n#layer #layer_elements {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: fixed;\n  top: 120px;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  overflow: auto;\n}\n#layer #layer_elements .layerElement {\n  background-color: #fafafa;\n  color: black;\n  cursor: move;\n  font-weight: 400;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 5px;\n  text-align: left;\n  border: 1px solid transparent;\n  border-bottom: 1px solid #222222;\n}\n#layer #layer_elements .layerElement::before {\n  content: \"\";\n  display: block;\n  width: 20px;\n  height: 20px;\n  float: left;\n  margin-right: 5px;\n}\n#layer #layer_elements .layerElement.ExtLine::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_line.svg */ "./app/frontend/designer/images/layer_line.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyRect::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_rect.svg */ "./app/frontend/designer/images/layer_rect.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyCircle::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_circle.svg */ "./app/frontend/designer/images/layer_circle.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtLabel::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_text.svg */ "./app/frontend/designer/images/layer_text.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtPort::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_port.svg */ "./app/frontend/designer/images/layer_port.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement[data-visibility=\"false\"] {\n  opacity: 0.5;\n  font-style: italic;\n}\n#layer #layer_elements .layerElement .icon {\n  cursor: pointer;\n  padding-right: 4px;\n  width: 20px;\n  height: 20px;\n}\n#layer #layer_elements .layerElement .icon * {\n  stroke: black !important;\n}\n#layer #layer_elements .layerElement .icon:hover * {\n  stroke: #C21B7A !important;\n}\n#layer #layer_elements .layerSelectedElement {\n  background-color: #f5f5f5;\n  color: black;\n  border-style: dotted;\n  border-width: 1px;\n  border-color: #C21B7A;\n  font-weight: 600;\n}\n#code_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#code_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#code_close:hover {\n  color: #C21B7A;\n}\n#test_run {\n  position: fixed;\n  right: 90px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_run:hover {\n  color: #C21B7A;\n}\n#test_info {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#test_canvas {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#test_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_close:hover {\n  color: #C21B7A;\n}\n#test_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_clipboard:hover {\n  color: #C21B7A;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 250px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .filter_header {\n  background: none repeat scroll 0 0 #303030;\n  position: fixed;\n  height: 30px;\n  width: 250px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C21B7A;\n}\n#filter .filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 250px;\n  height: 30px;\n  background: none repeat scroll 0 0 #303030;\n}\n#filter .filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 250px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter .filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter .filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter .filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter .filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter .filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter .filter_actions .icon:hover {\n  color: #C21B7A;\n}\n#filter .filter_actions .filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0 !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter .filter_actions .filter-heading .icon {\n  width: 15px;\n}\n#filter .filter_actions .filter-heading .icon * {\n  stroke: white !important;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(194, 27, 122, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0px;\n  position: absolute;\n}\n#FigureMarkdownEdit .preview {\n  width: 50%;\n  display: inline-block;\n  top: 0px;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0px;\n}\n#FigureMarkdownEdit .preview img {\n  max-width: 35%;\n}\n#FigureMarkdownEdit .preview table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#FigureMarkdownEdit .preview table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#FigureMarkdownEdit .preview table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#FigureMarkdownEdit .preview table tr:last-child td {\n  border-bottom: 0;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n#tool_shape.open .dropdown-menu {\n  -webkit-transform: scale(1, 1);\n  opacity: 1;\n  transform: scale(1, 1);\n}\n#tool_shape .dropdown-menu {\n  opacity: 0.1;\n  animation-fill-mode: forwards;\n  transform: scale(1, 0);\n  transform-origin: 0 0 ;\n  display: block;\n  transition: all 0.2s ease;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape .tool_shape_entry img {\n  height: 30px;\n  padding-right: 20px;\n}\n#tool_shape .tool_shape_entry .tool_label {\n  min-width: 95px;\n  display: inline-block;\n}\n#tool_shape .tool_shape_entry .tool_shortcut {\n  color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 270px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n}\n.tooltip {\n  z-index: 1000000;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n.content {\n  position: absolute;\n  top: 60px;\n  right: 250px;\n  left: 220px;\n  overflow: scroll;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  bottom: 0;\n  background-color: #FFFFFF;\n}\n#canvas {\n  width: 6000px;\n  height: 6000px;\n}\n#canvas_config {\n  position: fixed;\n  width: 40px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n  border: 1px solid transparent;\n  background-color: rgba(178, 226, 242, 0.3);\n}\n#canvas_config:hover {\n  border: 1px solid #C71D3D !important;\n}\n#canvas_config:hover {\n  color: #C71D3D;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C71D3D;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C71D3D;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C71D3D;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #9a172f;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 90px;\n  border-bottom: 1px solid #222222;\n  font-weight: 500;\n  font-size: 12px;\n  padding: 4px 4px 4px 20px;\n  letter-spacing: 5px;\n  text-align: left;\n  color: #C71D3D;\n  box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);\n}\n#layer #layer_elements {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: fixed;\n  top: 120px;\n  bottom: 0;\n  width: 220px;\n  overflow: auto;\n}\n#layer #layer_elements .layerElement {\n  background-color: #fafafa;\n  color: black;\n  cursor: move;\n  font-weight: 400;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 5px;\n  text-align: left;\n  border: 1px solid transparent;\n  border-bottom: 1px solid #222222;\n}\n#layer #layer_elements .layerElement::before {\n  content: \"\";\n  display: block;\n  width: 20px;\n  height: 20px;\n  float: left;\n  margin-right: 5px;\n}\n#layer #layer_elements .layerElement.ExtLine::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_line.svg */ "./app/frontend/designer/images/layer_line.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyRect::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_rect.svg */ "./app/frontend/designer/images/layer_rect.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyCircle::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_circle.svg */ "./app/frontend/designer/images/layer_circle.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtLabel::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_text.svg */ "./app/frontend/designer/images/layer_text.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtPort::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_port.svg */ "./app/frontend/designer/images/layer_port.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement[data-visibility=\"false\"] {\n  opacity: 0.5;\n  font-style: italic;\n}\n#layer #layer_elements .layerElement .icon {\n  cursor: pointer;\n  padding-right: 4px;\n  width: 20px;\n  height: 20px;\n}\n#layer #layer_elements .layerElement .icon * {\n  stroke: black !important;\n}\n#layer #layer_elements .layerElement .icon:hover * {\n  stroke: #C71D3D !important;\n}\n#layer #layer_elements .layerSelectedElement {\n  background-color: #f5f5f5;\n  color: black;\n  border-style: dotted;\n  border-width: 1px;\n  border-color: #C71D3D;\n  font-weight: 600;\n}\n#code_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#code_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#code_close:hover {\n  color: #C71D3D;\n}\n#test_run {\n  position: fixed;\n  right: 90px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_run:hover {\n  color: #C71D3D;\n}\n#test_info {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#test_canvas {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#test_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_close:hover {\n  color: #C71D3D;\n}\n#test_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_clipboard:hover {\n  color: #C71D3D;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 250px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .filter_header {\n  background: none repeat scroll 0 0 #303030;\n  position: fixed;\n  height: 30px;\n  width: 250px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C71D3D;\n}\n#filter .filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 250px;\n  height: 30px;\n  background: none repeat scroll 0 0 #303030;\n}\n#filter .filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 250px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter .filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter .filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter .filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter .filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter .filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter .filter_actions .icon:hover {\n  color: #C71D3D;\n}\n#filter .filter_actions .filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0 !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter .filter_actions .filter-heading .icon {\n  width: 15px;\n}\n#filter .filter_actions .filter-heading .icon * {\n  stroke: white !important;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(199, 29, 61, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0px;\n  position: absolute;\n}\n#FigureMarkdownEdit .preview {\n  width: 50%;\n  display: inline-block;\n  top: 0px;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0px;\n}\n#FigureMarkdownEdit .preview img {\n  max-width: 35%;\n}\n#FigureMarkdownEdit .preview table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#FigureMarkdownEdit .preview table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#FigureMarkdownEdit .preview table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#FigureMarkdownEdit .preview table tr:last-child td {\n  border-bottom: 0;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n#tool_shape.open .dropdown-menu {\n  -webkit-transform: scale(1, 1);\n  opacity: 1;\n  transform: scale(1, 1);\n}\n#tool_shape .dropdown-menu {\n  opacity: 0.1;\n  animation-fill-mode: forwards;\n  transform: scale(1, 0);\n  transform-origin: 0 0 ;\n  display: block;\n  transition: all 0.2s ease;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape .tool_shape_entry img {\n  height: 30px;\n  padding-right: 20px;\n}\n#tool_shape .tool_shape_entry .tool_label {\n  min-width: 95px;\n  display: inline-block;\n}\n#tool_shape .tool_shape_entry .tool_shortcut {\n  color: rgba(0, 0, 0, 0.5);\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Designer\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #00BCD4;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #C71D3D;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#files #userBrainFilesTab.active ~ span.yellow-bar {\n  left: 0;\n  width: 120px;\n}\n#files #demoBrainFilesTab.active ~ span.yellow-bar {\n  left: 140px;\n  width: 85px;\n}\n", ""]);
 
 // exports
 
@@ -38947,6 +40905,201 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
     }
 }) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
+
+
+/***/ }),
+
+/***/ "./node_modules/process/browser.js":
+/*!*****************************************!*\
+  !*** ./node_modules/process/browser.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
 
 /***/ }),

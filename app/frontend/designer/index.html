@@ -57,59 +57,151 @@
 
 <body id="container">
 
-   <div class="toolbar navbar-default">
-   </div>
+<div id="layout">
 
-   <div id="layer" class="">
-     <div class="title">
-       <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
-       <div>
-         <h1>Brainbox</h1>
-         <h2>Shape Designer</h2>
-       </div>
-     </div>
-     <div id="layer_header" class="panetitle">Layers</div>
-     <div id="layer_elements"></div>
-   </div>
+  <ul class="nav nav-tabs" id="leftTabStrip">
+    <li id="editor_tab"  class="active">
+      <a href="#editor" class="leftTab editor" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_edit.svg"/>
+      </a>
+    </li>
 
-   <div class="content" id="draw2dCanvasWrapper">
-        <div id="canvas" class="" >
-        </div>
-   </div>
+    <li id="files_tab" class="">
+      <a href="#files" class="leftTab files" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_file.svg"/>
+      </a>
+    </li>
 
-   <div id="canvas_zoom" class="btn-group">
-     <button type="button" id="canvas_zoom_in"     class="btn highlight">&#8213;</button>
-     <button type="button" id="canvas_zoom_normal" class="btn highlight">100%</button>
-     <button type="button" id="canvas_zoom_out"    class="btn highlight">&#xFF0B</button>
-   </div>
+    <li id="index_tab">
+      <a href="#home" class="leftTab home" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_index.svg"/>
+      </a>
+    </li>
+  </ul>
 
-    <div class="btn-group dropdown">
-       <img id="canvas_config" src="./images/canvas_configure.svg" class="dropdown-toggle " data-toggle="dropdown"/>
-       <div class="dropdown-menu" id="canvas_config_items">
-          <div class="">
-            <label class="">Grid
-                <input id="canvas_config_grid" type="checkbox" checked="checked" data-toggle="toggle" >
-            </label>
+  <div class="tab-content">
+
+
+
+     <div class="tab-pane active" id="editor">
+       <div class="workspace">
+          <div class="toolbar navbar-default">
           </div>
+
+           <div id="layer" class="palette">
+             <div class="title">
+               <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
+               <div>
+                 <h1>Brainbox</h1>
+                 <h2>Designer</h2>
+               </div>
+             </div>
+             <div id="layer_header" class="panetitle">Layers</div>
+             <div id="layer_elements"></div>
+           </div>
+
+           <div class="content" id="draw2dCanvasWrapper">
+                <div id="canvas" class="" >
+                </div>
+           </div>
+
+           <div id="canvas_zoom" class="btn-group">
+             <button type="button" id="canvas_zoom_in"     class="btn highlight">&#8213;</button>
+             <button type="button" id="canvas_zoom_normal" class="btn highlight">100%</button>
+             <button type="button" id="canvas_zoom_out"    class="btn highlight">&#xFF0B</button>
+           </div>
+
+            <div class="btn-group dropdown">
+               <img id="canvas_config" src="./images/canvas_configure.svg" class="dropdown-toggle " data-toggle="dropdown"/>
+               <div class="dropdown-menu" id="canvas_config_items">
+                  <div class="">
+                    <label class="">Grid
+                        <input id="canvas_config_grid" type="checkbox" checked="checked" data-toggle="toggle" >
+                    </label>
+                  </div>
+               </div>
+            </div>
+
+           <div id="filter" class="navbar-default">
+               <div class="filter_actions" ></div>
+               <div class="highlight filter_header">Properties</div>
+               <div class="filter_toolbar" >
+                  <div class="btn-group dropup">
+                      <button id="add_filter_button" class="disabled btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown">
+                              <span class="glyphicon glyphicon-plus-sign"></span>
+                          Add
+                      <span class="caret"></span></button>
+                      <ul class="dropdown-menu" id="add_filter_action_menu">
+                      </ul>
+                  </div>
+               </div>
+           </div>
        </div>
-    </div>
+      </div>
 
-   <div id="filter" class="navbar-default">
-       <div class="filter_actions" ></div>
-       <div class="highlight filter_header">Properties</div>
-       <div class="filter_toolbar" >
 
-        <div class="btn-group dropup">
-            <button id="add_filter_button" class="disabled btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-plus-sign"></span>
-                Add
-            <span class="caret"></span></button>
-            <ul class="dropdown-menu" id="add_filter_action_menu">
-            </ul>
+
+
+
+      <div class="tab-pane" id="files">
+        <div class="row hidden-xs teaser">
+          <div class="col-sm-8 col-md-8">
+            <div class="title">
+              <img src="./images/navigation_file.svg"/>
+              <span>Load a Shape</span>
+            </div>
+          </div>
         </div>
-    </div>
+
+        <div class="container">
+
+          <div class="material-tab-content">
+            <div id="appShapeFiles">
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+  </div>
 </div>
 
+
+<!-- Shape Files list Template
+-->
+<script id="filesTemplate" type="text/x-jsrender">
+  <div>Folder: {{folder}}</div>
+  <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
+  {{#files}}
+    <li class="list-group-item"  data-type="{{type}}" data-name="{{folder}}{{name}}">
+      <div class="media thumb">
+         {{#dir}}
+            <a class="media-left">
+            <div style="width: 64px; height: 64px">
+              <img style="width:100%; height:100%; object-fit: contain"  src="./images/folder.svg">
+            </div>
+            </a>
+         {{/dir}}
+         {{^dir}}
+            <a class="thumbnail media-left">
+            <div style="width: 64px; height: 64px">
+              <img style="width:100%; height:100%; object-fit: contain" src="{{image}}">
+            </div>
+            </a>
+         {{/dir}}
+        <div class="media-body">
+          <h4 class="media-heading">{{title}}</h4>
+          {{^readonly}}
+            <img class="deleteIcon svg" data-toggle="confirmation" src="./images/toolbar_delete.svg"/>
+          {{/readonly}}
+        </div>
+      </div>
+    </li>
+  {{/files}}
+  </ul>
+</script>
 
 <!--
   # Save Dialog
