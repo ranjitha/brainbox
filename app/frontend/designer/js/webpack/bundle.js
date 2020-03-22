@@ -561,7 +561,7 @@ exports.default = {
         return "./shapes/" + file;
       },
       get: function get(file) {
-        return "../backend/shape/get?filePath=" + file;
+        return "../backend/shape/get?file=" + file;
       },
       save: "/backend/shape/save"
     }
