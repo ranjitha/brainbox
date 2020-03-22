@@ -95,18 +95,20 @@ class Application {
     // the draw2d.shape github repository
     //
     this.fileName = this.getParam("file")
+    let demo = this.getParam("demo")
     if (this.fileName) {
       $("#leftTabStrip .editor").click()
       this.load(conf.backend.file.get(this.fileName))
     }
-
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    let demo = this.getParam("demo")
-    if (demo) {
+    else if (demo) {
       $("#leftTabStrip .editor").click()
       this.load(conf.backend.demo.get(demo))
+    }
+    else {
+      this.fileNew()
     }
 
     // listen on the history object to load files
@@ -212,7 +214,6 @@ class Application {
       $("#editorFileSave div").removeClass("highlight")
     }
   }
-
 }
 
 let app = new Application()

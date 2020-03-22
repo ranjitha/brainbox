@@ -238,6 +238,7 @@ export default draw2d.Canvas.extend({
     // Register a Selection listener for the state handling
     // of the delete Button
     //
+    $("#editDelete").addClass("disabled")
     this.on("select", (emitter, event) => {
       $("#editDelete").removeClass("disabled")
     })
