@@ -89,7 +89,7 @@ class Application {
     //
     let file = this.getParam("file")
     if (file) {
-      this.load(file)
+      this.load(conf.backend.shape.get(file))
     }
     else {
       this.fileNew()

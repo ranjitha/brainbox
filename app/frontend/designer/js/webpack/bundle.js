@@ -347,7 +347,7 @@ var Application = function () {
       //
       var file = this.getParam("file");
       if (file) {
-        this.load(file);
+        this.load(conf.backend.shape.get(file));
       } else {
         this.fileNew();
       }
@@ -561,7 +561,7 @@ exports.default = {
         return "./shapes/" + file;
       },
       get: function get(file) {
-        return "../backend/shape/get?file=" + file;
+        return "../backend/shape/get?filePath=" + file;
       },
       save: "/backend/shape/save"
     }
