@@ -47,11 +47,17 @@ class Application {
 
   init(permissions) {
     this.permissions = permissions
+    this.hasUnsavedChanges = false
     this.palette = new Palette(permissions)
     this.view = new View("draw2dCanvas", permissions)
     this.filePane = new Files(permissions)
     this.addonPane = new Addons(permissions)
 
+    // Show the user an alert if there are unsaved changes
+    //
+    window.onbeforeunload = ()=> {
+      return this.hasUnsavedChanges?  "The changes you made will be lost if you navigate away from this page": undefined;
+    }
 
     this.view.getCommandStack().addEventListener(this)
 
@@ -65,12 +71,17 @@ class Application {
 
 
     $("#editorFileSave").on("click", () => {
+      let callback = () => {
+        this.hasUnsavedChanges = false
+        $( "#notificationToast" ).animate({top:"+=20"}, 500 ).delay(700).animate({top:"-=20"}, 300 )
+        $("#editorFileSave div").removeClass("highlight")
+      }
       if (this.permissions.brains.create && this.permissions.brains.update) {
         // allow the user to enter a file name....
-        new FileSave().show(this.view, this.fileName, ()=>{this.view.getCommandStack().markSaveLocation()})
+        new FileSave().show(this.view, this.fileName, callback)
       } else if (this.permissions.brains.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        new FileSave().save(this.view, this.fileName, ()=>{this.view.getCommandStack().markSaveLocation()})
+        new FileSave().save(this.view, this.fileName, callback)
       }
     })
 
@@ -208,10 +219,9 @@ class Application {
     if (event.isPreChangeEvent()) {
       return // silently
     }
-    if( event.getStack().canUndo())
+    if (event.getStack().canUndo()){
       $("#editorFileSave div").addClass("highlight")
-    else {
-      $("#editorFileSave div").removeClass("highlight")
+      this.hasUnsavedChanges = true
     }
   }
 }

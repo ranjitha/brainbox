@@ -61,7 +61,6 @@ export default class FileSave {
           if(callback) {
             callback()
           }
-          $( "#notificationToast" ).animate({top:"+=20"}, 500 ).delay(700).animate({top:"-=20"}, 300 )
         })
     })
   }

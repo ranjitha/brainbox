@@ -230,10 +230,17 @@ var Application = function () {
       var _this = this;
 
       this.permissions = permissions;
+      this.hasUnsavedChanges = false;
       this.palette = new _Palette2.default(permissions);
       this.view = new _View2.default("draw2dCanvas", permissions);
       this.filePane = new _FilesScreen2.default(permissions);
       this.addonPane = new _AddonScreen2.default(permissions);
+
+      // Show the user an alert if there are unsaved changes
+      //
+      window.onbeforeunload = function () {
+        return _this.hasUnsavedChanges ? "The changes you made will be lost if you navigate away from this page" : undefined;
+      };
 
       this.view.getCommandStack().addEventListener(this);
 
@@ -247,16 +254,17 @@ var Application = function () {
       }
 
       $("#editorFileSave").on("click", function () {
+        var callback = function callback() {
+          _this.hasUnsavedChanges = false;
+          $("#notificationToast").animate({ top: "+=20" }, 500).delay(700).animate({ top: "-=20" }, 300);
+          $("#editorFileSave div").removeClass("highlight");
+        };
         if (_this.permissions.brains.create && _this.permissions.brains.update) {
           // allow the user to enter a file name....
-          new _FileSave2.default().show(_this.view, _this.fileName, function () {
-            _this.view.getCommandStack().markSaveLocation();
-          });
+          new _FileSave2.default().show(_this.view, _this.fileName, callback);
         } else if (_this.permissions.brains.create) {
           // just save the file with a generated filename. It is a codepen-like modus
-          new _FileSave2.default().save(_this.view, _this.fileName, function () {
-            _this.view.getCommandStack().markSaveLocation();
-          });
+          new _FileSave2.default().save(_this.view, _this.fileName, callback);
         }
       });
 
@@ -397,8 +405,9 @@ var Application = function () {
       if (event.isPreChangeEvent()) {
         return; // silently
       }
-      if (event.getStack().canUndo()) $("#editorFileSave div").addClass("highlight");else {
-        $("#editorFileSave div").removeClass("highlight");
+      if (event.getStack().canUndo()) {
+        $("#editorFileSave div").addClass("highlight");
+        this.hasUnsavedChanges = true;
       }
     }
   }]);
@@ -1902,7 +1911,6 @@ exports.default = draw2d.Canvas.extend({
     // Register a Selection listener for the state handling
     // of the delete Button
     //
-    $("#editDelete").addClass("disabled");
     this.on("select", function (emitter, event) {
       $("#editDelete").removeClass("disabled");
     });
@@ -2746,7 +2754,6 @@ var FileSave = function () {
           if (callback) {
             callback();
           }
-          $("#notificationToast").animate({ top: "+=20" }, 500).delay(700).animate({ top: "-=20" }, 300);
         });
       });
     }
