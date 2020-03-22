@@ -13,6 +13,7 @@ import FileSave from "./dialog/FileSave"
 import storage from './io/BackendStorage'
 import conf from "./Configuration"
 import reader from "./io/Reader"
+import DesignerDialog from "./dialog/DesignerDialog";
 
 /**
  * wait asyn that an DOM element is present
@@ -69,6 +70,10 @@ class Application {
       $("#fileOpen, #editorFileOpen").remove()
     }
 
+
+    $("#applicationSwitchDesigner").on("click", () => {
+      new DesignerDialog().show()
+    })
 
     $("#editorFileSave").on("click", () => {
       let callback = () => {

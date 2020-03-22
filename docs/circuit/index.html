@@ -297,67 +297,67 @@
 
         <div class="toolbar">
 
-            <span class="group" id="editorgroup_fileoperations">
-                <span class="image-button"  id="editorFileOpen">
-                    <img title="Open circuit" src="./images/toolbar_download.svg"/>
-                    <div>Open</div>
-                </span>
-                <span class="image-button" id="editorFileSave" >
-                  <img title="Save circuit" src="./images/toolbar_upload.svg"/>
-                  <div>Save</div>
-                </span>
-            </span>
+          <span class="group" id="editorgroup_fileoperations">
+              <span class="image-button"  id="editorFileOpen">
+                  <img title="Open circuit" src="./images/toolbar_download.svg"/>
+                  <div>Open</div>
+              </span>
+              <span class="image-button" id="editorFileSave" >
+                <img title="Save circuit" src="./images/toolbar_upload.svg"/>
+                <div>Save</div>
+              </span>
+          </span>
 
-             <span class="group">
-                <span class="image-button disabled"  id="editDelete">
-                  <img  src="./images/toolbar_delete.svg"/>
-                  <div>Delete</div>
-                </span>
-            </span>
+           <span class="group">
+              <span class="image-button disabled"  id="editDelete">
+                <img  src="./images/toolbar_delete.svg"/>
+                <div>Delete</div>
+              </span>
+          </span>
 
-            <span class="group">
-                <span class="image-button disabled" id="editUndo">
-                  <img src="./images/toolbar_undo.svg"/>
-                  <div>Undo</div>
-                </span>
-                <span class="image-button disabled" id="editRedo">
-                  <img src="./images/toolbar_redo.svg"/>
-                  <div>Redo</div>
-                </span>
-            </span>
+          <span class="group">
+              <span class="image-button disabled" id="editUndo">
+                <img src="./images/toolbar_undo.svg"/>
+                <div>Undo</div>
+              </span>
+              <span class="image-button disabled" id="editRedo">
+                <img src="./images/toolbar_redo.svg"/>
+                <div>Redo</div>
+              </span>
+          </span>
 
-            <span id="" class="group editBase">
-                <label id="tool_shape" class="dropdown" >
-                <span class="image-button" id="editConnections" data-toggle="dropdown" >
-                  <img src="./images/status_index.svg">
-                  <div>Connection</div>
-                </span>
+          <span class="group editBase">
+              <label id="tool_shape" class="dropdown" >
+              <span class="image-button" id="editConnections" data-toggle="dropdown" >
+                <img src="./images/status_index.svg">
+                <div>Connection</div>
+              </span>
 
-                  <ul class="dropdown-menu" role="menu" >
-                      <form class="form-horizontal" role="form">
+                <ul class="dropdown-menu" role="menu" >
+                    <form class="form-horizontal" role="form">
 
-                        <label class="statusIndicator" id="statusWebUSB" >
-                          <img src="./images/status_arduino.svg"/>
-                          <span>WebUSB</span>
-                          <span class="connected">connected</span>
-                          <span class="disconnected">disconnected</span>
-                          <span class="notSupported">Not Supported - <a class="help-link" href="#">why?</a></span>
-                        </label>
+                      <label class="statusIndicator" id="statusWebUSB" >
+                        <img src="./images/status_arduino.svg"/>
+                        <span>WebUSB</span>
+                        <span class="connected">connected</span>
+                        <span class="disconnected">disconnected</span>
+                        <span class="notSupported">Not Supported - <a class="help-link" href="#">why?</a></span>
+                      </label>
 
-                        <label class="statusIndicator" id="statusRaspi" >
-                          <img src="./images/status_raspi.svg"/>
-                          <span>Server</span>
-                          <span class="connected">connected</span>
-                          <span class="disconnected">disconnected</span>
-                          <span class="notSupported">not available</span>
-                        </label>
+                      <label class="statusIndicator" id="statusRaspi" >
+                        <img src="./images/status_raspi.svg"/>
+                        <span>Server</span>
+                        <span class="connected">connected</span>
+                        <span class="disconnected">disconnected</span>
+                        <span class="notSupported">not available</span>
+                      </label>
 
-                      </form>
-                  </ul>
-                </label>
-            </span>
+                    </form>
+                </ul>
+              </label>
+          </span>
 
-            <span class="group simulationBase" style="display: none;">
+          <span class="group simulationBase" style="display: none;">
                 <label>Simulation Speed</label>
                 <input id="simulationBaseTimer"
                        type="text"
@@ -370,15 +370,40 @@
                        data-slider-tooltip="hide"
                        data-slider-id="simulationBaseTimerSlider"
                        data-slider-orientation="horizontal">
-            </span>
+          </span>
 
-             <a href="#" class="morph_btn play" id="simulationStartStop">
-                    <span>
-                      <span class="s1"></span>
-                      <span class="s2"></span>
-                      <span class="s3"></span>
-                    </span>
-             </a>
+          <span class="group applicationSwitch">
+            <label id="applicationSwitch_toggler" class="dropdown" >
+
+                <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
+                  <img  src="./images/toolbar_app_switch.svg"/>
+                </span>
+
+                <ul class="dropdown-menu" role="menu" >
+                    <form class="form-horizontal" role="form">
+
+                      <label id="applicationSwitchDesigner" class="image-button">
+                        <img src="./images/app_designer.svg"/>
+                        <div>Shape<br>Designer</div>
+                      </label>
+
+                      <label id="applicationSwitchLessons" class="image-button" >
+                        <img src="./images/app_lessons.svg"/>
+                        <div>Lesson<br>Author</div>
+                      </label>
+
+                    </form>
+                </ul>
+            </label>
+          </span>
+
+          <a href="#" class="morph_btn play" id="simulationStartStop">
+            <span>
+              <span class="s1"></span>
+              <span class="s2"></span>
+              <span class="s3"></span>
+            </span>
+          </a>
 
         </div>
         <div class="content" id="draw2dCanvasWrapper">
