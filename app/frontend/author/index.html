@@ -1,0 +1,309 @@
+﻿<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<title>Brainbox Designer</title>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+  <link rel="icon" type="image/png"    href="./images/favicon_64x64.png" sizes="64x64">
+  <link rel="icon" type="image/png"    href="./images/favicon_48x48.png" sizes="48x48">
+  <link rel="icon" type="image/png"    href="./images/favicon_32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png"    href="./images/favicon_16x16.png" sizes="16x16">
+
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,300,400italic,500,700,100,900' rel='stylesheet' type='text/css'>
+  <link href='./lib/bootstrap/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <link href="../_common/css/loader.css" rel='stylesheet' type='text/css'/>
+  <link href="./lib/anno.js/anno.css" rel='stylesheet' type='text/css'/>
+
+  <script>
+
+  var app = null
+  var socket = null
+</script>
+
+</head>
+
+<body id="container">
+
+<div id="layout">
+
+  <ul class="nav nav-tabs" id="leftTabStrip">
+    <li id="editor_tab"  class="active">
+      <a href="#editor" class="leftTab editor" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_edit.svg"/>
+      </a>
+    </li>
+
+    <li id="files_tab" class="">
+      <a href="#files" class="leftTab files" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_file.svg"/>
+      </a>
+    </li>
+
+    <li id="index_tab">
+      <a href="#home" class="leftTab home" data-toggle="tab">
+        <img class="icon svg" src="./images/navigation_index.svg"/>
+      </a>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+
+
+     <div class="tab-pane active" id="editor">
+       <div class="workspace">
+
+          <div class="toolbar navbar-default">
+               <span class="group" id="editorgroup_fileoperations">
+                  <span class="image-button"  id="editorFileOpen">
+                    <img title="Open circuit" src="./images/toolbar_download.svg"/>
+                    <div>Open</div>
+                  </span>
+                  <span class="image-button" id="editorFileSave" >
+                    <img title="Save circuit" src="./images/toolbar_upload.svg"/>
+                    <div>Save</div>
+                  </span>
+               </span>
+
+               <span class="group" id="editorgroup_sectionoperations">
+                  <span class="image-button"  id="addTextSection">
+                    <img title="Open circuit" src="./images/toolbar_add_text.svg"/>
+                    <div>Add Text</div>
+                  </span>
+                  <span class="image-button" id="addBrainSection" >
+                    <img title="Save circuit" src="./images/toolbar_add_brain.svg"/>
+                    <div>Add Circuit</div>
+                  </span>
+               </span>
+
+
+              <span class="group applicationSwitch">
+                <label id="applicationSwitch_toggler" class="dropdown" >
+                  <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
+                    <img  src="./images/toolbar_app_switch.svg"/>
+                  </span>
+
+                  <ul class="dropdown-menu" role="menu" >
+                      <form class="form-horizontal" role="form">
+
+                        <label id="applicationSwitchDesigner" class="image-button">
+                          <img src="./images/app_simulator.svg"/>
+                          <div>Circuit<br>Simulator</div>
+                        </label>
+
+                        <label id="applicationSwitchAuthor" class="image-button" >
+                          <img src="./images/app_designer.svg"/>
+                          <div>Shape<br>Designer</div>
+                        </label>
+
+                      </form>
+                  </ul>
+                </label>
+              </span>
+
+          </div>
+
+           <div id="layer" class="palette">
+             <div class="title">
+               <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
+               <div>
+                 <h1>Brainbox</h1>
+                 <h2>Author</h2>
+               </div>
+             </div>
+             <div id="layer_header" class="panetitle">Sections</div>
+             <div id="layer_elements"></div>
+           </div>
+
+           <div class="content">
+                  Content Content Content
+           </div>
+       </div>
+     </div>
+
+
+
+      <div class="tab-pane" id="files">
+        <div class="row hidden-xs teaser">
+          <div class="col-sm-8 col-md-8">
+            <div class="title">
+              <img src="./images/navigation_file.svg"/>
+              <span>Load a Shape</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="container">
+          <header>
+            It is not possible to modify the shapes in this version. You can download Brainbox on github and
+            run the App on your own computer to have the full feature set. This is even possible with a Raspberry Pi.
+          </header>
+
+          <div class="material-tab-content">
+            <div id="appShapeFiles">
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+
+  </div>
+</div>
+
+
+<!-- Shape Files list Template
+-->
+<script id="filesTemplate" type="text/x-jsrender">
+  <div>Folder: {{folder}}</div>
+  <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
+  {{#files}}
+    <li class="list-group-item"  data-type="{{type}}" data-name="{{folder}}{{name}}">
+      <div class="media thumb">
+         {{#dir}}
+            <a class="media-left">
+            <div style="width: 64px; height: 64px">
+              <img style="width:100%; height:100%; object-fit: contain"  src="./images/folder.svg">
+            </div>
+            </a>
+         {{/dir}}
+         {{^dir}}
+            <a class="thumbnail media-left">
+            <div style="width: 64px; height: 64px">
+              <img style="width:100%; height:100%; object-fit: contain" src="{{image}}">
+            </div>
+            </a>
+         {{/dir}}
+        <div class="media-body">
+          <h4 class="media-heading">{{title}}</h4>
+          {{^readonly}}
+            <img class="deleteIcon svg" data-toggle="confirmation" src="./images/toolbar_delete.svg"/>
+          {{/readonly}}
+        </div>
+      </div>
+    </li>
+  {{/files}}
+  </ul>
+</script>
+
+<!--
+  # Save Dialog
+  #
+  #
+-->
+<div id="fileSaveDialog" class="modal fade genericDialog" tabindex="-1">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="media-heading">Save Sheet</h4>
+            </div>
+            <div class="modal-body">
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <a href="#">
+                            <img class="media-object filePreview" src="">
+                        </a>
+                    </div>
+                    <div class="media-body">
+
+                        <form class="form-horizontal">
+                            <br>
+                            Filename:
+                            <fieldset>
+                                <div class="form-group">
+                                    <div class="col-lg-12">
+                                        <input type="text"
+                                               class="form-control floating-label githubFileName"
+                                               value=""
+                                                >
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                          Change Reason:
+                          <fieldset>
+                            <div class="form-group">
+                              <div class="col-lg-12">
+                                <input type="text"
+                                       class="form-control floating-label githubCommitMessage"
+                                       value=""
+                                >
+                              </div>
+                            </div>
+
+                          </fieldset>
+                            <div class="row"></div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal">Abort</button>
+                <button class="btn btn-primary okButton"><span>Save</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+   <!--
+     # GitHub File select/open dialog
+     #
+     -->
+<div id="fileOpenDialog" class="modal fade genericDialog" tabindex="-1">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="media-heading">File Open...</h4>
+            </div>
+            <div class="modal-body">
+
+
+                <div class="list-group">
+                    <!-- FileList here -->
+                </div>
+
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn" data-dismiss="modal">Abort</button>
+                <button class="btn btn-primary okButton"><span>Open</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="loader">
+  <div class="title">Loading the Lesson Author...</div>
+  <div class="gooey">
+    <span class="dot"></span>
+    <div class="dots">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+</div>
+
+</body>
+
+<!-- "include" files in a world of ES6 is not perfect. Unfortunately draw2d.js isn't complete
+     ES6 and therefore I run into some compatibility issues with jQuery and prerequisite
+-->
+<script src="./lib/jquery/jquery.js"></script>
+<script src="./lib/jquery/jquery-ui.js"></script>
+
+<script src="./lib/bootstrap/js/bootstrap.min.js"></script>
+<script src="./lib/bootbox/bootbox.min.js"></script>
+
+<script src="./lib/anno.js/anno.js"></script>
+<script src="./lib/draw2d.js"></script>
+<script src="../socket.io/socket.io.js"></script>
+<SCRIPT src="./js/webpack/bundle.js"></SCRIPT>
+
+</html>

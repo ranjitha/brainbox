@@ -11,8 +11,8 @@ import GeoDifferenceToolPolicy from "./policy/GeoDifferenceToolPolicy"
 import FigureCodeEdit from "./dialog/FigureCodeEdit"
 import FigureMarkdownEdit from "./dialog/FigureMarkdownEdit"
 import FigureTest from "./dialog/FigureTest"
-import conf from "./Configuration"
-
+import SimulatorDialog from "./dialog/SimulatorDialog"
+import AuthorDialog from "./dialog/AuthorDialog"
 
 export default class Toolbar {
 
@@ -259,6 +259,41 @@ export default class Toolbar {
     $(document).on("click", "#editDoc", () => {
       new FigureMarkdownEdit().show()
     })
+
+    let appSwitchButtons = $(` 
+         <span class="group applicationSwitch">
+            <label id="applicationSwitch_toggler" class="dropdown" >
+
+                <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
+                  <img  src="./images/toolbar_app_switch.svg"/>
+                </span>
+
+                <ul class="dropdown-menu" role="menu" >
+                    <form class="form-horizontal" role="form">
+
+                      <label id="applicationSwitchSimulator" class="image-button">
+                        <img src="./images/app_simulator.svg"/>
+                        <div>Circuit<br>Simulator</div>
+                      </label>
+
+                      <label id="applicationSwitchAuthor" class="image-button" >
+                        <img src="./images/app_lessons.svg"/>
+                        <div>Lesson<br>Author</div>
+                      </label>
+
+                    </form>
+                </ul>
+            </label>
+          </span>
+    `)
+    buttonGroup.append(appSwitchButtons)
+    $(document).on("click", "#applicationSwitchSimulator", () => {
+      new SimulatorDialog().show()
+    })
+    $(document).on("click", "#applicationSwitchAuthor", () => {
+      new AuthorDialog().show()
+    })
+
 
     // enable the tooltip for all buttons
     //

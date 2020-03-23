@@ -3,7 +3,7 @@ const path = require("path")
 const fs = require("fs")
 const glob = require("glob")
 const thisDir = path.normalize(__dirname)
-const shapeAppDir = path.normalize(__dirname + '/../../../shapes/')
+const shapeAppDir = path.normalize(__dirname + '/../../../repository/shapes/')
 const version =  process.env.VERSION || "local-version";
 const isPi = require('detect-rpi');
 

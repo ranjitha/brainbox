@@ -1,0 +1,71 @@
+#layer {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: @leftPaneWidth;
+  background-color: @layerPaneBgColor;
+  text-align: center;
+  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);
+  z-index: 1;
+
+  .panetitle {
+    position: fixed;
+    height: @layerPaneTitleHeight;
+    width: @leftPaneWidth;
+    top: @layerTitleHeight;
+    border-bottom: 1px solid #222222;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 4px 4px 4px 20px;
+    letter-spacing: 5px;
+    text-align: left;
+    color: @tintColor;
+    box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);
+  }
+
+  #layer_elements {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    position: fixed;
+    top: @layerPaneTitleHeight + @layerTitleHeight;
+    bottom: 0;
+    width: @leftPaneWidth;
+    overflow: auto;
+
+    .layerElement {
+      background-color:darken(@layerPaneBgColor, 2%);
+      color: @layerPaneColor;
+      cursor: move;
+      font-weight: 400;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 4px 4px 4px 5px;
+      text-align: left;
+      border: 1px solid transparent;
+      border-bottom: 1px solid #222222;
+
+      &::before {
+        content: "";
+        display: block;
+        width: 20px;
+        height: 20px;
+        float: left;
+        margin-right: 5px;
+      }
+    }
+
+    .layerSelectedElement {
+      background-color: darken(@layerPaneBgColor, 4%);
+      color: @layerPaneColor;
+      border-style: dotted;
+      border-width: 1px;
+      border-color: @tintColor;
+      font-weight: 600;
+    }
+  }
+}

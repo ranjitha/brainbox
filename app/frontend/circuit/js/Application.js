@@ -13,7 +13,8 @@ import FileSave from "./dialog/FileSave"
 import storage from './io/BackendStorage'
 import conf from "./Configuration"
 import reader from "./io/Reader"
-import DesignerDialog from "./dialog/DesignerDialog";
+import DesignerDialog from "./dialog/DesignerDialog"
+import AuthorDialog from "./dialog/AuthorDialog"
 
 /**
  * wait asyn that an DOM element is present
@@ -70,9 +71,12 @@ class Application {
       $("#fileOpen, #editorFileOpen").remove()
     }
 
-
     $("#applicationSwitchDesigner").on("click", () => {
       new DesignerDialog().show()
+    })
+
+    $("#applicationSwitchAuthor").on("click", () => {
+      new AuthorDialog().show()
     })
 
     $("#editorFileSave").on("click", () => {
@@ -90,22 +94,6 @@ class Application {
       }
     })
 
-    /*
-     * Replace all SVG images with inline SVG
-     */
-    $('img.svg').each(e => {
-      let $img = $(e)
-      let imgURL = $img.attr('src')
-
-      $.get(imgURL, data => {
-        // Get the SVG tag, ignore the rest
-        let $svg = $(data).find('svg')
-        // Remove any invalid XML tags as per http://validator.w3.org
-        $svg = $svg.removeAttr('xmlns:a')
-        // Replace image with new SVG
-        $img.replaceWith($svg)
-      }, 'xml')
-    })
 
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository

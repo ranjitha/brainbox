@@ -35,17 +35,26 @@ module.exports = {
       delete: true,
       read: true,
       list: true
+    },
+    sheets:{
+      create: true,
+      update: true,
+      delete: true,
+      read: true,
+      list: true
     }
   },
 
 
   init: function(app, args){
     const brainsHomeDir   = args.folder + "brains/"
-    const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
-    const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
+    const sheetAppDir     = path.normalize(__dirname + '/../../repository/sheets/')
+    const shapeAppDir     = path.normalize(__dirname + '/../../repository/shapes/')
+    const brainsAppDir    = path.normalize(__dirname + '/../../repository/brains/')
 
     // Ensure that the required storage folder exists
     //
+    makeDir(sheetAppDir)
     makeDir(brainsHomeDir)
 
     console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
@@ -54,6 +63,18 @@ module.exports = {
     console.log("|                                                                          |")
     console.log("| File Location:                                                           |")
     console.log("|    "+brainsHomeDir)
+
+    // =================================================================
+    // Handle Sheet / Author files
+    //
+    // =================================================================
+    app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetAppDir,      req.query.path, res))
+    app.get('/backend/sheet/get',     (req, res) => module.exports.getJSONFile(sheetAppDir,    req.query.filePath, res))
+    app.get('/backend/sheet/image',   (req, res) => module.exports.getBase64Image(sheetAppDir, req.query.filePath, res))
+    app.post('/backend/sheet/delete', (req, res) => module.exports.deleteFile(sheetAppDir,     req.body.filePath, res))
+    app.post('/backend/sheet/rename', (req, res) => module.exports.renameFile(sheetAppDir,     req.body.from, req.body.to, res))
+    app.post('/backend/sheet/save',   (req, res) => module.exports.writeBrain(sheetAppDir,      req.body.filePath, req.body.content, res))
+
 
     // =================================================================
     // Handle brain files

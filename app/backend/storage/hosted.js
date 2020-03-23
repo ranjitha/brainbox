@@ -6,7 +6,7 @@ const colors = require('colors')
 const makeDir = require('make-dir')
 
 
-let leveldb = null
+let dbs = []
 
 // Storage backend for the personal usage
 //
@@ -35,6 +35,13 @@ module.exports = {
       delete: false,
       read: true,
       list: true
+    },
+    sheets:{
+      create: false,
+      update: false,
+      delete: false,
+      read: true,
+      list: true
     }
   },
 
@@ -44,18 +51,23 @@ module.exports = {
       folder = folder + "/"
     }
     const brainsHomeDir   = folder + "brains_db"
-    const shapeAppDir     = path.normalize(__dirname + '/../../shapes/')
-    const brainsAppDir    = path.normalize(__dirname + '/../../brains/')
+    const sheetsHomeDir   = folder + "sheet_db"
+    const shapeAppDir     = path.normalize(__dirname + '/../../repository/shapes/')
+    const brainsAppDir    = path.normalize(__dirname + '/../../repository/brains/')
 
     // Ensure that the required storage folder exists
     //
     await makeDir(brainsHomeDir).catch( err => {
       console.log(err)
     })
+    await makeDir(sheetsHomeDir).catch( err => {
+      console.log(err)
+    })
 
     var levelup = require('levelup')
     var leveldown = require('leveldown')
-    leveldb = levelup(leveldown(brainsHomeDir))
+    dbs[brainsHomeDir]=levelup(leveldown(brainsHomeDir))
+    dbs[sheetsHomeDir]=levelup(leveldown(sheetsHomeDir))
 
     console.log("| You are using the "+"'hosted'".bold.green+" file storage engine.                          |")
     console.log("| This kind of installation is perfect for public access. It works by      |")
@@ -67,6 +79,20 @@ module.exports = {
     console.log("|                                                                          |")
     console.log("| "+"File Location:".bold+"                                                           |")
     console.log("|    "+brainsHomeDir)
+    // =================================================================
+    // Handle Sheet files
+    //
+    // =================================================================
+    app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
+    app.get('/backend/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
+    app.get('/backend/sheet/image',   (req, res) => module.exports.getBase64Image(sheetsHomeDir, req.query.filePath, res))
+    // not supported in the hosted version. We just create new files on every save....like Codepen
+    // app.post('/backend/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
+    // app.post('/backend/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
+    app.post('/backend/sheet/save',   (req, res) => module.exports.writeBrain(sheetsHomeDir,      req.body.filePath, req.body.content, res))
+
+
+
     // =================================================================
     // Handle brain files
     //
@@ -113,7 +139,7 @@ module.exports = {
 
   listFiles: generic.listFiles,
   getJSONFile: function (baseDir, subDir, res) {
-    leveldb.get(subDir, (err, value) => {
+    dbs[baseDir].get(subDir, (err, value) => {
         if(err) {
           res.status(404).send('Not found')
 
@@ -140,7 +166,7 @@ module.exports = {
   },
 
   writeFile: function (baseDir, subDir, content, res, callback) {
-    leveldb.put(subDir, content, err => {
+    dbs[baseDir].put(subDir, content, err => {
       if (err) console.log(err)
       if(typeof callback === "function") {
         callback(subDir, err)

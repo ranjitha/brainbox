@@ -39,6 +39,10 @@ export default {
     url: "../designer/"
   },
 
+  author: {
+    url: "../author/"
+  },
+
   updates: {
     url: "../backend/updates",
     shapes: "../backend/updates/shapes"

@@ -191,6 +191,10 @@ var _DesignerDialog = __webpack_require__(/*! ./dialog/DesignerDialog */ "./app/
 
 var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
 
+var _AuthorDialog = __webpack_require__(/*! ./dialog/AuthorDialog */ "./app/frontend/circuit/js/dialog/AuthorDialog.js");
+
+var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -261,6 +265,10 @@ var Application = function () {
         new _DesignerDialog2.default().show();
       });
 
+      $("#applicationSwitchAuthor").on("click", function () {
+        new _AuthorDialog2.default().show();
+      });
+
       $("#editorFileSave").on("click", function () {
         var callback = function callback() {
           _this.hasUnsavedChanges = false;
@@ -274,23 +282,6 @@ var Application = function () {
           // just save the file with a generated filename. It is a codepen-like modus
           new _FileSave2.default().save(_this.view, _this.fileName, callback);
         }
-      });
-
-      /*
-       * Replace all SVG images with inline SVG
-       */
-      $('img.svg').each(function (e) {
-        var $img = $(e);
-        var imgURL = $img.attr('src');
-
-        $.get(imgURL, function (data) {
-          // Get the SVG tag, ignore the rest
-          var $svg = $(data).find('svg');
-          // Remove any invalid XML tags as per http://validator.w3.org
-          $svg = $svg.removeAttr('xmlns:a');
-          // Replace image with new SVG
-          $img.replaceWith($svg);
-        }, 'xml');
       });
 
       // check if the user has added a "file" parameter. In this case we load the shape from
@@ -493,6 +484,10 @@ exports.default = {
 
   designer: {
     url: "../designer/"
+  },
+
+  author: {
+    url: "../author/"
   },
 
   updates: {
@@ -2336,6 +2331,57 @@ exports.default = draw2d.Canvas.extend({
     return new draw2d.geo.Point(x * (1 / this.zoomFactor) + this.getAbsoluteX(), y * (1 / this.zoomFactor) + this.getAbsoluteY());
   }
 });
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/circuit/js/dialog/AuthorDialog.js":
+/*!********************************************************!*\
+  !*** ./app/frontend/circuit/js/dialog/AuthorDialog.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CodeDialog = function () {
+  function CodeDialog() {
+    _classCallCheck(this, CodeDialog);
+  }
+
+  _createClass(CodeDialog, [{
+    key: "show",
+    value: function show(circuit) {
+      if (circuit) {
+        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
+        var pathToDesign = _Configuration2.default.author.url + "&file=" + baseName + ".shape" + "&tutorial=design";
+        window.open(pathToDesign, "author");
+      } else {
+        var _pathToDesign = _Configuration2.default.author.url;
+        window.open(_pathToDesign, "author");
+      }
+    }
+  }]);
+
+  return CodeDialog;
+}();
+
+exports.default = CodeDialog;
 module.exports = exports["default"];
 
 /***/ }),
