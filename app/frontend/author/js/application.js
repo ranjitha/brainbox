@@ -1,10 +1,10 @@
 
-import Toolbar from "./Toolbar"
+import Toolbar from "./toolbar"
 import storage from "./io/BackendStorage"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
 import Files from "./view/FilesScreen"
-import View from "./View"
+import View from "./view"
 
 class Application {
   /**

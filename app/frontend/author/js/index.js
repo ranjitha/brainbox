@@ -2,7 +2,7 @@
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import global from "./global"
-import conf from "./Configuration"
+import conf from "./configuration"
 
 //require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
@@ -65,7 +65,7 @@ $(window).load(function () {
   //
   socket.on("permissions", (permissions) => {
     socket.off("permissions")
-    app = require("./Application")
+    app = require("./application")
     app.init(permissions)
     $(".loader").fadeOut(500, function() { $(this).remove(); })
     inlineSVG.init()

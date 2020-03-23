@@ -1,4 +1,4 @@
-import conf from "../Configuration"
+import conf from "../configuration"
 import Hogan from "hogan.js"
 import storage from "../io/BackendStorage"
 

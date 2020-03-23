@@ -96,1138 +96,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/frontend/author/js/Application.js":
-/*!***********************************************!*\
-  !*** ./app/frontend/author/js/Application.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Toolbar = __webpack_require__(/*! ./Toolbar */ "./app/frontend/author/js/Toolbar.js");
-
-var _Toolbar2 = _interopRequireDefault(_Toolbar);
-
-var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "./app/frontend/author/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
-var _FileOpen = __webpack_require__(/*! ./dialog/FileOpen */ "./app/frontend/author/js/dialog/FileOpen.js");
-
-var _FileOpen2 = _interopRequireDefault(_FileOpen);
-
-var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/author/js/dialog/FileSave.js");
-
-var _FileSave2 = _interopRequireDefault(_FileSave);
-
-var _FilesScreen = __webpack_require__(/*! ./view/FilesScreen */ "./app/frontend/author/js/view/FilesScreen.js");
-
-var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
-
-var _View = __webpack_require__(/*! ./View */ "./app/frontend/author/js/View.js");
-
-var _View2 = _interopRequireDefault(_View);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Application = function () {
-  /**
-   * @constructor
-   *
-   * @param {String} canvasId the id of the DOM element to use as paint container
-   */
-  function Application() {
-    _classCallCheck(this, Application);
-  }
-
-  _createClass(Application, [{
-    key: "init",
-    value: function init(permissions) {
-      var _this = this;
-
-      $("body").delegate(".mousetrap-pause", "focus", function () {
-        Mousetrap.pause();
-      }).delegate(".mousetrap-pause", "blur", function () {
-        Mousetrap.unpause();
-      });
-
-      this.view = new _View2.default(this, "#editor .content", permissions);
-      this.filePane = new _FilesScreen2.default(permissions);
-      this.storage = _BackendStorage2.default;
-      this.toolbar = new _Toolbar2.default(this, this.view, ".toolbar", permissions);
-
-      // check if the user has added a "file" parameter. In this case we load the shape from
-      // the draw2d.shape github repository
-      //
-      var file = this.getParam("file");
-      if (file) {
-        this.load(conf.backend.sheet.get(file));
-        this.storage.fileName = file;
-      } else {
-        this.fileNew();
-      }
-
-      // listen on the history object to load files
-      //
-      window.addEventListener('popstate', function (event) {
-        if (event.state && event.state.id === 'editor') {
-          // Render new content for the hompage
-          _this.load(event.state.file);
-        }
-      });
-    }
-  }, {
-    key: "load",
-    value: function load(file) {
-      var _this2 = this;
-
-      $("#leftTabStrip .editor").click();
-      return this.storage.loadUrl(file).then(function (content) {
-        _this2.view.setDocument(content);
-        return content;
-      });
-    }
-  }, {
-    key: "getParam",
-    value: function getParam(name) {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      // the param isn't part of the normal URL pattern...
-      //
-      if (results === null) {
-        // maybe it is part in the hash.
-        //
-        regexS = "[\\#]" + name + "=([^&#]*)";
-        regex = new RegExp(regexS);
-        results = regex.exec(window.location.hash);
-        if (results === null) {
-          return null;
-        }
-      }
-      return results[1];
-    }
-  }, {
-    key: "fileNew",
-    value: function fileNew(shapeTemplate) {}
-  }, {
-    key: "fileOpen",
-    value: function fileOpen() {
-      new _FileOpen2.default().show(this.storage, this.view);
-    }
-  }, {
-    key: "fileSave",
-    value: function fileSave() {
-      new _FileSave2.default().show(this.storage, this.view);
-    }
-  }, {
-    key: "historySheet",
-    value: function historySheet(file) {
-      history.pushState({
-        id: 'author',
-        file: name
-      }, 'Brainbox Author | ' + name, window.location.href.split('?')[0] + '?file=' + file);
-    }
-  }]);
-
-  return Application;
-}();
-
-var app = new Application();
-exports.default = app;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/Configuration.js":
-/*!*************************************************!*\
-  !*** ./app/frontend/author/js/Configuration.js ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = {
-  fileSuffix: ".sheet",
-  backend: {
-    sheet: {
-      list: "/backend/sheet/list",
-      image: function image(file) {
-        return "./sheet/" + file;
-      },
-      get: function get(file) {
-        return "../backend/sheet/get?filePath=" + file;
-      },
-      save: "/backend/sheet/save"
-    }
-  }
-};
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/Toolbar.js":
+/***/ "./app/frontend/_common/inlineSVG.js":
 /*!*******************************************!*\
-  !*** ./app/frontend/author/js/Toolbar.js ***!
+  !*** ./app/frontend/_common/inlineSVG.js ***!
   \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Toolbar = function Toolbar(app, view, elementId, permissions) {
-  var _this = this;
-
-  _classCallCheck(this, Toolbar);
-
-  this.html = $(elementId);
-  this.app = app;
-  this.view = view;
-
-  /////////////////////////////////////////////
-  // File Operations
-  //
-  this.openButton = $("#fileOpen");
-  this.openButton.on("click", function () {
-    _this.openButton.tooltip("hide");
-    app.fileOpen();
-  });
-  Mousetrap.bindGlobal("ctrl+o", function () {
-    _this.openButton.click();
-    return false;
-  });
-
-  this.saveButton = $("#fileSave");
-  this.saveButton.on("click", function () {
-    _this.saveButton.tooltip("hide");
-    app.fileSave();
-  });
-  Mousetrap.bindGlobal("ctrl+s", function (event) {
-    _this.saveButton.click();
-    return false;
-  });
-
-  /////////////////////////////////////////////
-  // Editor Operations
-  //
-  this.addTextButton = $("#addTextSection");
-  this.addTextButton.on("click", function () {
-    _this.addTextButton.tooltip("hide");
-    _this.view.addMarkdown();
-  });
-  Mousetrap.bindGlobal("ctrl+t", function () {
-    _this.addTextButton.click();
-    return false;
-  });
-
-  this.addBrainButton = $("#addBrainSection");
-  this.addBrainButton.on("click", function () {
-    _this.addBrainButton.tooltip("hide");
-    _this.view.addBrain();
-  });
-  Mousetrap.bindGlobal("ctrl+s", function (event) {
-    _this.addBrainButton.click();
-    return false;
-  });
-
-  // enable the tooltip for all buttons
-  //
-  $('*[data-toggle="tooltip"]').tooltip({
-    placement: "bottom",
-    container: "body",
-    delay: { show: 1000, hide: 10 },
-    html: true
-  });
-};
-
-exports.default = Toolbar;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/View.js":
-/*!****************************************!*\
-  !*** ./app/frontend/author/js/View.js ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
-
-var View = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function View(app, id, permissions) {
-    var _this = this;
-
-    _classCallCheck(this, View);
-
-    this.document = [];
-
-    this.activeSection = null;
-    this.html = $(id);
-    this.html.html($("<ul class='sections'></ul>"));
-    $(document).on("click", ".sections .section", function (event) {
-      $(".sections .section").removeClass("active");
-      _this.activeSection = $(event.target);
-      _this.activeSection.addClass("active");
-    });
-  }
-
-  _createClass(View, [{
-    key: "setDocument",
-    value: function setDocument(json) {
-      this.document = json;
-      this.render(this.document);
-    }
-  }, {
-    key: "addMarkdown",
-    value: function addMarkdown() {
-      var entry = {
-        id: shortid.generate(),
-        type: "markdown",
-        content: "## Header"
-      };
-      this.document.push(entry);
-      this.renderMarkdown(entry);
-    }
-  }, {
-    key: "addBrain",
-    value: function addBrain() {
-      var entry = {
-        id: shortid.generate(),
-        type: "draw2d",
-        content: []
-      };
-      this.document.push(entry);
-      this.renderBrain(entry);
-    }
-  }, {
-    key: "render",
-    value: function render(document) {
-      var _this2 = this;
-
-      this.html.find("ul").html("");
-      document.forEach(function (entry) {
-        switch (entry.type) {
-          case "draw2d":
-            _this2.renderBrain(entry);
-            break;
-          case "markdown":
-            _this2.renderMarkdown(entry);
-            break;
-        }
-      });
-    }
-  }, {
-    key: "renderMarkdown",
-    value: function renderMarkdown(entry) {
-      this.html.find("ul").append("<li class='section'>" + entry.id + "</li>");
-    }
-  }, {
-    key: "renderBrain",
-    value: function renderBrain(entry) {
-      this.html.find("ul").append("<li class='section'>" + entry.id + "</li>");
-    }
-  }]);
-
-  return View;
-}();
-
-exports.default = View;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/dialog/FileOpen.js":
-/*!***************************************************!*\
-  !*** ./app/frontend/author/js/dialog/FileOpen.js ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
-
-var _hogan2 = _interopRequireDefault(_hogan);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileOpen = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function FileOpen() {
-    _classCallCheck(this, FileOpen);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(FileOpen, [{
-    key: "show",
-    value: function show(storage, view) {
-      $('#fileOpenDialog').modal('show');
-      this.currentDir = storage.currentDir;
-      this.fetchPathContent(storage, this.currentDir, view);
-    }
-  }, {
-    key: "fetchPathContent",
-    value: function fetchPathContent(storage, newPath, view) {
-      var _this = this;
-
-      storage.getFiles(newPath).then(function (files) {
-        files = files.filter(function (file) {
-          return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === 'dir';
-        });
-        var compiled = _hogan2.default.compile("\n           {{^rootDir}}     \n           <a href=\"#\" class=\"list-group-item githubPath\" data-type=\"dir\" data-path=\"{{parentPath}}\" >\n               <span class=\"glyphicon glyphicon-menu-left\"></span>\n               ..\n           </a>\n           {{/rootDir}}\n           {{#files}}\n             <a href=\"#\" data-draw2d=\"{{draw2d}}\" class=\"list-group-item githubPath text-nowrap\" data-type=\"{{type}}\" data-path=\"{{currentDir}}{{name}}\" data-id=\"{{id}}\">\n                <span class=\"glyphicon {{icon}}\"></span>\n                {{{name}}}\n             </a>\n           {{/files}}\n          ");
-
-        var parentPath = storage.dirname(newPath);
-        var output = compiled.render({
-          parentPath: parentPath,
-          currentDir: _this.currentDir,
-          files: files,
-          rootDir: newPath === null || newPath.length === 0,
-          draw2d: function draw2d() {
-            return this.name.endsWith(_Configuration2.default.fileSuffix);
-          },
-          icon: function icon() {
-            if (this.name.endsWith(_Configuration2.default.fileSuffix)) {
-              return "fa fa-object-group";
-            }
-            return this.type === "dir" ? "fa fa-folder-o" : "fa fa-file-o";
-          }
-        });
-
-        $("#fileOpenDialog .list-group").html($(output));
-        $("#fileOpenDialog .list-group").scrollTop(0);
-
-        // Load the content of an directory
-        //
-        $(".githubPath[data-type='dir']").on("click", function (event) {
-          var path = $(event.currentTarget).data("path");
-          _this.currentDir = path;
-          _this.fetchPathContent(storage, path, view);
-        });
-
-        // Load the user selected File
-        //
-        $('.githubPath*[data-draw2d="true"][data-type="file"]').on("click", function (event) {
-          var path = $(event.currentTarget).data("path");
-          storage.loadFile(path).then(function (content) {
-            $('#fileOpenDialog').modal('hide');
-            storage.currentFile = path;
-            view.setDocument(content);
-            return content;
-          });
-          event.preventDefault();
-        });
-      });
-    }
-  }]);
-
-  return FileOpen;
-}();
-
-exports.default = FileOpen;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/dialog/FileSave.js":
-/*!***************************************************!*\
-  !*** ./app/frontend/author/js/dialog/FileSave.js ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ./../Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FileSave = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function FileSave() {
-    _classCallCheck(this, FileSave);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(FileSave, [{
-    key: "show",
-    value: function show(storage, view) {
-
-      $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + _Configuration2.default.fileSuffix);
-      $("#fileSaveDialog .githubCommitMessage").val('commit message');
-
-      $('#fileSaveDialog').on('shown.bs.modal', function (event) {
-        $(event.currentTarget).find('input:first').focus();
-      });
-      $("#fileSaveDialog").modal("show");
-      Mousetrap.pause();
-
-      // Save Button
-      //
-      $("#fileSaveDialog .okButton").off('click').on("click", function () {
-        Mousetrap.unpause();
-        var json = view.document;
-        var newName = $("#fileSaveDialog .githubFileName").val();
-        var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
-        storage.saveFile(json, newName, commitMessage).then(function () {
-          storage.currentFile = newName;
-          $('#fileSaveDialog').modal('hide');
-        });
-      });
-    }
-  }]);
-
-  return FileSave;
-}();
-
-exports.default = FileSave;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/global.js":
-/*!******************************************!*\
-  !*** ./app/frontend/author/js/global.js ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
-
-var _mousetrap2 = _interopRequireDefault(_mousetrap);
-
-__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/author/js/util/mousetrap-global.js");
-
-__webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/author/js/util/mousetrap-pause.js");
-
-var _inlineSVG = __webpack_require__(/*! ../lib/inlineSVG */ "./app/frontend/author/lib/inlineSVG.js");
-
-var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = {
-  Mousetrap: _mousetrap2.default,
-  inlineSVG: _inlineSVG2.default
-};
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/index.js":
-/*!*****************************************!*\
-  !*** ./app/frontend/author/js/index.js ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-__webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.less");
-
-__webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
-
-var _global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
-
-var _global2 = _interopRequireDefault(_global);
-
-var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
-
-// Resolve name collision between jQuery UI and Twitter Bootstrap
-/*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
-$.widget.bridge('uibutton', $.ui.button);
-$.widget.bridge('uitooltip', $.ui.tooltip);
-
-// required to be compatible with jquery.layout and jquery.handsontable
-//
-jQuery.uaMatch = function (ua) {
-  ua = ua.toLowerCase();
-  var match = /(chrome)[ \/]([\w.]+)/.exec(ua) || /(webkit)[ \/]([\w.]+)/.exec(ua) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) || /(msie) ([\w.]+)/.exec(ua) || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
-  return {
-    browser: match[1] || "",
-    version: match[2] || "0"
-  };
-};
-if (!jQuery.browser) {
-  var matched = jQuery.uaMatch(navigator.userAgent);
-  var browser = {};
-  if (matched.browser) {
-    browser[matched.browser] = true;
-    browser.version = matched.version;
-  }
-  // Chrome is Webkit, but Webkit is also Safari.
-  if (browser.chrome) {
-    browser.webkit = true;
-  } else if (browser.webkit) {
-    browser.safari = true;
-  }
-  jQuery.browser = browser;
-}
-
-// need to be global for the "static" version hosted on gh-pages
-//
-window.conf = _Configuration2.default;
-
-$(window).load(function () {
-
-  // export all required classes for deserialize JSON with "eval"
-  // "eval" code didn't sees imported class or code
-  //
-  for (var k in _global2.default) {
-    window[k] = _global2.default[k];
-  }socket = io({
-    path: '/socket.io'
-  });
-
-  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
-  // (fake event from the socket.io mock )
-  //
-  socket.on("permissions", function (permissions) {
-    socket.off("permissions");
-    app = __webpack_require__(/*! ./Application */ "./app/frontend/author/js/Application.js");
-    app.init(permissions);
-    $(".loader").fadeOut(500, function () {
-      $(this).remove();
-    });
-    inlineSVG.init();
-  });
-});
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/io/BackendStorage.js":
-/*!*****************************************************!*\
-  !*** ./app/frontend/author/js/io/BackendStorage.js ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var BackendStorage = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function BackendStorage() {
-    _classCallCheck(this, BackendStorage);
-
-    this.fileName = "";
-    Object.preventExtensions(this);
-  }
-
-  _createClass(BackendStorage, [{
-    key: "getFiles",
-    value: function getFiles(path) {
-      return $.ajax({
-        url: _Configuration2.default.backend.sheet.list,
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          path: path
-        }
-      }).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if (typeof response === "string") response = JSON.parse(response);
-
-        var files = response.files;
-        // sort the result
-        // Directories are always on top
-        //
-        files.sort(function (a, b) {
-          if (a.type === b.type) {
-            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-            return 0;
-          }
-          if (a.type === "dir") {
-            return -1;
-          }
-          return 1;
-        });
-        return files;
-      });
-    }
-  }, {
-    key: "saveFile",
-    value: function saveFile(json, fileName, commitMessage) {
-      return $.ajax({
-        url: _Configuration2.default.backend.sheet.save,
-        method: "POST",
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          commitMessage: commitMessage,
-          filePath: fileName,
-          content: JSON.stringify(json, undefined, 2)
-        }
-      });
-    }
-  }, {
-    key: "loadFile",
-    value: function loadFile(fileName) {
-      return this.loadUrl(_Configuration2.default.backend.sheet.get(fileName));
-    }
-
-    /**
-     * Load the file content of the given path
-     *
-     * @param fileName
-     * @returns {*}
-     */
-
-  }, {
-    key: "loadUrl",
-    value: function loadUrl(url) {
-      return _axios2.default.get(url).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if (typeof response === "string") response = JSON.parse(response).data;else response = response.data;
-        return response;
-      });
-    }
-  }, {
-    key: "dirname",
-    value: function dirname(path) {
-      if (path === undefined || path === null || path.length === 0) return null;
-
-      var segments = path.split("/");
-      if (segments.length <= 1) return null;
-
-      segments = segments.filter(function (n) {
-        return n != "";
-      });
-      path = segments.slice(0, -1).join("/");
-      return path === "" ? null : path + "/";
-    }
-  }, {
-    key: "basename",
-    value: function basename(path) {
-      if (path === null || path === "" || path === undefined) {
-        return null;
-      }
-      return path.split(/[\\/]/).pop();
-    }
-  }, {
-    key: "currentDir",
-    get: function get() {
-      return this.dirname(this.dirname());
-    }
-  }, {
-    key: "currentFile",
-    get: function get() {
-      return this.fileName;
-    },
-    set: function set(name) {
-      this.fileName = name;
-
-      var url = window.location.href.split('?')[0] + '?file=' + name;
-      history.pushState({ id: 'author', file: name }, 'Brainbox Author ' + name, url);
-    }
-  }]);
-
-  return BackendStorage;
-}();
-
-var storage = new BackendStorage();
-exports.default = storage;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/util/mousetrap-global.js":
-/*!*********************************************************!*\
-  !*** ./app/frontend/author/js/util/mousetrap-global.js ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * adds a bindGlobal method to Mousetrap that allows you to
- * bind specific keyboard shortcuts that will still work
- * inside a text input field
- *
- * usage:
- * Mousetrap.bindGlobal('ctrl+s', _saveChanges);
- */
-/* global Mousetrap:true */
-(function (Mousetrap) {
-  var _globalCallbacks = {};
-  var _originalStopCallback = Mousetrap.prototype.stopCallback;
-
-  Mousetrap.prototype.stopCallback = function (e, element, combo, sequence) {
-    var self = this;
-
-    if (self.paused) {
-      return true;
-    }
-
-    if (_globalCallbacks[combo] || _globalCallbacks[sequence]) {
-      return false;
-    }
-
-    return _originalStopCallback.call(self, e, element, combo);
-  };
-
-  Mousetrap.prototype.bindGlobal = function (keys, callback, action) {
-    var self = this;
-    self.bind(keys, callback, action);
-
-    if (keys instanceof Array) {
-      for (var i = 0; i < keys.length; i++) {
-        _globalCallbacks[keys[i]] = true;
-      }
-      return;
-    }
-
-    _globalCallbacks[keys] = true;
-  };
-
-  Mousetrap.init();
-})(Mousetrap);
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/util/mousetrap-pause.js":
-/*!********************************************************!*\
-  !*** ./app/frontend/author/js/util/mousetrap-pause.js ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * adds a pause and unpause method to Mousetrap
- * this allows you to enable or disable keyboard shortcuts
- * without having to reset Mousetrap and rebind everything
- */
-/* global Mousetrap:true */
-(function (Mousetrap) {
-  var _originalStopCallback = Mousetrap.prototype.stopCallback;
-
-  Mousetrap.prototype.stopCallback = function (e, element, combo) {
-    var self = this;
-
-    if (self.paused) {
-      return true;
-    }
-
-    return _originalStopCallback.call(self, e, element, combo);
-  };
-
-  Mousetrap.prototype.pause = function () {
-    var self = this;
-    self.paused = true;
-  };
-
-  Mousetrap.prototype.unpause = function () {
-    var self = this;
-    self.paused = false;
-  };
-
-  Mousetrap.init();
-})(Mousetrap);
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/view/FilesScreen.js":
-/*!****************************************************!*\
-  !*** ./app/frontend/author/js/view/FilesScreen.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/author/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
-
-var _hogan2 = _interopRequireDefault(_hogan);
-
-var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "./app/frontend/author/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
-
-var Files = function () {
-
-  /**
-   * @constructor
-   *
-   * @param {String} canvasId the id of the DOM element to use as paint container
-   */
-  function Files(permissions) {
-    _classCallCheck(this, Files);
-
-    this.render(permissions);
-  }
-
-  _createClass(Files, [{
-    key: "render",
-    value: function render(permissions) {
-
-      if (permissions.sheets.list === false) {
-        return;
-      }
-
-      // load demo files
-      //
-      function loadSheets(path) {
-        _BackendStorage2.default.getFiles(path).then(function (files) {
-          files = files.filter(function (file) {
-            return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
-          });
-          files = files.map(function (file) {
-            return _extends({}, file, {
-              readonly: true,
-              folder: path,
-              title: file.name.replace(_Configuration2.default.fileSuffix, ""),
-              image: _Configuration2.default.backend.sheet.image(path + file.name.replace(_Configuration2.default.fileSuffix, ".png"))
-            });
-          });
-          if (path.length !== 0) {
-            files.unshift({
-              name: _BackendStorage2.default.dirname(path),
-              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
-              type: "dir",
-              dir: true,
-              readonly: true,
-              title: ".."
-            });
-          }
-
-          var compiled = _hogan2.default.compile($("#filesTemplate").html());
-          var output = compiled.render({ folder: path, files: files });
-          $("#appShapeFiles").html($(output));
-          $("#appShapeFiles .list-group-item[data-type='dir']").on("click", function (event) {
-            var $el = $(event.currentTarget);
-            var name = $el.data("name");
-            loadSheets(name);
-          });
-
-          $("#appShapeFiles .list-group-item[data-type='file']").on("click", function (event) {
-            var $el = $(event.currentTarget);
-            var name = $el.data("name");
-            $el.addClass("spinner");
-            var file = _Configuration2.default.backend.sheet.get(name);
-            app.load(file).then(function () {
-              $el.removeClass("spinner");
-              app.historySheet(name);
-            });
-          });
-        });
-      }
-
-      loadSheets("");
-    }
-  }]);
-
-  return Files;
-}();
-
-exports.default = Files;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/less/index.less":
-/*!*********************************************!*\
-  !*** ./app/frontend/author/less/index.less ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var api = __webpack_require__(/*! ../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
-            var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/less-loader/dist/cjs.js!./index.less */ "./node_modules/css-loader/index.js!./node_modules/less-loader/dist/cjs.js!./app/frontend/author/less/index.less");
-
-            content = content.__esModule ? content.default : content;
-
-            if (typeof content === 'string') {
-              content = [[module.i, content, '']];
-            }
-
-var options = {};
-
-options.insert = "head";
-options.singleton = false;
-
-var update = api(content, options);
-
-var exported = content.locals ? content.locals : {};
-
-
-
-module.exports = exported;
-
-/***/ }),
-
-/***/ "./app/frontend/author/lib/inlineSVG.js":
-/*!**********************************************!*\
-  !*** ./app/frontend/author/lib/inlineSVG.js ***!
-  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1448,7 +320,1135 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     return inlineSVG;
 });
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/application.js":
+/*!***********************************************!*\
+  !*** ./app/frontend/author/js/application.js ***!
+  \***********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _toolbar = __webpack_require__(/*! ./toolbar */ "./app/frontend/author/js/toolbar.js");
+
+var _toolbar2 = _interopRequireDefault(_toolbar);
+
+var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "./app/frontend/author/js/io/BackendStorage.js");
+
+var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
+
+var _FileOpen = __webpack_require__(/*! ./dialog/FileOpen */ "./app/frontend/author/js/dialog/FileOpen.js");
+
+var _FileOpen2 = _interopRequireDefault(_FileOpen);
+
+var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/author/js/dialog/FileSave.js");
+
+var _FileSave2 = _interopRequireDefault(_FileSave);
+
+var _FilesScreen = __webpack_require__(/*! ./view/FilesScreen */ "./app/frontend/author/js/view/FilesScreen.js");
+
+var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
+
+var _view = __webpack_require__(/*! ./view */ "./app/frontend/author/js/view.js");
+
+var _view2 = _interopRequireDefault(_view);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Application = function () {
+  /**
+   * @constructor
+   *
+   * @param {String} canvasId the id of the DOM element to use as paint container
+   */
+  function Application() {
+    _classCallCheck(this, Application);
+  }
+
+  _createClass(Application, [{
+    key: "init",
+    value: function init(permissions) {
+      var _this = this;
+
+      $("body").delegate(".mousetrap-pause", "focus", function () {
+        Mousetrap.pause();
+      }).delegate(".mousetrap-pause", "blur", function () {
+        Mousetrap.unpause();
+      });
+
+      this.view = new _view2.default(this, "#editor .content", permissions);
+      this.filePane = new _FilesScreen2.default(permissions);
+      this.storage = _BackendStorage2.default;
+      this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
+
+      // check if the user has added a "file" parameter. In this case we load the shape from
+      // the draw2d.shape github repository
+      //
+      var file = this.getParam("file");
+      if (file) {
+        this.load(conf.backend.sheet.get(file));
+        this.storage.fileName = file;
+      } else {
+        this.fileNew();
+      }
+
+      // listen on the history object to load files
+      //
+      window.addEventListener('popstate', function (event) {
+        if (event.state && event.state.id === 'editor') {
+          // Render new content for the hompage
+          _this.load(event.state.file);
+        }
+      });
+    }
+  }, {
+    key: "load",
+    value: function load(file) {
+      var _this2 = this;
+
+      $("#leftTabStrip .editor").click();
+      return this.storage.loadUrl(file).then(function (content) {
+        _this2.view.setDocument(content);
+        return content;
+      });
+    }
+  }, {
+    key: "getParam",
+    value: function getParam(name) {
+      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+      var regexS = "[\\?&]" + name + "=([^&#]*)";
+      var regex = new RegExp(regexS);
+      var results = regex.exec(window.location.href);
+      // the param isn't part of the normal URL pattern...
+      //
+      if (results === null) {
+        // maybe it is part in the hash.
+        //
+        regexS = "[\\#]" + name + "=([^&#]*)";
+        regex = new RegExp(regexS);
+        results = regex.exec(window.location.hash);
+        if (results === null) {
+          return null;
+        }
+      }
+      return results[1];
+    }
+  }, {
+    key: "fileNew",
+    value: function fileNew(shapeTemplate) {}
+  }, {
+    key: "fileOpen",
+    value: function fileOpen() {
+      new _FileOpen2.default().show(this.storage, this.view);
+    }
+  }, {
+    key: "fileSave",
+    value: function fileSave() {
+      new _FileSave2.default().show(this.storage, this.view);
+    }
+  }, {
+    key: "historySheet",
+    value: function historySheet(file) {
+      history.pushState({
+        id: 'author',
+        file: name
+      }, 'Brainbox Author | ' + name, window.location.href.split('?')[0] + '?file=' + file);
+    }
+  }]);
+
+  return Application;
+}();
+
+var app = new Application();
+exports.default = app;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/configuration.js":
+/*!*************************************************!*\
+  !*** ./app/frontend/author/js/configuration.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  fileSuffix: ".sheet",
+  backend: {
+    sheet: {
+      list: "/backend/sheet/list",
+      image: function image(file) {
+        return "./sheet/" + file;
+      },
+      get: function get(file) {
+        return "../backend/sheet/get?filePath=" + file;
+      },
+      save: "/backend/sheet/save"
+    }
+  }
+};
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/dialog/FileOpen.js":
+/*!***************************************************!*\
+  !*** ./app/frontend/author/js/dialog/FileOpen.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileOpen = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function FileOpen() {
+    _classCallCheck(this, FileOpen);
+  }
+
+  /**
+   * @method
+   *
+   * Open the file picker and load the selected file.<br>
+   *
+   * @param {Function} successCallback callback method if the user select a file and the content is loaded
+   * @param {Function} errorCallback method to call if any error happens
+   *
+   * @since 4.0.0
+   */
+
+
+  _createClass(FileOpen, [{
+    key: "show",
+    value: function show(storage, view) {
+      $('#fileOpenDialog').modal('show');
+      this.currentDir = storage.currentDir;
+      this.fetchPathContent(storage, this.currentDir, view);
+    }
+  }, {
+    key: "fetchPathContent",
+    value: function fetchPathContent(storage, newPath, view) {
+      var _this = this;
+
+      storage.getFiles(newPath).then(function (files) {
+        files = files.filter(function (file) {
+          return file.name.endsWith(_configuration2.default.fileSuffix) || file.type === 'dir';
+        });
+        var compiled = _hogan2.default.compile("\n           {{^rootDir}}     \n           <a href=\"#\" class=\"list-group-item githubPath\" data-type=\"dir\" data-path=\"{{parentPath}}\" >\n               <span class=\"glyphicon glyphicon-menu-left\"></span>\n               ..\n           </a>\n           {{/rootDir}}\n           {{#files}}\n             <a href=\"#\" data-draw2d=\"{{draw2d}}\" class=\"list-group-item githubPath text-nowrap\" data-type=\"{{type}}\" data-path=\"{{currentDir}}{{name}}\" data-id=\"{{id}}\">\n                <span class=\"glyphicon {{icon}}\"></span>\n                {{{name}}}\n             </a>\n           {{/files}}\n          ");
+
+        var parentPath = storage.dirname(newPath);
+        var output = compiled.render({
+          parentPath: parentPath,
+          currentDir: _this.currentDir,
+          files: files,
+          rootDir: newPath === null || newPath.length === 0,
+          draw2d: function draw2d() {
+            return this.name.endsWith(_configuration2.default.fileSuffix);
+          },
+          icon: function icon() {
+            if (this.name.endsWith(_configuration2.default.fileSuffix)) {
+              return "fa fa-object-group";
+            }
+            return this.type === "dir" ? "fa fa-folder-o" : "fa fa-file-o";
+          }
+        });
+
+        $("#fileOpenDialog .list-group").html($(output));
+        $("#fileOpenDialog .list-group").scrollTop(0);
+
+        // Load the content of an directory
+        //
+        $(".githubPath[data-type='dir']").on("click", function (event) {
+          var path = $(event.currentTarget).data("path");
+          _this.currentDir = path;
+          _this.fetchPathContent(storage, path, view);
+        });
+
+        // Load the user selected File
+        //
+        $('.githubPath*[data-draw2d="true"][data-type="file"]').on("click", function (event) {
+          var path = $(event.currentTarget).data("path");
+          storage.loadFile(path).then(function (content) {
+            $('#fileOpenDialog').modal('hide');
+            storage.currentFile = path;
+            view.setDocument(content);
+            return content;
+          });
+          event.preventDefault();
+        });
+      });
+    }
+  }]);
+
+  return FileOpen;
+}();
+
+exports.default = FileOpen;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/dialog/FileSave.js":
+/*!***************************************************!*\
+  !*** ./app/frontend/author/js/dialog/FileSave.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ./../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FileSave = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function FileSave() {
+    _classCallCheck(this, FileSave);
+  }
+
+  /**
+   * @method
+   *
+   * Open the file picker and load the selected file.<br>
+   *
+   * @param {Function} successCallback callback method if the user select a file and the content is loaded
+   * @param {Function} errorCallback method to call if any error happens
+   *
+   * @since 4.0.0
+   */
+
+
+  _createClass(FileSave, [{
+    key: "show",
+    value: function show(storage, view) {
+
+      $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + _configuration2.default.fileSuffix);
+      $("#fileSaveDialog .githubCommitMessage").val('commit message');
+
+      $('#fileSaveDialog').on('shown.bs.modal', function (event) {
+        $(event.currentTarget).find('input:first').focus();
+      });
+      $("#fileSaveDialog").modal("show");
+      Mousetrap.pause();
+
+      // Save Button
+      //
+      $("#fileSaveDialog .okButton").off('click').on("click", function () {
+        Mousetrap.unpause();
+        var json = view.document;
+        var newName = $("#fileSaveDialog .githubFileName").val();
+        var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
+        storage.saveFile(json, newName, commitMessage).then(function () {
+          storage.currentFile = newName;
+          $('#fileSaveDialog').modal('hide');
+        });
+      });
+    }
+  }]);
+
+  return FileSave;
+}();
+
+exports.default = FileSave;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/global.js":
+/*!******************************************!*\
+  !*** ./app/frontend/author/js/global.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
+
+var _mousetrap2 = _interopRequireDefault(_mousetrap);
+
+__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/author/js/util/mousetrap-global.js");
+
+__webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/author/js/util/mousetrap-pause.js");
+
+var _inlineSVG = __webpack_require__(/*! ../../_common/inlineSVG */ "./app/frontend/_common/inlineSVG.js");
+
+var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  Mousetrap: _mousetrap2.default,
+  inlineSVG: _inlineSVG2.default
+};
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/index.js":
+/*!*****************************************!*\
+  !*** ./app/frontend/author/js/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.less");
+
+__webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
+
+var _global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
+
+var _global2 = _interopRequireDefault(_global);
+
+var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+
+// Resolve name collision between jQuery UI and Twitter Bootstrap
+/*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
+$.widget.bridge('uibutton', $.ui.button);
+$.widget.bridge('uitooltip', $.ui.tooltip);
+
+// required to be compatible with jquery.layout and jquery.handsontable
+//
+jQuery.uaMatch = function (ua) {
+  ua = ua.toLowerCase();
+  var match = /(chrome)[ \/]([\w.]+)/.exec(ua) || /(webkit)[ \/]([\w.]+)/.exec(ua) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) || /(msie) ([\w.]+)/.exec(ua) || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
+  return {
+    browser: match[1] || "",
+    version: match[2] || "0"
+  };
+};
+if (!jQuery.browser) {
+  var matched = jQuery.uaMatch(navigator.userAgent);
+  var browser = {};
+  if (matched.browser) {
+    browser[matched.browser] = true;
+    browser.version = matched.version;
+  }
+  // Chrome is Webkit, but Webkit is also Safari.
+  if (browser.chrome) {
+    browser.webkit = true;
+  } else if (browser.webkit) {
+    browser.safari = true;
+  }
+  jQuery.browser = browser;
+}
+
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = _configuration2.default;
+
+$(window).load(function () {
+
+  // export all required classes for deserialize JSON with "eval"
+  // "eval" code didn't sees imported class or code
+  //
+  for (var k in _global2.default) {
+    window[k] = _global2.default[k];
+  }socket = io({
+    path: '/socket.io'
+  });
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  //
+  socket.on("permissions", function (permissions) {
+    socket.off("permissions");
+    app = __webpack_require__(/*! ./application */ "./app/frontend/author/js/application.js");
+    app.init(permissions);
+    $(".loader").fadeOut(500, function () {
+      $(this).remove();
+    });
+    inlineSVG.init();
+  });
+});
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/io/BackendStorage.js":
+/*!*****************************************************!*\
+  !*** ./app/frontend/author/js/io/BackendStorage.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BackendStorage = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function BackendStorage() {
+    _classCallCheck(this, BackendStorage);
+
+    this.fileName = "";
+    Object.preventExtensions(this);
+  }
+
+  _createClass(BackendStorage, [{
+    key: "getFiles",
+    value: function getFiles(path) {
+      return $.ajax({
+        url: _configuration2.default.backend.sheet.list,
+        xhrFields: {
+          withCredentials: true
+        },
+        data: {
+          path: path
+        }
+      }).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") response = JSON.parse(response);
+
+        var files = response.files;
+        // sort the result
+        // Directories are always on top
+        //
+        files.sort(function (a, b) {
+          if (a.type === b.type) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+            return 0;
+          }
+          if (a.type === "dir") {
+            return -1;
+          }
+          return 1;
+        });
+        return files;
+      });
+    }
+  }, {
+    key: "saveFile",
+    value: function saveFile(json, fileName, commitMessage) {
+      return $.ajax({
+        url: _configuration2.default.backend.sheet.save,
+        method: "POST",
+        xhrFields: {
+          withCredentials: true
+        },
+        data: {
+          commitMessage: commitMessage,
+          filePath: fileName,
+          content: JSON.stringify(json, undefined, 2)
+        }
+      });
+    }
+  }, {
+    key: "loadFile",
+    value: function loadFile(fileName) {
+      return this.loadUrl(_configuration2.default.backend.sheet.get(fileName));
+    }
+
+    /**
+     * Load the file content of the given path
+     *
+     * @param fileName
+     * @returns {*}
+     */
+
+  }, {
+    key: "loadUrl",
+    value: function loadUrl(url) {
+      return _axios2.default.get(url).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") response = JSON.parse(response).data;else response = response.data;
+        return response;
+      });
+    }
+  }, {
+    key: "dirname",
+    value: function dirname(path) {
+      if (path === undefined || path === null || path.length === 0) return null;
+
+      var segments = path.split("/");
+      if (segments.length <= 1) return null;
+
+      segments = segments.filter(function (n) {
+        return n != "";
+      });
+      path = segments.slice(0, -1).join("/");
+      return path === "" ? null : path + "/";
+    }
+  }, {
+    key: "basename",
+    value: function basename(path) {
+      if (path === null || path === "" || path === undefined) {
+        return null;
+      }
+      return path.split(/[\\/]/).pop();
+    }
+  }, {
+    key: "currentDir",
+    get: function get() {
+      return this.dirname(this.dirname());
+    }
+  }, {
+    key: "currentFile",
+    get: function get() {
+      return this.fileName;
+    },
+    set: function set(name) {
+      this.fileName = name;
+
+      var url = window.location.href.split('?')[0] + '?file=' + name;
+      history.pushState({ id: 'author', file: name }, 'Brainbox Author ' + name, url);
+    }
+  }]);
+
+  return BackendStorage;
+}();
+
+var storage = new BackendStorage();
+exports.default = storage;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/toolbar.js":
+/*!*******************************************!*\
+  !*** ./app/frontend/author/js/toolbar.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Toolbar = function Toolbar(app, view, elementId, permissions) {
+  var _this = this;
+
+  _classCallCheck(this, Toolbar);
+
+  this.html = $(elementId);
+  this.app = app;
+  this.view = view;
+
+  /////////////////////////////////////////////
+  // File Operations
+  //
+  this.openButton = $("#fileOpen");
+  this.openButton.on("click", function () {
+    _this.openButton.tooltip("hide");
+    app.fileOpen();
+  });
+  Mousetrap.bindGlobal("ctrl+o", function () {
+    _this.openButton.click();
+    return false;
+  });
+
+  this.saveButton = $("#fileSave");
+  this.saveButton.on("click", function () {
+    _this.saveButton.tooltip("hide");
+    app.fileSave();
+  });
+  Mousetrap.bindGlobal("ctrl+s", function (event) {
+    _this.saveButton.click();
+    return false;
+  });
+
+  /////////////////////////////////////////////
+  // Editor Operations
+  //
+  this.addTextButton = $("#addTextSection");
+  this.addTextButton.on("click", function () {
+    _this.addTextButton.tooltip("hide");
+    _this.view.addMarkdown();
+  });
+  Mousetrap.bindGlobal("ctrl+t", function () {
+    _this.addTextButton.click();
+    return false;
+  });
+
+  this.addBrainButton = $("#addBrainSection");
+  this.addBrainButton.on("click", function () {
+    _this.addBrainButton.tooltip("hide");
+    _this.view.addBrain();
+  });
+  Mousetrap.bindGlobal("ctrl+s", function (event) {
+    _this.addBrainButton.click();
+    return false;
+  });
+
+  // enable the tooltip for all buttons
+  //
+  $('*[data-toggle="tooltip"]').tooltip({
+    placement: "bottom",
+    container: "body",
+    delay: { show: 1000, hide: 10 },
+    html: true
+  });
+};
+
+exports.default = Toolbar;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/util/mousetrap-global.js":
+/*!*********************************************************!*\
+  !*** ./app/frontend/author/js/util/mousetrap-global.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a bindGlobal method to Mousetrap that allows you to
+ * bind specific keyboard shortcuts that will still work
+ * inside a text input field
+ *
+ * usage:
+ * Mousetrap.bindGlobal('ctrl+s', _saveChanges);
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _globalCallbacks = {};
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo, sequence) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    if (_globalCallbacks[combo] || _globalCallbacks[sequence]) {
+      return false;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.bindGlobal = function (keys, callback, action) {
+    var self = this;
+    self.bind(keys, callback, action);
+
+    if (keys instanceof Array) {
+      for (var i = 0; i < keys.length; i++) {
+        _globalCallbacks[keys[i]] = true;
+      }
+      return;
+    }
+
+    _globalCallbacks[keys] = true;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/util/mousetrap-pause.js":
+/*!********************************************************!*\
+  !*** ./app/frontend/author/js/util/mousetrap-pause.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a pause and unpause method to Mousetrap
+ * this allows you to enable or disable keyboard shortcuts
+ * without having to reset Mousetrap and rebind everything
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.pause = function () {
+    var self = this;
+    self.paused = true;
+  };
+
+  Mousetrap.prototype.unpause = function () {
+    var self = this;
+    self.paused = false;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/view.js":
+/*!****************************************!*\
+  !*** ./app/frontend/author/js/view.js ***!
+  \****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
+
+var View = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function View(app, id, permissions) {
+    var _this = this;
+
+    _classCallCheck(this, View);
+
+    this.document = [];
+
+    this.activeSection = null;
+    this.html = $(id);
+    this.html.html($("<ul class='sections'></ul>"));
+    $(document).on("click", ".sections .section", function (event) {
+      $(".sections .section").removeClass("active");
+      _this.activeSection = $(event.target);
+      _this.activeSection.addClass("active");
+    });
+  }
+
+  _createClass(View, [{
+    key: "setDocument",
+    value: function setDocument(json) {
+      this.document = json;
+      this.render(this.document);
+    }
+  }, {
+    key: "addMarkdown",
+    value: function addMarkdown() {
+      var entry = {
+        id: shortid.generate(),
+        type: "markdown",
+        content: "## Header"
+      };
+      this.document.push(entry);
+      this.renderMarkdown(entry);
+    }
+  }, {
+    key: "addBrain",
+    value: function addBrain() {
+      var entry = {
+        id: shortid.generate(),
+        type: "draw2d",
+        content: []
+      };
+      this.document.push(entry);
+      this.renderBrain(entry);
+    }
+  }, {
+    key: "render",
+    value: function render(document) {
+      var _this2 = this;
+
+      this.html.find("ul").html("");
+      document.forEach(function (entry) {
+        switch (entry.type) {
+          case "draw2d":
+            _this2.renderBrain(entry);
+            break;
+          case "markdown":
+            _this2.renderMarkdown(entry);
+            break;
+        }
+      });
+    }
+  }, {
+    key: "renderMarkdown",
+    value: function renderMarkdown(entry) {
+      this.html.find("ul").append("<li class='section'>" + entry.id + "</li>");
+    }
+  }, {
+    key: "renderBrain",
+    value: function renderBrain(entry) {
+      this.html.find("ul").append("<li class='section'>" + entry.id + "</li>");
+    }
+  }]);
+
+  return View;
+}();
+
+exports.default = View;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/view/FilesScreen.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/author/js/view/FilesScreen.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "./app/frontend/author/js/io/BackendStorage.js");
+
+var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *
+ * The **GraphicalEditor** is responsible for layout and dialog handling.
+ *
+ * @author Andreas Herz
+ */
+
+var Files = function () {
+
+  /**
+   * @constructor
+   *
+   * @param {String} canvasId the id of the DOM element to use as paint container
+   */
+  function Files(permissions) {
+    _classCallCheck(this, Files);
+
+    this.render(permissions);
+  }
+
+  _createClass(Files, [{
+    key: "render",
+    value: function render(permissions) {
+
+      if (permissions.sheets.list === false) {
+        return;
+      }
+
+      // load demo files
+      //
+      function loadSheets(path) {
+        _BackendStorage2.default.getFiles(path).then(function (files) {
+          files = files.filter(function (file) {
+            return file.name.endsWith(_configuration2.default.fileSuffix) || file.type === "dir";
+          });
+          files = files.map(function (file) {
+            return _extends({}, file, {
+              readonly: true,
+              folder: path,
+              title: file.name.replace(_configuration2.default.fileSuffix, ""),
+              image: _configuration2.default.backend.sheet.image(path + file.name.replace(_configuration2.default.fileSuffix, ".png"))
+            });
+          });
+          if (path.length !== 0) {
+            files.unshift({
+              name: _BackendStorage2.default.dirname(path),
+              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
+              type: "dir",
+              dir: true,
+              readonly: true,
+              title: ".."
+            });
+          }
+
+          var compiled = _hogan2.default.compile($("#filesTemplate").html());
+          var output = compiled.render({ folder: path, files: files });
+          $("#appShapeFiles").html($(output));
+          $("#appShapeFiles .list-group-item[data-type='dir']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            loadSheets(name);
+          });
+
+          $("#appShapeFiles .list-group-item[data-type='file']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            $el.addClass("spinner");
+            var file = _configuration2.default.backend.sheet.get(name);
+            app.load(file).then(function () {
+              $el.removeClass("spinner");
+              app.historySheet(name);
+            });
+          });
+        });
+      }
+
+      loadSheets("");
+    }
+  }]);
+
+  return Files;
+}();
+
+exports.default = Files;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/less/index.less":
+/*!*********************************************!*\
+  !*** ./app/frontend/author/less/index.less ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../../../node_modules/css-loader!../../../../node_modules/less-loader/dist/cjs.js!./index.less */ "./node_modules/css-loader/index.js!./node_modules/less-loader/dist/cjs.js!./app/frontend/author/less/index.less");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
 
 /***/ }),
 

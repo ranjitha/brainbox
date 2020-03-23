@@ -1,4 +1,4 @@
-import conf from '../Configuration'
+import conf from '../configuration'
 import axios from "axios";
 
 class BackendStorage{
