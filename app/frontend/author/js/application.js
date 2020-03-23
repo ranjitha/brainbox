@@ -57,7 +57,7 @@ class Application {
     $("#leftTabStrip .editor").click()
     return this.storage.loadUrl(file)
       .then((content) => {
-        this.view.setDocument(content)
+        this.view.setDocument(content.json)
         return content
       })
   }

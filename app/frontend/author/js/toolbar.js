@@ -11,7 +11,7 @@ export default class Toolbar {
     /////////////////////////////////////////////
     // File Operations
     //
-    this.openButton = $("#fileOpen")
+    this.openButton = $("#editorFileOpen")
     this.openButton.on("click", () => {
       this.openButton.tooltip("hide")
       app.fileOpen()
@@ -22,9 +22,10 @@ export default class Toolbar {
     })
 
 
-    this.saveButton = $("#fileSave")
+    this.saveButton = $("#editorFileSave")
     this.saveButton.on("click", () => {
       this.saveButton.tooltip("hide")
+      console.log("click")
       app.fileSave()
     })
     Mousetrap.bindGlobal("ctrl+s", (event) => {

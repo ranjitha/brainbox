@@ -1,27 +1,29 @@
-[
-  {
-    "id": "SI0N8wZ9J",
-    "type": "markdown",
-    "content": "## Header"
-  },
-  {
-    "id": "O5NOvZP7Wc",
-    "type": "draw2d",
-    "content": []
-  },
-  {
-    "id": "ScMwTEhUO4",
-    "type": "markdown",
-    "content": "## Header"
-  },
-  {
-    "id": "Mvlfk4n7oX",
-    "type": "markdown",
-    "content": "## Header"
-  },
-  {
-    "id": "AIRUAOxJzn",
-    "type": "draw2d",
-    "content": []
-  }
-]
+{
+  "json": [
+    {
+      "id": "O5NOvZP7Wc",
+      "type": "draw2d",
+      "content": []
+    },
+    {
+      "id": "SI0N8wZ9J",
+      "type": "markdown",
+      "content": "## Header"
+    },
+    {
+      "id": "Mvlfk4n7oX",
+      "type": "markdown",
+      "content": "## Header"
+    },
+    {
+      "id": "AIRUAOxJzn",
+      "type": "draw2d",
+      "content": []
+    },
+    {
+      "id": "ScMwTEhUO4",
+      "type": "markdown",
+      "content": "## Header"
+    }
+  ]
+}
