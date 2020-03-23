@@ -1,4 +1,5 @@
 const shortid = require('shortid')
+const Document = require("./document")
 
 export default class View {
 
@@ -8,7 +9,7 @@ export default class View {
    */
   constructor(app, id, permissions) {
 
-    this.document = []
+    this.document = new Document()
 
     this.activeSection = null;
     this.html = $(id)
@@ -21,7 +22,7 @@ export default class View {
   }
 
   setDocument(json){
-    this.document = json
+    this.document = new Document(json)
     this.render(this.document)
   }
 
@@ -31,7 +32,7 @@ export default class View {
       type: "markdown",
       content: "## Header"
     }
-    this.document.push(entry)
+    this.document.add(entry)
     this.renderMarkdown(entry)
   }
 
@@ -41,7 +42,7 @@ export default class View {
       type: "draw2d",
       content: []
     }
-    this.document.push(entry)
+    this.document.add(entry)
     this.renderBrain(entry)
   }
 

@@ -712,6 +712,75 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/author/js/document.js":
+/*!********************************************!*\
+  !*** ./app/frontend/author/js/document.js ***!
+  \********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var View = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function View(json) {
+    _classCallCheck(this, View);
+
+    this.json = json || [];
+  }
+
+  _createClass(View, [{
+    key: "getSectionById",
+    value: function getSectionById(id) {
+      return this.json.find(function (value) {
+        return value.id === id;
+      });
+    }
+  }, {
+    key: "setSection",
+    value: function setSection(section) {
+      var index = this.json.findIndex(function (obj) {
+        return obj.id == section.id;
+      });
+      if (index >= 0) {
+        this.json[index] = section;
+      } else {
+        console.log("record not found", section);
+      }
+    }
+  }, {
+    key: "add",
+    value: function add(section) {
+      this.json.push(section);
+    }
+  }, {
+    key: "forEach",
+    value: function forEach(callback) {
+      return this.json.forEach(callback);
+    }
+  }]);
+
+  return View;
+}();
+
+exports.default = View;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/author/js/global.js":
 /*!******************************************!*\
   !*** ./app/frontend/author/js/global.js ***!
@@ -1210,6 +1279,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
+var Document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
 
 var View = function () {
 
@@ -1222,7 +1292,7 @@ var View = function () {
 
     _classCallCheck(this, View);
 
-    this.document = [];
+    this.document = new Document();
 
     this.activeSection = null;
     this.html = $(id);
@@ -1237,7 +1307,7 @@ var View = function () {
   _createClass(View, [{
     key: "setDocument",
     value: function setDocument(json) {
-      this.document = json;
+      this.document = new Document(json);
       this.render(this.document);
     }
   }, {
@@ -1248,7 +1318,7 @@ var View = function () {
         type: "markdown",
         content: "## Header"
       };
-      this.document.push(entry);
+      this.document.add(entry);
       this.renderMarkdown(entry);
     }
   }, {
@@ -1259,7 +1329,7 @@ var View = function () {
         type: "draw2d",
         content: []
       };
-      this.document.push(entry);
+      this.document.add(entry);
       this.renderBrain(entry);
     }
   }, {
