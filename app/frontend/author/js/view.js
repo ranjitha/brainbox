@@ -1,8 +1,6 @@
 const shortid = require('shortid')
 const Document = require("./document")
 const MarkdownEditor = require("./inplace/markdown/editor")
-var md = require('markdown-it')();
-md.use(require("markdown-it-asciimath"));
 
 export default class View {
 
@@ -12,11 +10,16 @@ export default class View {
    */
   constructor(app, id, permissions) {
 
+    this.markdownEditor = new MarkdownEditor()
+
     this.document = new Document()
 
     this.activeSection = null;
     this.html = $(id)
+
+    // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"))
+
     $(document).on("click", ".sections .section .sectionContent", event => {
       this.onSelect($(event.target).closest(".section"))
     })
@@ -46,7 +49,6 @@ export default class View {
       this.onSelect(section)
       this.onEdit(section.data("id"))
     })
-
     $(document).on("click","#sectionMenuEdit", event=>{
       this.onEdit($(event.target).data("id"))
     })
@@ -56,11 +58,9 @@ export default class View {
     $(document).on("click","#sectionMenuCommitEdit", event=>{
       this.onCommitEdit($(event.target).data("id"))
     })
-    $(document).on("click","#sectionMenuUndoEdit", event=>{
-      this.onUndoEdit($(event.target).data("id"))
+    $(document).on("click","#sectionMenuCancelEdit", event=>{
+      this.onCancelEdit()
     })
-
-    $(document).on("click","#sectionMenuDelete", event=>{})
   }
 
   setDocument(json){
@@ -90,7 +90,6 @@ export default class View {
 
 
   render(document){
-    console.log(document)
     this.html.find(".sections").html("")
     document.forEach( entry => {
       switch(entry.type){
@@ -105,7 +104,7 @@ export default class View {
   }
 
   renderMarkdown(entry){
-    let markdown = md.render(entry.content)
+    let markdown = this.markdownEditor.render(entry.content)
     this.html.find(".sections").append(`
         <div data-id="${entry.id}" class='section'>
            <div class="sectionContent">${markdown}</div>
@@ -145,11 +144,12 @@ export default class View {
   }
 
 
-
   onEdit(id){
     if(this.currentEditor){
       return
     }
+
+    let section = this.document.get(id)
 
     $(".sections .activeSection .sectionContent").html(`
             <div id="editor-container">
@@ -163,12 +163,11 @@ export default class View {
               `)
     $(".sections").removeClass("activeSection")
 
-    let section = this.document.get(id)
-    this.currentEditor = new MarkdownEditor('markdownEditor', 'htmlPreview', section.content)
+    this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content)
 
     $(".sections .menu").html(`
           <div data-id="${id}" id="sectionMenuCommitEdit"   class='fa fa-check-square-o' ></div>
-          <div data-id="${id}" id="sectionMenuUndoEdit" class='fa fa-minus-square-o' ></div>
+          <div data-id="${id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
         `)
   }
 
@@ -185,4 +184,8 @@ export default class View {
     this.render(this.document)
   }
 
+  onCancelEdit(){
+    this.currentEditor = null;
+    this.render(this.document)
+  }
 }

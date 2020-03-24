@@ -7,7 +7,10 @@ md.use(require("markdown-it-asciimath"));
 
 export default class Toolbar {
 
-  constructor(editorId, previewId, content) {
+  constructor() {
+  }
+
+  inject(editorId, previewId, content) {
     this.editorId = editorId
     this.previewId = previewId
 
@@ -26,16 +29,22 @@ export default class Toolbar {
       this.updatePreview()
     }, 500, false))
     this.updatePreview()
+
+    return this
   }
 
   updatePreview(){
     let markdown = this.editor.getValue()
-    let result = md.render(markdown)
-    document.getElementById(this.previewId).innerHTML = result
+    let preview = md.render(markdown)
+    document.getElementById(this.previewId).innerHTML = preview
   }
 
   getValue(){
     return this.editor.getValue()
+  }
+
+  render(content){
+    return md.render(content)
   }
 
   debounce(func, wait, immediate) {

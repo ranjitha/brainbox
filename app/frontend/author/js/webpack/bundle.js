@@ -964,42 +964,52 @@ var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/inde
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
 var Toolbar = function () {
-  function Toolbar(editorId, previewId, content) {
-    var _this = this;
-
+  function Toolbar() {
     _classCallCheck(this, Toolbar);
-
-    this.editorId = editorId;
-    this.previewId = previewId;
-
-    this.editor = _codemirror2.default.fromTextArea(document.getElementById(this.editorId), {
-      lineNumbers: true,
-      mode: 'gfm',
-      theme: 'default',
-      viewportMargin: Infinity,
-      autofocus: true,
-      lineWrapping: true,
-      styleActiveLine: { nonEmpty: true }
-    });
-
-    this.editor.setValue(content);
-    this.editor.on('changes', this.debounce(function () {
-      _this.updatePreview();
-    }, 500, false));
-    this.updatePreview();
   }
 
   _createClass(Toolbar, [{
+    key: 'inject',
+    value: function inject(editorId, previewId, content) {
+      var _this = this;
+
+      this.editorId = editorId;
+      this.previewId = previewId;
+
+      this.editor = _codemirror2.default.fromTextArea(document.getElementById(this.editorId), {
+        lineNumbers: true,
+        mode: 'gfm',
+        theme: 'default',
+        viewportMargin: Infinity,
+        autofocus: true,
+        lineWrapping: true,
+        styleActiveLine: { nonEmpty: true }
+      });
+
+      this.editor.setValue(content);
+      this.editor.on('changes', this.debounce(function () {
+        _this.updatePreview();
+      }, 500, false));
+      this.updatePreview();
+
+      return this;
+    }
+  }, {
     key: 'updatePreview',
     value: function updatePreview() {
       var markdown = this.editor.getValue();
-      var result = md.render(markdown);
-      document.getElementById(this.previewId).innerHTML = result;
+      var preview = md.render(markdown);
+      document.getElementById(this.previewId).innerHTML = preview;
     }
   }, {
     key: 'getValue',
     value: function getValue() {
       return this.editor.getValue();
+    }
+  }, {
+    key: 'render',
+    value: function render(content) {
+      return md.render(content);
     }
   }, {
     key: 'debounce',
@@ -1399,8 +1409,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
 var Document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
 var MarkdownEditor = __webpack_require__(/*! ./inplace/markdown/editor */ "./app/frontend/author/js/inplace/markdown/editor.js");
-var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/index.js")();
-md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
 var View = function () {
 
@@ -1413,11 +1421,16 @@ var View = function () {
 
     _classCallCheck(this, View);
 
+    this.markdownEditor = new MarkdownEditor();
+
     this.document = new Document();
 
     this.activeSection = null;
     this.html = $(id);
+
+    // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"));
+
     $(document).on("click", ".sections .section .sectionContent", function (event) {
       _this.onSelect($(event.target).closest(".section"));
     });
@@ -1447,7 +1460,6 @@ var View = function () {
       _this.onSelect(section);
       _this.onEdit(section.data("id"));
     });
-
     $(document).on("click", "#sectionMenuEdit", function (event) {
       _this.onEdit($(event.target).data("id"));
     });
@@ -1457,11 +1469,9 @@ var View = function () {
     $(document).on("click", "#sectionMenuCommitEdit", function (event) {
       _this.onCommitEdit($(event.target).data("id"));
     });
-    $(document).on("click", "#sectionMenuUndoEdit", function (event) {
-      _this.onUndoEdit($(event.target).data("id"));
+    $(document).on("click", "#sectionMenuCancelEdit", function (event) {
+      _this.onCancelEdit();
     });
-
-    $(document).on("click", "#sectionMenuDelete", function (event) {});
   }
 
   _createClass(View, [{
@@ -1497,7 +1507,6 @@ var View = function () {
     value: function render(document) {
       var _this2 = this;
 
-      console.log(document);
       this.html.find(".sections").html("");
       document.forEach(function (entry) {
         switch (entry.type) {
@@ -1513,7 +1522,7 @@ var View = function () {
   }, {
     key: "renderMarkdown",
     value: function renderMarkdown(entry) {
-      var markdown = md.render(entry.content);
+      var markdown = this.markdownEditor.render(entry.content);
       this.html.find(".sections").append("\n        <div data-id=\"" + entry.id + "\" class='section'>\n           <div class=\"sectionContent\">" + markdown + "</div>\n        </div>\n      ");
     }
   }, {
@@ -1550,13 +1559,14 @@ var View = function () {
         return;
       }
 
+      var section = this.document.get(id);
+
       $(".sections .activeSection .sectionContent").html("\n            <div id=\"editor-container\">\n              <div class=\"left\">\n                <textarea id=\"markdownEditor\"></textarea>\n              </div>\n              <div class=\"right\">\n                <article class=\"markdown-body\" id=\"htmlPreview\"></article>\n              </div>\n            </div>\n              ");
       $(".sections").removeClass("activeSection");
 
-      var section = this.document.get(id);
-      this.currentEditor = new MarkdownEditor('markdownEditor', 'htmlPreview', section.content);
+      this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content);
 
-      $(".sections .menu").html("\n          <div data-id=\"" + id + "\" id=\"sectionMenuCommitEdit\"   class='fa fa-check-square-o' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuUndoEdit\" class='fa fa-minus-square-o' ></div>\n        ");
+      $(".sections .menu").html("\n          <div data-id=\"" + id + "\" id=\"sectionMenuCommitEdit\"   class='fa fa-check-square-o' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuCancelEdit\" class='fa fa-minus-square-o' ></div>\n        ");
     }
   }, {
     key: "onDelete",
@@ -1570,6 +1580,12 @@ var View = function () {
       var section = this.document.get(id);
       var value = this.currentEditor.getValue();
       section.content = value;
+      this.currentEditor = null;
+      this.render(this.document);
+    }
+  }, {
+    key: "onCancelEdit",
+    value: function onCancelEdit() {
       this.currentEditor = null;
       this.render(this.document);
     }
