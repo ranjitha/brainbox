@@ -31,6 +31,11 @@ export default class View {
     return this.json.findIndex((obj => obj.id == id))
   }
 
+  remove(id){
+    let index = this.json.findIndex((obj => obj.id == id))
+    return this.json.splice(index, 1);
+  }
+
   add(section){
     this.json.push(section)
   }

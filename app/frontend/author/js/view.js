@@ -1,5 +1,8 @@
 const shortid = require('shortid')
 const Document = require("./document")
+const MarkdownEditor = require("./inplace/markdown/editor")
+var md = require('markdown-it')();
+md.use(require("markdown-it-asciimath"));
 
 export default class View {
 
@@ -13,15 +16,14 @@ export default class View {
 
     this.activeSection = null;
     this.html = $(id)
-    this.html.html($("<ul class='sections'></ul>"))
-    $(document).on("click", ".sections .section", event => {
-      this.onSelect($(event.target))
+    this.html.html($("<div class='sections'></div>"))
+    $(document).on("click", ".sections .section .sectionContent", event => {
+      this.onSelect($(event.target).closest(".section"))
     })
 
     $(document).on("click","#sectionMenuUp", event=>{
       let id = $(event.target).data("id")
       let index = this.document.index(id)
-      console.log(index, id)
       if(index>0) {
         let prev = this.activeSection.parent().prev()
         this.activeSection.parent().insertBefore(prev)
@@ -39,7 +41,25 @@ export default class View {
       }
     })
 
-    $(document).on("click","#sectionMenuEdit", event=>{})
+    $(document).on("dblclick", ".sections .section .sectionContent", event => {
+      let section = $(event.target).closest(".section")
+      this.onSelect(section)
+      this.onEdit(section.data("id"))
+    })
+
+    $(document).on("click","#sectionMenuEdit", event=>{
+      this.onEdit($(event.target).data("id"))
+    })
+    $(document).on("click","#sectionMenuDelete", event=>{
+      this.onDelete($(event.target).data("id"))
+    })
+    $(document).on("click","#sectionMenuCommitEdit", event=>{
+      this.onCommitEdit($(event.target).data("id"))
+    })
+    $(document).on("click","#sectionMenuUndoEdit", event=>{
+      this.onUndoEdit($(event.target).data("id"))
+    })
+
     $(document).on("click","#sectionMenuDelete", event=>{})
   }
 
@@ -70,7 +90,8 @@ export default class View {
 
 
   render(document){
-    this.html.find("ul").html("")
+    console.log(document)
+    this.html.find(".sections").html("")
     document.forEach( entry => {
       switch(entry.type){
         case "draw2d":
@@ -84,22 +105,27 @@ export default class View {
   }
 
   renderMarkdown(entry){
-    this.html.find("ul").append(`<li data-id="${entry.id}" class='section'>${entry.id}</li>`)
+    let markdown = md.render(entry.content)
+    this.html.find(".sections").append(`
+        <div data-id="${entry.id}" class='section'>
+           <div class="sectionContent">${markdown}</div>
+        </div>
+      `)
   }
 
   renderBrain(entry){
-    this.html.find("ul").append(`<li data-id="${entry.id}" class='section'>${entry.id}</li>`)
+    this.html.find(".sections").append(`<div data-id="${entry.id}" class='section'><div>${entry.id}</div></div>`)
   }
 
   onSelect(sectionDOM){
-    let id = sectionDOM.data("id")
-    if(this.activeSection){
-      this.activeSection.parent().find(".menu").remove()
-      this.activeSection.unwrap()
+    if(this.currentEditor){
+      return
     }
+    this.onUnselect()
+    let id = sectionDOM.data("id")
     this.activeSection = sectionDOM
-    this.activeSection.wrap("<div class='active'></div>")
-    $(".sections .active").append(`
+    this.activeSection.addClass('activeSection')
+    $(".sections .activeSection").append(`
         <div class='menu'>
           <div data-id="${id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
           <div data-id="${id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
@@ -107,4 +133,56 @@ export default class View {
           <div data-id="${id}" id="sectionMenuDelete" class='fa fa-trash-o' ></div>
         </div>`)
   }
+
+
+  onUnselect(){
+    if(this.activeSection === null){
+      return
+    }
+    $(".sections .activeSection .menu").remove()
+    this.activeSection.removeClass("activeSection")
+    this.activeSection = null
+  }
+
+
+
+  onEdit(id){
+    if(this.currentEditor){
+      return
+    }
+
+    $(".sections .activeSection .sectionContent").html(`
+            <div id="editor-container">
+              <div class="left">
+                <textarea id="markdownEditor"></textarea>
+              </div>
+              <div class="right">
+                <article class="markdown-body" id="htmlPreview"></article>
+              </div>
+            </div>
+              `)
+    $(".sections").removeClass("activeSection")
+
+    let section = this.document.get(id)
+    this.currentEditor = new MarkdownEditor('markdownEditor', 'htmlPreview', section.content)
+
+    $(".sections .menu").html(`
+          <div data-id="${id}" id="sectionMenuCommitEdit"   class='fa fa-check-square-o' ></div>
+          <div data-id="${id}" id="sectionMenuUndoEdit" class='fa fa-minus-square-o' ></div>
+        `)
+  }
+
+  onDelete(id){
+    this.document.remove(id)
+    this.render(this.document)
+  }
+
+  onCommitEdit(id){
+    let section = this.document.get(id)
+    let value = this.currentEditor.getValue()
+    section.content = value
+    this.currentEditor = null;
+    this.render(this.document)
+  }
+
 }

@@ -1,5 +1,3 @@
-import conf from "./configuration"
-
 
 export default class Toolbar {
 
