@@ -11,7 +11,7 @@ export default class Toolbar {
     this.editorId = editorId
     this.previewId = previewId
 
-    this.editor = CodeMirror.fromTextArea(document.getElementById(editorId), {
+    this.editor = CodeMirror.fromTextArea(document.getElementById(this.editorId), {
       lineNumbers: true,
       mode: 'gfm',
       theme: 'default',

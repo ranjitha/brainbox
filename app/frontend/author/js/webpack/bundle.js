@@ -972,7 +972,7 @@ var Toolbar = function () {
     this.editorId = editorId;
     this.previewId = previewId;
 
-    this.editor = _codemirror2.default.fromTextArea(document.getElementById(editorId), {
+    this.editor = _codemirror2.default.fromTextArea(document.getElementById(this.editorId), {
       lineNumbers: true,
       mode: 'gfm',
       theme: 'default',
