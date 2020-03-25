@@ -64,8 +64,7 @@ export default class Files {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
-          let file = conf.backend.sheet.get(name)
-          app.load(file).then(() => {
+          app.fileLoad(name).then(() => {
             $el.removeClass("spinner")
             app.historySheet(name)
           })

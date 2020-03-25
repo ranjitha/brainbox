@@ -83,6 +83,7 @@ class BackendStorage{
   }
 
   loadFile(fileName){
+    this.fileName = fileName
     return this.loadUrl(conf.backend.shape.get(fileName))
   }
 

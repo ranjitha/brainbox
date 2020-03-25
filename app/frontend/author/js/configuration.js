@@ -14,4 +14,8 @@ export default {
     version: "0.0.0" // updated during after loading from the index.json file
   },
 
+  color: {
+    high: "#C21B7A",
+    low:  "#0078F2"
+  }
 }

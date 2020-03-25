@@ -83,6 +83,7 @@ class BackendStorage{
   }
 
   loadFile(fileName){
+    this.fileName = fileName
     return this.loadUrl(conf.backend.sheet.get(fileName))
   }
 
@@ -110,7 +111,7 @@ class BackendStorage{
     if (path===undefined || path===null || path.length === 0)
       return null
 
-    var segments = path.split("/")
+    let segments = path.split("/")
     if (segments.length <= 1)
       return null
 

@@ -575,7 +575,7 @@ var Application = function () {
       //
       var file = this.getParam("file");
       if (file) {
-        this.load(conf.backend.shape.get(file));
+        this.fileLoad(file);
       } else {
         this.fileNew();
       }
@@ -584,8 +584,8 @@ var Application = function () {
       //
       window.addEventListener('popstate', function (event) {
         if (event.state && event.state.id === 'editor') {
-          // Render new content for the hompage
-          _this.load(event.state.file);
+          // Render new content for the homepage
+          _this.fileLoad(event.state.file);
         }
       });
 
@@ -658,26 +658,6 @@ var Application = function () {
       }
     }
   }, {
-    key: "load",
-    value: function load(file) {
-      var _this2 = this;
-
-      this.view.clear();
-      $("#leftTabStrip .editor").click();
-
-      return this.storage.loadUrl(file).then(function (content) {
-        _this2.view.clear();
-        _this2.view.centerDocument();
-        var reader = new draw2d.io.json.Reader();
-        reader.unmarshal(_this2.view, content);
-        _this2.getConfiguration();
-        _this2.storage.fileName = file;
-        _this2.view.getCommandStack().markSaveLocation();
-        _this2.view.centerDocument();
-        return content;
-      });
-    }
-  }, {
     key: "getParam",
     value: function getParam(name) {
       name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -697,6 +677,25 @@ var Application = function () {
         }
       }
       return results[1];
+    }
+  }, {
+    key: "fileLoad",
+    value: function fileLoad(name) {
+      var _this2 = this;
+
+      this.view.clear();
+      $("#leftTabStrip .editor").click();
+
+      return this.storage.loadFile(name).then(function (content) {
+        _this2.view.clear();
+        _this2.view.centerDocument();
+        var reader = new draw2d.io.json.Reader();
+        reader.unmarshal(_this2.view, content);
+        _this2.getConfiguration();
+        _this2.view.getCommandStack().markSaveLocation();
+        _this2.view.centerDocument();
+        return content;
+      });
     }
   }, {
     key: "fileNew",
@@ -6131,6 +6130,7 @@ var BackendStorage = function () {
   }, {
     key: "loadFile",
     value: function loadFile(fileName) {
+      this.fileName = fileName;
       return this.loadUrl(_Configuration2.default.backend.shape.get(fileName));
     }
 
@@ -7591,8 +7591,7 @@ var Files = function () {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
-            var file = _Configuration2.default.backend.shape.get(name);
-            app.load(file).then(function () {
+            app.fileLoad(name).then(function () {
               $el.removeClass("spinner");
               app.historyShape(name);
             });

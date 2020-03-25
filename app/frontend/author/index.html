@@ -99,16 +99,20 @@
 
           </div>
 
-           <div class="palette_container">
-             <div class="palette_title">
-               <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
-               <div>
-                 <h1>Brainbox</h1>
-                 <h2>Author</h2>
+           <div class="paletteContainer">
+             <div id="paletteHeader">
+               <div class="paletteTitle">
+                 <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
+                 <div>
+                   <h1>Brainbox</h1>
+                   <h2>Author</h2>
+                 </div>
                </div>
+               <div id="paletteFilter"></div>
              </div>
-             <div class="palette_header">Sections</div>
-             <div class="palette_elements"></div>
+             <div id="paletteElementsScroll">
+               <div id="paletteElements"></div>
+             </div>
            </div>
 
            <div class="content">
@@ -309,6 +313,7 @@
 <script src="./lib/ASCIIMathTeXImg.js"></script>
 <script src="../_common/jquery/jquery.js"></script>
 <script src="../_common/jquery/jquery-ui.js"></script>
+<script src="../_common/shufflejs/jquery.shuffle.modernizr.min.js"></script>
 
 <script src="../_common/bootstrap/js/bootstrap.min.js"></script>
 <script src="../_common/bootbox/bootbox.min.js"></script>

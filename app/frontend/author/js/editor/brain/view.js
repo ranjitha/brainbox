@@ -313,12 +313,6 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("pause")
     $("#simulationStartStop").removeClass("play")
-    $(".editBase").fadeOut("slow", () => {
-      $(".simulationBase").fadeIn("slow")
-    })
-    $("#paletteElementsOverlay").fadeIn("fast")
-    $("#paletteElementsOverlay").height($("#paletteElements").height())
-    //this.slider.slider("setValue", 100)
   },
 
   simulationStop: function () {
@@ -332,10 +326,7 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("play")
     $("#simulationStartStop").removeClass("pause")
-    $(".simulationBase").fadeOut("slow", () => {
-      $(".editBase").fadeIn("slow")
-    })
-    $("#paletteElementsOverlay").fadeOut("fast")
+
   },
 
   _calculate: function () {

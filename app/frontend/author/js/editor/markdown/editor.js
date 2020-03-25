@@ -10,9 +10,22 @@ export default class Toolbar {
   constructor() {
   }
 
-  inject(editorId, previewId, content) {
-    this.editorId = editorId
-    this.previewId = previewId
+  inject(section) {
+    this.section = section
+    let content = section.content
+    $(".sections .activeSection .sectionContent").html(`
+              <div class="editorContainerSelector" id="editor-container">
+                <div class="left">
+                  <textarea id="markdownEditor"></textarea>
+                </div>
+                <div class="right">
+                  <article class="markdown-body" id="htmlPreview"></article>
+                </div>
+              </div>
+                `)
+
+    this.editorId = "markdownEditor"
+    this.previewId = "htmlPreview"
 
     this.editor = CodeMirror.fromTextArea(document.getElementById(this.editorId), {
       lineNumbers: true,
@@ -31,6 +44,19 @@ export default class Toolbar {
     this.updatePreview()
 
     return this
+  }
+
+  commit(){
+    return new Promise((resolve, reject) => {
+      this.section.content = this.editor.getValue()
+      resolve(this.section)
+    })
+  }
+
+  cancel(){
+    return new Promise((resolve, reject) => {
+      resolve(this.section)
+    })
   }
 
   updatePreview(){

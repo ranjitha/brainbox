@@ -89,7 +89,7 @@ class Application {
     //
     let file = this.getParam("file")
     if (file) {
-      this.load(conf.backend.shape.get(file))
+      this.fileLoad(file)
     }
     else {
       this.fileNew()
@@ -99,8 +99,8 @@ class Application {
     //
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.id === 'editor') {
-        // Render new content for the hompage
-        this.load(event.state.file)
+        // Render new content for the homepage
+        this.fileLoad(event.state.file)
       }
     })
 
@@ -183,23 +183,6 @@ class Application {
     }
   }
 
-  load(file){
-    this.view.clear()
-    $("#leftTabStrip .editor").click()
-
-    return this.storage.loadUrl(file)
-      .then((content) => {
-        this.view.clear()
-        this.view.centerDocument()
-        let reader = new draw2d.io.json.Reader()
-        reader.unmarshal(this.view, content)
-        this.getConfiguration()
-        this.storage.fileName = file
-        this.view.getCommandStack().markSaveLocation()
-        this.view.centerDocument()
-        return content
-      })
-  }
 
   getParam(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]")
@@ -219,6 +202,24 @@ class Application {
       }
     }
     return results[1]
+  }
+
+
+  fileLoad(name){
+    this.view.clear()
+    $("#leftTabStrip .editor").click()
+
+    return this.storage.loadFile(name)
+      .then((content) => {
+        this.view.clear()
+        this.view.centerDocument()
+        let reader = new draw2d.io.json.Reader()
+        reader.unmarshal(this.view, content)
+        this.getConfiguration()
+        this.view.getCommandStack().markSaveLocation()
+        this.view.centerDocument()
+        return content
+      })
   }
 
   fileNew(shapeTemplate) {

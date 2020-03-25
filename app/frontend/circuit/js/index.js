@@ -3,7 +3,6 @@ import "font-awesome/css/font-awesome.css"
 import "./dialog/PopConfirm"
 import UpdateSuccessDialog from "./dialog/UpdateSuccessDialog"
 import Split from 'split.js'
-import TreeView from 'js-treeview'
 
 require('js-treeview/dist/treeview.min.css')
 
@@ -95,7 +94,7 @@ $(window).load(function () {
   });
 
 
-  Split(['#paletteElementsFilter', '#paletteElementsScroll'], {
+  Split(['#paletteHeader', '#paletteElementsScroll'], {
     gutterSize: 10,
     sizes: [40, 60],
     minSize: 200,

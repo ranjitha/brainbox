@@ -118,7 +118,7 @@ export default class Palette {
     // Create tree
     //
 
-    new TreeView(tree, 'shapeTree');
+    new TreeView(tree, 'paletteFilter');
     $("#paletteElements").shuffle()
     $(".tree-leaf-content").on("click", (event) => {
       try {

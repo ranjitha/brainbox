@@ -1,10 +1,7 @@
-
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
-import global from "./global"
 import conf from "./configuration"
-
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+require('js-treeview/dist/treeview.min.css')
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
@@ -54,7 +51,8 @@ $(window).load(function () {
   // export all required classes for deserialize JSON with "eval"
   // "eval" code didn't sees imported class or code
   //
-  for(var k in global) window[k]=global[k];
+  let global = require("./global")
+  for (let k in global) window[k] = global[k];
 
   socket = io({
       path: '/socket.io'
@@ -65,10 +63,16 @@ $(window).load(function () {
   //
   socket.on("permissions", (permissions) => {
     socket.off("permissions")
-    app = require("./application")
-    app.init(permissions)
-    $(".loader").fadeOut(500, function() { $(this).remove(); })
-    inlineSVG.init()
+    // we must load the "shape/index.js" in the global scope.
+    //
+    $.getScript(conf.shapes.url + "index.js", function () {
+      app = require("./application")
+      app.init(permissions)
+      $(".loader").fadeOut(500, function () {
+        $(this).remove();
+      })
+      inlineSVG.init()
+    })
   })
 
 })

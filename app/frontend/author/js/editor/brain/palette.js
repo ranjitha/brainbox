@@ -15,8 +15,8 @@ export default class Palette {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  constructor(permissions) {
-
+  constructor(view, id, permissions) {
+    this.view = view
     $.getJSON(conf.shapes.url + "index.json", (data) => {
       conf.shapes.version = data[0].version
       let tmpl = Hogan.compile($("#shapeTemplate").html());
@@ -25,7 +25,7 @@ export default class Palette {
         shapes: data
       })
 
-      $("#paletteElements").html(html)
+      $(id).html(html)
 
       this.buildTree(data)
 
@@ -35,14 +35,14 @@ export default class Palette {
       $(".draw2d_droppable").draggable({
         appendTo: "body",
         helper: "clone",
-        drag: function (event, ui) {
-          event = app.view._getEvent(event)
-          let pos = app.view.fromDocumentToCanvasCoordinate(event.clientX, event.clientY)
-          app.view.onDrag(ui.draggable, pos.getX(), pos.getY(), event.shiftKey, event.ctrlKey)
+        drag: (event, ui) => {
+          event = this.view._getEvent(event)
+          let pos = this.view.fromDocumentToCanvasCoordinate(event.clientX, event.clientY)
+          this.view.onDrag(ui.draggable, pos.getX(), pos.getY(), event.shiftKey, event.ctrlKey)
         },
-        stop: function (e, ui) {
+        stop: (e, ui) => {
         },
-        start: function (e, ui) {
+        start: (e, ui) => {
           $(ui.helper).addClass("shadow")
         }
       })
@@ -118,7 +118,7 @@ export default class Palette {
     // Create tree
     //
 
-    new TreeView(tree, 'shapeTree');
+    new TreeView(tree, 'paletteFilter');
     $("#paletteElements").shuffle()
     $(".tree-leaf-content").on("click", (event) => {
       try {

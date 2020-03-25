@@ -20,46 +20,58 @@ export default class View {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"))
 
+    $(document).on("click", ".content", event => {
+      this.onUnselect()
+    })
+
     $(document).on("click", ".sections .section .sectionContent", event => {
       this.onSelect($(event.target).closest(".section"))
+      return false
     })
 
     $(document).on("click","#sectionMenuUp", event=>{
       let id = $(event.target).data("id")
       let index = this.document.index(id)
       if(index>0) {
-        let prev = this.activeSection.parent().prev()
-        this.activeSection.parent().insertBefore(prev)
+        let prev = this.activeSection.prev()
+        this.activeSection.insertBefore(prev)
         this.document.move(index, index-1)
       }
+      return false
     })
 
     $(document).on("click","#sectionMenuDown", event=>{
       let id = $(event.target).data("id")
       let index = this.document.index(id)
       if(index<this.document.length-1) {
-        let prev = this.activeSection.parent().next()
-        this.activeSection.parent().insertAfter(prev)
+        let prev = this.activeSection.next()
+        this.activeSection.insertAfter(prev)
         this.document.move(index, index+1)
       }
+      return false
     })
 
     $(document).on("dblclick", ".sections .section .sectionContent", event => {
       let section = $(event.target).closest(".section")
       this.onSelect(section)
       this.onEdit(section.data("id"))
+      return false
     })
     $(document).on("click","#sectionMenuEdit", event=>{
       this.onEdit($(event.target).data("id"))
+      return false
     })
     $(document).on("click","#sectionMenuDelete", event=>{
       this.onDelete($(event.target).data("id"))
+      return false
     })
     $(document).on("click","#sectionMenuCommitEdit", event=>{
       this.onCommitEdit($(event.target).data("id"))
+      return false
     })
     $(document).on("click","#sectionMenuCancelEdit", event=>{
       this.onCancelEdit()
+      return false
     })
   }
 
@@ -138,6 +150,9 @@ export default class View {
 
 
   onUnselect(){
+    if(this.currentEditor){
+      return
+    }
     if(this.activeSection === null){
       return
     }
@@ -157,28 +172,12 @@ export default class View {
     let menu = $(".sectionMenu")
 
     if(type==='markdown') {
-      $(".sections .activeSection .sectionContent").html(`
-              <div class="editorContainerSelector" id="editor-container">
-                <div class="left">
-                  <textarea id="markdownEditor"></textarea>
-                </div>
-                <div class="right">
-                  <article class="markdown-body" id="htmlPreview"></article>
-                </div>
-              </div>
-                `)
+      this.currentEditor = this.markdownEditor.inject(section)
       $(".sections").removeClass("activeSection")
-      this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content)
     }
     else if (type === "brain"){
-      $(".workspace").append(`
-          <div class="content editorContainerSelector" " id="draw2dCanvasWrapper">
-               <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
-          </div>
-                `)
+      this.currentEditor = this.brainEditor.inject(section)
       $(".sections").removeClass("activeSection")
-      this.currentEditor = this.brainEditor.inject('draw2dCanvas', section.content)
-      $("#draw2dCanvasWrapper").append(menu)
     }
     else {
       return
@@ -195,17 +194,21 @@ export default class View {
     this.render(this.document)
   }
 
-  onCommitEdit(id){
-    let section = this.document.get(id)
-    section.content = this.currentEditor.getValue()
-    this.currentEditor = null;
-    $(".editorContainerSelector").remove()
-    this.render(this.document)
+  onCommitEdit(){
+    this.currentEditor.commit()
+      .then(()=>{
+        this.currentEditor = null;
+        $(".editorContainerSelector").remove()
+        this.render(this.document)
+      })
   }
 
   onCancelEdit(){
-    $(".editorContainerSelector").remove()
-    this.currentEditor = null;
-    this.render(this.document)
+    this.currentEditor.cancel()
+      .then(() => {
+        $(".editorContainerSelector").remove()
+        this.currentEditor = null;
+        this.render(this.document)
+      })
   }
 }

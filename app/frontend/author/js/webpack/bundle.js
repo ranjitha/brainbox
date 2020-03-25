@@ -364,6 +364,10 @@ var _view = __webpack_require__(/*! ./view */ "./app/frontend/author/js/view.js"
 
 var _view2 = _interopRequireDefault(_view);
 
+var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -389,9 +393,9 @@ var Application = function () {
         Mousetrap.unpause();
       });
 
+      this.storage = _BackendStorage2.default;
       this.view = new _view2.default(this, "#editor .content", permissions);
       this.filePane = new _FilesScreen2.default(permissions);
-      this.storage = _BackendStorage2.default;
       this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
 
       // check if the user has added a "file" parameter. In this case we load the shape from
@@ -399,30 +403,16 @@ var Application = function () {
       //
       var file = this.getParam("file");
       if (file) {
-        this.load(conf.backend.sheet.get(file));
-        this.storage.fileName = file;
-      } else {
-        this.fileNew();
+        this.fileLoad(file);
       }
 
       // listen on the history object to load files
       //
       window.addEventListener('popstate', function (event) {
         if (event.state && event.state.id === 'editor') {
-          // Render new content for the hompage
-          _this.load(event.state.file);
+          // Render new content for the homepage
+          _this.fileLoad(event.state.file);
         }
-      });
-    }
-  }, {
-    key: "load",
-    value: function load(file) {
-      var _this2 = this;
-
-      $("#leftTabStrip .editor").click();
-      return this.storage.loadUrl(file).then(function (content) {
-        _this2.view.setDocument(content.json);
-        return content;
       });
     }
   }, {
@@ -445,6 +435,17 @@ var Application = function () {
         }
       }
       return results[1];
+    }
+  }, {
+    key: "fileLoad",
+    value: function fileLoad(name) {
+      var _this2 = this;
+
+      $("#leftTabStrip .editor").click();
+      return this.storage.loadFile(name).then(function (content) {
+        _this2.view.setDocument(content.json);
+        return content;
+      });
     }
   }, {
     key: "fileOpen",
@@ -506,8 +507,12 @@ exports.default = {
   shapes: {
     url: "./shapes/",
     version: "0.0.0" // updated during after loading from the index.json file
-  }
+  },
 
+  color: {
+    high: "#C21B7A",
+    low: "#0078F2"
+  }
 };
 module.exports = exports["default"];
 
@@ -1495,9 +1500,16 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _split = __webpack_require__(/*! split.js */ "./node_modules/split.js/dist/split.es.js");
+
+var _split2 = _interopRequireDefault(_split);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var View = __webpack_require__(/*! ./view */ "./app/frontend/author/js/editor/brain/view.js");
+var Palette = __webpack_require__(/*! ./palette */ "./app/frontend/author/js/editor/brain/palette.js");
 
 var Editor = function () {
   function Editor() {
@@ -1506,14 +1518,48 @@ var Editor = function () {
 
   _createClass(Editor, [{
     key: "inject",
-    value: function inject(editorId, content) {
-      this.view = new View(editorId);
+    value: function inject(section) {
+      this.section = section;
+      var menu = $(".sectionMenu");
+      $(".workspace").append("\n          <div class=\"content editorContainerSelector\" \" id=\"draw2dCanvasWrapper\">\n               <div class=\"canvas\" id=\"draw2dCanvas\" oncontextmenu=\"return false;\">\n          </div>\n       ");
+
+      $("#draw2dCanvasWrapper").append(menu);
+
+      this.view = new View("draw2dCanvas");
+      this.palette = new Palette(this.view, "#paletteElements");
+
+      new draw2d.io.json.Reader().unmarshal(this.view, section.content);
+
+      (0, _split2.default)(['#paletteHeader', '#paletteElementsScroll'], {
+        gutterSize: 10,
+        sizes: [40, 60],
+        minSize: 200,
+        cursor: 'row-resize',
+        direction: 'vertical'
+      });
+
       return this;
     }
   }, {
-    key: "getValue",
-    value: function getValue() {
-      return [];
+    key: "commit",
+    value: function commit() {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        new draw2d.io.json.Writer().marshal(_this.view, function (content) {
+          _this.section.content = content;
+          resolve(_this.section);
+        });
+      });
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {
+      var _this2 = this;
+
+      return new Promise(function (resolve, reject) {
+        resolve(_this2.section);
+      });
     }
   }]);
 
@@ -2543,6 +2589,189 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/author/js/editor/brain/palette.js":
+/*!********************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/palette.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ../../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+var _jsTreeview = __webpack_require__(/*! js-treeview */ "./node_modules/js-treeview/index.js");
+
+var _jsTreeview2 = _interopRequireDefault(_jsTreeview);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ *
+ * The **GraphicalEditor** is responsible for layout and dialog handling.
+ *
+ * @author Andreas Herz
+ */
+
+var Palette = function () {
+  /**
+   * @constructor
+   *
+   * @param {String} canvasId the id of the DOM element to use as paint container
+   */
+  function Palette(view, id, permissions) {
+    var _this = this;
+
+    _classCallCheck(this, Palette);
+
+    this.view = view;
+    $.getJSON(_configuration2.default.shapes.url + "index.json", function (data) {
+      _configuration2.default.shapes.version = data[0].version;
+      var tmpl = _hogan2.default.compile($("#shapeTemplate").html());
+      var html = tmpl.render({
+        shapesUrl: _configuration2.default.shapes.url,
+        shapes: data
+      });
+
+      $(id).html(html);
+
+      _this.buildTree(data);
+
+      // Create the jQuery-Draggable for the palette -> canvas drag&drop interaction
+      //
+      $(".draw2d_droppable").draggable({
+        appendTo: "body",
+        helper: "clone",
+        drag: function drag(event, ui) {
+          event = _this.view._getEvent(event);
+          var pos = _this.view.fromDocumentToCanvasCoordinate(event.clientX, event.clientY);
+          _this.view.onDrag(ui.draggable, pos.getX(), pos.getY(), event.shiftKey, event.ctrlKey);
+        },
+        stop: function stop(e, ui) {},
+        start: function start(e, ui) {
+          $(ui.helper).addClass("shadow");
+        }
+      });
+
+      $('.draw2d_droppable').on('mouseover', function () {
+        $(_this).parent().addClass('glowBorder');
+      }).on('mouseout', function () {
+        $(_this).parent().removeClass('glowBorder');
+      });
+    });
+
+    socket.on("shape:generating", function (msg) {
+      $("div[data-file='" + msg.filePath + "'] ").addClass("spinner");
+    });
+
+    socket.on("shape:generated", function (msg) {
+      $("div[data-file='" + msg.filePath + "'] ").removeClass("spinner");
+      $("div[data-file='" + msg.filePath + "'] img").attr({ src: _configuration2.default.shapes.url + msg.imagePath + "?timestamp=" + new Date().getTime() });
+    });
+  }
+
+  _createClass(Palette, [{
+    key: "buildTree",
+    value: function buildTree(data) {
+      var tree = [];
+      data.forEach(function (element) {
+        tree.push(element.basedir.split("/"));
+      });
+
+      function arrangeIntoTree(paths) {
+        var tree = [];
+
+        for (var i = 0; i < paths.length; i++) {
+          var path = paths[i];
+          var currentLevel = tree;
+          var rootPath = null;
+          for (var j = 0; j < path.length; j++) {
+            var part = path[j];
+            var existingPath = findWhere(currentLevel, 'name', part);
+            rootPath = rootPath ? rootPath + "/" + part : part;
+            if (existingPath) {
+              currentLevel = existingPath.children;
+            } else {
+              var newPart = {
+                name: part,
+                path: rootPath,
+                children: []
+              };
+
+              currentLevel.push(newPart);
+              currentLevel = newPart.children;
+            }
+          }
+        }
+        return tree;
+
+        function findWhere(array, key, value) {
+          var t = 0;
+          while (t < array.length && array[t][key] !== value) {
+            t++;
+          }
+
+          if (t < array.length) {
+            return array[t];
+          } else {
+            return false;
+          }
+        }
+      }
+
+      tree = arrangeIntoTree(tree);
+      //
+      // Create tree
+      //
+
+      new _jsTreeview2.default(tree, 'paletteFilter');
+      $("#paletteElements").shuffle();
+      $(".tree-leaf-content").on("click", function (event) {
+        try {
+          $(".tree-leaf-content").removeClass("selected");
+          var target = $(event.currentTarget);
+          target.addClass("selected");
+          var path = target.data("item").path;
+          var $grid = $("#paletteElements");
+
+          $grid.shuffle('shuffle', function ($el, shuffle) {
+            var text = $.trim($el.data("path")).toLowerCase();
+            if (text === "_request_") return true;
+
+            return text.startsWith(path);
+          });
+
+          return false;
+        } catch (e) {
+          console.log(e);
+        }
+      });
+    }
+  }]);
+
+  return Palette;
+}();
+
+exports.default = Palette;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/author/js/editor/brain/view.js":
 /*!*****************************************************!*\
   !*** ./app/frontend/author/js/editor/brain/view.js ***!
@@ -2885,12 +3114,6 @@ exports.default = draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("pause");
     $("#simulationStartStop").removeClass("play");
-    $(".editBase").fadeOut("slow", function () {
-      $(".simulationBase").fadeIn("slow");
-    });
-    $("#paletteElementsOverlay").fadeIn("fast");
-    $("#paletteElementsOverlay").height($("#paletteElements").height());
-    //this.slider.slider("setValue", 100)
   },
 
   simulationStop: function simulationStop() {
@@ -2904,10 +3127,6 @@ exports.default = draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("play");
     $("#simulationStartStop").removeClass("pause");
-    $(".simulationBase").fadeOut("slow", function () {
-      $(".editBase").fadeIn("slow");
-    });
-    $("#paletteElementsOverlay").fadeOut("fast");
   },
 
   _calculate: function _calculate() {
@@ -3061,11 +3280,15 @@ var Toolbar = function () {
 
   _createClass(Toolbar, [{
     key: 'inject',
-    value: function inject(editorId, previewId, content) {
+    value: function inject(section) {
       var _this = this;
 
-      this.editorId = editorId;
-      this.previewId = previewId;
+      this.section = section;
+      var content = section.content;
+      $(".sections .activeSection .sectionContent").html('\n              <div class="editorContainerSelector" id="editor-container">\n                <div class="left">\n                  <textarea id="markdownEditor"></textarea>\n                </div>\n                <div class="right">\n                  <article class="markdown-body" id="htmlPreview"></article>\n                </div>\n              </div>\n                ');
+
+      this.editorId = "markdownEditor";
+      this.previewId = "htmlPreview";
 
       this.editor = _codemirror2.default.fromTextArea(document.getElementById(this.editorId), {
         lineNumbers: true,
@@ -3084,6 +3307,25 @@ var Toolbar = function () {
       this.updatePreview();
 
       return this;
+    }
+  }, {
+    key: 'commit',
+    value: function commit() {
+      var _this2 = this;
+
+      return new Promise(function (resolve, reject) {
+        _this2.section.content = _this2.editor.getValue();
+        resolve(_this2.section);
+      });
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      var _this3 = this;
+
+      return new Promise(function (resolve, reject) {
+        resolve(_this3.section);
+      });
     }
   }, {
     key: 'updatePreview',
@@ -3219,17 +3461,13 @@ __webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
 
-var _global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
-
-var _global2 = _interopRequireDefault(_global);
-
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
 var _configuration2 = _interopRequireDefault(_configuration);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+__webpack_require__(/*! js-treeview/dist/treeview.min.css */ "./node_modules/js-treeview/dist/treeview.min.css");
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
@@ -3271,8 +3509,9 @@ $(window).load(function () {
   // export all required classes for deserialize JSON with "eval"
   // "eval" code didn't sees imported class or code
   //
-  for (var k in _global2.default) {
-    window[k] = _global2.default[k];
+  var global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
+  for (var k in global) {
+    window[k] = global[k];
   }socket = io({
     path: '/socket.io'
   });
@@ -3282,12 +3521,16 @@ $(window).load(function () {
   //
   socket.on("permissions", function (permissions) {
     socket.off("permissions");
-    app = __webpack_require__(/*! ./application */ "./app/frontend/author/js/application.js");
-    app.init(permissions);
-    $(".loader").fadeOut(500, function () {
-      $(this).remove();
+    // we must load the "shape/index.js" in the global scope.
+    //
+    $.getScript(_configuration2.default.shapes.url + "index.js", function () {
+      app = __webpack_require__(/*! ./application */ "./app/frontend/author/js/application.js");
+      app.init(permissions);
+      $(".loader").fadeOut(500, function () {
+        $(this).remove();
+      });
+      inlineSVG.init();
     });
-    inlineSVG.init();
   });
 });
 
@@ -3387,6 +3630,7 @@ var BackendStorage = function () {
   }, {
     key: "loadFile",
     value: function loadFile(fileName) {
+      this.fileName = fileName;
       return this.loadUrl(_configuration2.default.backend.sheet.get(fileName));
     }
 
@@ -3686,46 +3930,58 @@ var View = function () {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"));
 
+    $(document).on("click", ".content", function (event) {
+      _this.onUnselect();
+    });
+
     $(document).on("click", ".sections .section .sectionContent", function (event) {
       _this.onSelect($(event.target).closest(".section"));
+      return false;
     });
 
     $(document).on("click", "#sectionMenuUp", function (event) {
       var id = $(event.target).data("id");
       var index = _this.document.index(id);
       if (index > 0) {
-        var prev = _this.activeSection.parent().prev();
-        _this.activeSection.parent().insertBefore(prev);
+        var prev = _this.activeSection.prev();
+        _this.activeSection.insertBefore(prev);
         _this.document.move(index, index - 1);
       }
+      return false;
     });
 
     $(document).on("click", "#sectionMenuDown", function (event) {
       var id = $(event.target).data("id");
       var index = _this.document.index(id);
       if (index < _this.document.length - 1) {
-        var prev = _this.activeSection.parent().next();
-        _this.activeSection.parent().insertAfter(prev);
+        var prev = _this.activeSection.next();
+        _this.activeSection.insertAfter(prev);
         _this.document.move(index, index + 1);
       }
+      return false;
     });
 
     $(document).on("dblclick", ".sections .section .sectionContent", function (event) {
       var section = $(event.target).closest(".section");
       _this.onSelect(section);
       _this.onEdit(section.data("id"));
+      return false;
     });
     $(document).on("click", "#sectionMenuEdit", function (event) {
       _this.onEdit($(event.target).data("id"));
+      return false;
     });
     $(document).on("click", "#sectionMenuDelete", function (event) {
       _this.onDelete($(event.target).data("id"));
+      return false;
     });
     $(document).on("click", "#sectionMenuCommitEdit", function (event) {
       _this.onCommitEdit($(event.target).data("id"));
+      return false;
     });
     $(document).on("click", "#sectionMenuCancelEdit", function (event) {
       _this.onCancelEdit();
+      return false;
     });
   }
 
@@ -3800,6 +4056,9 @@ var View = function () {
   }, {
     key: "onUnselect",
     value: function onUnselect() {
+      if (this.currentEditor) {
+        return;
+      }
       if (this.activeSection === null) {
         return;
       }
@@ -3819,14 +4078,11 @@ var View = function () {
       var menu = $(".sectionMenu");
 
       if (type === 'markdown') {
-        $(".sections .activeSection .sectionContent").html("\n              <div class=\"editorContainerSelector\" id=\"editor-container\">\n                <div class=\"left\">\n                  <textarea id=\"markdownEditor\"></textarea>\n                </div>\n                <div class=\"right\">\n                  <article class=\"markdown-body\" id=\"htmlPreview\"></article>\n                </div>\n              </div>\n                ");
+        this.currentEditor = this.markdownEditor.inject(section);
         $(".sections").removeClass("activeSection");
-        this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content);
       } else if (type === "brain") {
-        $(".workspace").append("\n          <div class=\"content editorContainerSelector\" \" id=\"draw2dCanvasWrapper\">\n               <div class=\"canvas\" id=\"draw2dCanvas\" oncontextmenu=\"return false;\">\n          </div>\n                ");
+        this.currentEditor = this.brainEditor.inject(section);
         $(".sections").removeClass("activeSection");
-        this.currentEditor = this.brainEditor.inject('draw2dCanvas', section.content);
-        $("#draw2dCanvasWrapper").append(menu);
       } else {
         return;
       }
@@ -3841,19 +4097,25 @@ var View = function () {
     }
   }, {
     key: "onCommitEdit",
-    value: function onCommitEdit(id) {
-      var section = this.document.get(id);
-      section.content = this.currentEditor.getValue();
-      this.currentEditor = null;
-      $(".editorContainerSelector").remove();
-      this.render(this.document);
+    value: function onCommitEdit() {
+      var _this3 = this;
+
+      this.currentEditor.commit().then(function () {
+        _this3.currentEditor = null;
+        $(".editorContainerSelector").remove();
+        _this3.render(_this3.document);
+      });
     }
   }, {
     key: "onCancelEdit",
     value: function onCancelEdit() {
-      $(".editorContainerSelector").remove();
-      this.currentEditor = null;
-      this.render(this.document);
+      var _this4 = this;
+
+      this.currentEditor.cancel().then(function () {
+        $(".editorContainerSelector").remove();
+        _this4.currentEditor = null;
+        _this4.render(_this4.document);
+      });
     }
   }]);
 
@@ -3966,8 +4228,7 @@ var Files = function () {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
-            var file = _configuration2.default.backend.sheet.get(name);
-            app.load(file).then(function () {
+            app.fileLoad(name).then(function () {
               $el.removeClass("spinner");
               app.historySheet(name);
             });
@@ -17509,6 +17770,25 @@ exports.push([module.i, "/*!\n *  Font Awesome 4.7.0 by @davegandy - http://font
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/js-treeview/dist/treeview.min.css":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/js-treeview/dist/treeview.min.css ***!
+  \**********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".tree-leaf{position:relative}.tree-leaf .tree-child-leaves{display:block;margin-left:15px}.tree-leaf .hidden{display:none;visibility:hidden}.tree-leaf .tree-expando{background:#ddd;border-radius:3px;cursor:pointer;float:left;height:10px;line-height:10px;position:relative;text-align:center;top:5px;width:10px}.tree-leaf .tree-expando:hover{background:#aaa}.tree-leaf .tree-leaf-text{cursor:pointer;float:left;margin-left:5px}.tree-leaf .tree-leaf-text:hover{color:#00f}.tree-leaf .tree-leaf-content:after,.tree-leaf .tree-leaf-content:before{content:\" \";display:table}.tree-leaf .tree-leaf-content:after{clear:both}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/less-loader/dist/cjs.js!./app/frontend/author/less/index.less":
 /*!**************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/less-loader/dist/cjs.js!./app/frontend/author/less/index.less ***!
@@ -17521,7 +17801,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette_container {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.palette_container {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.palette_container .palette_title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.palette_container .palette_title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.palette_container .palette_title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.palette_container .palette_title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.palette_container .palette_header {\n  position: absolute;\n  left: 0px;\n  top: 90px;\n}\n.palette_container .palette_elements {\n  border: 0;\n  overflow: auto;\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin: 20px;\n  cursor: pointer;\n  border-left: 1px dotted rgba(0, 0, 0, 0.3);\n  padding-left: 3px;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.sectionMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 16px;\n}\n.sectionMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.sectionMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#draw2dCanvasWrapper .sectionMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#draw2dCanvasWrapper {\n  background-color: white;\n  top: 0px  !important;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 218px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 110px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.paletteContainer {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin: 20px;\n  cursor: pointer;\n  border-left: 1px dotted rgba(0, 0, 0, 0.3);\n  padding-left: 3px;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n.sectionMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 16px;\n}\n.sectionMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.sectionMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#draw2dCanvasWrapper .sectionMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#draw2dCanvasWrapper {\n  background-color: white;\n  top: 0px  !important;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n", ""]);
 
 // exports
 
@@ -18564,6 +18844,317 @@ var Hogan = {};
   };
 
 })( true ? exports : undefined);
+
+
+/***/ }),
+
+/***/ "./node_modules/js-treeview/dist/treeview.min.css":
+/*!********************************************************!*\
+  !*** ./node_modules/js-treeview/dist/treeview.min.css ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../css-loader!./treeview.min.css */ "./node_modules/css-loader/index.js!./node_modules/js-treeview/dist/treeview.min.css");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
+
+/***/ }),
+
+/***/ "./node_modules/js-treeview/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/js-treeview/index.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(/*! ./src/treeview */ "./node_modules/js-treeview/src/treeview.js");
+
+
+/***/ }),
+
+/***/ "./node_modules/js-treeview/src/treeview.js":
+/*!**************************************************!*\
+  !*** ./node_modules/js-treeview/src/treeview.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+(function (define) {
+  'use strict';
+
+  (function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+      define(factory);
+    } else if (true) {
+      module.exports = factory();
+    } else {}
+  }(window, function () {
+    return (function () {
+
+      /** List of events supported by the tree view */
+      var events = [
+        'expand',
+        'expandAll',
+        'collapse',
+        'collapseAll',
+        'select'
+      ];
+
+	  /**
+	   * A utilite function to check to see if something is a DOM object
+	   * @param {object} Object to test
+	   * @returns {boolean} If the object is a DOM object
+	   */
+	  function isDOMElement(obj) {
+        try {
+          return obj instanceof HTMLElement;
+        } catch (e) {
+          // Some browsers don't support using the HTMLElement so some extra
+          // checks are needed.
+            return typeof obj === 'object' && obj.nodeType === 1 && typeof obj.style === 'object' && typeof obj.ownerDocument === 'object';
+        }
+	  }
+
+      /**
+       * A forEach that will work with a NodeList and generic Arrays
+       * @param {array|NodeList} arr The array to iterate over
+       * @param {function} callback Function that executes for each element. First parameter is element, second is index
+       * @param {object} The context to execute callback with
+       */
+      function forEach(arr, callback, scope) {
+        var i, len = arr.length;
+        for (i = 0; i < len; i += 1) {
+          callback.call(scope, arr[i], i);
+        }
+      }
+
+      /**
+       * Emit an event from the tree view
+       * @param {string} name The name of the event to emit
+       */
+      function emit(instance, name) {
+        var args = [].slice.call(arguments, 2);
+        if (events.indexOf(name) > -1) {
+          if (instance.handlers[name] && instance.handlers[name] instanceof Array) {
+            forEach(instance.handlers[name], function (handle) {
+              window.setTimeout(function () {
+                handle.callback.apply(handle.context, args);
+              }, 0);
+            });
+          }
+        } else {
+          throw new Error(name + ' event cannot be found on TreeView.');
+        }
+      }
+
+      /**
+       * Renders the tree view in the DOM
+       */
+      function render(self) {
+        var container = isDOMElement(self.node) ? self.node : document.getElementById(self.node);
+        var leaves = [], click;
+        var renderLeaf = function (item) {
+          var leaf = document.createElement('div');
+          var content = document.createElement('div');
+          var text = document.createElement('div');
+          var expando = document.createElement('div');
+
+          leaf.setAttribute('class', 'tree-leaf');
+          content.setAttribute('class', 'tree-leaf-content');
+          content.setAttribute('data-item', JSON.stringify(item));
+          text.setAttribute('class', 'tree-leaf-text');
+          text.textContent = item.name;
+          expando.setAttribute('class', 'tree-expando ' + (item.expanded ? 'expanded' : ''));
+          expando.textContent = item.expanded ? '-' : '+';
+          content.appendChild(expando);
+          content.appendChild(text);
+          leaf.appendChild(content);
+          if (item.children && item.children.length > 0) {
+            var children = document.createElement('div');
+            children.setAttribute('class', 'tree-child-leaves');
+            forEach(item.children, function (child) {
+              var childLeaf = renderLeaf(child);
+              children.appendChild(childLeaf);
+            });
+            if (!item.expanded) {
+              children.classList.add('hidden');
+            }
+            leaf.appendChild(children);
+          } else {
+            expando.classList.add('hidden');
+          }
+          return leaf;
+        };
+
+        forEach(self.data, function (item) {
+          leaves.push(renderLeaf.call(self, item));
+        });
+        container.innerHTML = leaves.map(function (leaf) {
+          return leaf.outerHTML;
+        }).join('');
+
+        click = function (e) {
+          var parent = (e.target || e.currentTarget).parentNode;
+          var data = JSON.parse(parent.getAttribute('data-item'));
+          var leaves = parent.parentNode.querySelector('.tree-child-leaves');
+          if (leaves) {
+            if (leaves.classList.contains('hidden')) {
+              self.expand(parent, leaves);
+            } else {
+              self.collapse(parent, leaves);
+            }
+          } else {
+            emit(self, 'select', {
+              target: e,
+              data: data
+            });
+          }
+        };
+
+        forEach(container.querySelectorAll('.tree-leaf-text'), function (node) {
+          node.onclick = click;
+        });
+        forEach(container.querySelectorAll('.tree-expando'), function (node) {
+          node.onclick = click;
+        });
+      }
+
+      /**
+       * @constructor
+       * @property {object} handlers The attached event handlers
+       * @property {object} data The JSON object that represents the tree structure
+       * @property {DOMElement} node The DOM element to render the tree in
+       */
+      function TreeView(data, node) {
+        this.handlers = {};
+        this.node = node;
+        this.data = data;
+        render(this);
+      }
+
+      /**
+       * Expands a leaflet by the expando or the leaf text
+       * @param {DOMElement} node The parent node that contains the leaves
+       * @param {DOMElement} leaves The leaves wrapper element
+       */
+      TreeView.prototype.expand = function (node, leaves, skipEmit) {
+        var expando = node.querySelector('.tree-expando');
+        expando.textContent = '-';
+        leaves.classList.remove('hidden');
+        if (skipEmit) { return; }
+        emit(this, 'expand', {
+          target: node,
+          leaves: leaves
+        });
+      };
+
+      TreeView.prototype.expandAll = function () {
+        var self = this;
+        var nodes = document.getElementById(self.node).querySelectorAll('.tree-expando');
+        forEach(nodes, function (node) {
+          var parent = node.parentNode;
+          var leaves = parent.parentNode.querySelector('.tree-child-leaves');
+          if (parent && leaves && parent.hasAttribute('data-item')) {
+            self.expand(parent, leaves, true);
+          }
+        });
+        emit(this, 'expandAll', {});
+      };
+
+      /**
+       * Collapses a leaflet by the expando or the leaf text
+       * @param {DOMElement} node The parent node that contains the leaves
+       * @param {DOMElement} leaves The leaves wrapper element
+       */
+      TreeView.prototype.collapse = function (node, leaves, skipEmit) {
+        var expando = node.querySelector('.tree-expando');
+        expando.textContent = '+';
+        leaves.classList.add('hidden');
+        if (skipEmit) { return; }
+        emit(this, 'collapse', {
+          target: node,
+          leaves: leaves
+        });
+      };
+
+      /**
+       */
+      TreeView.prototype.collapseAll = function () {
+        var self = this;
+        var nodes = document.getElementById(self.node).querySelectorAll('.tree-expando');
+        forEach(nodes, function (node) {
+          var parent = node.parentNode;
+          var leaves = parent.parentNode.querySelector('.tree-child-leaves');
+          if (parent && leaves && parent.hasAttribute('data-item')) {
+            self.collapse(parent, leaves, true);
+          }
+        });
+        emit(this, 'collapseAll', {});
+      };
+
+      /**
+       * Attach an event handler to the tree view
+       * @param {string} name Name of the event to attach
+       * @param {function} callback The callback to execute on the event
+       * @param {object} scope The context to call the callback with
+       */
+      TreeView.prototype.on = function (name, callback, scope) {
+        if (events.indexOf(name) > -1) {
+          if (!this.handlers[name]) {
+            this.handlers[name] = [];
+          }
+          this.handlers[name].push({
+            callback: callback,
+            context: scope
+          });
+        } else {
+          throw new Error(name + ' is not supported by TreeView.');
+        }
+      };
+
+      /**
+       * Deattach an event handler from the tree view
+       * @param {string} name Name of the event to deattach
+       * @param {function} callback The function to deattach
+       */
+      TreeView.prototype.off = function (name, callback) {
+        var index, found = false;
+        if (this.handlers[name] instanceof Array) {
+          this.handlers[name].forEach(function (handle, i) {
+            index = i;
+            if (handle.callback === callback && !found) {
+              found = true;
+            }
+          });
+          if (found) {
+            this.handlers[name].splice(index, 1);
+          }
+        }
+      };
+
+      return TreeView;
+    }());
+  }));
+}(window.define));
 
 
 /***/ }),
@@ -39050,6 +39641,791 @@ module.exports = {
 
 
 module.exports = 0;
+
+
+/***/ }),
+
+/***/ "./node_modules/split.js/dist/split.es.js":
+/*!************************************************!*\
+  !*** ./node_modules/split.js/dist/split.es.js ***!
+  \************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+// The programming goals of Split.js are to deliver readable, understandable and
+// maintainable code, while at the same time manually optimizing for tiny minified file size,
+// browser compatibility without additional requirements, graceful fallback (IE8 is supported)
+// and very few assumptions about the user's page layout.
+var global = window;
+var document = global.document;
+
+// Save a couple long function names that are used frequently.
+// This optimization saves around 400 bytes.
+var addEventListener = 'addEventListener';
+var removeEventListener = 'removeEventListener';
+var getBoundingClientRect = 'getBoundingClientRect';
+var gutterStartDragging = '_a';
+var aGutterSize = '_b';
+var bGutterSize = '_c';
+var HORIZONTAL = 'horizontal';
+var NOOP = function () { return false; };
+
+// Figure out if we're in IE8 or not. IE8 will still render correctly,
+// but will be static instead of draggable.
+var isIE8 = global.attachEvent && !global[addEventListener];
+
+// Helper function determines which prefixes of CSS calc we need.
+// We only need to do this once on startup, when this anonymous function is called.
+//
+// Tests -webkit, -moz and -o prefixes. Modified from StackOverflow:
+// http://stackoverflow.com/questions/16625140/js-feature-detection-to-detect-the-usage-of-webkit-calc-over-calc/16625167#16625167
+var calc = (['', '-webkit-', '-moz-', '-o-']
+    .filter(function (prefix) {
+        var el = document.createElement('div');
+        el.style.cssText = "width:" + prefix + "calc(9px)";
+
+        return !!el.style.length
+    })
+    .shift()) + "calc";
+
+// Helper function checks if its argument is a string-like type
+var isString = function (v) { return typeof v === 'string' || v instanceof String; };
+
+// Helper function allows elements and string selectors to be used
+// interchangeably. In either case an element is returned. This allows us to
+// do `Split([elem1, elem2])` as well as `Split(['#id1', '#id2'])`.
+var elementOrSelector = function (el) {
+    if (isString(el)) {
+        var ele = document.querySelector(el);
+        if (!ele) {
+            throw new Error(("Selector " + el + " did not match a DOM element"))
+        }
+        return ele
+    }
+
+    return el
+};
+
+// Helper function gets a property from the properties object, with a default fallback
+var getOption = function (options, propName, def) {
+    var value = options[propName];
+    if (value !== undefined) {
+        return value
+    }
+    return def
+};
+
+var getGutterSize = function (gutterSize, isFirst, isLast, gutterAlign) {
+    if (isFirst) {
+        if (gutterAlign === 'end') {
+            return 0
+        }
+        if (gutterAlign === 'center') {
+            return gutterSize / 2
+        }
+    } else if (isLast) {
+        if (gutterAlign === 'start') {
+            return 0
+        }
+        if (gutterAlign === 'center') {
+            return gutterSize / 2
+        }
+    }
+
+    return gutterSize
+};
+
+// Default options
+var defaultGutterFn = function (i, gutterDirection) {
+    var gut = document.createElement('div');
+    gut.className = "gutter gutter-" + gutterDirection;
+    return gut
+};
+
+var defaultElementStyleFn = function (dim, size, gutSize) {
+    var style = {};
+
+    if (!isString(size)) {
+        if (!isIE8) {
+            style[dim] = calc + "(" + size + "% - " + gutSize + "px)";
+        } else {
+            style[dim] = size + "%";
+        }
+    } else {
+        style[dim] = size;
+    }
+
+    return style
+};
+
+var defaultGutterStyleFn = function (dim, gutSize) {
+    var obj;
+
+    return (( obj = {}, obj[dim] = (gutSize + "px"), obj ));
+};
+
+// The main function to initialize a split. Split.js thinks about each pair
+// of elements as an independant pair. Dragging the gutter between two elements
+// only changes the dimensions of elements in that pair. This is key to understanding
+// how the following functions operate, since each function is bound to a pair.
+//
+// A pair object is shaped like this:
+//
+// {
+//     a: DOM element,
+//     b: DOM element,
+//     aMin: Number,
+//     bMin: Number,
+//     dragging: Boolean,
+//     parent: DOM element,
+//     direction: 'horizontal' | 'vertical'
+// }
+//
+// The basic sequence:
+//
+// 1. Set defaults to something sane. `options` doesn't have to be passed at all.
+// 2. Initialize a bunch of strings based on the direction we're splitting.
+//    A lot of the behavior in the rest of the library is paramatized down to
+//    rely on CSS strings and classes.
+// 3. Define the dragging helper functions, and a few helpers to go with them.
+// 4. Loop through the elements while pairing them off. Every pair gets an
+//    `pair` object and a gutter.
+// 5. Actually size the pair elements, insert gutters and attach event listeners.
+var Split = function (idsOption, options) {
+    if ( options === void 0 ) options = {};
+
+    var ids = idsOption;
+    var dimension;
+    var clientAxis;
+    var position;
+    var positionEnd;
+    var clientSize;
+    var elements;
+
+    // Allow HTMLCollection to be used as an argument when supported
+    if (Array.from) {
+        ids = Array.from(ids);
+    }
+
+    // All DOM elements in the split should have a common parent. We can grab
+    // the first elements parent and hope users read the docs because the
+    // behavior will be whacky otherwise.
+    var firstElement = elementOrSelector(ids[0]);
+    var parent = firstElement.parentNode;
+    var parentStyle = getComputedStyle ? getComputedStyle(parent) : null;
+    var parentFlexDirection = parentStyle ? parentStyle.flexDirection : null;
+
+    // Set default options.sizes to equal percentages of the parent element.
+    var sizes = getOption(options, 'sizes') || ids.map(function () { return 100 / ids.length; });
+
+    // Standardize minSize to an array if it isn't already. This allows minSize
+    // to be passed as a number.
+    var minSize = getOption(options, 'minSize', 100);
+    var minSizes = Array.isArray(minSize) ? minSize : ids.map(function () { return minSize; });
+
+    // Get other options
+    var expandToMin = getOption(options, 'expandToMin', false);
+    var gutterSize = getOption(options, 'gutterSize', 10);
+    var gutterAlign = getOption(options, 'gutterAlign', 'center');
+    var snapOffset = getOption(options, 'snapOffset', 30);
+    var dragInterval = getOption(options, 'dragInterval', 1);
+    var direction = getOption(options, 'direction', HORIZONTAL);
+    var cursor = getOption(
+        options,
+        'cursor',
+        direction === HORIZONTAL ? 'col-resize' : 'row-resize'
+    );
+    var gutter = getOption(options, 'gutter', defaultGutterFn);
+    var elementStyle = getOption(
+        options,
+        'elementStyle',
+        defaultElementStyleFn
+    );
+    var gutterStyle = getOption(options, 'gutterStyle', defaultGutterStyleFn);
+
+    // 2. Initialize a bunch of strings based on the direction we're splitting.
+    // A lot of the behavior in the rest of the library is paramatized down to
+    // rely on CSS strings and classes.
+    if (direction === HORIZONTAL) {
+        dimension = 'width';
+        clientAxis = 'clientX';
+        position = 'left';
+        positionEnd = 'right';
+        clientSize = 'clientWidth';
+    } else if (direction === 'vertical') {
+        dimension = 'height';
+        clientAxis = 'clientY';
+        position = 'top';
+        positionEnd = 'bottom';
+        clientSize = 'clientHeight';
+    }
+
+    // 3. Define the dragging helper functions, and a few helpers to go with them.
+    // Each helper is bound to a pair object that contains its metadata. This
+    // also makes it easy to store references to listeners that that will be
+    // added and removed.
+    //
+    // Even though there are no other functions contained in them, aliasing
+    // this to self saves 50 bytes or so since it's used so frequently.
+    //
+    // The pair object saves metadata like dragging state, position and
+    // event listener references.
+
+    function setElementSize(el, size, gutSize, i) {
+        // Split.js allows setting sizes via numbers (ideally), or if you must,
+        // by string, like '300px'. This is less than ideal, because it breaks
+        // the fluid layout that `calc(% - px)` provides. You're on your own if you do that,
+        // make sure you calculate the gutter size by hand.
+        var style = elementStyle(dimension, size, gutSize, i);
+
+        Object.keys(style).forEach(function (prop) {
+            // eslint-disable-next-line no-param-reassign
+            el.style[prop] = style[prop];
+        });
+    }
+
+    function setGutterSize(gutterElement, gutSize, i) {
+        var style = gutterStyle(dimension, gutSize, i);
+
+        Object.keys(style).forEach(function (prop) {
+            // eslint-disable-next-line no-param-reassign
+            gutterElement.style[prop] = style[prop];
+        });
+    }
+
+    function getSizes() {
+        return elements.map(function (element) { return element.size; })
+    }
+
+    // Supports touch events, but not multitouch, so only the first
+    // finger `touches[0]` is counted.
+    function getMousePosition(e) {
+        if ('touches' in e) { return e.touches[0][clientAxis] }
+        return e[clientAxis]
+    }
+
+    // Actually adjust the size of elements `a` and `b` to `offset` while dragging.
+    // calc is used to allow calc(percentage + gutterpx) on the whole split instance,
+    // which allows the viewport to be resized without additional logic.
+    // Element a's size is the same as offset. b's size is total size - a size.
+    // Both sizes are calculated from the initial parent percentage,
+    // then the gutter size is subtracted.
+    function adjust(offset) {
+        var a = elements[this.a];
+        var b = elements[this.b];
+        var percentage = a.size + b.size;
+
+        a.size = (offset / this.size) * percentage;
+        b.size = percentage - (offset / this.size) * percentage;
+
+        setElementSize(a.element, a.size, this[aGutterSize], a.i);
+        setElementSize(b.element, b.size, this[bGutterSize], b.i);
+    }
+
+    // drag, where all the magic happens. The logic is really quite simple:
+    //
+    // 1. Ignore if the pair is not dragging.
+    // 2. Get the offset of the event.
+    // 3. Snap offset to min if within snappable range (within min + snapOffset).
+    // 4. Actually adjust each element in the pair to offset.
+    //
+    // ---------------------------------------------------------------------
+    // |    | <- a.minSize               ||              b.minSize -> |    |
+    // |    |  | <- this.snapOffset      ||     this.snapOffset -> |  |    |
+    // |    |  |                         ||                        |  |    |
+    // |    |  |                         ||                        |  |    |
+    // ---------------------------------------------------------------------
+    // | <- this.start                                        this.size -> |
+    function drag(e) {
+        var offset;
+        var a = elements[this.a];
+        var b = elements[this.b];
+
+        if (!this.dragging) { return }
+
+        // Get the offset of the event from the first side of the
+        // pair `this.start`. Then offset by the initial position of the
+        // mouse compared to the gutter size.
+        offset =
+            getMousePosition(e) -
+            this.start +
+            (this[aGutterSize] - this.dragOffset);
+
+        if (dragInterval > 1) {
+            offset = Math.round(offset / dragInterval) * dragInterval;
+        }
+
+        // If within snapOffset of min or max, set offset to min or max.
+        // snapOffset buffers a.minSize and b.minSize, so logic is opposite for both.
+        // Include the appropriate gutter sizes to prevent overflows.
+        if (offset <= a.minSize + snapOffset + this[aGutterSize]) {
+            offset = a.minSize + this[aGutterSize];
+        } else if (
+            offset >=
+            this.size - (b.minSize + snapOffset + this[bGutterSize])
+        ) {
+            offset = this.size - (b.minSize + this[bGutterSize]);
+        }
+
+        // Actually adjust the size.
+        adjust.call(this, offset);
+
+        // Call the drag callback continously. Don't do anything too intensive
+        // in this callback.
+        getOption(options, 'onDrag', NOOP)();
+    }
+
+    // Cache some important sizes when drag starts, so we don't have to do that
+    // continously:
+    //
+    // `size`: The total size of the pair. First + second + first gutter + second gutter.
+    // `start`: The leading side of the first element.
+    //
+    // ------------------------------------------------
+    // |      aGutterSize -> |||                      |
+    // |                     |||                      |
+    // |                     |||                      |
+    // |                     ||| <- bGutterSize       |
+    // ------------------------------------------------
+    // | <- start                             size -> |
+    function calculateSizes() {
+        // Figure out the parent size minus padding.
+        var a = elements[this.a].element;
+        var b = elements[this.b].element;
+
+        var aBounds = a[getBoundingClientRect]();
+        var bBounds = b[getBoundingClientRect]();
+
+        this.size =
+            aBounds[dimension] +
+            bBounds[dimension] +
+            this[aGutterSize] +
+            this[bGutterSize];
+        this.start = aBounds[position];
+        this.end = aBounds[positionEnd];
+    }
+
+    function innerSize(element) {
+        // Return nothing if getComputedStyle is not supported (< IE9)
+        // Or if parent element has no layout yet
+        if (!getComputedStyle) { return null }
+
+        var computedStyle = getComputedStyle(element);
+
+        if (!computedStyle) { return null }
+
+        var size = element[clientSize];
+
+        if (size === 0) { return null }
+
+        if (direction === HORIZONTAL) {
+            size -=
+                parseFloat(computedStyle.paddingLeft) +
+                parseFloat(computedStyle.paddingRight);
+        } else {
+            size -=
+                parseFloat(computedStyle.paddingTop) +
+                parseFloat(computedStyle.paddingBottom);
+        }
+
+        return size
+    }
+
+    // When specifying percentage sizes that are less than the computed
+    // size of the element minus the gutter, the lesser percentages must be increased
+    // (and decreased from the other elements) to make space for the pixels
+    // subtracted by the gutters.
+    function trimToMin(sizesToTrim) {
+        // Try to get inner size of parent element.
+        // If it's no supported, return original sizes.
+        var parentSize = innerSize(parent);
+        if (parentSize === null) {
+            return sizesToTrim
+        }
+
+        if (minSizes.reduce(function (a, b) { return a + b; }, 0) > parentSize) {
+            return sizesToTrim
+        }
+
+        // Keep track of the excess pixels, the amount of pixels over the desired percentage
+        // Also keep track of the elements with pixels to spare, to decrease after if needed
+        var excessPixels = 0;
+        var toSpare = [];
+
+        var pixelSizes = sizesToTrim.map(function (size, i) {
+            // Convert requested percentages to pixel sizes
+            var pixelSize = (parentSize * size) / 100;
+            var elementGutterSize = getGutterSize(
+                gutterSize,
+                i === 0,
+                i === sizesToTrim.length - 1,
+                gutterAlign
+            );
+            var elementMinSize = minSizes[i] + elementGutterSize;
+
+            // If element is too smal, increase excess pixels by the difference
+            // and mark that it has no pixels to spare
+            if (pixelSize < elementMinSize) {
+                excessPixels += elementMinSize - pixelSize;
+                toSpare.push(0);
+                return elementMinSize
+            }
+
+            // Otherwise, mark the pixels it has to spare and return it's original size
+            toSpare.push(pixelSize - elementMinSize);
+            return pixelSize
+        });
+
+        // If nothing was adjusted, return the original sizes
+        if (excessPixels === 0) {
+            return sizesToTrim
+        }
+
+        return pixelSizes.map(function (pixelSize, i) {
+            var newPixelSize = pixelSize;
+
+            // While there's still pixels to take, and there's enough pixels to spare,
+            // take as many as possible up to the total excess pixels
+            if (excessPixels > 0 && toSpare[i] - excessPixels > 0) {
+                var takenPixels = Math.min(
+                    excessPixels,
+                    toSpare[i] - excessPixels
+                );
+
+                // Subtract the amount taken for the next iteration
+                excessPixels -= takenPixels;
+                newPixelSize = pixelSize - takenPixels;
+            }
+
+            // Return the pixel size adjusted as a percentage
+            return (newPixelSize / parentSize) * 100
+        })
+    }
+
+    // stopDragging is very similar to startDragging in reverse.
+    function stopDragging() {
+        var self = this;
+        var a = elements[self.a].element;
+        var b = elements[self.b].element;
+
+        if (self.dragging) {
+            getOption(options, 'onDragEnd', NOOP)(getSizes());
+        }
+
+        self.dragging = false;
+
+        // Remove the stored event listeners. This is why we store them.
+        global[removeEventListener]('mouseup', self.stop);
+        global[removeEventListener]('touchend', self.stop);
+        global[removeEventListener]('touchcancel', self.stop);
+        global[removeEventListener]('mousemove', self.move);
+        global[removeEventListener]('touchmove', self.move);
+
+        // Clear bound function references
+        self.stop = null;
+        self.move = null;
+
+        a[removeEventListener]('selectstart', NOOP);
+        a[removeEventListener]('dragstart', NOOP);
+        b[removeEventListener]('selectstart', NOOP);
+        b[removeEventListener]('dragstart', NOOP);
+
+        a.style.userSelect = '';
+        a.style.webkitUserSelect = '';
+        a.style.MozUserSelect = '';
+        a.style.pointerEvents = '';
+
+        b.style.userSelect = '';
+        b.style.webkitUserSelect = '';
+        b.style.MozUserSelect = '';
+        b.style.pointerEvents = '';
+
+        self.gutter.style.cursor = '';
+        self.parent.style.cursor = '';
+        document.body.style.cursor = '';
+    }
+
+    // startDragging calls `calculateSizes` to store the inital size in the pair object.
+    // It also adds event listeners for mouse/touch events,
+    // and prevents selection while dragging so avoid the selecting text.
+    function startDragging(e) {
+        // Right-clicking can't start dragging.
+        if ('button' in e && e.button !== 0) {
+            return
+        }
+
+        // Alias frequently used variables to save space. 200 bytes.
+        var self = this;
+        var a = elements[self.a].element;
+        var b = elements[self.b].element;
+
+        // Call the onDragStart callback.
+        if (!self.dragging) {
+            getOption(options, 'onDragStart', NOOP)(getSizes());
+        }
+
+        // Don't actually drag the element. We emulate that in the drag function.
+        e.preventDefault();
+
+        // Set the dragging property of the pair object.
+        self.dragging = true;
+
+        // Create two event listeners bound to the same pair object and store
+        // them in the pair object.
+        self.move = drag.bind(self);
+        self.stop = stopDragging.bind(self);
+
+        // All the binding. `window` gets the stop events in case we drag out of the elements.
+        global[addEventListener]('mouseup', self.stop);
+        global[addEventListener]('touchend', self.stop);
+        global[addEventListener]('touchcancel', self.stop);
+        global[addEventListener]('mousemove', self.move);
+        global[addEventListener]('touchmove', self.move);
+
+        // Disable selection. Disable!
+        a[addEventListener]('selectstart', NOOP);
+        a[addEventListener]('dragstart', NOOP);
+        b[addEventListener]('selectstart', NOOP);
+        b[addEventListener]('dragstart', NOOP);
+
+        a.style.userSelect = 'none';
+        a.style.webkitUserSelect = 'none';
+        a.style.MozUserSelect = 'none';
+        a.style.pointerEvents = 'none';
+
+        b.style.userSelect = 'none';
+        b.style.webkitUserSelect = 'none';
+        b.style.MozUserSelect = 'none';
+        b.style.pointerEvents = 'none';
+
+        // Set the cursor at multiple levels
+        self.gutter.style.cursor = cursor;
+        self.parent.style.cursor = cursor;
+        document.body.style.cursor = cursor;
+
+        // Cache the initial sizes of the pair.
+        calculateSizes.call(self);
+
+        // Determine the position of the mouse compared to the gutter
+        self.dragOffset = getMousePosition(e) - self.end;
+    }
+
+    // adjust sizes to ensure percentage is within min size and gutter.
+    sizes = trimToMin(sizes);
+
+    // 5. Create pair and element objects. Each pair has an index reference to
+    // elements `a` and `b` of the pair (first and second elements).
+    // Loop through the elements while pairing them off. Every pair gets a
+    // `pair` object and a gutter.
+    //
+    // Basic logic:
+    //
+    // - Starting with the second element `i > 0`, create `pair` objects with
+    //   `a = i - 1` and `b = i`
+    // - Set gutter sizes based on the _pair_ being first/last. The first and last
+    //   pair have gutterSize / 2, since they only have one half gutter, and not two.
+    // - Create gutter elements and add event listeners.
+    // - Set the size of the elements, minus the gutter sizes.
+    //
+    // -----------------------------------------------------------------------
+    // |     i=0     |         i=1         |        i=2       |      i=3     |
+    // |             |                     |                  |              |
+    // |           pair 0                pair 1             pair 2           |
+    // |             |                     |                  |              |
+    // -----------------------------------------------------------------------
+    var pairs = [];
+    elements = ids.map(function (id, i) {
+        // Create the element object.
+        var element = {
+            element: elementOrSelector(id),
+            size: sizes[i],
+            minSize: minSizes[i],
+            i: i,
+        };
+
+        var pair;
+
+        if (i > 0) {
+            // Create the pair object with its metadata.
+            pair = {
+                a: i - 1,
+                b: i,
+                dragging: false,
+                direction: direction,
+                parent: parent,
+            };
+
+            pair[aGutterSize] = getGutterSize(
+                gutterSize,
+                i - 1 === 0,
+                false,
+                gutterAlign
+            );
+            pair[bGutterSize] = getGutterSize(
+                gutterSize,
+                false,
+                i === ids.length - 1,
+                gutterAlign
+            );
+
+            // if the parent has a reverse flex-direction, switch the pair elements.
+            if (
+                parentFlexDirection === 'row-reverse' ||
+                parentFlexDirection === 'column-reverse'
+            ) {
+                var temp = pair.a;
+                pair.a = pair.b;
+                pair.b = temp;
+            }
+        }
+
+        // Determine the size of the current element. IE8 is supported by
+        // staticly assigning sizes without draggable gutters. Assigns a string
+        // to `size`.
+        //
+        // IE9 and above
+        if (!isIE8) {
+            // Create gutter elements for each pair.
+            if (i > 0) {
+                var gutterElement = gutter(i, direction, element.element);
+                setGutterSize(gutterElement, gutterSize, i);
+
+                // Save bound event listener for removal later
+                pair[gutterStartDragging] = startDragging.bind(pair);
+
+                // Attach bound event listener
+                gutterElement[addEventListener](
+                    'mousedown',
+                    pair[gutterStartDragging]
+                );
+                gutterElement[addEventListener](
+                    'touchstart',
+                    pair[gutterStartDragging]
+                );
+
+                parent.insertBefore(gutterElement, element.element);
+
+                pair.gutter = gutterElement;
+            }
+        }
+
+        setElementSize(
+            element.element,
+            element.size,
+            getGutterSize(
+                gutterSize,
+                i === 0,
+                i === ids.length - 1,
+                gutterAlign
+            ),
+            i
+        );
+
+        // After the first iteration, and we have a pair object, append it to the
+        // list of pairs.
+        if (i > 0) {
+            pairs.push(pair);
+        }
+
+        return element
+    });
+
+    function adjustToMin(element) {
+        var isLast = element.i === pairs.length;
+        var pair = isLast ? pairs[element.i - 1] : pairs[element.i];
+
+        calculateSizes.call(pair);
+
+        var size = isLast
+            ? pair.size - element.minSize - pair[bGutterSize]
+            : element.minSize + pair[aGutterSize];
+
+        adjust.call(pair, size);
+    }
+
+    elements.forEach(function (element) {
+        var computedSize = element.element[getBoundingClientRect]()[dimension];
+
+        if (computedSize < element.minSize) {
+            if (expandToMin) {
+                adjustToMin(element);
+            } else {
+                // eslint-disable-next-line no-param-reassign
+                element.minSize = computedSize;
+            }
+        }
+    });
+
+    function setSizes(newSizes) {
+        var trimmed = trimToMin(newSizes);
+        trimmed.forEach(function (newSize, i) {
+            if (i > 0) {
+                var pair = pairs[i - 1];
+
+                var a = elements[pair.a];
+                var b = elements[pair.b];
+
+                a.size = trimmed[i - 1];
+                b.size = newSize;
+
+                setElementSize(a.element, a.size, pair[aGutterSize], a.i);
+                setElementSize(b.element, b.size, pair[bGutterSize], b.i);
+            }
+        });
+    }
+
+    function destroy(preserveStyles, preserveGutter) {
+        pairs.forEach(function (pair) {
+            if (preserveGutter !== true) {
+                pair.parent.removeChild(pair.gutter);
+            } else {
+                pair.gutter[removeEventListener](
+                    'mousedown',
+                    pair[gutterStartDragging]
+                );
+                pair.gutter[removeEventListener](
+                    'touchstart',
+                    pair[gutterStartDragging]
+                );
+            }
+
+            if (preserveStyles !== true) {
+                var style = elementStyle(
+                    dimension,
+                    pair.a.size,
+                    pair[aGutterSize]
+                );
+
+                Object.keys(style).forEach(function (prop) {
+                    elements[pair.a].element.style[prop] = '';
+                    elements[pair.b].element.style[prop] = '';
+                });
+            }
+        });
+    }
+
+    if (isIE8) {
+        return {
+            setSizes: setSizes,
+            destroy: destroy,
+        }
+    }
+
+    return {
+        setSizes: setSizes,
+        getSizes: getSizes,
+        collapse: function collapse(i) {
+            adjustToMin(elements[i]);
+        },
+        destroy: destroy,
+        parent: parent,
+        pairs: pairs,
+    }
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Split);
 
 
 /***/ }),
