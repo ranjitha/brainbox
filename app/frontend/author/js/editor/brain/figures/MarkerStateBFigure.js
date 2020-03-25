@@ -1,4 +1,4 @@
-import conf from "../Configuration"
+import conf from "../../../configuration"
 
 export default draw2d.shape.layout.HorizontalLayout.extend({
 

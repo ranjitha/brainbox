@@ -1,6 +1,6 @@
 ﻿<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-<title>Brainbox Designer</title>
+<title>Brainbox Author</title>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="viewport" content="width=device-width, minimum-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -13,7 +13,6 @@
   <link href="../_common/css/loader.css" rel='stylesheet' type='text/css'/>
 
   <script>
-
   var app = null
   var socket = null
 </script>
@@ -50,7 +49,6 @@
 
      <div class="tab-pane active" id="editor">
        <div class="workspace">
-
           <div class="toolbar navbar-default">
                <span class="group" id="editorgroup_fileoperations">
                   <span class="image-button"  id="editorFileOpen">
@@ -101,20 +99,20 @@
 
           </div>
 
-           <div id="layer" class="palette">
-             <div class="title">
+           <div class="palette_container">
+             <div class="palette_title">
                <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
                <div>
                  <h1>Brainbox</h1>
                  <h2>Author</h2>
                </div>
              </div>
-             <div id="layer_header" class="panetitle">Sections</div>
-             <div id="layer_elements"></div>
+             <div class="palette_header">Sections</div>
+             <div class="palette_elements"></div>
            </div>
 
            <div class="content">
-                  Content Content Content
+
            </div>
        </div>
      </div>
@@ -151,8 +149,22 @@
 </div>
 
 
-<!-- Shape Files list Template
--->
+<!-- Template for the shapes files in the brain editor
+  -->
+<script id="shapeTemplate" type="text/x-jsrender">
+{{#shapes}}
+    <div  data-name='{{name}}'  data-file='{{filePath}}'  data-path="{{filePath}}" class="mix col-md-6 pallette_item">
+      <div class="glow">
+          <img data-shape="{{name}}" data-file='{{filePath}}' data-path="{{filePath}}" class="draw2d_droppable" src="{{shapesUrl}}{{image}}"/>
+          <div>{{basename}}</div>
+       </div>
+    </div>
+{{/shapes}}
+</script>
+
+
+<!-- Files list Template
+  -->
 <script id="filesTemplate" type="text/x-jsrender">
   <div>Folder: {{folder}}</div>
   <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
@@ -185,10 +197,9 @@
   </ul>
 </script>
 
+
 <!--
-  # Save Dialog
-  #
-  #
+  Save Dialog
 -->
 <div id="fileSaveDialog" class="modal fade genericDialog" tabindex="-1">
     <div class="modal-dialog ">
@@ -246,11 +257,9 @@
 </div>
 
 
-
-   <!--
-     # GitHub File select/open dialog
-     #
-     -->
+<!--
+  GitHub File select/open dialog
+ -->
 <div id="fileOpenDialog" class="modal fade genericDialog" tabindex="-1">
     <div class="modal-dialog ">
         <div class="modal-content">
@@ -289,7 +298,7 @@
 
 </body>
 
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css">
+<link href="//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" rel="stylesheet" >
 <link href='//fonts.googleapis.com/css?family=Roboto:400,300,400italic,500,700,100,900' rel='stylesheet' type='text/css'>
 <link href='../_common/bootstrap/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
 <link href="../_common/anno.js/anno.css" rel='stylesheet' type='text/css'/>

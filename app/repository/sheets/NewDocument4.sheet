@@ -1,14 +1,9 @@
 {
   "json": [
     {
-      "id": "O5NOvZP7Wc",
-      "type": "draw2d",
-      "content": []
-    },
-    {
       "id": "SI0N8wZ9J",
       "type": "markdown",
-      "content": "## Header **bolder**\n\n### ver"
+      "content": "## Header Document 4\n\n### ver"
     },
     {
       "id": "Mvlfk4n7oX",
@@ -16,8 +11,13 @@
       "content": "## Header"
     },
     {
-      "id": "AIRUAOxJzn",
-      "type": "draw2d",
+      "id": "xPsSNhyQs",
+      "type": "brain",
+      "content": []
+    },
+    {
+      "id": "AkxC1iVcX",
+      "type": "brain",
       "content": []
     }
   ]

@@ -1,4 +1,3 @@
-
 import Toolbar from "./toolbar"
 import storage from "./io/BackendStorage"
 import FileOpen from "./dialog/FileOpen"
@@ -15,12 +14,12 @@ class Application {
   constructor() {
   }
 
-  init(permissions){
-    $( "body" )
-      .delegate( ".mousetrap-pause", "focus", function() {
+  init(permissions) {
+    $("body")
+      .delegate(".mousetrap-pause", "focus", function () {
         Mousetrap.pause()
       })
-      .delegate(".mousetrap-pause", "blur", function (){
+      .delegate(".mousetrap-pause", "blur", function () {
         Mousetrap.unpause()
       });
 
@@ -37,8 +36,7 @@ class Application {
     if (file) {
       this.load(conf.backend.sheet.get(file))
       this.storage.fileName = file
-    }
-    else {
+    } else {
       this.fileNew()
     }
 
@@ -53,7 +51,7 @@ class Application {
 
   }
 
-  load(file){
+  load(file) {
     $("#leftTabStrip .editor").click()
     return this.storage.loadUrl(file)
       .then((content) => {
@@ -82,16 +80,12 @@ class Application {
     return results[1]
   }
 
-  fileNew(shapeTemplate) {
-
-  }
-
   fileOpen() {
     new FileOpen().show(this.storage, this.view)
   }
 
   fileSave() {
-    new FileSave().show(this.storage,this.view)
+    new FileSave().show(this.storage, this.view)
   }
 
 

@@ -78,6 +78,7 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(new draw2d.policy.canvas.SnapToGeometryEditPolicy())
     this.installEditPolicy(new draw2d.policy.canvas.SnapToCenterEditPolicy())
     this.installEditPolicy(new draw2d.policy.canvas.SnapToInBetweenEditPolicy())
+    this.installEditPolicy(new draw2d.policy.canvas.ShowGridEditPolicy())
     this.installEditPolicy(new EditEditPolicy())
 
     // Enable Copy&Paste for figures

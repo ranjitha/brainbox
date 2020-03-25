@@ -1,6 +1,7 @@
 const shortid = require('shortid')
 const Document = require("./document")
-const MarkdownEditor = require("./inplace/markdown/editor")
+const MarkdownEditor = require("./editor/markdown/editor")
+const BrainEditor = require("./editor/brain/editor")
 
 export default class View {
 
@@ -11,9 +12,8 @@ export default class View {
   constructor(app, id, permissions) {
 
     this.markdownEditor = new MarkdownEditor()
-
+    this.brainEditor = new BrainEditor()
     this.document = new Document()
-
     this.activeSection = null;
     this.html = $(id)
 
@@ -81,19 +81,18 @@ export default class View {
   addBrain(){
     let entry = {
       id: shortid.generate(),
-      type: "draw2d",
+      type: "brain",
       content: []
     }
     this.document.add(entry)
     this.renderBrain(entry)
   }
 
-
   render(document){
     this.html.find(".sections").html("")
     document.forEach( entry => {
       switch(entry.type){
-        case "draw2d":
+        case "brain":
           this.renderBrain(entry)
               break
         case "markdown":
@@ -107,13 +106,17 @@ export default class View {
     let markdown = this.markdownEditor.render(entry.content)
     this.html.find(".sections").append(`
         <div data-id="${entry.id}" class='section'>
-           <div class="sectionContent">${markdown}</div>
+           <div class="sectionContent" data-type="markdown">${markdown}</div>
         </div>
       `)
   }
 
   renderBrain(entry){
-    this.html.find(".sections").append(`<div data-id="${entry.id}" class='section'><div>${entry.id}</div></div>`)
+    this.html.find(".sections").append(`
+        <div data-id="${entry.id}" class='section'>
+            <div class="sectionContent" data-type="brain">${entry.id}</div>
+        </div>
+      `)
   }
 
   onSelect(sectionDOM){
@@ -125,7 +128,7 @@ export default class View {
     this.activeSection = sectionDOM
     this.activeSection.addClass('activeSection')
     $(".sections .activeSection").append(`
-        <div class='menu'>
+        <div class='sectionMenu'>
           <div data-id="${id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
           <div data-id="${id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
           <div data-id="${id}" id="sectionMenuEdit"   class='fa fa-edit' ></div>
@@ -138,7 +141,7 @@ export default class View {
     if(this.activeSection === null){
       return
     }
-    $(".sections .activeSection .menu").remove()
+    $(".sectionMenu").remove()
     this.activeSection.removeClass("activeSection")
     this.activeSection = null
   }
@@ -150,22 +153,38 @@ export default class View {
     }
 
     let section = this.document.get(id)
+    let type = section.type
+    let menu = $(".sectionMenu")
 
-    $(".sections .activeSection .sectionContent").html(`
-            <div id="editor-container">
-              <div class="left">
-                <textarea id="markdownEditor"></textarea>
+    if(type==='markdown') {
+      $(".sections .activeSection .sectionContent").html(`
+              <div class="editorContainerSelector" id="editor-container">
+                <div class="left">
+                  <textarea id="markdownEditor"></textarea>
+                </div>
+                <div class="right">
+                  <article class="markdown-body" id="htmlPreview"></article>
+                </div>
               </div>
-              <div class="right">
-                <article class="markdown-body" id="htmlPreview"></article>
-              </div>
-            </div>
-              `)
-    $(".sections").removeClass("activeSection")
+                `)
+      $(".sections").removeClass("activeSection")
+      this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content)
+    }
+    else if (type === "brain"){
+      $(".workspace").append(`
+          <div class="content editorContainerSelector" " id="draw2dCanvasWrapper">
+               <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
+          </div>
+                `)
+      $(".sections").removeClass("activeSection")
+      this.currentEditor = this.brainEditor.inject('draw2dCanvas', section.content)
+      $("#draw2dCanvasWrapper").append(menu)
+    }
+    else {
+      return
+    }
 
-    this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content)
-
-    $(".sections .menu").html(`
+    menu.html(`
           <div data-id="${id}" id="sectionMenuCommitEdit"   class='fa fa-check-square-o' ></div>
           <div data-id="${id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
         `)
@@ -178,13 +197,14 @@ export default class View {
 
   onCommitEdit(id){
     let section = this.document.get(id)
-    let value = this.currentEditor.getValue()
-    section.content = value
+    section.content = this.currentEditor.getValue()
     this.currentEditor = null;
+    $(".editorContainerSelector").remove()
     this.render(this.document)
   }
 
   onCancelEdit(){
+    $(".editorContainerSelector").remove()
     this.currentEditor = null;
     this.render(this.document)
   }

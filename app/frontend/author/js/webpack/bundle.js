@@ -447,9 +447,6 @@ var Application = function () {
       return results[1];
     }
   }, {
-    key: "fileNew",
-    value: function fileNew(shapeTemplate) {}
-  }, {
     key: "fileOpen",
     value: function fileOpen() {
       new _FileOpen2.default().show(this.storage, this.view);
@@ -504,7 +501,13 @@ exports.default = {
       },
       save: "/backend/sheet/save"
     }
+  },
+
+  shapes: {
+    url: "./shapes/",
+    version: "0.0.0" // updated during after loading from the index.json file
   }
+
 };
 module.exports = exports["default"];
 
@@ -806,10 +809,160 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/author/js/global.js":
-/*!******************************************!*\
-  !*** ./app/frontend/author/js/global.js ***!
-  \******************************************/
+/***/ "./app/frontend/author/js/editor/brain/ConnectionRouter.js":
+/*!*****************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/ConnectionRouter.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _ConnectionSelectionFeedbackPolicy = __webpack_require__(/*! ./ConnectionSelectionFeedbackPolicy */ "./app/frontend/author/js/editor/brain/ConnectionSelectionFeedbackPolicy.js");
+
+var _ConnectionSelectionFeedbackPolicy2 = _interopRequireDefault(_ConnectionSelectionFeedbackPolicy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.layout.connection.InteractiveManhattanConnectionRouter.extend({
+    NAME: "ConnectionRouter",
+
+    /**
+     * @constructor
+     * Creates a new Router object.
+     *
+     */
+    init: function init() {
+        this._super();
+
+        this.setBridgeRadius(4);
+        this.setVertexRadius(3);
+    },
+
+    onInstall: function onInstall(conn) {
+        this._super.apply(this, arguments);
+        conn.installEditPolicy(new _ConnectionSelectionFeedbackPolicy2.default());
+    },
+
+    /**
+     * @method
+     * Set the radius of the vertex circle.
+     *
+     * @param {Number} radius
+     */
+    setVertexRadius: function setVertexRadius(radius) {
+        this.vertexRadius = radius;
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Set the radius or span of the bridge. A bridge will be drawn if two connections are crossing and didn't have any
+     * common port.
+     *
+     * @param {Number} radius
+     */
+    setBridgeRadius: function setBridgeRadius(radius) {
+        this.bridgeRadius = radius;
+        this.bridge_LR = [" r", 0.5, -0.5, radius - radius / 2, -(radius - radius / 4), radius, -radius, radius + radius / 2, -(radius - radius / 4), radius * 2, "0 "].join(" ");
+        this.bridge_RL = [" r", -0.5, -0.5, -(radius - radius / 2), -(radius - radius / 4), -radius, -radius, -(radius + radius / 2), -(radius - radius / 4), -radius * 2, "0 "].join(" ");
+
+        return this;
+    },
+
+    /**
+     * @inheritdoc
+     */
+    x_paint: function x_paint(conn) {
+        var _this = this;
+        // get the intersections to the other connections
+        //
+        var intersectionsASC = conn.getCanvas().getIntersection(conn).sort("x");
+        var intersectionsDESC = intersectionsASC.clone().reverse();
+
+        var intersectionForCalc = intersectionsASC;
+
+        // add a ArrayList of all added vertex nodes to the connection
+        //
+        if (typeof conn.vertexNodes !== "undefined" && conn.vertexNodes !== null) {
+            conn.vertexNodes.remove();
+        }
+        conn.vertexNodes = conn.canvas.paper.set();
+
+        // ATTENTION: we cast all x/y coordinates to integer and add 0.5 to avoid subpixel rendering of
+        //            the connection. The 1px or 2px lines look much clearer than before.
+        //
+        var ps = conn.getVertices();
+        var p = ps.get(0);
+        var path = ["M", p.x, " ", p.y];
+
+        var oldP = p;
+        var bridgeWidth = this.bridgeRadius;
+        var bridgeCode = null;
+
+        var calc = function calc(ii, interP) {
+            if (draw2d.shape.basic.Line.hit(5, oldP.x, oldP.y, p.x, p.y, interP.x, interP.y) === true) {
+                // It is a vertex node..
+                //
+                if (conn.sharingPorts(interP.other)) {
+                    var other = interP.other;
+                    var otherZ = other.getZOrder();
+                    var connZ = conn.getZOrder();
+                    if (connZ < otherZ) {
+                        var vertexNode = conn.canvas.paper.ellipse(interP.x, interP.y, _this.vertexRadius, _this.vertexRadius).attr({ fill: conn.lineColor.hash() });
+                        conn.vertexNodes.push(vertexNode);
+                    }
+                }
+                // ..or a bridge. We draw only horizontal bridges. Just a design decision
+                //
+                else if ((p.y | 0) === (interP.y | 0)) {
+                        path.push(" L", interP.x - bridgeWidth, " ", interP.y);
+                        path.push(bridgeCode);
+                    }
+            }
+        };
+
+        for (var i = 1; i < ps.getSize(); i++) {
+            p = ps.get(i);
+
+            // line goes from right->left.
+            if (oldP.x > p.x) {
+                intersectionForCalc = intersectionsDESC;
+                bridgeCode = this.bridge_RL;
+                bridgeWidth = -this.bridgeRadius;
+            }
+            // line goes from left->right
+            else {
+                    intersectionForCalc = intersectionsASC;
+                    bridgeCode = this.bridge_LR;
+                    bridgeWidth = this.bridgeRadius;
+                }
+
+            // bridge   => the connections didn't have a common port
+            // vertex => the connections did have a common source or target port
+            //
+            intersectionForCalc.each(calc);
+
+            path.push(" L", p.x, " ", p.y);
+            oldP = p;
+        }
+        conn.svgPathString = path.join("");
+    }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/ConnectionSelectionFeedbackPolicy.js":
+/*!**********************************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/ConnectionSelectionFeedbackPolicy.js ***!
+  \**********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -820,120 +973,2058 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
+var _ProbeFigure = __webpack_require__(/*! ./figures/ProbeFigure */ "./app/frontend/author/js/editor/brain/figures/ProbeFigure.js");
 
-var _mousetrap2 = _interopRequireDefault(_mousetrap);
-
-__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/author/js/util/mousetrap-global.js");
-
-__webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/author/js/util/mousetrap-pause.js");
-
-var _inlineSVG = __webpack_require__(/*! ../../_common/inlineSVG */ "./app/frontend/_common/inlineSVG.js");
-
-var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
+var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = {
-  Mousetrap: _mousetrap2.default,
-  inlineSVG: _inlineSVG2.default
-};
+exports.default = draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
+
+  NAME: "ConnectionSelectionFeedbackPolicy",
+
+  /**
+   * @constructor
+   * Creates a new Router object.
+   *
+   */
+  init: function init() {
+    this._super();
+  },
+
+  onRightMouseDown: function onRightMouseDown(conn, x, y, shiftKey, ctrlKey) {
+    var segment = conn.hitSegment(x, y);
+
+    if (segment === null) {
+      return;
+    }
+
+    // standard menu entry "split". It is always possible to split a connection
+    //
+    var items = {};
+
+    // add/remove of connection segments is only possible in the edit mode
+    //
+    if (conn.getCanvas().isSimulationRunning() === false) {
+      items.split = { name: draw2d.Configuration.i18n.menu.addSegment
+
+        // "remove" a segment isn't always possible. depends from the router algorithm
+        //
+      };if (conn.getRouter().canRemoveSegmentAt(conn, segment.index)) {
+        items.remove = { name: draw2d.Configuration.i18n.menu.deleteSegment };
+      }
+    }
+
+    // add a probe label is always possible
+    //
+    var probeFigure = conn.getProbeFigure();
+    if (probeFigure === null) {
+      items.probe = { name: "Add Probe" };
+    } else {
+      items.unprobe = { name: "Remove Probe" };
+    }
+
+    $.contextMenu({
+      selector: 'body',
+      events: {
+        hide: function hide() {
+          $.contextMenu('destroy');
+        }
+      },
+      callback: $.proxy(function (key, options) {
+        var originalVertices = void 0,
+            newVertices = void 0;
+
+        switch (key) {
+          case "remove":
+            // deep copy of the vertices of the connection for the command stack to avoid side effects
+            originalVertices = conn.getVertices().clone(true);
+            this.removeSegment(conn, segment.index);
+            newVertices = conn.getVertices().clone(true);
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
+            break;
+
+          case "split":
+            // deep copy of the vertices of the connection for the command stack to avoid side effects
+            originalVertices = conn.getVertices().clone(true);
+            this.splitSegment(conn, segment.index, x, y);
+            newVertices = conn.getVertices().clone(true);
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
+            break;
+
+          case "probe":
+            var text = prompt("Probe Signal Label");
+            if (text) {
+              var label = new _ProbeFigure2.default({ text: text, stroke: 0, x: -20, y: -40 });
+              var locator = new draw2d.layout.locator.ManhattanMidpointLocator();
+              label.installEditor(new draw2d.ui.LabelInplaceEditor());
+              conn.add(label, locator);
+            }
+            break;
+
+          case "unprobe":
+            conn.remove(conn.getProbeFigure());
+            break;
+          default:
+            break;
+        }
+      }, this),
+      x: x,
+      y: y,
+      items: items
+    });
+  }
+});
 module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/author/js/index.js":
-/*!*****************************************!*\
-  !*** ./app/frontend/author/js/index.js ***!
-  \*****************************************/
+/***/ "./app/frontend/author/js/editor/brain/DropInterceptorPolicy.js":
+/*!**********************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/DropInterceptorPolicy.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.less");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.policy.canvas.DropInterceptorPolicy.extend({
 
-__webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
+  NAME: "draw2d.policy.canvas.DropInterceptorPolicy",
 
-var _global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
+  /**
+   * @constructor
+   *
+   */
+  init: function init(attr, setter, getter) {
+    this._super(attr, setter, getter);
+  },
 
-var _global2 = _interopRequireDefault(_global);
+  /**
+   * @method
+   * Called if the user want connect a port with any kind draw2d.Figure.<br>
+   * Return a non <b>null</b> value if the interceptor accept the connect event.<br>
+   * <br>
+   * It is possible to delegate the drop event to another figure if the policy
+   * returns another figure. This is usefull if a figure want to accept a port
+   * drop event and delegates this drop event to another port.<br>
+   *
+   *
+   * @param {draw2d.Figure} connectInquirer the figure who wants connect
+   * @param {draw2d.Figure} connectIntent the potential connect target
+   *
+   * @return {draw2d.Figure} the calculated connect intent or <b>null</b> if the interceptor uses the veto right
+   */
+  delegateTarget: function delegateTarget(connectInquirer, connectIntent) {
+    // we allow that a figure with a special class is droppable to a connection
+    //
+    if (connectInquirer instanceof draw2d.shape.node.Node && connectIntent instanceof draw2d.Connection) {
+      if (connectInquirer.getInputPorts().getSize() > 0 && connectInquirer.getOutputPorts().getSize() > 0) {
+        return connectIntent;
+      }
+    }
 
-var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
+    // a composite accept any kind of figures exceptional ports
+    //
+    if (!(connectInquirer instanceof draw2d.Port) && connectIntent instanceof draw2d.shape.composite.StrongComposite) {
+      return connectIntent;
+    }
+
+    // Ports accepts only Ports as DropTarget
+    //
+    if (!(connectIntent instanceof draw2d.Port) || !(connectInquirer instanceof draw2d.Port)) {
+      return null;
+    }
+
+    // consider the max possible connections for this port
+    //
+    if (connectIntent.getConnections().getSize() >= connectIntent.getMaxFanOut()) {
+      return null;
+    }
+
+    // It is not allowed to connect two output ports
+    if (connectInquirer instanceof draw2d.OutputPort && connectIntent instanceof draw2d.OutputPort) {
+      return null;
+    }
+
+    // It is not allowed to connect two input ports
+    if (connectInquirer instanceof draw2d.InputPort && connectIntent instanceof draw2d.InputPort) {
+      return null;
+    }
+
+    // It is not possible to create a loop back connection at the moment.
+    // Reason: no connection router implemented for this case
+    if (connectInquirer instanceof draw2d.Port && connectIntent instanceof draw2d.Port) {}
+    //    if(connectInquirer === connectIntent){
+    //       return null;
+    // }
+
+
+    // redirect the dragEnter handling to the hybrid port
+    //
+    if (connectInquirer instanceof draw2d.Port && connectIntent instanceof draw2d.shape.node.Hub) {
+      return connectIntent.getHybridPort(0);
+    }
+
+    // return the connectTarget determined by the framework or delegate it to another
+    // figure.
+    return connectIntent;
+  }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/EditEditPolicy.js":
+/*!***************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/EditEditPolicy.js ***!
+  \***************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _MarkerFigure = __webpack_require__(/*! ./figures/MarkerFigure */ "./app/frontend/author/js/editor/brain/figures/MarkerFigure.js");
+
+var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import FigureConfigDialog from "./dialog/FigureConfigDialog"
+
+exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
+
+  init: function init() {
+    this._super();
+    this.mouseMoveProxy = this._onMouseMoveCallback.bind(this);
+    this.configIcon = null;
+  },
+
+  /**
+   * @method
+   * Called by the canvas if the user click on a figure.
+   *
+   * @param {draw2d.Figure} the figure under the click event. Can be null
+   * @param {Number} mouseX the x coordinate of the mouse during the click event
+   * @param {Number} mouseY the y coordinate of the mouse during the click event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   *
+   * @since 3.0.0
+   */
+  onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
+    // we only forward the click-event to the MarkerFigure which the user can show hide per
+    // default
+    // lt in the edit mode as well.
+    if (figure instanceof _MarkerFigure2.default) {
+      this._super(figure, mouseX, mouseY, shiftKey, ctrlKey);
+    }
+  },
+
+  onInstall: function onInstall(canvas) {
+    this._super(canvas);
+
+    // provide configuration menu if the mouse is close to a shape
+    //
+    canvas.on("mousemove", this.mouseMoveProxy);
+  },
+
+  onUninstall: function onUninstall(canvas) {
+    this._super(canvas);
+
+    canvas.off(this.mouseMoveProxy);
+  },
+
+  onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
+    if (shiftKey === true && this.mouseDownElement === null) {
+      var rx = Math.min(x, this.x);
+      var ry = Math.min(y, this.y);
+      var rh = Math.abs(y - this.y);
+      var rw = Math.abs(x - this.x);
+      var raftFigure = new Raft();
+      raftFigure.attr({
+        x: rx,
+        y: ry,
+        width: rw,
+        height: rh,
+        color: "#1c9bab"
+      });
+      canvas.add(raftFigure);
+      this.boundingBoxFigure1.setCanvas(null);
+      this.boundingBoxFigure1 = null;
+      this.boundingBoxFigure2.setCanvas(null);
+      this.boundingBoxFigure2 = null;
+    } else {
+      this._super(canvas, x, y, shiftKey, ctrlKey);
+    }
+  },
+
+  _onMouseMoveCallback: function _onMouseMoveCallback(emitter, event) {
+    var _this = this;
+
+    // there is no benefit to show decorations during Drag&Drop of an shape
+    //
+    if (this.mouseMovedDuringMouseDown === true) {
+      if (this.configIcon !== null) {
+        this.configIcon.remove();
+        this.configIcon = null;
+      }
+      return;
+    }
+
+    var hit = null;
+
+    emitter.getFigures().each(function (index, figure) {
+      if (figure.hitTest(event.x, event.y, 40)) {
+
+        hit = figure;
+        return false;
+      }
+    });
+
+    if (hit !== null && hit.getParameterSettings && hit.getParameterSettings().length > 0) {
+      var pos = hit.getBoundingBox().getTopLeft();
+      pos = emitter.fromCanvasToDocumentCoordinate(pos.x, pos.y);
+      pos.y -= 30;
+
+      if (this.configIcon === null) {
+        this.configIcon = $("<div class='fa fa-cog' id='configMenuIcon'></div>");
+        $("body").append(this.configIcon);
+        this.configIcon.on("click", function () {
+          // FigureConfigDialog.show(hit, pos)
+          _this.configFigure = hit;
+          if (_this.configIcon !== null) {
+            _this.configIcon.remove();
+            _this.configIcon = null;
+          }
+        });
+      }
+      this.configIcon.css({ top: pos.y, left: pos.x, position: 'absolute' });
+    } else {
+      if (this.configIcon !== null) {
+        var x = this.configIcon;
+        this.configIcon = null;
+        x.fadeOut(500, function () {
+          return x.remove();
+        });
+      }
+    }
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/LabelInplaceEditor.js":
+/*!*******************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/LabelInplaceEditor.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.ui.LabelInplaceEditor.extend({
+
+  NAME: "LabelInplaceEditor",
+
+  /**
+   * @constructor
+   *
+   */
+  init: function init(attr, setter, getter) {
+    this._super({
+      onStart: function onStart() {
+        Mousetrap.pause();
+      },
+      onCancel: function onCancel() {
+        Mousetrap.unpause();
+      },
+      onCommit: function onCommit() {
+        Mousetrap.unpause();
+      }
+    }, setter, getter);
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/SimulationEditPolicy.js":
+/*!*********************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/SimulationEditPolicy.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.policy.canvas.ReadOnlySelectionPolicy.extend({
+
+  init: function init() {
+    this._super();
+    this.mouseDownElement = null;
+  },
+
+  onInstall: function onInstall(canvas) {
+    canvas.getFigures().each(function (index, shape) {
+      shape.onStart();
+    });
+  },
+
+  onUninstall: function onUninstall(canvas) {
+    canvas.getFigures().each(function (index, shape) {
+      shape.onStop();
+    });
+  },
+
+  /**
+   * @method
+   *
+   * @param {draw2d.Canvas} canvas
+   * @param {Number} x the x-coordinate of the mouse down event
+   * @param {Number} y the y-coordinate of the mouse down event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   */
+  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
+    var figure = canvas.getBestFigure(x, y);
+
+    // may the figure is assigned to a composite. In this case the composite can
+    // override the event receiver
+    while (figure !== null) {
+      var delegated = figure.getSelectionAdapter()();
+      if (delegated === figure) {
+        break;
+      }
+      figure = delegated;
+    }
+
+    // ignore ports since version 6.1.0. This is handled by the ConnectionCreatePolicy
+    //
+    if (figure instanceof draw2d.Port) {
+      return; // silently
+    }
+
+    this.mouseDownElement = figure;
+
+    if (this.mouseDownElement !== null) {
+      this.mouseDownElement.fireEvent("mousedown", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
+    }
+  },
+
+  /**
+   * @method
+   *
+   * @param {draw2d.Canvas} canvas
+   * @param {Number} x the x-coordinate of the mouse down event
+   * @param {Number} y the y-coordinate of the mouse down event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   */
+  onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
+    if (this.mouseDownElement !== null) {
+      this.mouseDownElement.fireEvent("mouseup", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
+    }
+    this.mouseDownElement = null;
+  },
+
+  /**
+   * @method
+   * Called by the canvas if the user click on a figure.
+   *
+   * @param {draw2d.Figure} the figure under the click event. Can be null
+   * @param {Number} mouseX the x coordinate of the mouse during the click event
+   * @param {Number} mouseY the y coordinate of the mouse during the click event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   *
+   * @since 3.0.0
+   */
+  onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
+    if (figure !== null) {
+      figure.fireEvent("click", {
+        figure: figure,
+        x: mouseX,
+        y: mouseY,
+        relX: mouseX - figure.getAbsoluteX(),
+        relY: mouseY - figure.getAbsoluteY(),
+        shiftKey: shiftKey,
+        ctrlKey: ctrlKey
+      });
+
+      figure.onClick();
+    }
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/editor.js":
+/*!*******************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/editor.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var View = __webpack_require__(/*! ./view */ "./app/frontend/author/js/editor/brain/view.js");
+
+var Editor = function () {
+  function Editor() {
+    _classCallCheck(this, Editor);
+  }
+
+  _createClass(Editor, [{
+    key: "inject",
+    value: function inject(editorId, content) {
+      this.view = new View(editorId);
+      return this;
+    }
+  }, {
+    key: "getValue",
+    value: function getValue() {
+      return [];
+    }
+  }]);
+
+  return Editor;
+}();
+
+exports.default = Editor;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/CircuitFigure.js":
+/*!**********************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/CircuitFigure.js ***!
+  \**********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.SetFigure.extend({
+
+  NAME: "CircuitFigure",
+
+  init: function init(attr, setter, getter) {
+
+    this._super(attr, setter, getter);
+
+    this.persistPorts = false;
+  },
+
+  applyAlpha: function applyAlpha() {},
+
+  layerGet: function layerGet(name, attributes) {
+    if (this.svgNodes === null) return null;
+
+    var result = null;
+    this.svgNodes.some(function (shape) {
+      if (shape.data("name") === name) {
+        result = shape;
+      }
+      return result !== null;
+    });
+
+    return result;
+  },
+
+  layerAttr: function layerAttr(name, attributes) {
+    if (this.svgNodes === null) return;
+
+    this.svgNodes.forEach(function (shape) {
+      if (shape.data("name") === name) {
+        shape.attr(attributes);
+      }
+    });
+  },
+
+  layerShow: function layerShow(name, flag, duration) {
+    if (this.svgNodes === null) return;
+
+    if (duration) {
+      this.svgNodes.forEach(function (node) {
+        if (node.data("name") === name) {
+          if (flag) {
+            node.attr({ opacity: 0 }).show().animate({ opacity: 1 }, duration);
+          } else {
+            node.animate({ opacity: 0 }, duration, function () {
+              this.hide();
+            });
+          }
+        }
+      });
+    } else {
+      this.svgNodes.forEach(function (node) {
+        if (node.data("name") === name) {
+          if (flag) {
+            node.show();
+          } else {
+            node.hide();
+          }
+        }
+      });
+    }
+  },
+
+  calculate: function calculate() {},
+
+  onStart: function onStart() {},
+
+  onStop: function onStop() {},
+
+  getParameterSettings: function getParameterSettings() {
+    return [];
+  },
+
+  getRequiredHardware: function getRequiredHardware() {
+    return {
+      raspi: false,
+      arduino: false
+    };
+  },
+
+  onDrop: function onDrop(dropTarget, x, y, shiftKey, ctrlKey) {
+    // Activate a "smart insert" If the user drop this figure on connection
+    //
+    /*
+    if (dropTarget instanceof draw2d.Connection) {
+      let additionalConnection = dropTarget.getCanvas().createConnection()
+      let oldSource = dropTarget.getSource()
+      let oldTarget = dropTarget.getTarget()
+      if (oldSource instanceof draw2d.InputPort) {
+        oldSource = dropTarget.getTarget()
+        oldTarget = dropTarget.getSource()
+      }
+       let stack = this.getCanvas().getCommandStack()
+      let cmd = new draw2d.command.CommandReconnect(dropTarget)
+      cmd.setNewPorts(oldSource, this.getInputPort(0))
+      stack.execute(cmd)
+       cmd = new draw2d.command.CommandConnect(oldTarget, this.getOutputPort(0))
+      cmd.setConnection(additionalConnection)
+      stack.execute(cmd)
+    }
+    */
+  },
+
+  /**
+   * @method
+   * Return an objects with all important attributes for XML or JSON serialization
+   *
+   * @returns {Object}
+   */
+  getPersistentAttributes: function getPersistentAttributes() {
+    var memento = this._super();
+
+    memento.value = this.value;
+
+    // add all decorations to the memento
+    //
+    memento.labels = [];
+    this.children.each(function (i, e) {
+      var labelJSON = e.figure.getPersistentAttributes();
+      labelJSON.locator = e.locator.NAME;
+      memento.labels.push(labelJSON);
+    });
+
+    return memento;
+  },
+
+  /**
+   * @method
+   * Read all attributes from the serialized properties and transfer them into the shape.
+   *
+   * @param {Object} memento
+   * @returns
+   */
+  setPersistentAttributes: function setPersistentAttributes(memento) {
+    this._super(memento);
+
+    if (typeof memento.value !== "undefined") {
+      this.value = memento.value;
+    }
+
+    // remove all decorations created in the constructor of this element
+    //
+    this.resetChildren();
+
+    // and add all children of the JSON document.
+    //
+    $.each(memento.labels, $.proxy(function (i, json) {
+      // create the figure stored in the JSON
+      var figure = eval("new " + json.type + "()");
+
+      // apply all attributes
+      figure.attr(json);
+
+      // instantiate the locator
+      var locator = eval("new " + json.locator + "()");
+
+      // add the new figure as child to this figure
+      this.add(figure, locator);
+    }, this));
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/Connection.js":
+/*!*******************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/Connection.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ProbeFigure = __webpack_require__(/*! ./ProbeFigure */ "./app/frontend/author/js/editor/brain/figures/ProbeFigure.js");
+
+var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.Connection.extend({
+
+  NAME: "Connection",
+
+  init: function init(attr, setter, getter) {
+    var _this = this;
+
+    this._super(attr, setter, getter);
+
+    // since version 3.5.6
+    //
+    this.on("dragEnter", function (emitter, event) {
+      _this.attr({
+        outlineStroke: 2,
+        outlineColor: "#30ff30"
+      });
+    });
+    this.on("dragLeave", function (emitter, event) {
+      _this.attr({
+        outlineStroke: 0,
+        outlineColor: "#303030"
+      });
+    });
+  },
+
+  getValue: function getValue() {
+    return this.getSource().getValue();
+  },
+
+  /**
+   * Return the ProbeFigure if the connection has any or NULL
+   *
+   * @return {ProbeFigure}
+   */
+  getProbeFigure: function getProbeFigure() {
+    var entry = this.children.find(function (entry) {
+      return entry.figure instanceof _ProbeFigure2.default;
+    });
+    return entry !== null ? entry.figure : null;
+  },
+
+  disconnect: function disconnect() {
+    this._super();
+
+    // remove some decorations of the router.
+    // This is a design flaw. the router creates the decoration and the connection must remove them :-/
+    // Unfortunately the Router didn't have a callback when a connection is removed from the canvas.
+    //
+    if (typeof this.vertexNodes !== "undefined" && this.vertexNodes !== null) {
+      this.vertexNodes.remove();
+      delete this.vertexNodes;
+    }
+  },
+
+  add: function add(figure) {
+    this._super.apply(this, arguments);
+
+    if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
+      this.canvas.fireEvent("probe:add", { figure: figure });
+    }
+  },
+
+  remove: function remove(figure) {
+    this._super.apply(this, arguments);
+
+    if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
+      this.canvas.fireEvent("probe:remove", { figure: figure });
+    }
+  },
+
+  /**
+   * @method
+   * Return an objects with all important attributes for XML or JSON serialization
+   *
+   * @returns {Object}
+   */
+  getPersistentAttributes: function getPersistentAttributes() {
+    var memento = this._super();
+
+    // add all decorations to the memento
+    //
+    memento.labels = [];
+    this.children.each(function (i, e) {
+      var labelJSON = e.figure.getPersistentAttributes();
+      labelJSON.locator = e.locator.NAME;
+      memento.labels.push(labelJSON);
+    });
+
+    return memento;
+  },
+
+  /**
+   * @method
+   * Read all attributes from the serialized properties and transfer them into the shape.
+   *
+   * @param {Object} memento
+   * @returns
+   */
+  setPersistentAttributes: function setPersistentAttributes(memento) {
+    // patch the router from some legacy data
+    //
+    memento.router = "ConnectionRouter";
+
+    this._super(memento);
+
+    // remove all decorations created in the constructor of this element
+    //
+    this.resetChildren();
+
+    // and add all children of the JSON document.
+    //
+    if (memento.labels) {
+      $.each(memento.labels, $.proxy(function (i, json) {
+        // create the figure stored in the JSON
+        var figure = eval("new " + json.type + "()");
+
+        // apply all attributes
+        figure.setPersistentAttributes(json);
+
+        // instantiate the locator
+        var locator = eval("new " + json.locator + "()");
+
+        // add the new figure as child to this figure
+        this.add(figure, locator);
+      }, this));
+    }
+  }
+
+}); /*jshint evil:true */
+
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/DecoratedInputPort.js":
+/*!***************************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/DecoratedInputPort.js ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _MarkerFigure = __webpack_require__(/*! ./MarkerFigure */ "./app/frontend/author/js/editor/brain/figures/MarkerFigure.js");
+
+var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.InputPort.extend({
+
+    NAME: "DecoratedInputPort",
+
+    init: function init(attr, setter, getter) {
+        this.hasChanged = false;
+
+        this._super(attr, setter, getter);
+
+        this.decoration = new _MarkerFigure2.default();
+
+        this.add(this.decoration, new draw2d.layout.locator.LeftLocator({ margin: 8 }));
+
+        this.on("disconnect", function (emitter, event) {
+            this.decoration.setVisible(this.getConnections().getSize() === 0);
+
+            // default value of a not connected port is always HIGH
+            //
+            if (this.getConnections().getSize() === 0) {
+                this.setValue(true);
+            }
+        }.bind(this));
+
+        this.on("connect", function (emitter, event) {
+            this.decoration.setVisible(false);
+        }.bind(this));
+
+        this.on("dragend", function (emitter, event) {
+            this.decoration.setVisible(this.getConnections().getSize() === 0);
+        }.bind(this));
+
+        this.on("drag", function (emitter, event) {
+            this.decoration.setVisible(false);
+        }.bind(this));
+
+        // a port can have a value. Usefull for workflow engines or circuit diagrams
+        this.setValue(true);
+    },
+
+    useDefaultValue: function useDefaultValue() {
+        this.decoration.setStick(true);
+    },
+
+    setValue: function setValue(value) {
+        this.hasChanged = this.value !== value;
+        this._super(value);
+    },
+
+    hasChangedValue: function hasChangedValue() {
+        return this.hasChanged;
+    },
+
+    hasRisingEdge: function hasRisingEdge() {
+        return this.hasChangedValue() && this.getValue();
+    },
+
+    hasFallingEdge: function hasFallingEdge() {
+        return this.hasChangedValue() && !this.getValue();
+    }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/MarkerFigure.js":
+/*!*********************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/MarkerFigure.js ***!
+  \*********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _MarkerStateAFigure = __webpack_require__(/*! ./MarkerStateAFigure */ "./app/frontend/author/js/editor/brain/figures/MarkerStateAFigure.js");
+
+var _MarkerStateAFigure2 = _interopRequireDefault(_MarkerStateAFigure);
+
+var _MarkerStateBFigure = __webpack_require__(/*! ./MarkerStateBFigure */ "./app/frontend/author/js/editor/brain/figures/MarkerStateBFigure.js");
+
+var _MarkerStateBFigure2 = _interopRequireDefault(_MarkerStateBFigure);
+
+var _configuration = __webpack_require__(/*! ../../../configuration */ "./app/frontend/author/js/configuration.js");
 
 var _configuration2 = _interopRequireDefault(_configuration);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+exports.default = draw2d.shape.layout.VerticalLayout.extend({
 
-// Resolve name collision between jQuery UI and Twitter Bootstrap
-/*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
-$.widget.bridge('uibutton', $.ui.button);
-$.widget.bridge('uitooltip', $.ui.tooltip);
+    NAME: "MarkerFigure",
 
-// required to be compatible with jquery.layout and jquery.handsontable
-//
-jQuery.uaMatch = function (ua) {
-  ua = ua.toLowerCase();
-  var match = /(chrome)[ \/]([\w.]+)/.exec(ua) || /(webkit)[ \/]([\w.]+)/.exec(ua) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) || /(msie) ([\w.]+)/.exec(ua) || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
-  return {
-    browser: match[1] || "",
-    version: match[2] || "0"
-  };
-};
-if (!jQuery.browser) {
-  var matched = jQuery.uaMatch(navigator.userAgent);
-  var browser = {};
-  if (matched.browser) {
-    browser[matched.browser] = true;
-    browser.version = matched.version;
-  }
-  // Chrome is Webkit, but Webkit is also Safari.
-  if (browser.chrome) {
-    browser.webkit = true;
-  } else if (browser.webkit) {
-    browser.safari = true;
-  }
-  jQuery.browser = browser;
-}
+    init: function init(attr, setter, getter) {
+        var _this = this;
 
-// need to be global for the "static" version hosted on gh-pages
-//
-window.conf = _configuration2.default;
+        this.isMouseOver = false; // indicator if the mouse is over the element
+        this.stick = false; // indicator if the stateBFigure should always be visible
+        this.defaultValue = true; // current selected default value for the decoration
 
-$(window).load(function () {
+        this._super($.extend({
+            stroke: 0
+        }, attr), setter, getter);
 
-  // export all required classes for deserialize JSON with "eval"
-  // "eval" code didn't sees imported class or code
-  //
-  for (var k in _global2.default) {
-    window[k] = _global2.default[k];
-  }socket = io({
-    path: '/socket.io'
-  });
+        // figure if the decoration is not permanent visible (sticky note)
+        this.add(this.stateA = new _MarkerStateAFigure2.default({ text: "X" }));
+        // figure if the decoration permanent visible
+        this.add(this.stateB = new _MarkerStateBFigure2.default({ text: "X" }));
 
-  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
-  // (fake event from the socket.io mock )
-  //
-  socket.on("permissions", function (permissions) {
-    socket.off("permissions");
-    app = __webpack_require__(/*! ./application */ "./app/frontend/author/js/application.js");
-    app.init(permissions);
-    $(".loader").fadeOut(500, function () {
-      $(this).remove();
-    });
-    inlineSVG.init();
-  });
-});
+        this.on("mouseenter", function (emitter, event) {
+            _this.onMouseOver(true);
+        });
+
+        this.on("mouseleave", function (emitter, event) {
+            _this.onMouseOver(false);
+        });
+
+        this.on("click", function (emitter, event) {
+            if (_this.isVisible() === false) {
+                return; //silently
+            }
+
+            if (_this.stateB.getStickTickFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
+                _this.setStick(!_this.getStick());
+            } else if (_this.stateB.getLabelFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
+                $.contextMenu({
+                    selector: 'body',
+                    trigger: "left",
+                    events: {
+                        hide: function hide() {
+                            $.contextMenu('destroy');
+                        }
+                    },
+                    callback: $.proxy(function (key, options) {
+                        // propagate the default value to the port
+                        //
+                        switch (key) {
+                            case "high":
+                                _this.setDefaultValue(true);
+                                _this.setStick(true);
+                                break;
+                            case "low":
+                                _this.setDefaultValue(false);
+                                _this.setStick(true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }, this),
+                    x: event.x,
+                    y: event.y,
+                    items: {
+                        "high": { name: "High" },
+                        "low": { name: "Low" }
+                    }
+                });
+            }
+        });
+
+        this.setDefaultValue(true);
+        this.onMouseOver(false);
+    },
+
+    onMouseOver: function onMouseOver(flag) {
+        this.isMouseOver = flag;
+
+        if (this.visible === false) {
+            return; // silently
+        }
+
+        if (this.stick === true) {
+            this.stateA.setVisible(false);
+            this.stateB.setVisible(true);
+        } else {
+            this.stateA.setVisible(!this.isMouseOver);
+            this.stateB.setVisible(this.isMouseOver);
+        }
+
+        return this;
+    },
+
+    setVisible: function setVisible(flag) {
+        this._super(flag);
+
+        // update the hover/stick state of the figure
+        this.onMouseOver(this.isMouseOver);
+
+        return this;
+    },
+
+    setStick: function setStick(flag) {
+        this.stick = flag;
+        this.onMouseOver(this.isMouseOver);
+
+        // the port has only a default value if the decoration is visible
+        this.parent.setValue(flag ? this.defaultValue : null);
+
+        this.stateB.setTick(this.getStick());
+
+        return this;
+    },
+
+    getStick: function getStick() {
+        return this.stick;
+    },
+
+    setText: function setText(text) {
+        this.stateB.setText(text);
+
+        return this;
+    },
+
+    setDefaultValue: function setDefaultValue(value) {
+        this.defaultValue = value;
+
+        this.setText(this.defaultValue === true ? "High" : "Low ");
+        this.stateB.setTintColor(this.defaultValue === true ? _configuration2.default.color.high : _configuration2.default.color.low);
+
+        // only propagate the value to the parent if the decoration permanent visible
+        //
+        if (this.stick === true) {
+            this.parent.setValue(this.defaultValue);
+        }
+    }
+}); /**
+     * The markerFigure is the left hand side annotation for a DecoratedPort.
+     *
+     * It contains two children
+     *
+     * StateAFigure: if the mouse hover and the figure isn't permanent visible
+     * StateBFigure: either the mouse is over or the user pressed the checkbox to stick the figure on the port
+     *
+     * This kind of decoration is usefull for defualt values on workflwos enginges or circuit diagrams
+     *
+     */
+
+module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/author/js/inplace/markdown/editor.js":
-/*!***********************************************************!*\
-  !*** ./app/frontend/author/js/inplace/markdown/editor.js ***!
-  \***********************************************************/
+/***/ "./app/frontend/author/js/editor/brain/figures/MarkerStateAFigure.js":
+/*!***************************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/MarkerStateAFigure.js ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+/**
+ * This is only the mouseover reactive shape. A little bit smaller than the visible shape
+ *
+ * Or you can display this shape with opacity of 0.2 to indicate that this is a reactive area.
+ */
+exports.default = draw2d.shape.basic.Label.extend({
+
+    NAME: "MarkerStateAFigure",
+
+    /**
+     * @param attr
+     */
+    init: function init(attr, setter, getter) {
+        this._super($.extend({
+            padding: { left: 5, top: 2, bottom: 2, right: 10 },
+            bgColor: null,
+            stroke: 1,
+            color: null,
+            fontColor: null,
+            fontSize: 8
+        }, attr), setter, getter);
+
+        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
+        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
+        //
+        // now this shape is "dead" for any mouse events and the parent must/can handle this.
+        this.hitTest = function () {
+            return false;
+        };
+    }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/MarkerStateBFigure.js":
+/*!***************************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/MarkerStateBFigure.js ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _configuration = __webpack_require__(/*! ../../../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.shape.layout.HorizontalLayout.extend({
+
+    NAME: "MarkerStateBFigure",
+
+    /**
+     * @param attr
+     */
+    init: function init(attr, setter, getter) {
+        this.tintColor = _configuration2.default.color.low;
+
+        this._super($.extend({
+            bgColor: "#FFFFFF",
+            stroke: 1,
+            color: _configuration2.default.color.low,
+            radius: 2,
+            padding: { left: 3, top: 2, bottom: 0, right: 8 },
+            gap: 5
+        }, attr), setter, getter);
+
+        this.stickTick = new draw2d.shape.basic.Circle({
+            diameter: 8,
+            bgColor: "#f0f0f0",
+            stroke: 1,
+            resizeable: false
+        });
+        this.add(this.stickTick);
+        this.stickTick.hitTest = function () {
+            return false;
+        };
+        this.stickTick.addCssClass("highlightOnHover");
+
+        this.label = new draw2d.shape.basic.Label({
+            text: attr.text,
+            resizeable: false,
+            stroke: 0,
+            padding: 0,
+            fontSize: 8,
+            fontColor: "#303030"
+        });
+        this.add(this.label);
+        this.label.hitTest = function () {
+            return false;
+        };
+        this.label.addCssClass("highlightOnHover");
+
+        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
+        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
+        //
+        // now this shape is "dead" for any mouse events and the parent must/can handle this.
+        this.hitTest = function () {
+            return false;
+        };
+    },
+
+    setText: function setText(text) {
+        this.label.setText(text);
+    },
+
+    setTintColor: function setTintColor(color) {
+        this.tintColor = color;
+        this.attr({ color: color });
+        this.label.attr({ fontColor: color });
+    },
+
+    setTick: function setTick(flag) {
+        this.stickTick.attr({ bgColor: flag ? this.tintColor : "#f0f0f0" });
+    },
+
+    getStickTickFigure: function getStickTickFigure() {
+        return this.stickTick;
+    },
+
+    getLabelFigure: function getLabelFigure() {
+        return this.label;
+    },
+
+    /**
+     * @method
+     *
+     *
+     * @template
+     **/
+    repaint: function repaint(attributes) {
+        if (this.repaintBlocked === true || this.shape === null) {
+            return;
+        }
+
+        attributes = attributes || {};
+
+        attributes.path = this.calculatePath();
+
+        this._super(attributes);
+    },
+
+    /**
+     * @method
+     *
+     * Override the default rendering of the HorizontalLayout, which is a simple
+     * rectangle. We want an arrow.
+     */
+    createShapeElement: function createShapeElement() {
+        return this.canvas.paper.path(this.calculatePath());
+    },
+
+    /**
+     * stupid copy&paste the code from the Polygon shape...unfortunately the LayoutFigure isn't a polygon.
+     *
+     * @returns {string}
+     */
+    calculatePath: function calculatePath() {
+        var arrowLength = 8;
+
+        this.vertices = new draw2d.util.ArrayList();
+
+        var w = this.width;
+        var h = this.height;
+        var pos = this.getAbsolutePosition();
+        var i = 0;
+        var length = 0;
+        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y));
+        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y));
+
+        this.vertices.add(new draw2d.geo.Point(pos.x + w, pos.y + h / 2));
+
+        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y + h));
+        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y + h));
+
+        var radius = this.getRadius();
+        var path = [];
+        // hard corners
+        //
+        if (radius === 0) {
+            length = this.vertices.getSize();
+            var p = this.vertices.get(0);
+            path.push("M", p.x, " ", p.y);
+            for (i = 1; i < length; i++) {
+                p = this.vertices.get(i);
+                path.push("L", p.x, " ", p.y);
+            }
+            path.push("Z");
+        }
+        // soften/round corners
+        //
+        else {
+                length = this.vertices.getSize();
+                var start = this.vertices.first();
+                var end = this.vertices.last();
+                if (start.equals(end)) {
+                    length = length - 1;
+                    end = this.vertices.get(length - 1);
+                }
+                var begin = draw2d.geo.Util.insetPoint(start, end, radius);
+                path.push("M", begin.x, ",", begin.y);
+                for (i = 0; i < length; i++) {
+                    start = this.vertices.get(i);
+                    end = this.vertices.get((i + 1) % length);
+                    var modStart = draw2d.geo.Util.insetPoint(start, end, radius);
+                    var modEnd = draw2d.geo.Util.insetPoint(end, start, radius);
+                    path.push("Q", start.x, ",", start.y, " ", modStart.x, ", ", modStart.y);
+                    path.push("L", modEnd.x, ",", modEnd.y);
+                }
+            }
+        return path.join("");
+    }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/ProbeFigure.js":
+/*!********************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/ProbeFigure.js ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = draw2d.shape.basic.Label.extend({
+
+    NAME: "ProbeFigure",
+
+    /**
+     * @param attr
+     */
+    init: function init(attr, setter, getter) {
+        this._super($.extend({
+            padding: { left: 5, top: 2, bottom: 2, right: 10 },
+            bgColor: "#FFFFFF",
+            stroke: 0,
+            color: "#000000",
+            fontSize: 8
+        }, attr), setter, getter);
+
+        // the sort index in the probe window
+        //
+        this.index = 0;
+    },
+
+    getValue: function getValue() {
+        return this.getParent().getValue();
+    },
+
+    getIndex: function getIndex() {
+        return this.index;
+    },
+
+    setIndex: function setIndex(index) {
+        this.index = index;
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Return an objects with all important attributes for XML or JSON serialization
+     *
+     * @returns {Object}
+     */
+    getPersistentAttributes: function getPersistentAttributes() {
+        var memento = this._super();
+
+        memento.index = this.index;
+
+        return memento;
+    },
+
+    /**
+     * @method
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     * @returns
+     */
+    setPersistentAttributes: function setPersistentAttributes(memento) {
+        this._super(memento);
+
+        if (typeof memento.index !== "undefined") {
+            this.index = parseInt(memento.index);
+        }
+    }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/figures/Raft.js":
+/*!*************************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/figures/Raft.js ***!
+  \*************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = draw2d.shape.composite.Raft.extend({
+
+    NAME: "Raft",
+
+    init: function init(attr, setter, getter) {
+        this._super(attr, setter, getter);
+    },
+
+    calculate: function calculate() {},
+
+    onStart: function onStart() {},
+
+    onStop: function onStop() {},
+
+    toBack: function toBack(figure) {
+        if (this.canvas.getFigures().getSize() === 1) {
+            return; // silently
+        }
+
+        // unfortunately the shape goes behind the "canvas decoration" which could be the grid or dots.
+        // this is sad and unwanted. In this case we select the first figure in th canvas and set the Raft behind of them
+        // instead of "behind of ALL shapes"
+        var first = this.canvas.getFigures().first();
+        this._super(first);
+    },
+
+    getParameterSettings: function getParameterSettings() {
+        return [];
+    },
+
+    /**
+     * @method
+     * Return an objects with all important attributes for XML or JSON serialization
+     *
+     * @returns {Object}
+     */
+    getPersistentAttributes: function getPersistentAttributes() {
+        var memento = this._super();
+
+        // add all decorations to the memento
+        //
+        memento.labels = [];
+        this.children.each(function (i, e) {
+            var labelJSON = e.figure.getPersistentAttributes();
+            labelJSON.locator = e.locator.NAME;
+            memento.labels.push(labelJSON);
+        });
+
+        return memento;
+    },
+
+    /**
+     * @method
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     * @returns
+     */
+    setPersistentAttributes: function setPersistentAttributes(memento) {
+        this._super(memento);
+
+        // remove all decorations created in the constructor of this element
+        //
+        this.resetChildren();
+
+        // and add all children of the JSON document.
+        //
+        $.each(memento.labels, $.proxy(function (i, json) {
+            // create the figure stored in the JSON
+            var figure = eval("new " + json.type + "()");
+
+            // apply all attributes
+            figure.attr(json);
+
+            // instantiate the locator
+            var locator = eval("new " + json.locator + "()");
+
+            // add the new figure as child to this figure
+            this.add(figure, locator);
+        }, this));
+    }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/brain/view.js":
+/*!*****************************************************!*\
+  !*** ./app/frontend/author/js/editor/brain/view.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ConnectionRouter = __webpack_require__(/*! ./ConnectionRouter */ "./app/frontend/author/js/editor/brain/ConnectionRouter.js");
+
+var _ConnectionRouter2 = _interopRequireDefault(_ConnectionRouter);
+
+var _DropInterceptorPolicy = __webpack_require__(/*! ./DropInterceptorPolicy */ "./app/frontend/author/js/editor/brain/DropInterceptorPolicy.js");
+
+var _DropInterceptorPolicy2 = _interopRequireDefault(_DropInterceptorPolicy);
+
+var _EditEditPolicy = __webpack_require__(/*! ./EditEditPolicy */ "./app/frontend/author/js/editor/brain/EditEditPolicy.js");
+
+var _EditEditPolicy2 = _interopRequireDefault(_EditEditPolicy);
+
+var _configuration = __webpack_require__(/*! ../../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+var _Connection = __webpack_require__(/*! ./figures/Connection */ "./app/frontend/author/js/editor/brain/figures/Connection.js");
+
+var _Connection2 = _interopRequireDefault(_Connection);
+
+var _SimulationEditPolicy = __webpack_require__(/*! ./SimulationEditPolicy */ "./app/frontend/author/js/editor/brain/SimulationEditPolicy.js");
+
+var _SimulationEditPolicy2 = _interopRequireDefault(_SimulationEditPolicy);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ *
+ * The **GraphicalEditor** is responsible for layout and dialog handling.
+ *
+ * @author Andreas Herz
+ */
+exports.default = draw2d.Canvas.extend({
+
+  init: function init(id, permissions) {
+    var _this2 = this;
+
+    var _this = this;
+
+    this._super(id, 6000, 6000);
+
+    this.permissions = permissions;
+    this.simulate = false;
+    this.animationFrameFunc = this._calculate.bind(this);
+
+    this.timerBase = 10; // ms calculate every 10ms all elements
+
+    this.setScrollArea("#draw2dCanvasWrapper");
+
+    // register this class as event listener for the canvas
+    // CommandStack. This is required to update the state of
+    // the Undo/Redo Buttons.
+    //
+    this.getCommandStack().addEventListener(this);
+
+    var router = new _ConnectionRouter2.default();
+    router.abortRoutingOnFirstVertexNode = false;
+    var createConnection = this.createConnection = function (sourcePort, targetPort) {
+      var c = new _Connection2.default({
+        color: "#000000",
+        router: router,
+        stroke: 1.5,
+        radius: 2
+      });
+      if (sourcePort) {
+        c.setSource(sourcePort);
+        c.setTarget(targetPort);
+      }
+      return c;
+    };
+
+    this.installEditPolicy(new _DropInterceptorPolicy2.default());
+
+    // install a Connection create policy which matches to a "circuit like"
+    // connections
+    //
+    this.connectionPolicy = new draw2d.policy.connection.ComposedConnectionCreatePolicy([
+    // create a connection via Drag&Drop of ports
+    //
+    new draw2d.policy.connection.DragConnectionCreatePolicy({
+      createConnection: createConnection
+    }),
+    // or via click and point
+    //
+    new draw2d.policy.connection.OrthogonalConnectionCreatePolicy({
+      createConnection: createConnection
+    })]);
+    this.installEditPolicy(this.connectionPolicy);
+
+    // show the ports of the elements only if the mouse cursor is close to the shape.
+    //
+    this.coronaFeedback = new draw2d.policy.canvas.CoronaDecorationPolicy({ diameterToBeVisible: 50 });
+    this.installEditPolicy(this.coronaFeedback);
+
+    // add some SnapTo policy for better shape/figure alignment
+    //
+    this.installEditPolicy(new draw2d.policy.canvas.SnapToGeometryEditPolicy());
+    this.installEditPolicy(new draw2d.policy.canvas.SnapToCenterEditPolicy());
+    this.installEditPolicy(new draw2d.policy.canvas.SnapToInBetweenEditPolicy());
+    this.installEditPolicy(new draw2d.policy.canvas.ShowGridEditPolicy());
+    this.installEditPolicy(new _EditEditPolicy2.default());
+
+    // Enable Copy&Paste for figures
+    //
+    Mousetrap.bindGlobal(['ctrl+c', 'command+c'], function () {
+      var primarySelection = _this2.getSelection().getPrimary();
+      if (primarySelection !== null) {
+        _this2.clippboardFigure = primarySelection.clone({ excludePorts: true });
+        _this2.clippboardFigure.translate(5, 5);
+      }
+      return false;
+    });
+    Mousetrap.bindGlobal(['ctrl+v', 'command+v'], function () {
+      if (_this2.clippboardFigure !== null) {
+        var cloneToAdd = _this2.clippboardFigure.clone({ excludePorts: true });
+        var command = new draw2d.command.CommandAdd(_this2, cloneToAdd, cloneToAdd.getPosition());
+        _this2.getCommandStack().execute(command);
+        _this2.setCurrentSelection(cloneToAdd);
+      }
+      return false;
+    });
+    Mousetrap.bindGlobal(['left'], function (event) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
+        f.translate(-diff, 0);
+      });
+      return false;
+    });
+    Mousetrap.bindGlobal(['up'], function (event) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
+        f.translate(0, -diff);
+      });
+      return false;
+    });
+    Mousetrap.bindGlobal(['right'], function (event) {
+      var diff = _this2.getZoom() < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
+        f.translate(diff, 0);
+      });
+      return false;
+    });
+    Mousetrap.bindGlobal(['down'], function (event) {
+      var diff = _this2.getZoom(8) < 0.5 ? 0.5 : 1;
+      _this2.getSelection().each(function (i, f) {
+        f.translate(0, diff);
+      });
+      return false;
+    });
+
+    this.deleteSelectionCallback = function () {
+      var selection = _this2.getSelection();
+      _this2.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape);
+      selection.each(function (index, figure) {
+
+        // Don't delete the connection if the source or target node part of the
+        // selection. In this case the nodes deletes all connections by itself.
+        //
+        if (figure instanceof draw2d.Connection) {
+          if (selection.contains(figure.getSource().getRoot()) || selection.contains(figure.getTarget().getRoot())) {
+            return;
+          }
+        }
+
+        var cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE));
+        if (cmd !== null) {
+          _this2.getCommandStack().execute(cmd);
+        }
+      });
+      // execute all single commands at once.
+      _this2.getCommandStack().commitTransaction();
+    };
+    Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
+
+    this.on("contextmenu", function (emitter, event) {
+      var figure = _this.getBestFigure(event.x, event.y);
+
+      // a connection provides its own context menu
+      //
+      if (figure instanceof draw2d.Connection) {
+        return;
+      }
+
+      if (figure !== null) {
+        var x = event.x;
+        var y = event.y;
+
+        var items = {};
+
+        if (figure instanceof CircuitFigure) {
+          items = {
+            "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
+            "delete": { name: "Delete", icon: "x ion-ios-close-outline" }
+          };
+        } else if (figure instanceof draw2d.shape.basic.Label) {
+          items = {
+            "delete": { name: "Delete", icon: "x ion-ios-close-outline" }
+          };
+        } else if (figure instanceof draw2d.Port) {
+          return;
+        } else {
+          items = {
+            "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
+            "delete": { name: "Delete", icon: "x ion-ios-close-outline" }
+          };
+        }
+
+        $.contextMenu({
+          selector: 'body',
+          events: {
+            hide: function hide() {
+              $.contextMenu('destroy');
+            }
+          },
+          callback: $.proxy(function (key, options) {
+            switch (key) {
+              case "label":
+                var text = prompt("Label");
+                if (text) {
+                  var label = new draw2d.shape.basic.Label({ text: text, stroke: 0, x: -20, y: -40 });
+                  var locator = new draw2d.layout.locator.SmartDraggableLocator();
+                  label.installEditor(new LabelInplaceEditor());
+                  figure.add(label, locator);
+                  Object.defineProperty(figure, "canvas", { configurable: false, writable: false });
+                }
+                break;
+              case "delete":
+                _this.getCommandStack().execute(new draw2d.command.CommandDelete(figure));
+                break;
+              default:
+                break;
+            }
+          }, this),
+          x: x,
+          y: y,
+          items: items
+        });
+      }
+    });
+
+    // hide the figure configuration dialog if the user clicks inside the canvas
+    //
+    this.on("click", function () {
+      $("#figureConfigDialog").hide();
+    });
+  },
+
+  isSimulationRunning: function isSimulationRunning() {
+    return this.simulate;
+  },
+
+  /**
+   * @method
+   * Clear the canvas and stop the simulation. Be ready for the next clean circuit
+   * load. Start from the beginning
+   */
+  clear: function clear() {
+    this.simulationStop();
+
+    this._super();
+
+    this.centerDocument();
+  },
+
+  /**
+   * Disable snapTo GRID if we have select more than one element
+   * @param figure
+   * @param pos
+   */
+  snapToHelper: function snapToHelper(figure, pos) {
+    if (this.getSelection().getSize() > 1) {
+      return pos;
+    }
+    return this._super(figure, pos);
+  },
+
+  /**
+   * @method
+   * Called if the user drop the droppedDomNode onto the canvas.<br>
+   * <br>
+   * Draw2D use the jQuery draggable/droppable lib. Please inspect
+   * http://jqueryui.com/demos/droppable/ for further information.
+   *
+   * @param {HTMLElement} droppedDomNode The dropped DOM element.
+   * @param {Number} x the x coordinate of the drop
+   * @param {Number} y the y coordinate of the drop
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   * @private
+   **/
+  onDrop: function onDrop(droppedDomNode, x, y, shiftKey, ctrlKey) {
+    var type = $(droppedDomNode).data("shape");
+    var file = $(droppedDomNode).data("file");
+
+    var figure = eval("new " + type + "();"); // jshint ignore:line
+    figure.attr("userData.file", file);
+
+    // create a command for the undo/redo support
+    var command = new draw2d.command.CommandAdd(this, figure, x, y);
+    this.getCommandStack().execute(command);
+  },
+
+  simulationToggle: function simulationToggle() {
+    if (this.simulate === true) {
+      this.simulationStop();
+    } else {
+      this.simulationStart();
+    }
+  },
+
+  simulationStart: function simulationStart() {
+    if (this.simulate === true) {
+      return; // silently
+    }
+
+    this.simulate = true;
+
+    this.installEditPolicy(new _SimulationEditPolicy2.default());
+    this.uninstallEditPolicy(this.connectionPolicy);
+    this.uninstallEditPolicy(this.coronaFeedback);
+    this.commonPorts.each(function (i, p) {
+      p.setVisible(false);
+    });
+
+    this._calculate();
+
+    $("#simulationStartStop").addClass("pause");
+    $("#simulationStartStop").removeClass("play");
+    $(".editBase").fadeOut("slow", function () {
+      $(".simulationBase").fadeIn("slow");
+    });
+    $("#paletteElementsOverlay").fadeIn("fast");
+    $("#paletteElementsOverlay").height($("#paletteElements").height());
+    //this.slider.slider("setValue", 100)
+  },
+
+  simulationStop: function simulationStop() {
+    this.simulate = false;
+    this.commonPorts.each(function (i, p) {
+      p.setVisible(true);
+    });
+    this.installEditPolicy(new _EditEditPolicy2.default());
+    this.installEditPolicy(this.connectionPolicy);
+    this.installEditPolicy(this.coronaFeedback);
+
+    $("#simulationStartStop").addClass("play");
+    $("#simulationStartStop").removeClass("pause");
+    $(".simulationBase").fadeOut("slow", function () {
+      $(".editBase").fadeIn("slow");
+    });
+    $("#paletteElementsOverlay").fadeOut("fast");
+  },
+
+  _calculate: function _calculate() {
+    // call the "calculate" method if given to calculate the output-port values
+    //
+    this.getFigures().each(function (i, figure) {
+      figure.calculate();
+    });
+
+    // transport the value from outputPort to inputPort
+    //
+    this.getLines().each(function (i, line) {
+      var outPort = line.getSource();
+      var inPort = line.getTarget();
+      inPort.setValue(outPort.getValue());
+      line.setColor(outPort.getValue() ? _configuration2.default.color.high : _configuration2.default.color.low);
+    });
+
+    if (this.simulate === true) {
+      //     setImmediate(this.animationFrameFunc);
+      setTimeout(this.animationFrameFunc, this.timerBase);
+    }
+  },
+
+  /**
+   * @method
+   * Sent when an event occurs on the command stack. draw2d.command.CommandStackEvent.getDetail()
+   * can be used to identify the type of event which has occurred.
+   *
+   * @template
+   *
+   * @param {draw2d.command.CommandStackEvent} event
+   **/
+  stackChanged: function stackChanged(event) {
+    if (event.isPreChangeEvent()) {
+      return; // silently
+    }
+  },
+
+  getBoundingBox: function getBoundingBox() {
+    var xCoords = [];
+    var yCoords = [];
+    this.getFigures().each(function (i, f) {
+      var b = f.getBoundingBox();
+      xCoords.push(b.x, b.x + b.w);
+      yCoords.push(b.y, b.y + b.h);
+    });
+    var minX = Math.min.apply(Math, xCoords);
+    var minY = Math.min.apply(Math, yCoords);
+    var width = Math.max(100, Math.max.apply(Math, xCoords) - minX);
+    var height = Math.max(100, Math.max.apply(Math, yCoords) - minY);
+
+    return new draw2d.geo.Rectangle(minX, minY, width, height);
+  },
+
+  reloadFromCache: function reloadFromCache() {
+    var _this3 = this;
+
+    new draw2d.io.json.Writer().marshal(this, function (json) {
+      draw2d.Canvas.prototype.clear.call(_this3);
+      new draw2d.io.json.Reader().unmarshal(_this3, json);
+    });
+  },
+
+  centerDocument: function centerDocument() {
+    this.setZoom(1.0);
+
+    var c = $("#draw2dCanvasWrapper");
+    if (this.getFigures().getSize() > 0) {
+      // get the bounding box of the document and translate the complete document
+      // into the center of the canvas. Scroll to the top left corner after them
+      //
+      var bb = this.getBoundingBox();
+      this.scrollTo(bb.y - c.height() / 2 + bb.h / 2, bb.x - c.width() / 2 + bb.w / 2);
+    } else {
+      var _bb = {
+        x: this.getWidth() / 2,
+        y: this.getHeight() / 2
+      };
+      this.scrollTo(_bb.y - c.height() / 2, _bb.x - c.width() / 2);
+    }
+  },
+
+  /**
+   * @method
+   * Transforms a document coordinate to canvas coordinate.
+   *
+   * @param {Number} x the x coordinate relative to the window
+   * @param {Number} y the y coordinate relative to the window
+   *
+   * @returns {draw2d.geo.Point} The coordinate in relation to the canvas [0,0] position
+   */
+  fromDocumentToCanvasCoordinate: function fromDocumentToCanvasCoordinate(x, y) {
+    return new draw2d.geo.Point((x - this.getAbsoluteX()) * this.zoomFactor, (y - this.getAbsoluteY()) * this.zoomFactor);
+  },
+
+  /**
+   * @method
+   * Transforms a canvas coordinate to document coordinate.
+   *
+   * @param {Number} x the x coordinate in the canvas
+   * @param {Number} y the y coordinate in the canvas
+   *
+   * @returns {draw2d.geo.Point} the coordinate in relation to the document [0,0] position
+   */
+  fromCanvasToDocumentCoordinate: function fromCanvasToDocumentCoordinate(x, y) {
+    return new draw2d.geo.Point(x * (1 / this.zoomFactor) + this.getAbsoluteX(), y * (1 / this.zoomFactor) + this.getAbsoluteY());
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/editor/markdown/editor.js":
+/*!**********************************************************!*\
+  !*** ./app/frontend/author/js/editor/markdown/editor.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1035,6 +3126,170 @@ var Toolbar = function () {
 
 exports.default = Toolbar;
 module.exports = exports['default'];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/global.js":
+/*!******************************************!*\
+  !*** ./app/frontend/author/js/global.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _ConnectionSelectionFeedbackPolicy = __webpack_require__(/*! ./editor/brain/ConnectionSelectionFeedbackPolicy */ "./app/frontend/author/js/editor/brain/ConnectionSelectionFeedbackPolicy.js");
+
+var _ConnectionSelectionFeedbackPolicy2 = _interopRequireDefault(_ConnectionSelectionFeedbackPolicy);
+
+var _DecoratedInputPort = __webpack_require__(/*! ./editor/brain/figures/DecoratedInputPort */ "./app/frontend/author/js/editor/brain/figures/DecoratedInputPort.js");
+
+var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
+
+var _Connection = __webpack_require__(/*! ./editor/brain/figures/Connection */ "./app/frontend/author/js/editor/brain/figures/Connection.js");
+
+var _Connection2 = _interopRequireDefault(_Connection);
+
+var _ProbeFigure = __webpack_require__(/*! ./editor/brain/figures/ProbeFigure */ "./app/frontend/author/js/editor/brain/figures/ProbeFigure.js");
+
+var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
+
+var _CircuitFigure = __webpack_require__(/*! ./editor/brain/figures/CircuitFigure */ "./app/frontend/author/js/editor/brain/figures/CircuitFigure.js");
+
+var _CircuitFigure2 = _interopRequireDefault(_CircuitFigure);
+
+var _ConnectionRouter = __webpack_require__(/*! ./editor/brain/ConnectionRouter */ "./app/frontend/author/js/editor/brain/ConnectionRouter.js");
+
+var _ConnectionRouter2 = _interopRequireDefault(_ConnectionRouter);
+
+var _Raft = __webpack_require__(/*! ./editor/brain/figures/Raft */ "./app/frontend/author/js/editor/brain/figures/Raft.js");
+
+var _Raft2 = _interopRequireDefault(_Raft);
+
+var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
+
+var _mousetrap2 = _interopRequireDefault(_mousetrap);
+
+var _LabelInplaceEditor = __webpack_require__(/*! ./editor/brain/LabelInplaceEditor */ "./app/frontend/author/js/editor/brain/LabelInplaceEditor.js");
+
+var _LabelInplaceEditor2 = _interopRequireDefault(_LabelInplaceEditor);
+
+__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/author/js/util/mousetrap-global.js");
+
+__webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/author/js/util/mousetrap-pause.js");
+
+var _inlineSVG = __webpack_require__(/*! ../../_common/inlineSVG */ "./app/frontend/_common/inlineSVG.js");
+
+var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = {
+  ConnectionSelectionFeedbackPolicy: _ConnectionSelectionFeedbackPolicy2.default,
+  DecoratedInputPort: _DecoratedInputPort2.default,
+  Connection: _Connection2.default,
+  Raft: _Raft2.default,
+  ProbeFigure: _ProbeFigure2.default,
+  Mousetrap: _mousetrap2.default,
+  inlineSVG: _inlineSVG2.default,
+  LabelInplaceEditor: _LabelInplaceEditor2.default,
+  ConnectionRouter: _ConnectionRouter2.default,
+  CircuitFigure: _CircuitFigure2.default
+};
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/index.js":
+/*!*****************************************!*\
+  !*** ./app/frontend/author/js/index.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+__webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.less");
+
+__webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
+
+var _global = __webpack_require__(/*! ./global */ "./app/frontend/author/js/global.js");
+
+var _global2 = _interopRequireDefault(_global);
+
+var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
+
+// Resolve name collision between jQuery UI and Twitter Bootstrap
+/*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
+$.widget.bridge('uibutton', $.ui.button);
+$.widget.bridge('uitooltip', $.ui.tooltip);
+
+// required to be compatible with jquery.layout and jquery.handsontable
+//
+jQuery.uaMatch = function (ua) {
+  ua = ua.toLowerCase();
+  var match = /(chrome)[ \/]([\w.]+)/.exec(ua) || /(webkit)[ \/]([\w.]+)/.exec(ua) || /(opera)(?:.*version|)[ \/]([\w.]+)/.exec(ua) || /(msie) ([\w.]+)/.exec(ua) || ua.indexOf("compatible") < 0 && /(mozilla)(?:.*? rv:([\w.]+)|)/.exec(ua) || [];
+  return {
+    browser: match[1] || "",
+    version: match[2] || "0"
+  };
+};
+if (!jQuery.browser) {
+  var matched = jQuery.uaMatch(navigator.userAgent);
+  var browser = {};
+  if (matched.browser) {
+    browser[matched.browser] = true;
+    browser.version = matched.version;
+  }
+  // Chrome is Webkit, but Webkit is also Safari.
+  if (browser.chrome) {
+    browser.webkit = true;
+  } else if (browser.webkit) {
+    browser.safari = true;
+  }
+  jQuery.browser = browser;
+}
+
+// need to be global for the "static" version hosted on gh-pages
+//
+window.conf = _configuration2.default;
+
+$(window).load(function () {
+
+  // export all required classes for deserialize JSON with "eval"
+  // "eval" code didn't sees imported class or code
+  //
+  for (var k in _global2.default) {
+    window[k] = _global2.default[k];
+  }socket = io({
+    path: '/socket.io'
+  });
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  //
+  socket.on("permissions", function (permissions) {
+    socket.off("permissions");
+    app = __webpack_require__(/*! ./application */ "./app/frontend/author/js/application.js");
+    app.init(permissions);
+    $(".loader").fadeOut(500, function () {
+      $(this).remove();
+    });
+    inlineSVG.init();
+  });
+});
 
 /***/ }),
 
@@ -1408,7 +3663,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
 var Document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
-var MarkdownEditor = __webpack_require__(/*! ./inplace/markdown/editor */ "./app/frontend/author/js/inplace/markdown/editor.js");
+var MarkdownEditor = __webpack_require__(/*! ./editor/markdown/editor */ "./app/frontend/author/js/editor/markdown/editor.js");
+var BrainEditor = __webpack_require__(/*! ./editor/brain/editor */ "./app/frontend/author/js/editor/brain/editor.js");
 
 var View = function () {
 
@@ -1422,9 +3678,8 @@ var View = function () {
     _classCallCheck(this, View);
 
     this.markdownEditor = new MarkdownEditor();
-
+    this.brainEditor = new BrainEditor();
     this.document = new Document();
-
     this.activeSection = null;
     this.html = $(id);
 
@@ -1496,7 +3751,7 @@ var View = function () {
     value: function addBrain() {
       var entry = {
         id: shortid.generate(),
-        type: "draw2d",
+        type: "brain",
         content: []
       };
       this.document.add(entry);
@@ -1510,7 +3765,7 @@ var View = function () {
       this.html.find(".sections").html("");
       document.forEach(function (entry) {
         switch (entry.type) {
-          case "draw2d":
+          case "brain":
             _this2.renderBrain(entry);
             break;
           case "markdown":
@@ -1523,12 +3778,12 @@ var View = function () {
     key: "renderMarkdown",
     value: function renderMarkdown(entry) {
       var markdown = this.markdownEditor.render(entry.content);
-      this.html.find(".sections").append("\n        <div data-id=\"" + entry.id + "\" class='section'>\n           <div class=\"sectionContent\">" + markdown + "</div>\n        </div>\n      ");
+      this.html.find(".sections").append("\n        <div data-id=\"" + entry.id + "\" class='section'>\n           <div class=\"sectionContent\" data-type=\"markdown\">" + markdown + "</div>\n        </div>\n      ");
     }
   }, {
     key: "renderBrain",
     value: function renderBrain(entry) {
-      this.html.find(".sections").append("<div data-id=\"" + entry.id + "\" class='section'><div>" + entry.id + "</div></div>");
+      this.html.find(".sections").append("\n        <div data-id=\"" + entry.id + "\" class='section'>\n            <div class=\"sectionContent\" data-type=\"brain\">" + entry.id + "</div>\n        </div>\n      ");
     }
   }, {
     key: "onSelect",
@@ -1540,7 +3795,7 @@ var View = function () {
       var id = sectionDOM.data("id");
       this.activeSection = sectionDOM;
       this.activeSection.addClass('activeSection');
-      $(".sections .activeSection").append("\n        <div class='menu'>\n          <div data-id=\"" + id + "\" id=\"sectionMenuUp\"     class='fa fa-caret-square-o-up' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuDown\"   class='fa fa-caret-square-o-down' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuEdit\"   class='fa fa-edit' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuDelete\" class='fa fa-trash-o' ></div>\n        </div>");
+      $(".sections .activeSection").append("\n        <div class='sectionMenu'>\n          <div data-id=\"" + id + "\" id=\"sectionMenuUp\"     class='fa fa-caret-square-o-up' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuDown\"   class='fa fa-caret-square-o-down' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuEdit\"   class='fa fa-edit' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuDelete\" class='fa fa-trash-o' ></div>\n        </div>");
     }
   }, {
     key: "onUnselect",
@@ -1548,7 +3803,7 @@ var View = function () {
       if (this.activeSection === null) {
         return;
       }
-      $(".sections .activeSection .menu").remove();
+      $(".sectionMenu").remove();
       this.activeSection.removeClass("activeSection");
       this.activeSection = null;
     }
@@ -1560,13 +3815,23 @@ var View = function () {
       }
 
       var section = this.document.get(id);
+      var type = section.type;
+      var menu = $(".sectionMenu");
 
-      $(".sections .activeSection .sectionContent").html("\n            <div id=\"editor-container\">\n              <div class=\"left\">\n                <textarea id=\"markdownEditor\"></textarea>\n              </div>\n              <div class=\"right\">\n                <article class=\"markdown-body\" id=\"htmlPreview\"></article>\n              </div>\n            </div>\n              ");
-      $(".sections").removeClass("activeSection");
+      if (type === 'markdown') {
+        $(".sections .activeSection .sectionContent").html("\n              <div class=\"editorContainerSelector\" id=\"editor-container\">\n                <div class=\"left\">\n                  <textarea id=\"markdownEditor\"></textarea>\n                </div>\n                <div class=\"right\">\n                  <article class=\"markdown-body\" id=\"htmlPreview\"></article>\n                </div>\n              </div>\n                ");
+        $(".sections").removeClass("activeSection");
+        this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content);
+      } else if (type === "brain") {
+        $(".workspace").append("\n          <div class=\"content editorContainerSelector\" \" id=\"draw2dCanvasWrapper\">\n               <div class=\"canvas\" id=\"draw2dCanvas\" oncontextmenu=\"return false;\">\n          </div>\n                ");
+        $(".sections").removeClass("activeSection");
+        this.currentEditor = this.brainEditor.inject('draw2dCanvas', section.content);
+        $("#draw2dCanvasWrapper").append(menu);
+      } else {
+        return;
+      }
 
-      this.currentEditor = this.markdownEditor.inject('markdownEditor', 'htmlPreview', section.content);
-
-      $(".sections .menu").html("\n          <div data-id=\"" + id + "\" id=\"sectionMenuCommitEdit\"   class='fa fa-check-square-o' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuCancelEdit\" class='fa fa-minus-square-o' ></div>\n        ");
+      menu.html("\n          <div data-id=\"" + id + "\" id=\"sectionMenuCommitEdit\"   class='fa fa-check-square-o' ></div>\n          <div data-id=\"" + id + "\" id=\"sectionMenuCancelEdit\" class='fa fa-minus-square-o' ></div>\n        ");
     }
   }, {
     key: "onDelete",
@@ -1578,14 +3843,15 @@ var View = function () {
     key: "onCommitEdit",
     value: function onCommitEdit(id) {
       var section = this.document.get(id);
-      var value = this.currentEditor.getValue();
-      section.content = value;
+      section.content = this.currentEditor.getValue();
       this.currentEditor = null;
+      $(".editorContainerSelector").remove();
       this.render(this.document);
     }
   }, {
     key: "onCancelEdit",
     value: function onCancelEdit() {
+      $(".editorContainerSelector").remove();
       this.currentEditor = null;
       this.render(this.document);
     }
@@ -15255,7 +17521,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .palette #paletteElementsFilter {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 90px;\n  border-bottom: 1px solid #222222;\n  font-weight: 500;\n  font-size: 12px;\n  padding: 4px 4px 4px 20px;\n  letter-spacing: 5px;\n  text-align: left;\n  color: #C71D3D;\n  box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);\n}\n#layer #layer_elements {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: fixed;\n  top: 120px;\n  bottom: 0;\n  width: 220px;\n  overflow: auto;\n}\n#layer #layer_elements .layerElement {\n  background-color: #fafafa;\n  color: black;\n  cursor: move;\n  font-weight: 400;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 5px;\n  text-align: left;\n  border: 1px solid transparent;\n  border-bottom: 1px solid #222222;\n}\n#layer #layer_elements .layerElement::before {\n  content: \"\";\n  display: block;\n  width: 20px;\n  height: 20px;\n  float: left;\n  margin-right: 5px;\n}\n#layer #layer_elements .layerSelectedElement {\n  background-color: #f5f5f5;\n  color: black;\n  border-style: dotted;\n  border-width: 1px;\n  border-color: #C71D3D;\n  font-weight: 600;\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin: 20px;\n  cursor: pointer;\n  border-left: 1px dotted rgba(0, 0, 0, 0.3);\n  padding-left: 3px;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.sections .activeSection .menu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 16px;\n}\n.sections .activeSection .menu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.sections .activeSection .menu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette_container {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.palette_container {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.palette_container .palette_title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.palette_container .palette_title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.palette_container .palette_title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.palette_container .palette_title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.palette_container .palette_header {\n  position: absolute;\n  left: 0px;\n  top: 90px;\n}\n.palette_container .palette_elements {\n  border: 0;\n  overflow: auto;\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin: 20px;\n  cursor: pointer;\n  border-left: 1px dotted rgba(0, 0, 0, 0.3);\n  padding-left: 3px;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.sectionMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 16px;\n}\n.sectionMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.sectionMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#draw2dCanvasWrapper .sectionMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#draw2dCanvasWrapper {\n  background-color: white;\n  top: 0px  !important;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n", ""]);
 
 // exports
 
