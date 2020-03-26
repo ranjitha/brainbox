@@ -7,12 +7,14 @@ export default class FigureCodeEdit {
   show() {
     Mousetrap.pause()
     let code = shape_designer.app.getConfiguration("code")
-    let splash = $(
-      '<pre id="code_overlay">' +
-      code +
-      '</pre>' +
-      '<img title="Run"   id="test_run"   class="icon" src="./images/dialog_run.svg"/>' +
-      '<img title="Close" id="code_close" class="icon" src="./images/dialog_close.svg"/>'
+    let splash = $(`
+            <pre id="codeContainer">${code}</pre>
+              <div class="tinyFlyoverMenu codeOverlay">
+                <div id="test_run"    class="fa fa-play"></div>
+                <div id="test_commit" class="fa fa-check-square-o"></div>
+                <div id="test_cancel" class='fa fa-minus-square-o' ></div>
+              </div>
+            `
     )
     splash.hide()
     $("body").append(splash)
@@ -45,7 +47,7 @@ export default class FigureCodeEdit {
       return element.startsWith("testShape")
     })
 
-    let editor = ace.edit("code_overlay"),
+    let editor = ace.edit("codeContainer"),
       session = editor.getSession(),
       Range = ace.require("ace/range").Range,
       range = new Range(0, 0, first, lines[first].length),
@@ -79,9 +81,16 @@ export default class FigureCodeEdit {
     range2.end = session.doc.createAnchor(range2.end)
     range2.end.$insertRight = true
 
-    $("#code_close").on("click", function () {
+    $("#test_commit").on("click", function () {
       let code = editor.getValue()
       shape_designer.app.setConfiguration({code: code})
+      Mousetrap.unpause()
+      splash.fadeOut(function () {
+        splash.remove()
+      })
+    })
+
+    $("#test_cancel").on("click", function () {
       Mousetrap.unpause()
       splash.fadeOut(function () {
         splash.remove()

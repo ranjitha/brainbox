@@ -22,7 +22,7 @@ export default class MarkdownDialog {
       let version = figure.VERSION
       let markdownParser = new Remarkable('full', this.defaults)
       markdownParser.inline.validateLink = this.validateLink
-      $('#markdownDialog .html').html(markdownParser.render(content))
+      $('#markdownDialog .markdownRendering').html(markdownParser.render(content))
       $('#markdownDialog .version').html(version)
       if(figure instanceof CircuitFigure){
         $('#markdownDialog .editButton').show()

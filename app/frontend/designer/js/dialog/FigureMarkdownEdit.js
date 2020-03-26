@@ -25,36 +25,46 @@ export default class FigureMarkdownEdit {
     this.mdHtml.inline.validateLink = this.validateLink
 
     let markdown = shape_designer.app.getConfiguration("markdown")
-    markdown = markdown ? markdown : "# Header \n## Subheader \nbe nice and write a help file for your new \ncreated ***DigitalTrainingStudion*** shape. \n\n  - point 1\n  - point 2\n  - point 3"
-    let splash = $(
-      '<div id="FigureMarkdownEdit" class="overlay-scale">' +
-      '<pre class="source full-height">' +
-      markdown +
-      '</pre>' +
-      '<div class="preview full-height" >' +
-      '' +
-      '</div>' +
-      ' <div class="header">' +
-      '<span class="left">Documentation Editor (<a target="_blank" href="https://en.wikipedia.org/wiki/Markdown">markdown syntax </a>)</span>' +
-      '<span class="right">HTML Preview</span></div>' +
-      ' <img title="Close" id="test_close" class="icon" src="./images/dialog_close.svg"/>' +
-      '<div>')
+    markdown = markdown ? markdown : "# Header \n## Subheader \nbe nice and write a help file for your new \ncreated ***Brainbox*** shape. \n\n  - point 1\n  - point 2\n  - point 3"
+    let splash = $(`
+      <div id="FigureMarkdownEdit" class="overlay-scale">
+          <pre class="source full-height">${markdown}</pre>
+          <div class="full-height markdownRendering">
+          </div>
+          <div class="header">
+             <span class="left">Markdown Editor (<a target="_blank" href="https://en.wikipedia.org/wiki/Markdown">markdown syntax </a>)</span>
+             <span class="right">HTML Preview</span>
+          </div>
+          <div class="tinyFlyoverMenu">
+            <div id="test_commit" class="fa fa-check-square-o"></div>
+            <div id="test_cancel" class='fa fa-minus-square-o' ></div>
+          </div>
+      <div>
+      `)
 
     // fadeTo MUSS leider sein. Man kann mit raphael keine paper.text elemente einfügen
     // wenn das canvas nicht sichtbar ist. In diesen Fall mach ich das Canvas "leicht" sichtbar und raphael ist
     // zufrieden.
     $("body").append(splash)
 
-    let removeDialog = () => {
+    $("#test_commit").on("click", () => {
       Mousetrap.unpause()
       shape_designer.app.setConfiguration({markdown: this.editor.getValue()})
       splash.removeClass("open")
       setTimeout(function () {
         splash.remove()
       }, 400)
-    }
+    })
+    
+    $("#test_cancel").on("click", () => {
+      Mousetrap.unpause()
+      splash.removeClass("open")
+      setTimeout(function () {
+        splash.remove()
+      }, 400)
+    })
 
-    $("#test_close").on("click", removeDialog)
+
     setTimeout( () => {
       splash.addClass("open")
     }, 100)
@@ -80,7 +90,7 @@ export default class FigureMarkdownEdit {
       return '<h' + tokens[idx].hLevel + '>'
     }
 
-    this.$preview = $("#FigureMarkdownEdit .preview")
+    this.$preview = $("#FigureMarkdownEdit .markdownRendering")
     this.$source = $('#FigureMarkdownEdit .source')
 
     let editor = ace.edit(this.$source[0]),session = editor.getSession()

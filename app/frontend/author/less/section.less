@@ -7,11 +7,24 @@
   .section {
     margin:20px;
     cursor: pointer;
-    border-left: 1px dotted rgba(0,0,0,0.3);
+    border-left: 1px solid transparent;
     padding-left:3px;
     &:hover{
       background-color: rgba(0,0,0,0.01);
       border-left: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .sectionContent {
+      &[data-type='markdown']{
+
+      }
+
+      &[data-type='brain']{
+        left: 50%;
+        position: relative;
+        transform: translateX(-50%);
+        max-width:100%;
+      }
     }
   }
   .activeSection {

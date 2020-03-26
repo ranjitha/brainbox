@@ -118,7 +118,7 @@ export default class View {
     let markdown = this.markdownEditor.render(entry.content)
     this.html.find(".sections").append(`
         <div data-id="${entry.id}" class='section'>
-           <div class="sectionContent" data-type="markdown">${markdown}</div>
+           <div class="sectionContent markdownRendering" data-type="markdown">${markdown}</div>
         </div>
       `)
   }
@@ -149,7 +149,7 @@ export default class View {
     this.activeSection = sectionDOM
     this.activeSection.addClass('activeSection')
     $(".sections .activeSection").append(`
-        <div class='sectionMenu'>
+        <div class='tinyFlyoverMenu'>
           <div data-id="${id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
           <div data-id="${id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
           <div data-id="${id}" id="sectionMenuEdit"   class='fa fa-edit' ></div>
@@ -165,7 +165,7 @@ export default class View {
     if(this.activeSection === null){
       return
     }
-    $(".sectionMenu").remove()
+    $(".tinyFlyoverMenu").remove()
     this.activeSection.removeClass("activeSection")
     this.activeSection = null
   }
@@ -178,7 +178,7 @@ export default class View {
 
     let section = this.document.get(id)
     let type = section.type
-    let menu = $(".sectionMenu")
+    let menu = $(".tinyFlyoverMenu")
 
     if(type==='markdown') {
       this.currentEditor = this.markdownEditor.inject(section)

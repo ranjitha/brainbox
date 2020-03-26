@@ -12,7 +12,7 @@ export default class Editor {
 
   inject(section) {
     this.section = section
-    let menu = $(".sectionMenu")
+    let menu = $(".tinyFlyoverMenu")
     $(".workspace").append(`
           <div class="content editorContainerSelector" " id="draw2dCanvasWrapper">
                <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
