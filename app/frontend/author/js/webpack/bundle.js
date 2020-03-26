@@ -96,10 +96,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/frontend/_common/inlineSVG.js":
-/*!*******************************************!*\
-  !*** ./app/frontend/_common/inlineSVG.js ***!
-  \*******************************************/
+/***/ "./app/frontend/_common/js/inlineSVG.js":
+/*!**********************************************!*\
+  !*** ./app/frontend/_common/js/inlineSVG.js ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -320,7 +320,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
     return inlineSVG;
 });
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -505,7 +505,7 @@ exports.default = {
   },
 
   shapes: {
-    url: "./shapes/",
+    url: "../shapes/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
 
@@ -3532,7 +3532,7 @@ __webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/author/js/uti
 
 __webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/author/js/util/mousetrap-pause.js");
 
-var _inlineSVG = __webpack_require__(/*! ../../_common/inlineSVG */ "./app/frontend/_common/inlineSVG.js");
+var _inlineSVG = __webpack_require__(/*! ../../_common/js/inlineSVG */ "./app/frontend/_common/js/inlineSVG.js");
 
 var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
 

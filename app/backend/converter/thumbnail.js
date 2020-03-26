@@ -3,7 +3,7 @@ const path = require("path")
 const fs = require("fs")
 const glob = require("glob")
 const thisDir = path.normalize(__dirname)
-const shapeAppDir = path.normalize(__dirname + '/../../../repository/shapes/')
+const shapeAppDir = path.normalize(__dirname + '/../../repository/shapes/')
 const version =  process.env.VERSION || "local-version";
 const isPi = require('detect-rpi');
 
@@ -49,8 +49,9 @@ function concatFiles(dirname) {
 
 module.exports = {
 
-  thumbnail: async (path, file) => {
-    let shapefilePath = path.normalize(path + dir)
+  thumbnail: async (baseDir, subDir) => {
+
+    let shapefilePath = path.normalize(baseDir + subDir)
 
     try {
       let json = JSON.parse(fs.readFileSync(shapefilePath,'utf8'));

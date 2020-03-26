@@ -19,7 +19,7 @@ export default class FileSave {
    *
    * @since 4.0.0
    */
-  show(storage, canvas) {
+  show(storage, canvas, callback) {
 
     new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
       $("#fileSaveDialog .filePreview").attr("src", imageDataUrl)
@@ -44,6 +44,9 @@ export default class FileSave {
             .then(() => {
               storage.currentFile = newName
               $('#fileSaveDialog').modal('hide')
+              if(callback) {
+                callback()
+              }
             });
         })
       })

@@ -39,7 +39,7 @@ export default class Toolbar {
     this.html.append(buttonGroup)
 
     if(permissions.shapes.list) {
-      this.openButton = $('<div class="image-button" id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>')
+      this.openButton = $('<div class="image-button" id="editorFileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>')
       buttonGroup.append(this.openButton)
       this.openButton.on("click", () => {
         this.openButton.tooltip("hide")
@@ -52,7 +52,7 @@ export default class Toolbar {
     }
 
     if(permissions.shapes.update) {
-      this.saveButton = $('<div class="image-button"  id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>')
+      this.saveButton = $('<div class="image-button"  id="editorFileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>')
       buttonGroup.append(this.saveButton)
       this.saveButton.on("click", () => {
         this.saveButton.tooltip("hide")

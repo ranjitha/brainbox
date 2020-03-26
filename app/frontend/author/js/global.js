@@ -9,7 +9,7 @@ import Mousetrap from "mousetrap"
 import LabelInplaceEditor from "./editor/brain/LabelInplaceEditor"
 import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
-import inlineSVG from "../../_common/inlineSVG"
+import inlineSVG from "../../_common/js/inlineSVG"
 import hardware from "./hardware"
 
 

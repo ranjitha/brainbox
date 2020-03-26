@@ -78,6 +78,7 @@ module.exports = {
   },
 
   writeFile: function (baseDir, subDir, content, res, callback) {
+
     let file = path.join(baseDir, subDir)
     let dir = path.dirname(baseDir + subDir)
     if (!fs.existsSync(dir)) {

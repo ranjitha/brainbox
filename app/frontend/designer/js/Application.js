@@ -7,8 +7,8 @@ import storage from "./io/BackendStorage"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
-import FileSaveAs from "./dialog/FileSaveAs"
 import Files from "./view/FilesScreen"
+import toast from "../../_common/js/toast";
 
 /**
  *
@@ -47,11 +47,20 @@ class Application {
   }
 
   init(permissions){
+    this.permissions = permissions
+    this.hasUnsavedChanges = false
+
     this.filePane = new Files(permissions)
 
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
       code: $("#shape-edit-template").text().trim()
+    }
+
+    // Show the user an alert if there are unsaved changes
+    //
+    window.onbeforeunload = ()=> {
+      return this.hasUnsavedChanges?  "The changes you made will be lost if you navigate away from this page": undefined;
     }
 
     this.localStorage = []
@@ -83,6 +92,8 @@ class Application {
     this.filter = new FilterPane(this, "#filter .filter_actions", this.view, permissions)
 
     this.view.installEditPolicy(new SelectionToolPolicy())
+
+    this.view.getCommandStack().addEventListener(this)
 
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
@@ -129,7 +140,7 @@ class Application {
               position: 'left'
             },
             {
-              target: '#fileSave',
+              target: '#editorFileSave',
               content: "..and don't forget to save your changes afterwards.",
               position: 'right'
             },
@@ -150,7 +161,7 @@ class Application {
               position: 'left'
             },
             {
-              target: '#fileSave',
+              target: '#editorFileSave',
               content: "..and don't forget to save your changes afterwards.",
               position: 'right'
             },
@@ -171,7 +182,7 @@ class Application {
               position: 'left'
             },
             {
-              target: '#fileSave',
+              target: '#editorFileSave',
               content: "..and don't forget to save your changes afterwards.",
               position: 'right'
             },
@@ -218,6 +229,8 @@ class Application {
         this.getConfiguration()
         this.view.getCommandStack().markSaveLocation()
         this.view.centerDocument()
+        this.hasUnsavedChanges = false
+        $("#editorFileSave div").removeClass("highlight")
         return content
       })
   }
@@ -240,12 +253,13 @@ class Application {
 
   fileSave() {
     this.setConfiguration()
-    if (this.storage.currentFile === null) {
-      new FileSaveAs().show(this.storage,this.view)
+    let callback = () => {
+      this.hasUnsavedChanges = false
+      toast("Saved")
+      $("#editorFileSave div").removeClass("highlight")
     }
-    else {
-      new FileSave().show(this.storage,this.view)
-    }
+
+    new FileSave().show(this.storage,this.view, callback)
   }
 
 
@@ -274,6 +288,17 @@ class Application {
       id: 'editor',
       file: name
     }, 'Brainbox Designer | ' + name, window.location.href.split('?')[0] + '?file=' + file)
+  }
+
+
+  stackChanged(event) {
+    if (event.isPreChangeEvent()) {
+      return // silently
+    }
+    if (event.getStack().canUndo()){
+      $("#editorFileSave div").addClass("highlight")
+      this.hasUnsavedChanges = true
+    }
   }
 
 }

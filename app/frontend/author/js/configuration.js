@@ -10,7 +10,7 @@ export default {
   },
 
   shapes: {
-    url: "./shapes/",
+    url: "../shapes/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
 

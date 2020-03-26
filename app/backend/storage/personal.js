@@ -1,7 +1,6 @@
 const generic = require("./_base_")
 const update = require("../update")
 const path = require('path')
-const fs = require('fs-extra')
 const express = require('express')
 const {thumbnail} = require("../converter/thumbnail")
 const colors = require('colors')
@@ -109,9 +108,7 @@ module.exports = {
     // Handle shape files
     //
     // =================================================================
-    app.use('/circuit/shapes', express.static(shapeAppDir));
-    app.use('/designer/shapes', express.static(shapeAppDir));
-    app.use('/author/shapes', express.static(shapeAppDir));
+    app.use('/shapes', express.static(shapeAppDir));
     app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapeAppDir, req.query.path, res))
     app.get('/backend/shape/get', (req, res) => module.exports.getJSONFile(shapeAppDir, req.query.filePath, res))
     app.get('/backend/shape/image', (req, res) => module.exports.getBase64Image(shapeAppDir, req.query.filePath, res))
@@ -136,7 +133,7 @@ module.exports = {
   writeShape:  function (baseDir, subDir, content, reason, res ){
     const io = require('../comm/websocket').io
 
-    generic.writeShape(baseDir, subDir, content, res, (err)=>{
+    generic.writeShape(baseDir, subDir, content, "reason", res, (err)=>{
       // inform the browser that the processing of the
       // code generation is ongoing
       //
@@ -157,6 +154,9 @@ module.exports = {
       // commit the shape to the connected github backend
       // (if configured)
       update.commitShape(baseDir+subDir, subDir, reason)
+
+      res.setHeader('Content-Type', 'application/json')
+      res.send({ filePath: subDir })
     })
   },
 

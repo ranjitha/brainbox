@@ -15,6 +15,7 @@ import conf from "./Configuration"
 import reader from "./io/Reader"
 import DesignerDialog from "./dialog/DesignerDialog"
 import AuthorDialog from "./dialog/AuthorDialog"
+import toast from "../../_common/js/toast"
 
 /**
  * wait asyn that an DOM element is present
@@ -82,7 +83,7 @@ class Application {
     $("#editorFileSave").on("click", () => {
       let callback = () => {
         this.hasUnsavedChanges = false
-        $( "#notificationToast" ).animate({top:"+=20"}, 500 ).delay(700).animate({top:"-=20"}, 300 )
+        toast("Saved")
         $("#editorFileSave div").removeClass("highlight")
       }
       if (this.permissions.brains.create && this.permissions.brains.update) {
@@ -135,6 +136,8 @@ class Application {
         reader.unmarshal(this.view, content)
         this.view.getCommandStack().markSaveLocation()
         this.view.centerDocument()
+        this.hasUnsavedChanges = false
+        $("#editorFileSave div").removeClass("highlight")
 
         // check if a tutorial exists for the named file and load/activate them
         //

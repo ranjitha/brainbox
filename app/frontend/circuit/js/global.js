@@ -10,7 +10,7 @@ import Mousetrap from "mousetrap"
 import LabelInplaceEditor from "./LabelInplaceEditor"
 import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
-import inlineSVG from "../../_common/inlineSVG"
+import inlineSVG from "../../_common/js/inlineSVG"
 import hardware from "./hardware"
 
 export default {
