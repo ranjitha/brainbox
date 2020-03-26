@@ -10,6 +10,7 @@ import LabelInplaceEditor from "./editor/brain/LabelInplaceEditor"
 import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
 import inlineSVG from "../../_common/inlineSVG"
+import hardware from "./hardware"
 
 
 export default {
@@ -17,6 +18,7 @@ export default {
   DecoratedInputPort,
   Connection,
   Raft,
+  hardware,
   ProbeFigure,
   Mousetrap,
   inlineSVG,

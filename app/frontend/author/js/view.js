@@ -94,7 +94,7 @@ export default class View {
     let entry = {
       id: shortid.generate(),
       type: "brain",
-      content: []
+      content: null
     }
     this.document.add(entry)
     this.renderBrain(entry)
@@ -123,12 +123,21 @@ export default class View {
       `)
   }
 
-  renderBrain(entry){
-    this.html.find(".sections").append(`
-        <div data-id="${entry.id}" class='section'>
-            <div class="sectionContent" data-type="brain">${entry.id}</div>
+  renderBrain(section){
+    if(section.content){
+      this.html.find(".sections").append(`
+        <div data-id="${section.id}" class='section'>
+            <img class="sectionContent" data-type="brain" src="${section.content.image}">
         </div>
       `)
+    }
+    else {
+      this.html.find(".sections").append(`
+        <div data-id="${section.id}" class='section'>
+            <div class="sectionContent" data-type="brain">-double click to edit brain-</div>
+        </div>
+      `)
+    }
   }
 
   onSelect(sectionDOM){
