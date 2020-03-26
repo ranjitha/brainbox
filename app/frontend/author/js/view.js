@@ -25,7 +25,8 @@ export default class View {
     })
 
     $(document).on("click", ".sections .section .sectionContent", event => {
-      this.onSelect($(event.target).closest(".section"))
+      let section = this.document.get($(event.target).closest(".section").data("id"))
+      this.onSelect(section)
       return false
     })
 
@@ -52,27 +53,40 @@ export default class View {
     })
 
     $(document).on("dblclick", ".sections .section .sectionContent", event => {
-      let section = $(event.target).closest(".section")
+      let section = this.document.get($(event.target).closest(".section").data("id"))
       this.onSelect(section)
-      this.onEdit(section.data("id"))
+      this.onEdit(section)
       return false
     })
     $(document).on("click","#sectionMenuEdit", event=>{
-      this.onEdit($(event.target).data("id"))
+      this.onEdit(this.document.get($(event.target).data("id")))
       return false
     })
     $(document).on("click","#sectionMenuDelete", event=>{
-      this.onDelete($(event.target).data("id"))
+      this.onDelete(this.document.get($(event.target).data("id")))
       return false
     })
     $(document).on("click","#sectionMenuCommitEdit", event=>{
-      this.onCommitEdit($(event.target).data("id"))
+      this.onCommitEdit(this.document.get($(event.target).data("id")))
       return false
     })
     $(document).on("click","#sectionMenuCancelEdit", event=>{
       this.onCancelEdit()
       return false
     })
+    $(document).on("click","#sectionMenuInsertMarkdown", event=>{
+      let section = this.addMarkdown($(event.target).data("index"))
+      this.onSelect(section)
+      this.onEdit(section)
+      return false
+    })
+    $(document).on("click","#sectionMenuInsertBrain", event=>{
+      let section = this.addBrain($(event.target).data("index"))
+      this.onSelect(section)
+      this.onEdit(section)
+      return false
+    })
+
   }
 
   setDocument(json){
@@ -80,44 +94,61 @@ export default class View {
     this.render(this.document)
   }
 
-  addMarkdown(){
-    let entry = {
+  addMarkdown(index){
+    let section = {
       id: shortid.generate(),
       type: "markdown",
       content: "## Header"
     }
-    this.document.add(entry)
-    this.renderMarkdown(entry)
+    this.document.add(section, index)
+    if(typeof index === "number"){
+      this.render(this.document)
+    }
+    else{
+      this.renderMarkdown(section, index)
+    }
+    return section
   }
 
-  addBrain(){
-    let entry = {
+  addBrain(index){
+    let section = {
       id: shortid.generate(),
       type: "brain",
       content: null
     }
-    this.document.add(entry)
-    this.renderBrain(entry)
+    this.document.add(section, index)
+    if(typeof index === "number"){
+      this.render(this.document)
+    }
+    else{
+      this.renderBrain(section, index)
+    }
+    return section
   }
 
   render(document){
     this.html.find(".sections").html("")
-    document.forEach( entry => {
-      switch(entry.type){
+    this.renderSpacer(0)
+    document.forEach( (section, index) => {
+      switch(section.type){
         case "brain":
-          this.renderBrain(entry)
+          this.renderBrain(section)
               break
         case "markdown":
-          this.renderMarkdown(entry)
+          this.renderMarkdown(section)
               break
+        default:
+          this.renderUnknown(section)
+          break
       }
+      this.renderSpacer(index+1)
     })
   }
 
-  renderMarkdown(entry){
-    let markdown = this.markdownEditor.render(entry.content)
+  renderMarkdown(section){
+    let markdown = this.markdownEditor.render(section.content)
     this.html.find(".sections").append(`
-        <div data-id="${entry.id}" class='section'>
+        <div data-id="${section.id}" class='section'>
            <div class="sectionContent markdownRendering" data-type="markdown">${markdown}</div>
         </div>
       `)
@@ -140,20 +171,38 @@ export default class View {
     }
   }
 
-  onSelect(sectionDOM){
+  renderSpacer(index){
+    this.html.find(".sections").append(`
+        <div class='section'>
+          <div class='sectionContent ' data-type="spacer" >
+            <div data-index="${index}" id="sectionMenuInsertMarkdown"  class='tinyFlyoverMenu fa fa-plus-square-o' >Text</div>
+            <div data-index="${index}" id="sectionMenuInsertBrain" class='tinyFlyoverMenu fa fa-plus-square-o' >Diagram</div>
+          </div>
+        </div>
+      `)
+  }
+
+  renderUnknown(section){
+    this.html.find(".sections").append(`
+        <div data-id="${section.id}" class='section'>
+           <div class="sectionContent" data-type="unknown">Unknown section type</div>
+        </div>
+      `)
+  }
+
+  onSelect(section){
     if(this.currentEditor){
       return
     }
     this.onUnselect()
-    let id = sectionDOM.data("id")
-    this.activeSection = sectionDOM
+    this.activeSection = $(`.section[data-id='${section.id}']`)
     this.activeSection.addClass('activeSection')
     $(".sections .activeSection").append(`
         <div class='tinyFlyoverMenu'>
-          <div data-id="${id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
-          <div data-id="${id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
-          <div data-id="${id}" id="sectionMenuEdit"   class='fa fa-edit' ></div>
-          <div data-id="${id}" id="sectionMenuDelete" class='fa fa-trash-o' ></div>
+          <div data-id="${section.id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
+          <div data-id="${section.id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
+          <div data-id="${section.id}" id="sectionMenuEdit"   class='fa fa-edit' ></div>
+          <div data-id="${section.id}" id="sectionMenuDelete" class='fa fa-trash-o' ></div>
         </div>`)
   }
 
@@ -171,15 +220,14 @@ export default class View {
   }
 
 
-  onEdit(id){
+  onEdit(section){
     if(this.currentEditor){
       return
     }
 
-    let section = this.document.get(id)
     let type = section.type
-    let menu = $(".tinyFlyoverMenu")
 
+    let menu = $(".activeSection .tinyFlyoverMenu")
     if(type==='markdown') {
       this.currentEditor = this.markdownEditor.inject(section)
       $(".sections").removeClass("activeSection")
@@ -193,13 +241,13 @@ export default class View {
     }
 
     menu.html(`
-          <div data-id="${id}" id="sectionMenuCommitEdit"   class='fa fa-check-square-o' ></div>
-          <div data-id="${id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
+          <div data-id="${section.id}" id="sectionMenuCommitEdit" class='fa fa-check-square-o' ></div>
+          <div data-id="${section.id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
         `)
   }
 
-  onDelete(id){
-    this.document.remove(id)
+  onDelete(section){
+    this.document.remove(section.id)
     this.render(this.document)
   }
 

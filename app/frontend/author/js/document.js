@@ -36,11 +36,16 @@ export default class View {
     return this.json.splice(index, 1);
   }
 
-  add(section){
-    this.json.push(section)
+  add(section, index){
+    if(typeof index === "number"){
+      this.json.splice(index,0,section)
+    }
+    else {
+      this.json.push(section)
+    }
   }
 
-  move(fromIndex, toIndex) {
+  move(fromIndex, toIndex){
     this.json.splice(toIndex, 0, this.json.splice(fromIndex, 1)[0]);
   };
 

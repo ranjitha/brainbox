@@ -134,7 +134,7 @@ export default class Toolbar {
       '       <li class="tool_shape_entry policyCircleToolPolicy"    ><a href="#"><img  src="./images/toolbar_circle.svg"><span class="tool_label">Circle</span><span class="tool_shortcut">C</span></a></li>' +
       '       <li class="tool_shape_entry policyLineToolPolicy"      ><a href="#"><img  src="./images/toolbar_line.svg"><span class="tool_label">Line</span><span class="tool_shortcut">L</span></a></li>' +
       '       <li class="tool_shape_entry policyTextToolPolicy"      ><a href="#"><img  src="./images/toolbar_text.svg"><span class="tool_label">Text</span><span class="tool_shortcut">T</span></a></li>' +
-      '       <li class="tool_shape_entry policyPortToolPolicy"      ><a href="#"><img  src="./images/toolbar_rectangle.svg"><span class="tool_label">Port</span><span class="tool_shortcut">P</span></a></li>' +
+      '       <li class="tool_shape_entry policyPortToolPolicy"      ><a href="#"><img  src="./images/toolbar_port.svg"><span class="tool_label">Port</span><span class="tool_shortcut">P</span></a></li>' +
       '    </ul>' +
       '</label>'
     )
