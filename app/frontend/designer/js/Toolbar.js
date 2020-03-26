@@ -267,19 +267,19 @@ export default class Toolbar {
             <label id="applicationSwitch_toggler" class="dropdown" >
 
                 <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
-                  <img  src="./images/toolbar_app_switch.svg"/>
+                  <img  src="../_common/images/toolbar_app_switch.svg"/>
                 </span>
 
                 <ul class="dropdown-menu" role="menu" >
                     <form class="form-horizontal" role="form">
 
                       <label id="applicationSwitchSimulator" class="image-button">
-                        <img src="./images/app_simulator.svg"/>
+                        <img src="../_common/images/app_simulator.svg"/>
                         <div>Circuit<br>Simulator</div>
                       </label>
 
                       <label id="applicationSwitchAuthor" class="image-button" >
-                        <img src="./images/app_lessons.svg"/>
+                        <img src="../_common/images/app_lessons.svg"/>
                         <div>Lesson<br>Author</div>
                       </label>
 

@@ -17,5 +17,14 @@ export default {
   color: {
     high: "#C21B7A",
     low:  "#0078F2"
+  },
+
+  designer: {
+    url: "../designer/"
+  },
+
+  simulator: {
+    url: "../circuit/"
   }
+
 }

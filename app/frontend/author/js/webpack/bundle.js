@@ -512,8 +512,69 @@ exports.default = {
   color: {
     high: "#C21B7A",
     low: "#0078F2"
+  },
+
+  designer: {
+    url: "../designer/"
+  },
+
+  simulator: {
+    url: "../circuit/"
   }
+
 };
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/dialog/DesignerDialog.js":
+/*!*********************************************************!*\
+  !*** ./app/frontend/author/js/dialog/DesignerDialog.js ***!
+  \*********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+__webpack_require__(/*! google-code-prettify/bin/prettify.min.css */ "./node_modules/google-code-prettify/bin/prettify.min.css");
+
+var _configuration = __webpack_require__(/*! ../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(figure) {
+      if (figure) {
+        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
+        var pathToApp = _configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape";
+        window.open(pathToApp, "designer");
+      } else {
+        window.open(_configuration2.default.designer.url, "designer");
+      }
+    }
+  }]);
+
+  return Dialog;
+}();
+
+exports.default = Dialog;
 module.exports = exports["default"];
 
 /***/ }),
@@ -716,6 +777,52 @@ var FileSave = function () {
 }();
 
 exports.default = FileSave;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/dialog/SimulatorDialog.js":
+/*!**********************************************************!*\
+  !*** ./app/frontend/author/js/dialog/SimulatorDialog.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+__webpack_require__(/*! google-code-prettify/bin/prettify.min.css */ "./node_modules/google-code-prettify/bin/prettify.min.css");
+
+var _configuration = __webpack_require__(/*! ../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show() {
+      window.open(_configuration2.default.simulator.url, "simulator");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+exports.default = Dialog;
 module.exports = exports["default"];
 
 /***/ }),
@@ -3928,6 +4035,16 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _DesignerDialog = __webpack_require__(/*! ./dialog/DesignerDialog */ "./app/frontend/author/js/dialog/DesignerDialog.js");
+
+var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
+
+var _SimulatorDialog = __webpack_require__(/*! ./dialog/SimulatorDialog */ "./app/frontend/author/js/dialog/SimulatorDialog.js");
+
+var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Toolbar = function Toolbar(app, view, elementId, permissions) {
@@ -3984,6 +4101,14 @@ var Toolbar = function Toolbar(app, view, elementId, permissions) {
   Mousetrap.bindGlobal("ctrl+s", function (event) {
     _this.addBrainButton.click();
     return false;
+  });
+
+  $("#applicationSwitchDesigner").on("click", function () {
+    new _DesignerDialog2.default().show();
+  });
+
+  $("#applicationSwitchSimulator").on("click", function () {
+    new _SimulatorDialog2.default().show();
   });
 
   // enable the tooltip for all buttons
@@ -17988,6 +18113,25 @@ exports.push([module.i, "/*!\n *  Font Awesome 4.7.0 by @davegandy - http://font
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/google-code-prettify/bin/prettify.min.css":
+/*!******************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/google-code-prettify/bin/prettify.min.css ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".pln{color:#000}@media screen{.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun,.opn,.clo{color:#660}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec,.var{color:#606}.fun{color:red}}@media print,projection{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun,.opn,.clo{color:#440}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style-type:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/js-treeview/dist/treeview.min.css":
 /*!**********************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/js-treeview/dist/treeview.min.css ***!
@@ -18245,6 +18389,37 @@ module.exports = "js/webpack/af7ae505a9eed503f8b8e6982036873e.woff2";
 /***/ (function(module, exports) {
 
 module.exports = "js/webpack/fee66e712a8a08eef5805a46892932ad.woff";
+
+/***/ }),
+
+/***/ "./node_modules/google-code-prettify/bin/prettify.min.css":
+/*!****************************************************************!*\
+  !*** ./node_modules/google-code-prettify/bin/prettify.min.css ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../css-loader!./prettify.min.css */ "./node_modules/css-loader/index.js!./node_modules/google-code-prettify/bin/prettify.min.css");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
 
 /***/ }),
 

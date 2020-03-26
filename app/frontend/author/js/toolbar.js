@@ -1,3 +1,5 @@
+import DesignerDialog from "./dialog/DesignerDialog"
+import SimulatorDialog from "./dialog/SimulatorDialog"
 
 export default class Toolbar {
 
@@ -56,6 +58,13 @@ export default class Toolbar {
       return false
     })
 
+    $("#applicationSwitchDesigner").on("click", () => {
+      new DesignerDialog().show()
+    })
+
+    $("#applicationSwitchSimulator").on("click", () => {
+      new SimulatorDialog().show()
+    })
 
     // enable the tooltip for all buttons
     //
