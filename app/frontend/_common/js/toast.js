@@ -5,8 +5,8 @@ export default function(text){
   $("#notificationToast")
     .delay(900)
     .animate({ top: "+=20" }, 500)
-    .delay(700)
+    .delay(1500)
     .animate({ top: "-=20" }, 300, ()=>{
-      $(this).remove()
+       $(this).remove()
     })
 }

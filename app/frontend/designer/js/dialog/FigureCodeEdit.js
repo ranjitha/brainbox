@@ -8,12 +8,14 @@ export default class FigureCodeEdit {
     Mousetrap.pause()
     let code = shape_designer.app.getConfiguration("code")
     let splash = $(`
-            <pre id="codeContainer">${code}</pre>
+          <div id="codeDialog">
+            <pre class="codeContainer">${code}</pre>
               <div class="tinyFlyoverMenu codeOverlay">
                 <div id="test_run"    class="fa fa-play"></div>
                 <div id="test_commit" class="fa fa-check-square-o"></div>
                 <div id="test_cancel" class='fa fa-minus-square-o' ></div>
               </div>
+          </div>
             `
     )
     splash.hide()
@@ -47,7 +49,7 @@ export default class FigureCodeEdit {
       return element.startsWith("testShape")
     })
 
-    let editor = ace.edit("codeContainer"),
+    let editor = ace.edit($("#codeDialog .codeContainer")[0]),
       session = editor.getSession(),
       Range = ace.require("ace/range").Range,
       range = new Range(0, 0, first, lines[first].length),

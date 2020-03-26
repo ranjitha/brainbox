@@ -13,6 +13,7 @@ import FigureMarkdownEdit from "./dialog/FigureMarkdownEdit"
 import FigureTest from "./dialog/FigureTest"
 import SimulatorDialog from "./dialog/SimulatorDialog"
 import AuthorDialog from "./dialog/AuthorDialog"
+import toast from "../../_common/js/toast"
 
 export default class Toolbar {
 
@@ -245,6 +246,7 @@ export default class Toolbar {
       catch (exc) {
         console.log(exc)
         new FigureCodeEdit().show()
+        toast("Your code contains errors. Unable to run test environment")
       }
     })
 

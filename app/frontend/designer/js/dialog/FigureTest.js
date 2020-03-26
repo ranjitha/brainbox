@@ -1,4 +1,5 @@
 import FigureWriter from "./../io/FigureWriter"
+import toast from "../../../_common/js/toast";
 
 export default class FigureTest {
 
@@ -17,17 +18,16 @@ export default class FigureTest {
         testShape = eval(js)
       }
       catch (exc) {
-        alert("Error in shape code. \nRemove error and try it again:\n\n>>    " + exc)
+        toast("Error in shape code.<br>Remove error and try it again")
         throw exc
       }
       let splash = $(` 
         <div class="overlay-scale" id="testDialog">
-          <div class="testCanvas">
+          <div id="testCanvas">
           </div>
           <div  class="testInfo" >Test page for your designed and coded draw2d shape.</div>
           <div class="tinyFlyoverMenu">
-            <div id="test_commit" class="fa fa-check-square-o"></div>
-            <div id="test_cancel" class='fa fa-minus-square-o' ></div>
+            <div id="test_close" class='fa fa-close' ></div>
           </div>
         <div>
         `)
@@ -37,7 +37,7 @@ export default class FigureTest {
       // zufrieden.
       $("body").append(splash)
 
-      let canvas = new draw2d.Canvas("testDialog .testCanvas")
+      let canvas = new draw2d.Canvas("testCanvas")
       _this.canvas = canvas
       canvas.installEditPolicy(new draw2d.policy.canvas.ShowDotEditPolicy(20, 1, "#FF4981"))
       let router = new draw2d.layout.connection.InteractiveManhattanConnectionRouter()
