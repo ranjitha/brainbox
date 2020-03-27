@@ -6900,7 +6900,7 @@ _packages2.default.Canvas = Class.extend(
       _this.mouseDragDiffY = 0;
     });
 
-    this.html.bind("mousemove touchmove", function (event) {
+    this.html.bind("mousemove", function (event) {
       event = _this._getEvent(event);
       var pos = _this.fromDocumentToCanvasCoordinate(event.clientX, event.clientY);
       if (_this.mouseDown === false) {

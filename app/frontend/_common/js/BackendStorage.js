@@ -68,6 +68,27 @@ class BackendStorage {
     return this.loadUrl(this.conf.backend.demo.get(fileName))
   }
 
+  deleteFile(fileName) {
+    let data = {
+      filePath: fileName
+    }
+    return axios.post(this.conf.backend.file.del,data )
+  }
+
+  createUserFolder(folderName){
+    let data = {
+      filePath: folderName
+    }
+    return axios.post(this.conf.backend.file.folder, data)
+  }
+
+  createDemoFolder(folderName){
+    let data = {
+      filePath: folderName
+    }
+    return axios.post(this.conf.backend.demo.folder, data)
+  }
+
   /**
    * Load the file content of the given path
    *
@@ -84,20 +105,6 @@ class BackendStorage {
 
         return response.data
       })
-  }
-
-  deleteFile(fileName) {
-    return $.ajax({
-        url: this.conf.backend.file.del,
-        method: "POST",
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          filePath: fileName
-        }
-      }
-    )
   }
 
   dirname(path) {

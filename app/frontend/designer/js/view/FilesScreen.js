@@ -47,6 +47,7 @@ export default class Files {
             type: "dir",
             dir: true,
             readonly: true,
+            back:"_back",
             title: ".."
           })
         }

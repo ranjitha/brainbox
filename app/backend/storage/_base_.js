@@ -1,6 +1,7 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const glob = require("glob")
 const path = require('path')
+const makeDir = require('make-dir');
 
 // Generic file operations for "brains" and "shapes"
 //
@@ -72,10 +73,26 @@ module.exports = {
   deleteFile: function (baseDir, subDir, res) {
     let file = path.join(baseDir, subDir)
     fs.unlink(file, err => {
-      if (err) console.log(err)
+      if (err) {
+        // maybe a directory
+        fs.removeSync(file)
+      }
       res.send('true')
     })
   },
+
+  createFolder: function (baseDir, subDir, res) {
+    console.log(baseDir, subDir)
+    let directory = path.join(baseDir, subDir)
+    makeDir(directory)
+      .then( ()=>{
+        res.send('true')
+      })
+      .catch( ()=>{
+        res.status(500).send('Unable to create directory')
+      })
+  },
+
 
   writeFile: function (baseDir, subDir, content, res, callback) {
 

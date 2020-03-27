@@ -1,7 +1,7 @@
 import Toolbar from "./toolbar"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
-import Files from "./view/FilesScreen"
+import Files from "../../_common/js/FilesScreen"
 import View from "./view"
 import conf from "./configuration";
 
@@ -27,7 +27,7 @@ class Application {
 
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
-    this.filePane = new Files(permissions)
+    this.filePane = new Files(conf, permissions)
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
 
 
@@ -59,6 +59,7 @@ class Application {
         this.fileLoad(event.state.file)
       }
     })
+    $("#leftTabStrip .files").click()
   }
 
   getParam(name) {

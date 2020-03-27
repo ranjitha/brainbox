@@ -67,7 +67,7 @@ module.exports = {
 
     // Ensure that the required storage folder exists
     //
-    makeDir(sheetsAppDir)
+    makeDir(sheetsHomeDir)
     makeDir(brainsHomeDir)
 
     console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
@@ -88,7 +88,7 @@ module.exports = {
     app.post('/backend/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
     app.post('/backend/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
     app.post('/backend/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,     req.body.filePath, req.body.content, res))
-
+    app.post('/backend/sheet/folder', (req, res) => module.exports.createFolder(sheetsHomeDir,   req.body.filePath, res))
 
     // =================================================================
     // Handle user brain files
@@ -99,30 +99,44 @@ module.exports = {
     app.get('/backend/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
     app.post('/backend/brain/delete', (req, res) => module.exports.deleteFile(brainsHomeDir,     req.body.filePath, res))
     app.post('/backend/brain/rename', (req, res) => module.exports.renameFile(brainsHomeDir,     req.body.from, req.body.to, res))
-    app.post('/backend/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
+    app.post('/backend/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,     req.body.filePath, req.body.content, res))
+    app.post('/backend/brain/folder', (req, res) => module.exports.createFolder(brainsHomeDir,   req.body.filePath, res))
 
 
     // =================================================================
-    // Handle pre-installed brain/sheet files
+    // Handle pre-installed brain files
     //
     // =================================================================
-    app.get('/backend/demo/brain/list',  (req, res) => module.exports.listFiles(brainsAppDir, req.query.path, res))
-    app.get('/backend/demo/brain/get',   (req, res) => module.exports.getJSONFile(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/brain/image', (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/sheet/list',  (req, res) => module.exports.listFiles(sheetsAppDir, req.query.path, res))
-    app.get('/backend/demo/sheet/get',   (req, res) => module.exports.getJSONFile(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/demo/brain/list',    (req, res) => module.exports.listFiles(brainsAppDir,      req.query.path, res))
+    app.get('/backend/demo/brain/get',     (req, res) => module.exports.getJSONFile(brainsAppDir,    req.query.filePath, res))
+    app.get('/backend/demo/brain/image',   (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.post('/backend/demo/brain/delete', (req, res) => module.exports.deleteFile(brainsAppDir,     req.body.filePath, res))
+    app.post('/backend/demo/brain/rename', (req, res) => module.exports.renameFile(brainsAppDir,     req.body.from, req.body.to, res))
+    app.post('/backend/demo/brain/save',   (req, res) => module.exports.writeBrain(brainsAppDir,     req.body.filePath, req.body.content, res))
+    app.post('/backend/demo/brain/folder', (req, res) => module.exports.createFolder(brainsAppDir,   req.body.filePath, res))
+
+    // =================================================================
+    // Handle pre-installed brain files
+    //
+    // =================================================================
+    app.get('/backend/demo/sheet/list',    (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
+    app.get('/backend/demo/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsAppDir,  req.query.filePath, res))
+    app.post('/backend/demo/sheet/delete', (req, res) => module.exports.deleteFile(sheetsAppDir,   req.body.filePath, res))
+    app.post('/backend/demo/sheet/rename', (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
+    app.post('/backend/demo/sheet/save',   (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))
+    app.post('/backend/demo/sheet/folder', (req, res) => module.exports.createFolder(sheetsAppDir, req.body.filePath, res))
 
     // =================================================================
     // Handle system shape files
     //
     // =================================================================
     app.use('/shapes', express.static(shapesAppDir));
-    app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapesAppDir, req.query.path, res))
-    app.get('/backend/shape/get', (req, res) => module.exports.getJSONFile(shapesAppDir, req.query.filePath, res))
-    app.get('/backend/shape/image', (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
-    app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapesAppDir, req.body.filePath, res))
-    app.post('/backend/shape/rename', (req, res) => module.exports.renameFile(shapesAppDir, req.body.from, req.body.to, res))
-    app.post('/backend/shape/save', (req, res) => module.exports.writeShape(shapesAppDir, req.body.filePath, req.body.content, req.body.commitMessage, res))
+    app.get('/backend/shape/list',    (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
+    app.get('/backend/shape/get',     (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
+    app.get('/backend/shape/image',   (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
+    app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapesAppDir,     req.body.filePath, res))
+    app.post('/backend/shape/rename', (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
+    app.post('/backend/shape/save',   (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))
 
 
     // =================================================================
@@ -139,6 +153,7 @@ module.exports = {
   renameFile: generic.renameFile,
   deleteFile: generic.deleteFile,
   writeFile: generic.deleteFile,
+  createFolder: generic.createFolder,
 
   writeShape: function (baseDir, subDir, content, reason, res ){
     const io = require('../comm/websocket').io
@@ -147,7 +162,7 @@ module.exports = {
       // inform the browser that the processing of the
       // code generation is ongoing
       //
-      io.sockets.emit("shape:generating", {
+      io.sockets.emit("file:generating", {
         filePath: subDir
       })
 
@@ -155,7 +170,7 @@ module.exports = {
       //
       thumbnail(baseDir, subDir)
 
-      io.sockets.emit("shape:generated", {
+      io.sockets.emit("file:generated", {
         filePath: subDir,
         imagePath: subDir.replace(".shape", ".png"),
         jsPath: subDir.replace(".shape", ".js")

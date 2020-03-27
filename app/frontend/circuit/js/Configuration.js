@@ -16,18 +16,20 @@ export default {
     configuration:  `../backend/configuration`,
 
     file: {
-      list:   path       => `../backend/brain/list?path=${path}`,
-      get:    file       => `../backend/brain/get?filePath=${file}`,
-      image:  file       => `../backend/brain/image?filePath=${file}`,
-      del:     `../backend/brain/delete`,
-      rename:  `../backend/brain/rename`,
-      save:    `../backend/brain/save`
+      list:   path => `../backend/brain/list?path=${path}`,
+      get:    file => `../backend/brain/get?filePath=${file}`,
+      image:  file => `../backend/brain/image?filePath=${file}`,
+      del:            `../backend/brain/delete`,
+      rename:         `../backend/brain/rename`,
+      save:           `../backend/brain/save`,
+      folder:         `../backend/brain/folder`
     },
 
     demo:{
-      list:   path       => `../backend/demo/brain/list?path=${path}`,
-      get:    file       => `../backend/demo/brain/get?filePath=${file}`,
-      image:  file       => `../backend/demo/brain/image?filePath=${file}`
+      list:   path => `../backend/demo/brain/list?path=${path}`,
+      get:    file => `../backend/demo/brain/get?filePath=${file}`,
+      image:  file => `../backend/demo/brain/image?filePath=${file}`,
+      folder:         `../backend/demo/brain/folder`
     }
   },
 

@@ -146,8 +146,8 @@ module.exports = {
     //
     // =================================================================
     app.use('/shapes', express.static(shapeAppDir));
-    app.get('/backend/shape/list', (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
-    app.get('/backend/shape/get', (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
+    app.get('/backend/shape/list',  (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
+    app.get('/backend/shape/get',   (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
     app.get('/backend/shape/image', (req, res) => generic.getBase64Image(shapeAppDir, req.query.filePath, res))
     // it is not allowed to update the shape files in the hosted version....updates happens via CLI
     // app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
@@ -158,6 +158,7 @@ module.exports = {
   renameFile: ()=>{},
   deleteFile: ()=>{},
   writeShape: ()=>{},
+  createFolder: ()=>{},
 
   getJSONFile: function (baseDir, subDir, res) {
     dbs[baseDir].get(subDir, (err, value) => {

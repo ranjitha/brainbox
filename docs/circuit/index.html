@@ -4,10 +4,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="viewport" content="width=device-width, minimum-scale=1.0"/>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <link rel="icon" type="./image/png"    href="./images/favicon_64x64.png" sizes="64x64">
-  <link rel="icon" type="./image/png"    href="./images/favicon_48x48.png" sizes="48x48">
-  <link rel="icon" type="./image/png"    href="./images/favicon_32x32.png" sizes="32x32">
-  <link rel="icon" type="./image/png"    href="./images/favicon_16x16.png" sizes="16x16">
+  <link rel="icon" type="./image/png"    href="../_common/images/favicon_64x64.png" sizes="64x64">
+  <link rel="icon" type="./image/png"    href="../_common/images/favicon_48x48.png" sizes="48x48">
+  <link rel="icon" type="./image/png"    href="../_common/images/favicon_32x32.png" sizes="32x32">
+  <link rel="icon" type="./image/png"    href="../_common/images/favicon_16x16.png" sizes="16x16">
   <link href="../_common/css/loader.css" rel='stylesheet' type='text/css'/>
 
   <style>
@@ -185,7 +185,7 @@
         <div class="paletteContainer">
           <div id="paletteHeader">
             <div class="paletteTitle">
-              <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="./images/favicon_64x64.svg"/></a>
+              <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="../_common/images/favicon_64x64.svg"/></a>
               <div>
                 <h1>Brainbox</h1>
                 <h2>Simulator</h2>
@@ -349,33 +349,33 @@
 
 <script id="filesTemplate" type="text/x-jsrender">
 <div class="fileOperations">
-    <div id="fileOperationsFolderAdd"   class='fa fa-plus' > Folder</div>
-    <div id="fileOperationsDocumentAdd" class='fa fa-plus' > Document</div>
+    <div data-folder="{{folder}}" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>
+    <div data-folder="{{folder}}" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>
 </div>
 <div>Folder: {{folder}}</div>
 <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
 {{#files}}
-  <li class="list-group-item"  data-type="{{type}}" data-name="{{folder}}{{name}}">
+  <li class="list-group-item"  data-type="{{type}}"  data-delete="{{delete}}" data-update="{{update}}" data-name="{{folder}}{{name}}">
     <div class="media thumb">
        {{#dir}}
           <a class="media-left">
-          <div style="width: 64px; height: 64px">
-            <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_folder.svg">
+          <div style="width: 48px; height: 48px">
+            <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_folder{{back}}.svg">
           </div>
           </a>
        {{/dir}}
        {{^dir}}
           <a class="thumbnail media-left">
-          <div style="width: 64px; height: 64px">
+          <div style="width: 48px; height: 48px">
             <img style="width:100%; height:100%; object-fit: contain" src="{{image}}">
           </div>
           </a>
        {{/dir}}
       <div class="media-body">
         <h4 class="media-heading">{{title}}</h4>
-        {{^readonly}}
-          <img class="deleteIcon svg" data-toggle="confirmation" src="./images/toolbar_delete.svg"/>
-        {{/readonly}}
+        {{#delete}}
+            <div class="deleteIcon fa fa-trash-o" data-toggle="confirmation" ></div>
+        {{/delete}}
       </div>
     </div>
   </li>
@@ -401,6 +401,35 @@
 </div>
 
 </script>
+
+<!--
+  Input Prompt Dialog
+-->
+<div id="inputPromptDialog" class="modal fade genericDialog" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Input Prompt</h4>
+      </div>
+      <div class="modal-body">
+        <div class="media">
+          <div class="promptValueLabel">Value:</div>
+          <fieldset>
+            <div class="form-group">
+              <div class="col-lg-12">
+                <input type="text" class="form-control floating-label inputPromptValue" value="" >
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Close</button>
+        <button class="btn btn-primary okButton"><span>Create</span></button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!--
   # Template if nothing available for update....you are up to date

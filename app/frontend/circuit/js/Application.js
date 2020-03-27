@@ -6,7 +6,7 @@
  */
 import Palette from "./Palette"
 import View from "./View"
-import Files from "./view/FilesScreen"
+import Files from "../../_common/js/FilesScreen"
 import Addons from "./view/AddonScreen"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
@@ -54,7 +54,7 @@ class Application {
     this.hasUnsavedChanges = false
     this.palette = new Palette(permissions)
     this.view = new View("draw2dCanvas", permissions)
-    this.filePane = new Files(permissions)
+    this.filePane = new Files(conf, permissions)
     this.addonPane = new Addons(permissions)
 
     // Show the user an alert if there are unsaved changes
