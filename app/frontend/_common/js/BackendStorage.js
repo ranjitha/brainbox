@@ -1,4 +1,3 @@
-import conf from '../Configuration'
 import axios from 'axios'
 
 let sanitize = require("sanitize-filename")
@@ -9,15 +8,16 @@ class BackendStorage {
    * @constructor
    *
    */
-  constructor() {
+  constructor( conf) {
+    this.conf = conf
   }
 
   getFiles(path){
-    return this.__getFiles( conf.backend.file.list(path))
+    return this.__getFiles( this.conf.backend.file.list(path))
   }
 
   getDemos(path){
-    return this.__getFiles( conf.backend.demo.list(path))
+    return this.__getFiles( this.conf.backend.demo.list(path))
   }
 
   __getFiles(path) {
@@ -57,15 +57,15 @@ class BackendStorage {
       filePath: fileName,
       content: JSON.stringify(json, undefined, 2)
     }
-    return axios.post(conf.backend.file.save, data)
+    return axios.post(this.conf.backend.file.save, data)
   }
 
   loadFile(fileName) {
-    return this.loadUrl(conf.backend.file.get(fileName))
+    return this.loadUrl(this.conf.backend.file.get(fileName))
   }
 
   loadDemo(fileName) {
-    return this.loadUrl(conf.backend.demo.get(fileName))
+    return this.loadUrl(this.conf.backend.demo.get(fileName))
   }
 
   /**
@@ -88,7 +88,7 @@ class BackendStorage {
 
   deleteFile(fileName) {
     return $.ajax({
-        url: conf.backend.file.del,
+        url: this.conf.backend.file.del,
         method: "POST",
         xhrFields: {
           withCredentials: true
@@ -116,7 +116,7 @@ class BackendStorage {
 
   sanitize(file) {
     file = sanitize(file, "_")
-    file = file.replace(conf.fileSuffix, "")
+    file = file.replace(this.conf.fileSuffix, "")
     // I don't like dots in the name to
     file = file.replace(RegExp("[.]", "g"), "_")
     return file
@@ -130,5 +130,4 @@ class BackendStorage {
   }
 }
 
-let storage = new BackendStorage()
-export default storage
+export default conf => new BackendStorage(conf)

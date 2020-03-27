@@ -25,7 +25,6 @@ export default class Toolbar {
     this.saveButton = $("#editorFileSave")
     this.saveButton.on("click", () => {
       this.saveButton.tooltip("hide")
-      console.log("click")
       app.fileSave()
     })
     Mousetrap.bindGlobal("ctrl+s", (event) => {

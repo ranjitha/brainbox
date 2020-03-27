@@ -10,12 +10,13 @@ import Files from "./view/FilesScreen"
 import Addons from "./view/AddonScreen"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
-import storage from './io/BackendStorage'
 import conf from "./Configuration"
 import reader from "./io/Reader"
 import DesignerDialog from "./dialog/DesignerDialog"
 import AuthorDialog from "./dialog/AuthorDialog"
 import toast from "../../_common/js/toast"
+
+let storage = require('../../_common/js/BackendStorage')(conf)
 
 /**
  * wait asyn that an DOM element is present

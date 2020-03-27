@@ -25,9 +25,9 @@ export default {
     },
 
     demo:{
-      list:   path       => `../backend/demo/list?path=${path}`,
-      get:    file       => `../backend/demo/get?filePath=${file}`,
-      image:  file       => `../backend/demo/image?filePath=${file}`
+      list:   path       => `../backend/demo/brain/list?path=${path}`,
+      get:    file       => `../backend/demo/brain/get?filePath=${file}`,
+      image:  file       => `../backend/demo/brain/image?filePath=${file}`
     }
   },
 

@@ -1,10 +1,11 @@
 import Toolbar from "./toolbar"
-import storage from "./io/BackendStorage"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
 import Files from "./view/FilesScreen"
 import View from "./view"
 import conf from "./configuration";
+
+let storage = require('../../_common/js/BackendStorage')(conf)
 
 class Application {
   /**
@@ -33,9 +34,21 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    let file = this.getParam("file")
-    if (file) {
-      this.fileLoad(file)
+    // check if the user has added a "file" parameter. In this case we load the shape from
+    // the draw2d.shape github repository
+    //
+    this.fileName = this.getParam("file")
+    let demo = this.getParam("demo")
+    if (this.fileName) {
+      $("#leftTabStrip .editor").click()
+      this.load(conf.backend.file.get(this.fileName))
+    }
+    // check if the user has added a "file" parameter. In this case we load the shape from
+    // the draw2d.shape github repository
+    //
+    else if (demo) {
+      $("#leftTabStrip .editor").click()
+      this.load(conf.backend.demo.get(demo))
     }
 
     // listen on the history object to load files
@@ -86,7 +99,24 @@ class Application {
   }
 
 
-  historySheet(file) {
+  load(file){
+    $("#leftTabStrip .editor").click()
+    return this.storage.loadUrl(file)
+      .then((content) => {
+        this.view.setDocument(content.json)
+        return content
+      })
+  }
+
+  historyDemo(file) {
+    history.pushState({
+      id: 'editor',
+      file: name
+    }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?demo=' + file)
+  }
+
+  historyFile(file) {
+    this.fileName = file
     history.pushState({
       id: 'author',
       file: name

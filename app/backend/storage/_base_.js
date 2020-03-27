@@ -90,15 +90,9 @@ module.exports = {
       if(typeof callback === "function") {
         callback(subDir, err)
       }
+      res.setHeader('Content-Type', 'application/json')
+      res.send(`{ "filePath": ${subDir} }`)
     })
-  },
-
-  writeBrain: function (baseDir, subDir, content, res, callback){
-    module.exports.writeFile(baseDir, subDir, content, res, callback)
-  },
-
-  writeShape: function (baseDir, subDir, content, reason, res, callback){
-    module.exports.writeFile(baseDir, subDir, content, res, callback)
   }
 }
 

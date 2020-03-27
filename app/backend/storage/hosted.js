@@ -27,7 +27,13 @@ module.exports = {
       delete: false,
       read: true,
       list: false,
-      demos: true
+      demos:  {
+        create: false,
+        update: false,
+        delete: false,
+        read: true,
+        list: true
+      }
     },
     shapes:{
       create: false,
@@ -37,11 +43,18 @@ module.exports = {
       list: true
     },
     sheets:{
-      create: false,
+      create: true,
       update: false,
       delete: false,
       read: true,
-      list: true
+      list: false,
+      demos:  {
+        create: false,
+        update: false,
+        delete: false,
+        read: true,
+        list: true
+      }
     }
   },
 
@@ -54,6 +67,7 @@ module.exports = {
     const sheetsHomeDir   = folder + "sheet_db"
     const shapeAppDir     = path.normalize(__dirname + '/../../repository/shapes/')
     const brainsAppDir    = path.normalize(__dirname + '/../../repository/brains/')
+    const sheetsAppDir    = path.normalize(__dirname + '/../../repository/sheets/')
 
     // Ensure that the required storage folder exists
     //
@@ -78,14 +92,15 @@ module.exports = {
     console.log("| System creates always a new one. It works like https://codepen.io        |")
     console.log("|                                                                          |")
     console.log("| "+"File Location:".bold+"                                                           |")
-    console.log("|    "+brainsHomeDir)
+    console.log("|    Circuit: "+brainsHomeDir)
+    console.log("|    Sheets: "+sheetsHomeDir)
+
     // =================================================================
     // Handle Sheet files
     //
     // =================================================================
-    app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
+    // app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
     app.get('/backend/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
-    app.get('/backend/sheet/image',   (req, res) => module.exports.getBase64Image(sheetsHomeDir, req.query.filePath, res))
     // not supported in the hosted version. We just create new files on every save....like Codepen
     // app.post('/backend/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
     // app.post('/backend/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
@@ -107,36 +122,43 @@ module.exports = {
 
 
     // =================================================================
-    // Handle EXAMPLE brain files
+    // Handle pre-installed brain/sheet files
     //
     // =================================================================
-    app.get('/backend/demo/list',  (req, res) => module.exports.listFiles(brainsAppDir, req.query.path, res))
-    app.get('/backend/demo/get',   (req, res) => module.exports.getJSONFile(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/image', (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/demo/brain/list',  (req, res) => generic.listFiles(brainsAppDir, req.query.path, res))
+    app.get('/backend/demo/brain/get',   (req, res) => generic.getJSONFile(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/demo/brain/image', (req, res) => generic.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/demo/sheet/list',  (req, res) => generic.listFiles(sheetsAppDir, req.query.path, res))
+    app.get('/backend/demo/sheet/get',   (req, res) => generic.getJSONFile(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/demo/sheet/image', (req, res) => generic.getBase64Image(sheetsAppDir, req.query.filePath, res))
 
 
     // =================================================================
     // Handle update files
-    //
+    // hosted version didn'T have an UI-based update screen
     // =================================================================
     // app.get('/backend/updates/shapes', (req, res) => update.getLatestShapeRelease(res))
     // app.post('/backend/updates/shapes', async (req, res) => update.upgradeTo(shapeAppDir, req.body.url, res))
 
 
     // =================================================================
-    // Handle shape files
+    // Handle system shape files
     //
     // =================================================================
     app.use('/shapes', express.static(shapeAppDir));
-    app.get('/backend/shape/list', (req, res) => module.exports.listFiles(shapeAppDir, req.query.path, res))
+    app.get('/backend/shape/list', (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
     app.get('/backend/shape/get', (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
-    app.get('/backend/shape/image', (req, res) => module.exports.getBase64Image(shapeAppDir, req.query.filePath, res))
+    app.get('/backend/shape/image', (req, res) => generic.getBase64Image(shapeAppDir, req.query.filePath, res))
+    // it is not allowed to update the shape files in the hosted version....updates happens via CLI
     // app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
     // app.post('/backend/shape/rename', (req, res) => module.exports.renameFile(shapeAppDir, req.body.from, req.body.to, res))
     // app.post('/backend/shape/save', (req, res) => module.exports.writeShape(shapeAppDir, req.body.filePath, req.body.content, req.body.commitMessage, res))
   },
 
-  listFiles: generic.listFiles,
+  renameFile: ()=>{},
+  deleteFile: ()=>{},
+  writeShape: ()=>{},
+
   getJSONFile: function (baseDir, subDir, res) {
     dbs[baseDir].get(subDir, (err, value) => {
         if(err) {
@@ -149,10 +171,23 @@ module.exports = {
         }
     })
   },
-  getBase64Image: generic.getBase64Image,
-  renameFile: ()=>{},
-  deleteFile: ()=>{},
-  writeShape: ()=>{},
+
+  getBase64Image: function (baseDir, subDir, res) {
+    dbs[baseDir].get(subDir, (err, contents) => {
+      if (err) {
+        res.status(404).send('Not found')
+      } else {
+        let json = JSON.parse(contents)
+        let base64data = json.image.replace(/^data:image\/png;base64,/, '')
+        let img = Buffer.from(base64data, 'base64')
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': img.length
+        })
+        res.end(img)
+      }
+    })
+  },
 
   writeBrain: (baseDir, subDir, content, res ) => {
     // every save of a file ends in a NEW file. Like a codepen page.
@@ -163,6 +198,17 @@ module.exports = {
       res.send({ filePath: subDir })
     })
   },
+
+  writeSheet: (baseDir, subDir, content, res ) => {
+    // every save of a file ends in a NEW file. Like a codepen page.
+    // The new filename is the return value of this call
+    //
+    module.exports.writeFile(baseDir, shortid.generate()+".sheet", content, res, (subDir, err)=>{
+      res.setHeader('Content-Type', 'application/json')
+      res.send({ filePath: subDir })
+    })
+  },
+
 
   writeFile: function (baseDir, subDir, content, res, callback) {
     dbs[baseDir].put(subDir, content, err => {

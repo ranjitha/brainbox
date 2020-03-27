@@ -96,6 +96,326 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
+/***/ "../../app/frontend/_common/js/BackendStorage.js":
+/*!*********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/BackendStorage.js ***!
+  \*********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
+
+var BackendStorage = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function BackendStorage(conf) {
+    _classCallCheck(this, BackendStorage);
+
+    this.conf = conf;
+  }
+
+  _createClass(BackendStorage, [{
+    key: "getFiles",
+    value: function getFiles(path) {
+      return this.__getFiles(this.conf.backend.file.list(path));
+    }
+  }, {
+    key: "getDemos",
+    value: function getDemos(path) {
+      return this.__getFiles(this.conf.backend.demo.list(path));
+    }
+  }, {
+    key: "__getFiles",
+    value: function __getFiles(path) {
+      return _axios2.default.get(path).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        var files = [];
+        if (typeof response === "string") files = JSON.parse(response).data.files;else files = response.data.files;
+
+        // sort the result
+        // Directories are always on top
+        //
+        files.sort(function (a, b) {
+          if (a.type === b.type) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+            return 0;
+          }
+          if (a.type === "dir") {
+            return -1;
+          }
+          return 1;
+        });
+        return files;
+      });
+    }
+  }, {
+    key: "saveFile",
+    value: function saveFile(json, fileName) {
+      var data = {
+        filePath: fileName,
+        content: JSON.stringify(json, undefined, 2)
+      };
+      return _axios2.default.post(this.conf.backend.file.save, data);
+    }
+  }, {
+    key: "loadFile",
+    value: function loadFile(fileName) {
+      return this.loadUrl(this.conf.backend.file.get(fileName));
+    }
+  }, {
+    key: "loadDemo",
+    value: function loadDemo(fileName) {
+      return this.loadUrl(this.conf.backend.demo.get(fileName));
+    }
+
+    /**
+     * Load the file content of the given path
+     *
+     * @param fileName
+     * @returns {*}
+     */
+
+  }, {
+    key: "loadUrl",
+    value: function loadUrl(url) {
+      return _axios2.default.get(url).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") return JSON.parse(response).data;
+
+        return response.data;
+      });
+    }
+  }, {
+    key: "deleteFile",
+    value: function deleteFile(fileName) {
+      return $.ajax({
+        url: this.conf.backend.file.del,
+        method: "POST",
+        xhrFields: {
+          withCredentials: true
+        },
+        data: {
+          filePath: fileName
+        }
+      });
+    }
+  }, {
+    key: "dirname",
+    value: function dirname(path) {
+      if (path === undefined || path === null || path.length === 0) return null;
+
+      var segments = path.split("/");
+      if (segments.length <= 1) return null;
+
+      segments = segments.filter(function (n) {
+        return n !== "";
+      });
+      path = segments.slice(0, -1).join("/");
+      return path === "" ? null : path + "/";
+    }
+  }, {
+    key: "sanitize",
+    value: function sanitize(file) {
+      file = _sanitize(file, "_");
+      file = file.replace(this.conf.fileSuffix, "");
+      // I don't like dots in the name to
+      file = file.replace(RegExp("[.]", "g"), "_");
+      return file;
+    }
+  }, {
+    key: "basename",
+    value: function basename(path) {
+      if (path === null || path === "" || path === undefined) {
+        return null;
+      }
+      return path.split(/[\\/]/).pop();
+    }
+  }]);
+
+  return BackendStorage;
+}();
+
+exports.default = function (conf) {
+  return new BackendStorage(conf);
+};
+
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "../../app/frontend/_common/js/PopConfirm.js":
+/*!*****************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/PopConfirm.js ***!
+  \*****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+$.fn.extend({
+  popConfirm: function popConfirm(options) {
+    var defaults = {
+      title: 'Confirmation',
+      content: 'Are you really sure ?',
+      placement: 'right',
+      container: 'body',
+      yesBtn: 'Yes',
+      noBtn: 'No'
+    },
+        last = null;
+    options = $.extend(defaults, options);
+    return this.each(function () {
+      var self = $(this),
+          arrayActions = [],
+          arrayDelegatedActions = [],
+          eventToConfirm,
+          optName,
+          optValue,
+          i,
+          elmType,
+          code,
+          form;
+
+      // Load data-* attriutes
+      for (optName in options) {
+        if (options.hasOwnProperty(optName)) {
+          optValue = $(this).attr('data-confirm-' + optName);
+          if (optValue) {
+            options[optName] = optValue;
+          }
+        }
+      }
+
+      // If there are jquery click events
+      if (jQuery._data(this, "events") && jQuery._data(this, "events").click) {
+
+        // Save all click handlers
+        for (i = 0; i < jQuery._data(this, "events").click.length; i = i + 1) {
+          arrayActions.push(jQuery._data(this, "events").click[i].handler);
+        }
+
+        // unbind it to prevent it firing
+        $(self).unbind("click");
+      }
+
+      // If there are jquery delegated click events
+      if (self.data('remote') && jQuery._data(document, "events") && jQuery._data(document, "events").click) {
+
+        // Save all delegated click handlers that apply
+        for (i = 0; i < jQuery._data(document, "events").click.length; i = i + 1) {
+          elmType = self[0].tagName.toLowerCase();
+          if (jQuery._data(document, "events").click[i].selector && jQuery._data(document, "events").click[i].selector.indexOf(elmType + "[data-remote]") !== -1) {
+            arrayDelegatedActions.push(jQuery._data(document, "events").click[i].handler);
+          }
+        }
+      }
+
+      // If there are hard onclick attribute
+      if (self.attr('onclick')) {
+        // Extracting the onclick code to evaluate and bring it into a closure
+        code = self.attr('onclick');
+        arrayActions.push(function () {
+          eval(code);
+        });
+        $(self).prop("onclick", null);
+      }
+
+      // If there are href link defined
+      if (!self.data('remote') && self.attr('href')) {
+        // Assume there is a href attribute to redirect to
+        arrayActions.push(function () {
+          window.location.href = self.attr('href');
+        });
+      }
+
+      // If the button is a submit one
+      if (self.attr('type') && self.attr('type') === 'submit') {
+        // Get the form related to this button then store submiting in closure
+        form = $(this).parents('form:first');
+        arrayActions.push(function () {
+          // Add the button name / value if specified
+          if (typeof self.attr('name') !== "undefined") {
+            $('<input type="hidden">').attr('name', self.attr('name')).attr('value', self.attr('value')).appendTo(form);
+          }
+          form.submit();
+        });
+      }
+
+      self.popover({
+        trigger: 'manual',
+        title: options.title,
+        html: true,
+        placement: options.placement,
+        container: options.container,
+        //Avoid using multiline strings, no support in older browsers.
+        content: options.content + '<p class="button-group" style="margin-top: 10px; text-align: center;"><button type="button" class="btn btn-small confirm-dialog-btn-abort">' + options.noBtn + '</button> <button type="button" class="btn btn-small btn-danger confirm-dialog-btn-confirm">' + options.yesBtn + '</button></p>'
+      }).click(function (e) {
+        if (last && last !== self) {
+          last.popover('hide').removeClass('popconfirm-active');
+        }
+        last = self;
+      });
+
+      $(document).on('click', function () {
+        if (last) {
+          last.popover('hide').removeClass('popconfirm-active');
+        }
+      });
+
+      self.bind('click', function (e) {
+        eventToConfirm = e;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('.popconfirm-active').not(self).popover('hide').removeClass('popconfirm-active');
+        self.popover('show').addClass('popconfirm-active');
+
+        $(document).find('.popover .confirm-dialog-btn-confirm').one('click', function (e) {
+          for (i = 0; i < arrayActions.length; i = i + 1) {
+            arrayActions[i].apply(self, [eventToConfirm]);
+          }
+
+          for (i = 0; i < arrayDelegatedActions.length; i = i + 1) {
+            arrayDelegatedActions[i].apply(self, [eventToConfirm.originalEvent]);
+          }
+
+          self.popover('hide').removeClass('popconfirm-active');
+        });
+        $(document).find('.popover .confirm-dialog-btn-abord').bind('click', function (e) {
+          self.popover('hide').removeClass('popconfirm-active');
+        });
+      });
+    });
+  }
+});
+
+/***/ }),
+
 /***/ "../../app/frontend/_common/js/inlineSVG.js":
 /*!****************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/inlineSVG.js ***!
@@ -430,10 +750,6 @@ var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "../../app/frontend
 
 var _FileSave2 = _interopRequireDefault(_FileSave);
 
-var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "../../app/frontend/circuit/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
 var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/circuit/js/Configuration.js");
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
@@ -457,6 +773,8 @@ var _toast2 = _interopRequireDefault(_toast);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var storage = __webpack_require__(/*! ../../_common/js/BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
 
 /**
  * wait asyn that an DOM element is present
@@ -579,7 +897,7 @@ var Application = function () {
 
       this.view.clear();
       $("#leftTabStrip .editor").click();
-      return _BackendStorage2.default.loadUrl(file).then(function (content) {
+      return storage.loadUrl(file).then(function (content) {
         _this2.view.clear();
         _Reader2.default.unmarshal(_this2.view, content);
         _this2.view.getCommandStack().markSaveLocation();
@@ -589,7 +907,7 @@ var Application = function () {
 
         // check if a tutorial exists for the named file and load/activate them
         //
-        _BackendStorage2.default.loadUrl(file.replace(_Configuration2.default.fileSuffix, ".guide")).then(function (content) {
+        storage.loadUrl(file.replace(_Configuration2.default.fileSuffix, ".guide")).then(function (content) {
           if (typeof content === "string") {
             content = JSON.parse(content);
           }
@@ -653,7 +971,7 @@ var Application = function () {
       }
 
       if (fileName) {
-        this.fileName = _BackendStorage2.default.sanitize(fileName) + _Configuration2.default.fileSuffix;
+        this.fileName = storage.sanitize(fileName) + _Configuration2.default.fileSuffix;
       } else {
         this.fileName = "MyNewBrain" + _Configuration2.default.fileSuffix;
       }
@@ -728,13 +1046,13 @@ exports.default = {
 
     demo: {
       list: function list(path) {
-        return "../backend/demo/list?path=" + path;
+        return "../backend/demo/brain/list?path=" + path;
       },
       get: function get(file) {
-        return "../backend/demo/get?filePath=" + file;
+        return "../backend/demo/brain/get?filePath=" + file;
       },
       image: function image(file) {
-        return "../backend/demo/image?filePath=" + file;
+        return "../backend/demo/brain/image?filePath=" + file;
       }
     }
   },
@@ -2886,13 +3204,11 @@ var _hogan = __webpack_require__(/*! hogan.js */ "../../node_modules/hogan.js/li
 
 var _hogan2 = _interopRequireDefault(_hogan);
 
-var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "../../app/frontend/circuit/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var storage = __webpack_require__(/*! ../../../_common/js/BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
 
 var FileOpen = function () {
 
@@ -2917,24 +3233,24 @@ var FileOpen = function () {
 
 
   _createClass(FileOpen, [{
-    key: "show",
+    key: 'show',
     value: function show(view) {
       $('#fileOpenDialog').modal('show');
       this.fetchPathContent("", view);
     }
   }, {
-    key: "fetchPathContent",
+    key: 'fetchPathContent',
     value: function fetchPathContent(newPath, view) {
       var _this = this;
 
-      _BackendStorage2.default.getFiles(newPath).then(function (files) {
+      storage.getFiles(newPath).then(function (files) {
         files = files.filter(function (file) {
           return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
         });
 
-        var compiled = _hogan2.default.compile("\n               {{^rootDir}}     \n               <a href=\"#\" class=\"list-group-item githubPath\" data-type=\"dir\" data-path=\"{{parentPath}}\" >\n                   <span class=\"glyphicon glyphicon-menu-left\"></span>\n                   ..\n               </a>\n               {{/rootDir}}\n               {{#files}}\n                 <a href=\"#\" data-draw2d=\"{{draw2d}}\" class=\"list-group-item githubPath text-nowrap\" data-type=\"{{type}}\" data-path=\"{{currentDir}}{{name}}\" data-id=\"{{id}}\">\n                    <span class=\"glyphicon {{icon}}\"></span>\n                    {{{name}}}\n                 </a>\n               {{/files}}\n          ");
+        var compiled = _hogan2.default.compile('\n               {{^rootDir}}     \n               <a href="#" class="list-group-item githubPath" data-type="dir" data-path="{{parentPath}}" >\n                   <span class="glyphicon glyphicon-menu-left"></span>\n                   ..\n               </a>\n               {{/rootDir}}\n               {{#files}}\n                 <a href="#" data-draw2d="{{draw2d}}" class="list-group-item githubPath text-nowrap" data-type="{{type}}" data-path="{{currentDir}}{{name}}" data-id="{{id}}">\n                    <span class="glyphicon {{icon}}"></span>\n                    {{{name}}}\n                 </a>\n               {{/files}}\n          ');
 
-        var parentPath = _BackendStorage2.default.dirname(newPath);
+        var parentPath = storage.dirname(newPath);
         var output = compiled.render({
           parentPath: parentPath,
           currentDir: newPath,
@@ -2973,7 +3289,7 @@ var FileOpen = function () {
 }();
 
 exports.default = FileOpen;
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 
@@ -2997,10 +3313,6 @@ var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/fron
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
 
-var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "../../app/frontend/circuit/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
 var _Writer = __webpack_require__(/*! ../io/Writer */ "../../app/frontend/circuit/js/io/Writer.js");
 
 var _Writer2 = _interopRequireDefault(_Writer);
@@ -3008,6 +3320,8 @@ var _Writer2 = _interopRequireDefault(_Writer);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var storage = __webpack_require__(/*! ../../../_common/js/BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
 
 var FileSave = function () {
 
@@ -3032,7 +3346,7 @@ var FileSave = function () {
 
 
   _createClass(FileSave, [{
-    key: "show",
+    key: 'show',
     value: function show(canvas, defaultFileName, callback) {
       var _this = this;
 
@@ -3060,12 +3374,12 @@ var FileSave = function () {
       });
     }
   }, {
-    key: "save",
+    key: 'save',
     value: function save(canvas, name, callback) {
       canvas.setCurrentSelection(null);
       _Writer2.default.marshal(canvas, function (json) {
         // to forbid path in the file names you must uncomment this line
-        _BackendStorage2.default.saveFile(json, name).then(function (response) {
+        storage.saveFile(json, name).then(function (response) {
           var data = response.data;
           if (typeof data === "string") {
             data = JSON.parse(data);
@@ -3083,7 +3397,7 @@ var FileSave = function () {
 }();
 
 exports.default = FileSave;
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 
@@ -3182,156 +3496,6 @@ var MarkdownDialog = function () {
 
 exports.default = MarkdownDialog;
 module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "../../app/frontend/circuit/js/dialog/PopConfirm.js":
-/*!************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/dialog/PopConfirm.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-$.fn.extend({
-  popConfirm: function popConfirm(options) {
-    var defaults = {
-      title: 'Confirmation',
-      content: 'Are you really sure ?',
-      placement: 'right',
-      container: 'body',
-      yesBtn: 'Yes',
-      noBtn: 'No'
-    },
-        last = null;
-    options = $.extend(defaults, options);
-    return this.each(function () {
-      var self = $(this),
-          arrayActions = [],
-          arrayDelegatedActions = [],
-          eventToConfirm,
-          optName,
-          optValue,
-          i,
-          elmType,
-          code,
-          form;
-
-      // Load data-* attriutes
-      for (optName in options) {
-        if (options.hasOwnProperty(optName)) {
-          optValue = $(this).attr('data-confirm-' + optName);
-          if (optValue) {
-            options[optName] = optValue;
-          }
-        }
-      }
-
-      // If there are jquery click events
-      if (jQuery._data(this, "events") && jQuery._data(this, "events").click) {
-
-        // Save all click handlers
-        for (i = 0; i < jQuery._data(this, "events").click.length; i = i + 1) {
-          arrayActions.push(jQuery._data(this, "events").click[i].handler);
-        }
-
-        // unbind it to prevent it firing
-        $(self).unbind("click");
-      }
-
-      // If there are jquery delegated click events
-      if (self.data('remote') && jQuery._data(document, "events") && jQuery._data(document, "events").click) {
-
-        // Save all delegated click handlers that apply
-        for (i = 0; i < jQuery._data(document, "events").click.length; i = i + 1) {
-          elmType = self[0].tagName.toLowerCase();
-          if (jQuery._data(document, "events").click[i].selector && jQuery._data(document, "events").click[i].selector.indexOf(elmType + "[data-remote]") !== -1) {
-            arrayDelegatedActions.push(jQuery._data(document, "events").click[i].handler);
-          }
-        }
-      }
-
-      // If there are hard onclick attribute
-      if (self.attr('onclick')) {
-        // Extracting the onclick code to evaluate and bring it into a closure
-        code = self.attr('onclick');
-        arrayActions.push(function () {
-          eval(code);
-        });
-        $(self).prop("onclick", null);
-      }
-
-      // If there are href link defined
-      if (!self.data('remote') && self.attr('href')) {
-        // Assume there is a href attribute to redirect to
-        arrayActions.push(function () {
-          window.location.href = self.attr('href');
-        });
-      }
-
-      // If the button is a submit one
-      if (self.attr('type') && self.attr('type') === 'submit') {
-        // Get the form related to this button then store submiting in closure
-        form = $(this).parents('form:first');
-        arrayActions.push(function () {
-          // Add the button name / value if specified
-          if (typeof self.attr('name') !== "undefined") {
-            $('<input type="hidden">').attr('name', self.attr('name')).attr('value', self.attr('value')).appendTo(form);
-          }
-          form.submit();
-        });
-      }
-
-      self.popover({
-        trigger: 'manual',
-        title: options.title,
-        html: true,
-        placement: options.placement,
-        container: options.container,
-        //Avoid using multiline strings, no support in older browsers.
-        content: options.content + '<p class="button-group" style="margin-top: 10px; text-align: center;"><button type="button" class="btn btn-small confirm-dialog-btn-abort">' + options.noBtn + '</button> <button type="button" class="btn btn-small btn-danger confirm-dialog-btn-confirm">' + options.yesBtn + '</button></p>'
-      }).click(function (e) {
-        if (last && last !== self) {
-          last.popover('hide').removeClass('popconfirm-active');
-        }
-        last = self;
-      });
-
-      $(document).on('click', function () {
-        if (last) {
-          last.popover('hide').removeClass('popconfirm-active');
-        }
-      });
-
-      self.bind('click', function (e) {
-        eventToConfirm = e;
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        $('.popconfirm-active').not(self).popover('hide').removeClass('popconfirm-active');
-        self.popover('show').addClass('popconfirm-active');
-
-        $(document).find('.popover .confirm-dialog-btn-confirm').one('click', function (e) {
-          for (i = 0; i < arrayActions.length; i = i + 1) {
-            arrayActions[i].apply(self, [eventToConfirm]);
-          }
-
-          for (i = 0; i < arrayDelegatedActions.length; i = i + 1) {
-            arrayDelegatedActions[i].apply(self, [eventToConfirm.originalEvent]);
-          }
-
-          self.popover('hide').removeClass('popconfirm-active');
-        });
-        $(document).find('.popover .confirm-dialog-btn-abord').bind('click', function (e) {
-          self.popover('hide').removeClass('popconfirm-active');
-        });
-      });
-    });
-  }
-});
 
 /***/ }),
 
@@ -4842,7 +5006,7 @@ __webpack_require__(/*! ../less/index.less */ "../../app/frontend/circuit/less/i
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "../../node_modules/font-awesome/css/font-awesome.css");
 
-__webpack_require__(/*! ./dialog/PopConfirm */ "../../app/frontend/circuit/js/dialog/PopConfirm.js");
+__webpack_require__(/*! ../../_common/js/PopConfirm */ "../../app/frontend/_common/js/PopConfirm.js");
 
 var _UpdateSuccessDialog = __webpack_require__(/*! ./dialog/UpdateSuccessDialog */ "../../app/frontend/circuit/js/dialog/UpdateSuccessDialog.js");
 
@@ -4948,176 +5112,6 @@ $(window).load(function () {
     direction: 'vertical'
   });
 });
-
-/***/ }),
-
-/***/ "../../app/frontend/circuit/js/io/BackendStorage.js":
-/*!************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/io/BackendStorage.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
-
-var BackendStorage = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function BackendStorage() {
-    _classCallCheck(this, BackendStorage);
-  }
-
-  _createClass(BackendStorage, [{
-    key: 'getFiles',
-    value: function getFiles(path) {
-      return this.__getFiles(_Configuration2.default.backend.file.list(path));
-    }
-  }, {
-    key: 'getDemos',
-    value: function getDemos(path) {
-      return this.__getFiles(_Configuration2.default.backend.demo.list(path));
-    }
-  }, {
-    key: '__getFiles',
-    value: function __getFiles(path) {
-      return _axios2.default.get(path).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        var files = [];
-        if (typeof response === "string") files = JSON.parse(response).data.files;else files = response.data.files;
-
-        // sort the result
-        // Directories are always on top
-        //
-        files.sort(function (a, b) {
-          if (a.type === b.type) {
-            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-            return 0;
-          }
-          if (a.type === "dir") {
-            return -1;
-          }
-          return 1;
-        });
-        return files;
-      });
-    }
-  }, {
-    key: 'saveFile',
-    value: function saveFile(json, fileName) {
-      var data = {
-        filePath: fileName,
-        content: JSON.stringify(json, undefined, 2)
-      };
-      return _axios2.default.post(_Configuration2.default.backend.file.save, data);
-    }
-  }, {
-    key: 'loadFile',
-    value: function loadFile(fileName) {
-      return this.loadUrl(_Configuration2.default.backend.file.get(fileName));
-    }
-  }, {
-    key: 'loadDemo',
-    value: function loadDemo(fileName) {
-      return this.loadUrl(_Configuration2.default.backend.demo.get(fileName));
-    }
-
-    /**
-     * Load the file content of the given path
-     *
-     * @param fileName
-     * @returns {*}
-     */
-
-  }, {
-    key: 'loadUrl',
-    value: function loadUrl(url) {
-      return _axios2.default.get(url).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if (typeof response === "string") return JSON.parse(response).data;
-
-        return response.data;
-      });
-    }
-  }, {
-    key: 'deleteFile',
-    value: function deleteFile(fileName) {
-      return $.ajax({
-        url: _Configuration2.default.backend.file.del,
-        method: "POST",
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          filePath: fileName
-        }
-      });
-    }
-  }, {
-    key: 'dirname',
-    value: function dirname(path) {
-      if (path === undefined || path === null || path.length === 0) return null;
-
-      var segments = path.split("/");
-      if (segments.length <= 1) return null;
-
-      segments = segments.filter(function (n) {
-        return n !== "";
-      });
-      path = segments.slice(0, -1).join("/");
-      return path === "" ? null : path + "/";
-    }
-  }, {
-    key: 'sanitize',
-    value: function sanitize(file) {
-      file = _sanitize(file, "_");
-      file = file.replace(_Configuration2.default.fileSuffix, "");
-      // I don't like dots in the name to
-      file = file.replace(RegExp("[.]", "g"), "_");
-      return file;
-    }
-  }, {
-    key: 'basename',
-    value: function basename(path) {
-      if (path === null || path === "" || path === undefined) {
-        return null;
-      }
-      return path.split(/[\\/]/).pop();
-    }
-  }]);
-
-  return BackendStorage;
-}();
-
-var storage = new BackendStorage();
-exports.default = storage;
-module.exports = exports['default'];
 
 /***/ }),
 
@@ -5662,20 +5656,11 @@ var _hogan = __webpack_require__(/*! hogan.js */ "../../node_modules/hogan.js/li
 
 var _hogan2 = _interopRequireDefault(_hogan);
 
-var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "../../app/frontend/circuit/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
+var storage = __webpack_require__(/*! ../../../_common/js/BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
 
 var Files = function () {
 
@@ -5713,7 +5698,7 @@ var Files = function () {
     value: function initTabs(permissions) {
       // user can see personal files and the demo files
       //
-      if (permissions.brains.list === true && permissions.brains.demos === true) {
+      if (permissions.brains.list === true && permissions.brains.demos.list === true) {
         $('#material-tabs').each(function () {
           var $active = void 0,
               $content = void 0,
@@ -5738,29 +5723,29 @@ var Files = function () {
             e.preventDefault();
           });
         });
-      } else if (permissions.brains.list === false && permissions.brains.demos === true) {
+      } else if (permissions.brains.list === false && permissions.brains.demos.list === true) {
         $('#material-tabs').remove();
-        $("#demoBrainFiles").show();
-        $("#userBrainFiles").remove();
+        $("#demoFiles").show();
+        $("#userFiles").remove();
         $("#files .title span").html("Load a demo Circuit");
-      } else if (permissions.brains.list === true && permissions.brains.demos === false) {
+      } else if (permissions.brains.list === true && permissions.brains.demos.list === false) {
         $('#material-tabs').remove();
-        $("#demoBrainFiles").remove();
-        $("#userBrainFiles").show();
+        $("#demoFiles").remove();
+        $("#userFiles").show();
         $("#files .title span").html("Load a Circuit");
-      } else if (permissions.brains.list === true && permissions.brains.demos === false) {}
+      } else if (permissions.brains.list === true && permissions.brains.demos.list === false) {}
     }
   }, {
     key: "initDemos",
     value: function initDemos(permissions) {
-      if (permissions.brains.demos === false) {
+      if (permissions.brains.demos.list === false) {
         return;
       }
 
       // load demo files
       //
       function loadDemos(path) {
-        _BackendStorage2.default.getDemos(path).then(function (files) {
+        storage.getDemos(path).then(function (files) {
           files = files.filter(function (file) {
             return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
           });
@@ -5774,7 +5759,7 @@ var Files = function () {
           });
           if (path.length !== 0) {
             files.unshift({
-              name: _BackendStorage2.default.dirname(path),
+              name: storage.dirname(path),
               folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
               type: "dir",
               dir: true,
@@ -5785,14 +5770,17 @@ var Files = function () {
 
           var compiled = _hogan2.default.compile($("#filesTemplate").html());
           var output = compiled.render({ folder: path, files: files });
-          $("#demoBrainFiles").html($(output));
-          $("#demoBrainFiles .list-group-item[data-type='dir']").on("click", function (event) {
+          $("#demoFiles").html($(output));
+          if (permissions.sheets.demos.create === false) {
+            $("#demoFiles .fileOperations").remove();
+          }
+          $("#demoFiles .list-group-item[data-type='dir']").on("click", function (event) {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             loadDemos(name);
           });
 
-          $("#demoBrainFiles .list-group-item[data-type='file']").on("click", function (event) {
+          $("#demoFiles .list-group-item[data-type='file']").on("click", function (event) {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
@@ -5819,7 +5807,7 @@ var Files = function () {
       var _this = this;
 
       function loadFiles(path) {
-        _BackendStorage2.default.getFiles(path).then(function (files) {
+        storage.getFiles(path).then(function (files) {
           files = files.filter(function (file) {
             return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
           });
@@ -5833,7 +5821,7 @@ var Files = function () {
           });
           if (path.length !== 0) {
             files.unshift({
-              name: _BackendStorage2.default.dirname(path),
+              name: storage.dirname(path),
               folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
               type: "dir",
               dir: true,
@@ -5844,12 +5832,14 @@ var Files = function () {
 
           var compiled = _hogan2.default.compile($("#filesTemplate").html());
           var output = compiled.render({ folder: path, files: files });
-          $("#userBrainFiles").html($(output));
-
-          $("#userBrainFiles .deleteIcon").on("click", function (event) {
+          $("#userFiles").html($(output));
+          if (permissions.sheets.brains.create === false) {
+            $("#userFiles .fileOperations").remove();
+          }
+          $("#userFiles .deleteIcon").on("click", function (event) {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
-            _BackendStorage2.default.deleteFile(name).then(function () {
+            storage.deleteFile(name).then(function () {
               var parent = $el.closest(".list-group-item");
               parent.hide('slow', function () {
                 return parent.remove();
@@ -5864,7 +5854,7 @@ var Files = function () {
           });
 
           if (!_this.serverless) {
-            $("#userBrainFiles .list-group-item h4").on("click", function (event) {
+            $("#userFiles .list-group-item h4").on("click", function (event) {
               // can happen if the "serverless" websocket event comes too late
               //
               if (_this.serverless) {
@@ -5889,7 +5879,7 @@ var Files = function () {
                 var newName = $replaceWith.val();
                 if (newName !== "") {
                   if (type !== "dir") {
-                    newName = _BackendStorage2.default.sanitize(newName) + _Configuration2.default.fileSuffix;
+                    newName = storage.sanitize(newName) + _Configuration2.default.fileSuffix;
                   }
                   $.ajax({
                     url: _Configuration2.default.backend.file.rename,
@@ -5923,13 +5913,13 @@ var Files = function () {
             });
           }
 
-          $("#userBrainFiles .list-group-item[data-type='dir']").on("click", function (event) {
+          $("#userFiles .list-group-item[data-type='dir']").on("click", function (event) {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             loadFiles(name);
           });
 
-          $("#userBrainFiles .list-group-item[data-type='file']").on("click", function (event) {
+          $("#userFiles .list-group-item[data-type='file']").on("click", function (event) {
             var $el = $(event.currentTarget);
             var parent = $el.closest(".list-group-item");
             var name = parent.data("name");
@@ -7937,7 +7927,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 250px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#githubNewFileDialog .filePreview {\n  font-size: 115px;\n  color: #C71D3D;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: brown;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n#codePreviewDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#codePreviewDialog .modal-body .prettyprint {\n  margin: 0;\n  border: 0;\n  border-radius: 0;\n  overflow: hidden;\n  display: inline-block;\n}\n#markdownDialog .version {\n  opacity: 0.6;\n}\n#markdownDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#webUSBHelpDialog .modal-body {\n  min-height: 310px;\n}\n#webUSBHelpDialog .modal-body .html {\n  padding: 20px;\n  max-height: 310px;\n  overflow: auto;\n  border-radius: 0;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #C71D3D;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #C71D3D;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  position: absolute;\n  top: -30px;\n  cursor: pointer;\n  color: black;\n  width: 100%;\n  border-bottom: 2px solid #009DAC;\n  text-align: center;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #C71D3D;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Simulator\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: #B2E2F2;\n  white-space: nowrap;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .paletteContainer {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .paletteContainer .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .paletteContainer .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .paletteContainer .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.workspace .paletteContainer .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .pallette_item {\n  padding: 0px;\n}\n.workspace .paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .paletteContainer .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #C71D3D;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#files #userBrainFilesTab.active ~ span.yellow-bar {\n  left: 0;\n  width: 120px;\n}\n#files #demoBrainFilesTab.active ~ span.yellow-bar {\n  left: 140px;\n  width: 85px;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #C71D3D;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#addon {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#addon .branding {\n  color: #C71D3D;\n}\n#addon .btn {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n#addon .btn:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n#addon .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#addon .paragraph .block {\n  padding-bottom: 30px;\n}\n#addon .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#addon .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#addon .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#addon .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#addon footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #C71D3D;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.toolbar .group .form-horizontal {\n  text-align: center;\n  display: flex;\n}\n.toolbar .group .form-horizontal .statusIndicator {\n  margin: 20px;\n}\n.toolbar .group .form-horizontal .statusIndicator img {\n  display: block;\n  cursor: pointer;\n  margin: auto;\n}\n.toolbar .group .form-horizontal .statusIndicator img:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.toolbar .group .form-horizontal .statusIndicator span {\n  font-size: 0.8em;\n  text-align: center;\n  width: 100%;\n  display: inline-block;\n  white-space: nowrap;\n}\n.toolbar .group .form-horizontal .statusIndicator .notSupported {\n  display: none;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator .connected {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img:hover {\n  box-shadow: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled span {\n  opacity: 0.5;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .notSupported {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) span {\n  color: red;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .notSupported {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .disconnected {\n  display: block;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 70px;\n  z-index: 1000;\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 250px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  padding: 1px;\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#githubNewFileDialog .filePreview {\n  font-size: 115px;\n  color: #C71D3D;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: brown;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #C71D3D;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#files #userFilesTab.active ~ span.yellow-bar {\n  left: 0;\n  width: 120px;\n}\n#files #demoFilesTab.active ~ span.yellow-bar {\n  left: 126px;\n  width: 85px;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n#codePreviewDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#codePreviewDialog .modal-body .prettyprint {\n  margin: 0;\n  border: 0;\n  border-radius: 0;\n  overflow: hidden;\n  display: inline-block;\n}\n#markdownDialog .version {\n  opacity: 0.6;\n}\n#markdownDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#webUSBHelpDialog .modal-body {\n  min-height: 310px;\n}\n#webUSBHelpDialog .modal-body .html {\n  padding: 20px;\n  max-height: 310px;\n  overflow: auto;\n  border-radius: 0;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #C71D3D;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #C71D3D;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  position: absolute;\n  top: -30px;\n  cursor: pointer;\n  color: black;\n  width: 100%;\n  border-bottom: 2px solid #009DAC;\n  text-align: center;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #C71D3D;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Simulator\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: #B2E2F2;\n  white-space: nowrap;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .paletteContainer {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .paletteContainer .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .paletteContainer .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .paletteContainer .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.workspace .paletteContainer .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .pallette_item {\n  padding: 0px;\n}\n.workspace .paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .paletteContainer .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #C71D3D;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#addon {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#addon .branding {\n  color: #C71D3D;\n}\n#addon .btn {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n#addon .btn:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n#addon .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#addon .paragraph .block {\n  padding-bottom: 30px;\n}\n#addon .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#addon .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#addon .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#addon .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#addon footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #C71D3D;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.toolbar .group .form-horizontal {\n  text-align: center;\n  display: flex;\n}\n.toolbar .group .form-horizontal .statusIndicator {\n  margin: 20px;\n}\n.toolbar .group .form-horizontal .statusIndicator img {\n  display: block;\n  cursor: pointer;\n  margin: auto;\n}\n.toolbar .group .form-horizontal .statusIndicator img:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.toolbar .group .form-horizontal .statusIndicator span {\n  font-size: 0.8em;\n  text-align: center;\n  width: 100%;\n  display: inline-block;\n  white-space: nowrap;\n}\n.toolbar .group .form-horizontal .statusIndicator .notSupported {\n  display: none;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator .connected {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img:hover {\n  box-shadow: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled span {\n  opacity: 0.5;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .notSupported {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) span {\n  color: red;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .notSupported {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .disconnected {\n  display: block;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 70px;\n  z-index: 1000;\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n", ""]);
 
 // exports
 

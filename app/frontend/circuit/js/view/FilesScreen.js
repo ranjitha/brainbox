@@ -1,13 +1,8 @@
 import conf from "../Configuration"
 import Hogan from "hogan.js"
-import storage from "../io/BackendStorage"
 
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
+let storage = require('../../../_common/js/BackendStorage')(conf)
+
 
 export default class Files {
 
@@ -40,7 +35,7 @@ export default class Files {
   initTabs(permissions) {
     // user can see personal files and the demo files
     //
-    if(permissions.brains.list===true && permissions.brains.demos===true) {
+    if(permissions.brains.list===true && permissions.brains.demos.list===true) {
       $('#material-tabs').each(function () {
         let $active, $content, $links = $(this).find('a');
         $active = $($links[0]);
@@ -64,24 +59,24 @@ export default class Files {
         })
       })
     }
-    else if (permissions.brains.list===false && permissions.brains.demos===true){
+    else if (permissions.brains.list===false && permissions.brains.demos.list===true){
       $('#material-tabs').remove()
-      $("#demoBrainFiles").show()
-      $("#userBrainFiles").remove()
+      $("#demoFiles").show()
+      $("#userFiles").remove()
       $("#files .title span").html("Load a demo Circuit")
     }
-    else if (permissions.brains.list===true && permissions.brains.demos===false){
+    else if (permissions.brains.list===true && permissions.brains.demos.list===false){
       $('#material-tabs').remove()
-      $("#demoBrainFiles").remove()
-      $("#userBrainFiles").show()
+      $("#demoFiles").remove()
+      $("#userFiles").show()
       $("#files .title span").html("Load a Circuit")
     }
-    else if (permissions.brains.list===true && permissions.brains.demos===false) {
+    else if (permissions.brains.list===true && permissions.brains.demos.list===false) {
     }
   }
 
   initDemos(permissions) {
-    if(permissions.brains.demos===false){
+    if(permissions.brains.demos.list===false){
       return
     }
 
@@ -112,14 +107,17 @@ export default class Files {
 
         let compiled = Hogan.compile($("#filesTemplate").html())
         let output = compiled.render({folder: path, files: files})
-        $("#demoBrainFiles").html($(output))
-        $("#demoBrainFiles .list-group-item[data-type='dir']").on("click", (event) => {
+        $("#demoFiles").html($(output))
+        if(permissions.sheets.demos.create === false){
+          $("#demoFiles .fileOperations").remove()
+        }
+        $("#demoFiles .list-group-item[data-type='dir']").on("click", (event) => {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           loadDemos(name)
         })
 
-        $("#demoBrainFiles .list-group-item[data-type='file']").on("click", (event) => {
+        $("#demoFiles .list-group-item[data-type='file']").on("click", (event) => {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
@@ -169,9 +167,11 @@ export default class Files {
 
         let compiled = Hogan.compile($("#filesTemplate").html())
         let output = compiled.render({folder: path, files: files})
-        $("#userBrainFiles").html($(output))
-
-        $("#userBrainFiles .deleteIcon").on("click", (event) => {
+        $("#userFiles").html($(output))
+        if(permissions.sheets.brains.create === false){
+          $("#userFiles .fileOperations").remove()
+        }
+        $("#userFiles .deleteIcon").on("click", (event) => {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           storage.deleteFile(name).then(() => {
@@ -187,7 +187,7 @@ export default class Files {
         })
 
         if (!_this.serverless) {
-          $("#userBrainFiles .list-group-item h4").on("click", (event) => {
+          $("#userFiles .list-group-item h4").on("click", (event) => {
             // can happen if the "serverless" websocket event comes too late
             //
             if (_this.serverless) {
@@ -247,13 +247,13 @@ export default class Files {
           })
         }
 
-        $("#userBrainFiles .list-group-item[data-type='dir']").on("click", (event) => {
+        $("#userFiles .list-group-item[data-type='dir']").on("click", (event) => {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           loadFiles(name)
         })
 
-        $("#userBrainFiles .list-group-item[data-type='file']").on("click", (event) => {
+        $("#userFiles .list-group-item[data-type='file']").on("click", (event) => {
           let $el = $(event.currentTarget)
           let parent = $el.closest(".list-group-item")
           let name = parent.data("name")

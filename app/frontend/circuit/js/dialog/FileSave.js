@@ -1,7 +1,7 @@
 import conf from "../Configuration"
-
-import storage from "../io/BackendStorage"
 import writer from '../io/Writer'
+
+let storage = require('../../../_common/js/BackendStorage')(conf)
 
 export default class FileSave {
 

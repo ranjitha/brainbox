@@ -1,6 +1,6 @@
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
-import "./dialog/PopConfirm"
+import "../../_common/js/PopConfirm"
 import UpdateSuccessDialog from "./dialog/UpdateSuccessDialog"
 import Split from 'split.js'
 

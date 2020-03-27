@@ -128,19 +128,24 @@
           <div class="col-sm-8 col-md-8">
             <div class="title">
               <img src="./images/navigation_file.svg"/>
-              <span>Load a Shape</span>
+              <span>Load a lesson document</span>
             </div>
           </div>
         </div>
 
         <div class="container">
           <header>
-            It is not possible to modify the shapes in this version. You can download Brainbox on github and
-            run the App on your own computer to have the full feature set. This is even possible with a Raspberry Pi.
+            <div id="material-tabs">
+              <a id="userFilesTab" href="#userFiles" class="active">Your Files</a>
+              <a id="demoFilesTab" href="#demoFiles">Demos</a>
+              <span class="yellow-bar"></span>
+            </div>
           </header>
 
           <div class="material-tab-content">
-            <div id="appShapeFiles">
+            <div id="userFiles">
+            </div>
+            <div id="demoFiles">
             </div>
           </div>
         </div>
@@ -167,38 +172,40 @@
 </script>
 
 
-<!-- Files list Template
-  -->
 <script id="filesTemplate" type="text/x-jsrender">
-  <div>Folder: {{folder}}</div>
-  <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
-  {{#files}}
-    <li class="list-group-item"  data-type="{{type}}" data-name="{{folder}}{{name}}">
-      <div class="media thumb">
-         {{#dir}}
-            <a class="media-left">
-            <div style="width: 64px; height: 64px">
-              <img style="width:100%; height:100%; object-fit: contain"  src="./images/folder.svg">
-            </div>
-            </a>
-         {{/dir}}
-         {{^dir}}
-            <a class="thumbnail media-left">
-            <div style="width: 64px; height: 64px">
-              <img style="width:100%; height:100%; object-fit: contain" src="{{image}}">
-            </div>
-            </a>
-         {{/dir}}
-        <div class="media-body">
-          <h4 class="media-heading">{{title}}</h4>
-          {{^readonly}}
-            <img class="deleteIcon svg" data-toggle="confirmation" src="./images/toolbar_delete.svg"/>
-          {{/readonly}}
-        </div>
+<div class="fileOperations">
+    <div id="fileOperationsFolderAdd"   class='fa fa-plus' > Folder</div>
+    <div id="fileOperationsDocumentAdd" class='fa fa-plus' > Document</div>
+</div>
+<div>Folder: {{folder}}</div>
+<ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
+{{#files}}
+  <li class="list-group-item"  data-type="{{type}}" data-name="{{folder}}{{name}}">
+    <div class="media thumb">
+       {{#dir}}
+          <a class="media-left">
+          <div style="width: 64px; height: 64px">
+            <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_folder.svg">
+          </div>
+          </a>
+       {{/dir}}
+       {{^dir}}
+          <a class="thumbnail media-left">
+          <div style="width: 64px; height: 64px">
+            <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_markdown.svg">
+          </div>
+          </a>
+       {{/dir}}
+      <div class="media-body">
+        <h4 class="media-heading">{{title}}</h4>
+        {{^readonly}}
+          <img class="deleteIcon svg" data-toggle="confirmation" src="./images/toolbar_delete.svg"/>
+        {{/readonly}}
       </div>
-    </li>
-  {{/files}}
-  </ul>
+    </div>
+  </li>
+{{/files}}
+</ul>
 </script>
 
 

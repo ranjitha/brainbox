@@ -1,6 +1,7 @@
 import conf from "../Configuration"
 import Hogan from 'hogan.js'
-import storage from "../io/BackendStorage"
+
+let storage = require('../../../_common/js/BackendStorage')(conf)
 
 
 export default class FileOpen {

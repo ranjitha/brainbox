@@ -1,11 +1,19 @@
 export default {
   fileSuffix: ".sheet",
   backend: {
-    sheet: {
-      list: "/backend/sheet/list",
-      image: file  =>  `./sheet/${file}`,
-      get:   file  =>  `../backend/sheet/get?filePath=${file}`,
-      save: "/backend/sheet/save"
+    file: {
+      list:   path       => `../backend/sheet/list?path=${path}`,
+      get:    file       => `../backend/sheet/get?filePath=${file}`,
+      desc:  file       => `../backend/sheet/desc?filePath=${file}`,
+      del:     `../backend/sheet/delete`,
+      rename:  `../backend/sheet/rename`,
+      save:    `../backend/sheet/save`
+    },
+
+    demo:{
+      list:   path       => `../backend/demo/sheet/list?path=${path}`,
+      get:    file       => `../backend/demo/sheet/get?filePath=${file}`,
+      desc:  file       => `../backend/demo/sheet/desc?filePath=${file}`
     }
   },
 

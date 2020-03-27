@@ -71,7 +71,6 @@
   }
 
   .thumbAdd{
-    color:@tintColor;
     color: #0078f2;
     border: 1px solid rgba(0, 120, 242, 0.33);
     border-radius: 6px;
@@ -92,8 +91,17 @@
     }
   }
 
+  .fileOperations {
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 9px;
 
-
+    div{
+      border: 1px solid lightgray;
+      padding: 4px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  }
 
 
   .container{
@@ -146,13 +154,13 @@
     -webkit-transition: left .2s ease;
   }
 
-  #userBrainFilesTab.active ~ span.yellow-bar {
+  #userFilesTab.active ~ span.yellow-bar {
     left: 0;
     width: 120px;
   }
 
-  #demoBrainFilesTab.active ~ span.yellow-bar {
-    left:140px;
+  #demoFilesTab.active ~ span.yellow-bar {
+    left:126px;
     width: 85px;
   }
 

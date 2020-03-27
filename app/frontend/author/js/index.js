@@ -1,6 +1,7 @@
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import conf from "./configuration"
+import "../../_common/js/PopConfirm"
 require('js-treeview/dist/treeview.min.css')
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap

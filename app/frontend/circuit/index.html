@@ -147,16 +147,16 @@
       <div class="container">
         <header>
           <div id="material-tabs">
-            <a id="userBrainFilesTab" href="#userBrainFiles" class="active">Your Files</a>
-            <a id="demoBrainFilesTab" href="#demoBrainFiles">Demos</a>
+            <a id="userFilesTab" href="#userFiles" class="active">Your Files</a>
+            <a id="demoFilesTab" href="#demoFiles">Demos</a>
             <span class="yellow-bar"></span>
           </div>
         </header>
 
         <div class="material-tab-content">
-          <div id="userBrainFiles">
+          <div id="userFiles">
           </div>
-          <div id="demoBrainFiles">
+          <div id="demoFiles">
           </div>
         </div>
       </div>
@@ -348,6 +348,10 @@
 </script>
 
 <script id="filesTemplate" type="text/x-jsrender">
+<div class="fileOperations">
+    <div id="fileOperationsFolderAdd"   class='fa fa-plus' > Folder</div>
+    <div id="fileOperationsDocumentAdd" class='fa fa-plus' > Document</div>
+</div>
 <div>Folder: {{folder}}</div>
 <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
 {{#files}}
@@ -356,7 +360,7 @@
        {{#dir}}
           <a class="media-left">
           <div style="width: 64px; height: 64px">
-            <img style="width:100%; height:100%; object-fit: contain"  src="./images/folder.svg">
+            <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_folder.svg">
           </div>
           </a>
        {{/dir}}
@@ -377,7 +381,6 @@
   </li>
 {{/files}}
 </ul>
-
 </script>
 
 <!--
