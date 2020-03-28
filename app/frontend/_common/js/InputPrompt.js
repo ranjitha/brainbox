@@ -5,6 +5,33 @@ class Dialog {
    *
    */
   constructor() {
+    $("body").append(`
+            <div id="inputPromptDialog" class="modal fade genericDialog" tabindex="-1">
+            <div class="modal-dialog ">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="media-heading">Input Prompt</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="media">
+                    <div class="promptValueLabel">Value:</div>
+                    <fieldset>
+                      <div class="form-group">
+                        <div class="col-lg-12">
+                          <input type="text" class="form-control floating-label inputPromptValue" value="" >
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn" data-dismiss="modal">Close</button>
+                  <button class="btn btn-primary okButton"><span>Create</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+    `)
   }
 
   /**

@@ -8,7 +8,6 @@ import FileSave from "../../_common/js/FileSave"
 import designerDialog from "../../_common/js/DesignerDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
-let storage = require('../../_common/js/BackendStorage')(conf)
 
 import Palette from "./Palette"
 import View from "./View"
@@ -17,6 +16,7 @@ import Addons from "./view/AddonScreen"
 import conf from "./Configuration"
 import reader from "./io/Reader"
 
+let storage = require('../../_common/js/BackendStorage')(conf)
 /**
  * wait asyn that an DOM element is present
  * Usage: checkElement("<selector>").then(function(){alert("element found")})
@@ -53,7 +53,7 @@ class Application {
     this.hasUnsavedChanges = false
     this.palette = new Palette(permissions)
     this.view = new View("draw2dCanvas", permissions)
-    this.filePane = new Files(conf, permissions)
+    this.filePane = new Files(conf, permissions.brains)
     this.addonPane = new Addons(permissions)
 
     // Show the user an alert if there are unsaved changes
@@ -95,14 +95,14 @@ class Application {
     let demo = this.getParam("demo")
     if (this.fileName) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.file.get(this.fileName))
+      this.load(conf.backend.user.get(this.fileName))
     }
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     else if (demo) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.demo.get(demo))
+      this.load(conf.backend.global.get(demo))
     }
     else {
       this.fileNew()

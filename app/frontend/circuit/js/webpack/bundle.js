@@ -176,12 +176,12 @@ var BackendStorage = function () {
   _createClass(BackendStorage, [{
     key: "getFiles",
     value: function getFiles(path) {
-      return this.__getFiles(this.conf.backend.file.list(path));
+      return this.__getFiles(this.conf.backend.user.list(path));
     }
   }, {
     key: "getDemos",
     value: function getDemos(path) {
-      return this.__getFiles(this.conf.backend.demo.list(path));
+      return this.__getFiles(this.conf.backend.global.list(path));
     }
   }, {
     key: "__getFiles",
@@ -216,17 +216,17 @@ var BackendStorage = function () {
         filePath: fileName,
         content: JSON.stringify(json, undefined, 2)
       };
-      return _axios2.default.post(this.conf.backend.file.save, data);
+      return _axios2.default.post(this.conf.backend.user.save, data);
     }
   }, {
     key: "loadFile",
     value: function loadFile(fileName) {
-      return this.loadUrl(this.conf.backend.file.get(fileName));
+      return this.loadUrl(this.conf.backend.user.get(fileName));
     }
   }, {
     key: "loadDemo",
     value: function loadDemo(fileName) {
-      return this.loadUrl(this.conf.backend.demo.get(fileName));
+      return this.loadUrl(this.conf.backend.global.get(fileName));
     }
   }, {
     key: "deleteFile",
@@ -234,7 +234,7 @@ var BackendStorage = function () {
       var data = {
         filePath: fileName
       };
-      return _axios2.default.post(this.conf.backend.file.del, data);
+      return _axios2.default.post(this.conf.backend.user.del, data);
     }
   }, {
     key: "createUserFolder",
@@ -242,7 +242,7 @@ var BackendStorage = function () {
       var data = {
         filePath: folderName
       };
-      return _axios2.default.post(this.conf.backend.file.folder, data);
+      return _axios2.default.post(this.conf.backend.user.folder, data);
     }
   }, {
     key: "createDemoFolder",
@@ -250,7 +250,7 @@ var BackendStorage = function () {
       var data = {
         filePath: folderName
       };
-      return _axios2.default.post(this.conf.backend.demo.folder, data);
+      return _axios2.default.post(this.conf.backend.global.folder, data);
     }
 
     /**
@@ -475,6 +475,8 @@ var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 
 var _axios2 = _interopRequireDefault(_axios);
 
+__webpack_require__(/*! ./PopConfirm */ "./app/frontend/_common/js/PopConfirm.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -492,7 +494,9 @@ var Files = function () {
     _classCallCheck(this, Files);
 
     this.conf = conf;
-    this.render(conf, permissions.sheets);
+    this.render(conf, permissions);
+
+    $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  data-type=\"{{type}}\"  data-delete=\"{{delete}}\" data-update=\"{{update}}\" data-name=\"{{folder}}{{name}}\">\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
   }
 
   _createClass(Files, [{
@@ -503,15 +507,15 @@ var Files = function () {
       var storage = __webpack_require__(/*! ./BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(conf);
 
       this.initTabs(permissions);
-      this.initPane("#userFiles", conf.backend.file, permissions, "");
-      this.initPane("#demoFiles", conf.backend.demo, permissions.demos, "");
+      this.initPane("#userFiles", conf.backend.user, permissions, "");
+      this.initPane("#demoFiles", conf.backend.global, permissions.global, "");
 
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
         if (preview.length === 0) {
           _this2.render();
         } else {
-          $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
+          $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
         }
       });
 
@@ -526,7 +530,7 @@ var Files = function () {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createDemoFolder(folder + value);
-          _this2.initPane("#demoFiles", conf.backend.demo, permissions.demos, folder);
+          _this2.initPane("#demoFiles", conf.backend.global, permissions.global, folder);
         });
       });
     }
@@ -535,7 +539,7 @@ var Files = function () {
     value: function initTabs(permissions) {
       // user can see private files and the demo files
       //
-      if (permissions.list === true && permissions.demos.list === true) {
+      if (permissions.list === true && permissions.global.list === true) {
         $('#material-tabs').each(function () {
           var $active = void 0,
               $content = void 0,
@@ -560,17 +564,17 @@ var Files = function () {
             e.preventDefault();
           });
         });
-      } else if (permissions.list === false && permissions.demos.list === true) {
+      } else if (permissions.list === false && permissions.global.list === true) {
         $('#material-tabs').remove();
         $("#demoFiles").show();
         $("#userFiles").remove();
         $("#files .title span").html("Load a demo lesson file");
-      } else if (permissions.list === true && permissions.demos.list === false) {
+      } else if (permissions.list === true && permissions.global.list === false) {
         $('#material-tabs').remove();
         $("#demoFiles").remove();
         $("#userFiles").show();
         $("#files .title span").html("Load a lesson document");
-      } else if (permissions.list === true && permissions.demos.list === false) {}
+      } else if (permissions.list === true && permissions.global.list === false) {}
     }
   }, {
     key: "initPane",
@@ -663,7 +667,7 @@ var Files = function () {
                   if (type !== "dir") {
                     newName = storage.sanitize(newName) + conf.fileSuffix;
                   }
-                  _axios2.default.post(conf.backend.file.rename, { from: name, to: newName }).then(function () {
+                  _axios2.default.post(conf.backend.user.rename, { from: name, to: newName }).then(function () {
                     $replaceWith.remove();
                     $el.html(newName.replace(conf.fileSuffix, ""));
                     $el.show();
@@ -697,7 +701,7 @@ var Files = function () {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
-            var file = conf.backend.demo.get(name);
+            var file = conf.backend.global.get(name);
             app.load(file).then(function () {
               $el.removeClass("spinner");
             });
@@ -742,6 +746,8 @@ var Dialog = function () {
    */
   function Dialog() {
     _classCallCheck(this, Dialog);
+
+    $("body").append("\n            <div id=\"inputPromptDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n              <div class=\"modal-content\">\n                <div class=\"modal-header\">\n                  <h4 class=\"media-heading\">Input Prompt</h4>\n                </div>\n                <div class=\"modal-body\">\n                  <div class=\"media\">\n                    <div class=\"promptValueLabel\">Value:</div>\n                    <fieldset>\n                      <div class=\"form-group\">\n                        <div class=\"col-lg-12\">\n                          <input type=\"text\" class=\"form-control floating-label inputPromptValue\" value=\"\" >\n                        </div>\n                      </div>\n                    </fieldset>\n                  </div>\n                </div>\n                <div class=\"modal-footer\">\n                  <button class=\"btn\" data-dismiss=\"modal\">Close</button>\n                  <button class=\"btn btn-primary okButton\"><span>Create</span></button>\n                </div>\n              </div>\n            </div>\n          </div>\n    ");
   }
 
   /**
@@ -1293,7 +1299,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var storage = __webpack_require__(/*! ../../_common/js/BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
-
 /**
  * wait asyn that an DOM element is present
  * Usage: checkElement("<selector>").then(function(){alert("element found")})
@@ -1336,7 +1341,7 @@ var Application = function () {
       this.hasUnsavedChanges = false;
       this.palette = new _Palette2.default(permissions);
       this.view = new _View2.default("draw2dCanvas", permissions);
-      this.filePane = new _FilesScreen2.default(_Configuration2.default, permissions);
+      this.filePane = new _FilesScreen2.default(_Configuration2.default, permissions.brains);
       this.addonPane = new _AddonScreen2.default(permissions);
 
       // Show the user an alert if there are unsaved changes
@@ -1377,14 +1382,14 @@ var Application = function () {
       var demo = this.getParam("demo");
       if (this.fileName) {
         $("#leftTabStrip .editor").click();
-        this.load(_Configuration2.default.backend.file.get(this.fileName));
+        this.load(_Configuration2.default.backend.user.get(this.fileName));
       }
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
       else if (demo) {
           $("#leftTabStrip .editor").click();
-          this.load(_Configuration2.default.backend.demo.get(demo));
+          this.load(_Configuration2.default.backend.global.get(demo));
         } else {
           this.fileNew();
         }
@@ -1538,33 +1543,33 @@ exports.default = {
 
     configuration: "../backend/configuration",
 
-    file: {
+    user: {
       list: function list(path) {
-        return "../backend/brain/list?path=" + path;
+        return "../backend/user/brain/list?path=" + path;
       },
       get: function get(file) {
-        return "../backend/brain/get?filePath=" + file;
+        return "../backend/user/brain/get?filePath=" + file;
       },
       image: function image(file) {
-        return "../backend/brain/image?filePath=" + file;
+        return "../backend/user/brain/image?filePath=" + file;
       },
-      del: "../backend/brain/delete",
-      rename: "../backend/brain/rename",
-      save: "../backend/brain/save",
-      folder: "../backend/brain/folder"
+      del: "../backend/user/brain/delete",
+      rename: "../backend/user/brain/rename",
+      save: "../backend/user/brain/save",
+      folder: "../backend/user/brain/folder"
     },
 
-    demo: {
+    global: {
       list: function list(path) {
-        return "../backend/demo/brain/list?path=" + path;
+        return "../backend/global/brain/list?path=" + path;
       },
       get: function get(file) {
-        return "../backend/demo/brain/get?filePath=" + file;
+        return "../backend/global/brain/get?filePath=" + file;
       },
       image: function image(file) {
-        return "../backend/demo/brain/image?filePath=" + file;
+        return "../backend/global/brain/image?filePath=" + file;
       },
-      folder: "../backend/demo/brain/folder"
+      folder: "../backend/global/brain/folder"
     }
   },
 
@@ -1586,7 +1591,7 @@ exports.default = {
   },
 
   shapes: {
-    url: "../shapes/",
+    url: "../shapes/global/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
 
@@ -5186,8 +5191,6 @@ module.exports = exports["default"];
 __webpack_require__(/*! ../less/index.less */ "./app/frontend/circuit/less/index.less");
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
-
-__webpack_require__(/*! ../../_common/js/PopConfirm */ "./app/frontend/_common/js/PopConfirm.js");
 
 var _UpdateSuccessDialog = __webpack_require__(/*! ./dialog/UpdateSuccessDialog */ "./app/frontend/circuit/js/dialog/UpdateSuccessDialog.js");
 

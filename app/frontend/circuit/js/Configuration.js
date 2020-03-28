@@ -15,21 +15,21 @@ export default {
 
     configuration:  `../backend/configuration`,
 
-    file: {
-      list:   path => `../backend/brain/list?path=${path}`,
-      get:    file => `../backend/brain/get?filePath=${file}`,
-      image:  file => `../backend/brain/image?filePath=${file}`,
-      del:            `../backend/brain/delete`,
-      rename:         `../backend/brain/rename`,
-      save:           `../backend/brain/save`,
-      folder:         `../backend/brain/folder`
+    user: {
+      list:   path => `../backend/user/brain/list?path=${path}`,
+      get:    file => `../backend/user/brain/get?filePath=${file}`,
+      image:  file => `../backend/user/brain/image?filePath=${file}`,
+      del:            `../backend/user/brain/delete`,
+      rename:         `../backend/user/brain/rename`,
+      save:           `../backend/user/brain/save`,
+      folder:         `../backend/user/brain/folder`
     },
 
-    demo:{
-      list:   path => `../backend/demo/brain/list?path=${path}`,
-      get:    file => `../backend/demo/brain/get?filePath=${file}`,
-      image:  file => `../backend/demo/brain/image?filePath=${file}`,
-      folder:         `../backend/demo/brain/folder`
+    global:{
+      list:   path => `../backend/global/brain/list?path=${path}`,
+      get:    file => `../backend/global/brain/get?filePath=${file}`,
+      image:  file => `../backend/global/brain/image?filePath=${file}`,
+      folder:         `../backend/global/brain/folder`
     }
   },
 
@@ -51,7 +51,7 @@ export default {
   },
 
   shapes: {
-    url: "../shapes/",
+    url: "../shapes/global/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
 

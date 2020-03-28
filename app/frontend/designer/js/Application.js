@@ -1,20 +1,15 @@
+import Files from "../../_common/js/FilesScreen"
+import FileSave from "../../_common/js/FileSave"
+import toast from "../../_common/js/toast"
 
 import View from "./View"
 import Toolbar from "./Toolbar"
 import Layer from "./Layer"
 import FilterPane from "./FilterPane"
-import storage from "./io/BackendStorage"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
-import Files from "./view/FilesScreen"
-import FileSave from "../../_common/js/FileSave"
-import toast from "../../_common/js/toast"
+import conf from "./Configuration"
 
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
+let storage = require('../../_common/js/BackendStorage')(conf)
 
 /**
  * wait asyn that an DOM element is present
@@ -49,7 +44,7 @@ class Application {
     this.permissions = permissions
     this.hasUnsavedChanges = false
 
-    this.filePane = new Files(permissions)
+    this.filePane = new Files(conf, permissions.shapes)
 
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
@@ -99,7 +94,7 @@ class Application {
     //
     let file = this.getParam("file")
     if (file) {
-      this.fileLoad(file)
+      this.load(conf.backend.user.get(file))
     }
     else {
       this.fileNew()
@@ -215,16 +210,19 @@ class Application {
   }
 
 
-  fileLoad(name){
+  load(file){
     this.view.clear()
     $("#leftTabStrip .editor").click()
 
-    return this.storage.loadFile(name)
+    return this.storage.loadUrl(file)
       .then((content) => {
+        if (typeof content === "string"){
+          content = JSON.parse(content)
+        }
         this.view.clear()
         this.view.centerDocument()
         let reader = new draw2d.io.json.Reader()
-        reader.unmarshal(this.view, content)
+        reader.unmarshal(this.view, content.draw2d)
         this.getConfiguration()
         this.view.getCommandStack().markSaveLocation()
         this.view.centerDocument()

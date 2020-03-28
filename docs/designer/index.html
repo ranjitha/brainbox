@@ -111,8 +111,6 @@
 
 
 
-
-
       <div class="tab-pane" id="files">
         <div class="row hidden-xs teaser">
           <div class="col-sm-8 col-md-8">
@@ -125,12 +123,17 @@
 
         <div class="container">
           <header>
-            It is not possible to modify the shapes in this version. You can download Brainbox on github and
-            run the App on your own computer to have the full feature set. This is even possible with a Raspberry Pi.
+            <div id="material-tabs">
+              <a id="userFilesTab" href="#userFiles" class="active">Your Files</a>
+              <a id="demoFilesTab" href="#demoFiles">System</a>
+              <span class="yellow-bar"></span>
+            </div>
           </header>
 
           <div class="material-tab-content">
-            <div id="appShapeFiles">
+            <div id="userFiles">
+            </div>
+            <div id="demoFiles">
             </div>
           </div>
         </div>
@@ -224,7 +227,6 @@
 
                           </fieldset>
                             <div class="row"></div>
-
                         </form>
                     </div>
                 </div>
@@ -277,33 +279,6 @@
        </div>
    </div>
 
-
-   <!--
-     # GitHub File select/open dialog
-     #
-     -->
-<div id="fileOpenDialog" class="modal fade genericDialog" tabindex="-1">
-    <div class="modal-dialog ">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="media-heading">File Open...</h4>
-            </div>
-            <div class="modal-body">
-
-
-                <div class="list-group">
-                    <!-- FileList here -->
-                </div>
-
-
-            </div>
-            <div class="modal-footer">
-                <button class="btn" data-dismiss="modal">Abort</button>
-                <button class="btn btn-primary okButton"><span>Open</span></button>
-            </div>
-        </div>
-    </div>
-</div>
 
 
 <script id="shape-edit-template" type="text/js-template">

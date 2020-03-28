@@ -27,7 +27,7 @@ module.exports = {
       delete: false,
       read: true,
       list: false,
-      demos:  {
+      global:  {
         create: false,
         update: false,
         delete: false,
@@ -39,8 +39,15 @@ module.exports = {
       create: false,
       update: false,
       delete: false,
-      read: true,
-      list: true
+      read: false,
+      list: false,
+      global:  {
+        create: false,
+        update: false,
+        delete: false,
+        read: true,
+        list: true
+      }
     },
     sheets:{
       create: true,
@@ -48,7 +55,7 @@ module.exports = {
       delete: false,
       read: true,
       list: false,
-      demos:  {
+      global:  {
         create: false,
         update: false,
         delete: false,
@@ -100,11 +107,11 @@ module.exports = {
     //
     // =================================================================
     // app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
-    app.get('/backend/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
+    app.get('/backend/user/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
     // not supported in the hosted version. We just create new files on every save....like Codepen
-    // app.post('/backend/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
-    // app.post('/backend/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
-    app.post('/backend/sheet/save',   (req, res) => module.exports.writeBrain(sheetsHomeDir,      req.body.filePath, req.body.content, res))
+    // app.post('/backend/user/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
+    // app.post('/backend/user/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
+    app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeBrain(sheetsHomeDir,      req.body.filePath, req.body.content, res))
 
 
 
@@ -112,25 +119,25 @@ module.exports = {
     // Handle brain files
     //
     // =================================================================
-    // app.get('/backend/brain/list',    (req, res) => module.exports.listFiles(brainsHomeDir,      req.query.path, res))
-    app.get('/backend/brain/get',     (req, res) => module.exports.getJSONFile(brainsHomeDir,    req.query.filePath, res))
-    app.get('/backend/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
+    // app.get('/backend/user/brain/list',    (req, res) => module.exports.listFiles(brainsHomeDir,      req.query.path, res))
+    app.get('/backend/user/brain/get',     (req, res) => module.exports.getJSONFile(brainsHomeDir,    req.query.filePath, res))
+    app.get('/backend/user/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
     // not supported in the hosted version. We just create new files on every save....like Codepen
-    // app.post('/backend/brain/delete', (req, res) => module.exports.deleteFile(brainsHomeDir,     req.body.filePath, res))
-    // app.post('/backend/brain/rename', (req, res) => module.exports.renameFile(brainsHomeDir,     req.body.from, req.body.to, res))
-    app.post('/backend/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
+    // app.post('/backend/user/brain/delete', (req, res) => module.exports.deleteFile(brainsHomeDir,     req.body.filePath, res))
+    // app.post('/backend/user/brain/rename', (req, res) => module.exports.renameFile(brainsHomeDir,     req.body.from, req.body.to, res))
+    app.post('/backend/user/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
 
 
     // =================================================================
     // Handle pre-installed brain/sheet files
     //
     // =================================================================
-    app.get('/backend/demo/brain/list',  (req, res) => generic.listFiles(brainsAppDir, req.query.path, res))
-    app.get('/backend/demo/brain/get',   (req, res) => generic.getJSONFile(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/brain/image', (req, res) => generic.getBase64Image(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/sheet/list',  (req, res) => generic.listFiles(sheetsAppDir, req.query.path, res))
-    app.get('/backend/demo/sheet/get',   (req, res) => generic.getJSONFile(sheetsAppDir, req.query.filePath, res))
-    app.get('/backend/demo/sheet/image', (req, res) => generic.getBase64Image(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/global/brain/list',  (req, res) => generic.listFiles(brainsAppDir, req.query.path, res))
+    app.get('/backend/global/brain/get',   (req, res) => generic.getJSONFile(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/global/brain/image', (req, res) => generic.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/global/sheet/list',  (req, res) => generic.listFiles(sheetsAppDir, req.query.path, res))
+    app.get('/backend/global/sheet/get',   (req, res) => generic.getJSONFile(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/global/sheet/image', (req, res) => generic.getBase64Image(sheetsAppDir, req.query.filePath, res))
 
 
     // =================================================================
@@ -145,14 +152,14 @@ module.exports = {
     // Handle system shape files
     //
     // =================================================================
-    app.use('/shapes', express.static(shapeAppDir));
-    app.get('/backend/shape/list',  (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
-    app.get('/backend/shape/get',   (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
-    app.get('/backend/shape/image', (req, res) => generic.getBase64Image(shapeAppDir, req.query.filePath, res))
+    app.use('/shapes/global', express.static(shapeAppDir));
+    app.get('/backend/global/shape/list',  (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
+    app.get('/backend/global/shape/get',   (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
+    app.get('/backend/global/shape/image', (req, res) => generic.getBase64Image(shapeAppDir, req.query.filePath, res))
     // it is not allowed to update the shape files in the hosted version....updates happens via CLI
-    // app.post('/backend/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
-    // app.post('/backend/shape/rename', (req, res) => module.exports.renameFile(shapeAppDir, req.body.from, req.body.to, res))
-    // app.post('/backend/shape/save', (req, res) => module.exports.writeShape(shapeAppDir, req.body.filePath, req.body.content, req.body.commitMessage, res))
+    // app.post('/backend/global/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
+    // app.post('/backend/global/shape/rename', (req, res) => module.exports.renameFile(shapeAppDir, req.body.from, req.body.to, res))
+    // app.post('/backend/global/shape/save', (req, res) => module.exports.writeShape(shapeAppDir, req.body.filePath, req.body.content, req.body.commitMessage, res))
   },
 
   renameFile: ()=>{},

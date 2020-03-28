@@ -13,11 +13,11 @@ class BackendStorage {
   }
 
   getFiles(path){
-    return this.__getFiles( this.conf.backend.file.list(path))
+    return this.__getFiles( this.conf.backend.user.list(path))
   }
 
   getDemos(path){
-    return this.__getFiles( this.conf.backend.demo.list(path))
+    return this.__getFiles( this.conf.backend.global.list(path))
   }
 
   __getFiles(path) {
@@ -57,36 +57,36 @@ class BackendStorage {
       filePath: fileName,
       content: JSON.stringify(json, undefined, 2)
     }
-    return axios.post(this.conf.backend.file.save, data)
+    return axios.post(this.conf.backend.user.save, data)
   }
 
   loadFile(fileName) {
-    return this.loadUrl(this.conf.backend.file.get(fileName))
+    return this.loadUrl(this.conf.backend.user.get(fileName))
   }
 
   loadDemo(fileName) {
-    return this.loadUrl(this.conf.backend.demo.get(fileName))
+    return this.loadUrl(this.conf.backend.global.get(fileName))
   }
 
   deleteFile(fileName) {
     let data = {
       filePath: fileName
     }
-    return axios.post(this.conf.backend.file.del,data )
+    return axios.post(this.conf.backend.user.del,data )
   }
 
   createUserFolder(folderName){
     let data = {
       filePath: folderName
     }
-    return axios.post(this.conf.backend.file.folder, data)
+    return axios.post(this.conf.backend.user.folder, data)
   }
 
   createDemoFolder(folderName){
     let data = {
       filePath: folderName
     }
-    return axios.post(this.conf.backend.demo.folder, data)
+    return axios.post(this.conf.backend.global.folder, data)
   }
 
   /**

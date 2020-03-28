@@ -135,6 +135,186 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "../../app/frontend/_common/js/BackendStorage.js":
+/*!*********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/BackendStorage.js ***!
+  \*********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
+
+var BackendStorage = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function BackendStorage(conf) {
+    _classCallCheck(this, BackendStorage);
+
+    this.conf = conf;
+  }
+
+  _createClass(BackendStorage, [{
+    key: "getFiles",
+    value: function getFiles(path) {
+      return this.__getFiles(this.conf.backend.user.list(path));
+    }
+  }, {
+    key: "getDemos",
+    value: function getDemos(path) {
+      return this.__getFiles(this.conf.backend.global.list(path));
+    }
+  }, {
+    key: "__getFiles",
+    value: function __getFiles(path) {
+      return _axios2.default.get(path).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        var files = [];
+        if (typeof response === "string") files = JSON.parse(response).data.files;else files = response.data.files;
+
+        // sort the result
+        // Directories are always on top
+        //
+        files.sort(function (a, b) {
+          if (a.type === b.type) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+            return 0;
+          }
+          if (a.type === "dir") {
+            return -1;
+          }
+          return 1;
+        });
+        return files;
+      });
+    }
+  }, {
+    key: "saveFile",
+    value: function saveFile(json, fileName) {
+      var data = {
+        filePath: fileName,
+        content: JSON.stringify(json, undefined, 2)
+      };
+      return _axios2.default.post(this.conf.backend.user.save, data);
+    }
+  }, {
+    key: "loadFile",
+    value: function loadFile(fileName) {
+      return this.loadUrl(this.conf.backend.user.get(fileName));
+    }
+  }, {
+    key: "loadDemo",
+    value: function loadDemo(fileName) {
+      return this.loadUrl(this.conf.backend.global.get(fileName));
+    }
+  }, {
+    key: "deleteFile",
+    value: function deleteFile(fileName) {
+      var data = {
+        filePath: fileName
+      };
+      return _axios2.default.post(this.conf.backend.user.del, data);
+    }
+  }, {
+    key: "createUserFolder",
+    value: function createUserFolder(folderName) {
+      var data = {
+        filePath: folderName
+      };
+      return _axios2.default.post(this.conf.backend.user.folder, data);
+    }
+  }, {
+    key: "createDemoFolder",
+    value: function createDemoFolder(folderName) {
+      var data = {
+        filePath: folderName
+      };
+      return _axios2.default.post(this.conf.backend.global.folder, data);
+    }
+
+    /**
+     * Load the file content of the given path
+     *
+     * @param fileName
+     * @returns {*}
+     */
+
+  }, {
+    key: "loadUrl",
+    value: function loadUrl(url) {
+      return _axios2.default.get(url).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") return JSON.parse(response).data;
+
+        return response.data;
+      });
+    }
+  }, {
+    key: "dirname",
+    value: function dirname(path) {
+      if (path === undefined || path === null || path.length === 0) return null;
+
+      var segments = path.split("/");
+      if (segments.length <= 1) return null;
+
+      segments = segments.filter(function (n) {
+        return n !== "";
+      });
+      path = segments.slice(0, -1).join("/");
+      return path === "" ? null : path + "/";
+    }
+  }, {
+    key: "sanitize",
+    value: function sanitize(file) {
+      file = _sanitize(file, "_");
+      file = file.replace(this.conf.fileSuffix, "");
+      // I don't like dots in the name to
+      file = file.replace(RegExp("[.]", "g"), "_");
+      return file;
+    }
+  }, {
+    key: "basename",
+    value: function basename(path) {
+      if (path === null || path === "" || path === undefined) {
+        return null;
+      }
+      return path.split(/[\\/]/).pop();
+    }
+  }]);
+
+  return BackendStorage;
+}();
+
+exports.default = function (conf) {
+  return new BackendStorage(conf);
+};
+
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "../../app/frontend/_common/js/FileSave.js":
 /*!***************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/FileSave.js ***!
@@ -218,6 +398,501 @@ var dialog = new Dialog();
 
 exports.default = dialog;
 module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "../../app/frontend/_common/js/FilesScreen.js":
+/*!******************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/FilesScreen.js ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _hogan = __webpack_require__(/*! hogan.js */ "../../node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+__webpack_require__(/*! ./PopConfirm */ "../../app/frontend/_common/js/PopConfirm.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var inputPrompt = __webpack_require__(/*! ./InputPrompt */ "../../app/frontend/_common/js/InputPrompt.js");
+
+var Files = function () {
+
+  /**
+   * @constructor
+   *
+   * @param {String} canvasId the id of the DOM element to use as paint container
+   */
+  function Files(conf, permissions) {
+    _classCallCheck(this, Files);
+
+    this.conf = conf;
+    this.render(conf, permissions);
+
+    $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  data-type=\"{{type}}\"  data-delete=\"{{delete}}\" data-update=\"{{update}}\" data-name=\"{{folder}}{{name}}\">\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
+  }
+
+  _createClass(Files, [{
+    key: "render",
+    value: function render(conf, permissions) {
+      var _this2 = this;
+
+      var storage = __webpack_require__(/*! ./BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(conf);
+
+      this.initTabs(permissions);
+      this.initPane("#userFiles", conf.backend.user, permissions, "");
+      this.initPane("#demoFiles", conf.backend.global, permissions.global, "");
+
+      socket.on("file:generated", function (msg) {
+        var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
+        if (preview.length === 0) {
+          _this2.render();
+        } else {
+          $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
+        }
+      });
+
+      $(document).on("click", "#userFiles .fileOperationsFolderAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        inputPrompt.show("Create Folder", "Folder name", function (value) {
+          storage.createUserFolder(folder + value);
+          _this2.initPane("#userFiles", conf.backend.file, permissions, folder);
+        });
+      });
+      $(document).on("click", "#demoFiles .fileOperationsFolderAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        inputPrompt.show("Create Folder", "Folder name", function (value) {
+          storage.createDemoFolder(folder + value);
+          _this2.initPane("#demoFiles", conf.backend.global, permissions.global, folder);
+        });
+      });
+    }
+  }, {
+    key: "initTabs",
+    value: function initTabs(permissions) {
+      // user can see private files and the demo files
+      //
+      if (permissions.list === true && permissions.global.list === true) {
+        $('#material-tabs').each(function () {
+          var $active = void 0,
+              $content = void 0,
+              $links = $(this).find('a');
+          $active = $($links[0]);
+          $active.addClass('active');
+          $content = $($active[0].hash);
+          $links.not($active).each(function () {
+            $(this.hash).hide();
+          });
+
+          $(this).on('click', 'a', function (e) {
+            $active.removeClass('active');
+            $content.hide();
+
+            $active = $(this);
+            $content = $(this.hash);
+
+            $active.addClass('active');
+            $content.show();
+
+            e.preventDefault();
+          });
+        });
+      } else if (permissions.list === false && permissions.global.list === true) {
+        $('#material-tabs').remove();
+        $("#demoFiles").show();
+        $("#userFiles").remove();
+        $("#files .title span").html("Load a demo lesson file");
+      } else if (permissions.list === true && permissions.global.list === false) {
+        $('#material-tabs').remove();
+        $("#demoFiles").remove();
+        $("#userFiles").show();
+        $("#files .title span").html("Load a lesson document");
+      } else if (permissions.list === true && permissions.global.list === false) {}
+    }
+  }, {
+    key: "initPane",
+    value: function initPane(paneSelector, backendConf, permissions, initialPath) {
+      var storage = __webpack_require__(/*! ./BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(this.conf);
+      if (permissions.list === false) {
+        return;
+      }
+
+      var _this = this;
+      // load demo files
+      //
+      function loadPane(path) {
+        storage.__getFiles(backendConf.list(path)).then(function (files) {
+          files = files.filter(function (file) {
+            return file.name.endsWith(conf.fileSuffix) || file.type === "dir";
+          });
+          files = files.map(function (file) {
+            return _extends({}, file, {
+              delete: permissions.delete,
+              update: permissions.update,
+              folder: path,
+              image: backendConf.image(path + file.name),
+              title: file.name.replace(conf.fileSuffix, "")
+            });
+          });
+          if (path.length !== 0) {
+            files.unshift({
+              name: storage.dirname(path),
+              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
+              type: "dir",
+              dir: true,
+              delete: false,
+              update: false,
+              back: "_back",
+              title: ".."
+            });
+          }
+          var compiled = _hogan2.default.compile($("#filesTemplate").html());
+          var output = compiled.render({ folder: path, files: files });
+          $(paneSelector).html($(output));
+          if (permissions.create === false) {
+            $(paneSelector + " .fileOperations").remove();
+          }
+
+          $(paneSelector + " .deleteIcon").on("click", function (event) {
+            var $el = $(event.target).closest(".list-group-item");
+            var name = $el.data("name");
+            storage.deleteFile(name).then(function () {
+              var parent = $el.closest(".list-group-item");
+              parent.hide('slow', function () {
+                return parent.remove();
+              });
+            });
+          });
+
+          $(paneSelector + " [data-toggle='confirmation']").popConfirm({
+            title: "Delete File?",
+            content: "",
+            placement: "bottom" // (top, right, bottom, left)
+          });
+
+          if (!_this.serverless) {
+            $(paneSelector + " .list-group-item h4").on("click", function (event) {
+
+              var $el = $(event.currentTarget);
+              var parent = $el.closest(".list-group-item");
+              var update = parent.data("update");
+              // can happen if the "serverless" websocket event comes too late
+              //
+              if (_this.serverless || update === false) {
+                return;
+              }
+
+              Mousetrap.pause();
+              var name = parent.data("name");
+              var type = parent.data("type");
+              var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />');
+              $el.hide();
+              $el.after($replaceWith);
+              $replaceWith.focus();
+              $replaceWith.on("click", function () {
+                return false;
+              });
+
+              var fire = function fire() {
+                Mousetrap.unpause();
+                var newName = $replaceWith.val();
+                if (newName !== "") {
+                  if (type !== "dir") {
+                    newName = storage.sanitize(newName) + conf.fileSuffix;
+                  }
+                  _axios2.default.post(conf.backend.user.rename, { from: name, to: newName }).then(function () {
+                    $replaceWith.remove();
+                    $el.html(newName.replace(conf.fileSuffix, ""));
+                    $el.show();
+                    parent.data("name", newName);
+                  });
+                } else {
+                  // get the value and post them here
+                  $replaceWith.remove();
+                  $el.show();
+                }
+              };
+              $replaceWith.blur(fire);
+              $replaceWith.keypress(function (e) {
+                if (e.which === 13) {
+                  fire();
+                }
+              });
+              event.preventDefault();
+              event.stopPropagation();
+              return false;
+            });
+          }
+
+          $(paneSelector + " .list-group-item[data-type='dir']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            loadPane(name);
+          });
+
+          $(paneSelector + " .list-group-item[data-type='file']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            $el.addClass("spinner");
+            var file = conf.backend.global.get(name);
+            app.load(file).then(function () {
+              $el.removeClass("spinner");
+            });
+          });
+        });
+      }
+      loadPane(initialPath);
+    }
+  }]);
+
+  return Files;
+}();
+
+exports.default = Files;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "../../app/frontend/_common/js/InputPrompt.js":
+/*!******************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/InputPrompt.js ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+
+    $("body").append("\n            <div id=\"inputPromptDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n              <div class=\"modal-content\">\n                <div class=\"modal-header\">\n                  <h4 class=\"media-heading\">Input Prompt</h4>\n                </div>\n                <div class=\"modal-body\">\n                  <div class=\"media\">\n                    <div class=\"promptValueLabel\">Value:</div>\n                    <fieldset>\n                      <div class=\"form-group\">\n                        <div class=\"col-lg-12\">\n                          <input type=\"text\" class=\"form-control floating-label inputPromptValue\" value=\"\" >\n                        </div>\n                      </div>\n                    </fieldset>\n                  </div>\n                </div>\n                <div class=\"modal-footer\">\n                  <button class=\"btn\" data-dismiss=\"modal\">Close</button>\n                  <button class=\"btn btn-primary okButton\"><span>Create</span></button>\n                </div>\n              </div>\n            </div>\n          </div>\n    ");
+  }
+
+  /**
+   */
+
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(title, label, callback) {
+
+      $("#inputPromptDialog .media-heading").html(title);
+      $("#inputPromptDialog .promptValueLabel").html(label);
+
+      $('#inputPromptDialog').on('shown.bs.modal', function (event) {
+        $(event.currentTarget).find('input:first').focus();
+      });
+      $("#inputPromptDialog").modal("show");
+      Mousetrap.pause();
+
+      $('#inputPromptDialog .inputPromptValue').on('keypress', function (e) {
+        var key = e.charCode || e.keyCode || 0;
+        if (key === 13) {
+          $("#inputPromptDialog .okButton").click();
+        }
+      });
+
+      // Save Button
+      //
+      $("#inputPromptDialog .okButton").off('click').on("click", function () {
+        Mousetrap.unpause();
+        $('#inputPromptDialog').modal('hide');
+        var value = $("#inputPromptDialog .inputPromptValue").val();
+        callback(value);
+      });
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "../../app/frontend/_common/js/PopConfirm.js":
+/*!*****************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/PopConfirm.js ***!
+  \*****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+$.fn.extend({
+  popConfirm: function popConfirm(options) {
+    var defaults = {
+      title: 'Confirmation',
+      content: 'Are you really sure ?',
+      placement: 'right',
+      container: 'body',
+      yesBtn: 'Yes',
+      noBtn: 'No'
+    },
+        last = null;
+    options = $.extend(defaults, options);
+    return this.each(function () {
+      var self = $(this),
+          arrayActions = [],
+          arrayDelegatedActions = [],
+          eventToConfirm,
+          optName,
+          optValue,
+          i,
+          elmType,
+          code,
+          form;
+
+      // Load data-* attriutes
+      for (optName in options) {
+        if (options.hasOwnProperty(optName)) {
+          optValue = $(this).attr('data-confirm-' + optName);
+          if (optValue) {
+            options[optName] = optValue;
+          }
+        }
+      }
+
+      // If there are jquery click events
+      if (jQuery._data(this, "events") && jQuery._data(this, "events").click) {
+
+        // Save all click handlers
+        for (i = 0; i < jQuery._data(this, "events").click.length; i = i + 1) {
+          arrayActions.push(jQuery._data(this, "events").click[i].handler);
+        }
+
+        // unbind it to prevent it firing
+        $(self).unbind("click");
+      }
+
+      // If there are jquery delegated click events
+      if (self.data('remote') && jQuery._data(document, "events") && jQuery._data(document, "events").click) {
+
+        // Save all delegated click handlers that apply
+        for (i = 0; i < jQuery._data(document, "events").click.length; i = i + 1) {
+          elmType = self[0].tagName.toLowerCase();
+          if (jQuery._data(document, "events").click[i].selector && jQuery._data(document, "events").click[i].selector.indexOf(elmType + "[data-remote]") !== -1) {
+            arrayDelegatedActions.push(jQuery._data(document, "events").click[i].handler);
+          }
+        }
+      }
+
+      // If there are hard onclick attribute
+      if (self.attr('onclick')) {
+        // Extracting the onclick code to evaluate and bring it into a closure
+        code = self.attr('onclick');
+        arrayActions.push(function () {
+          eval(code);
+        });
+        $(self).prop("onclick", null);
+      }
+
+      // If there are href link defined
+      if (!self.data('remote') && self.attr('href')) {
+        // Assume there is a href attribute to redirect to
+        arrayActions.push(function () {
+          window.location.href = self.attr('href');
+        });
+      }
+
+      // If the button is a submit one
+      if (self.attr('type') && self.attr('type') === 'submit') {
+        // Get the form related to this button then store submiting in closure
+        form = $(this).parents('form:first');
+        arrayActions.push(function () {
+          // Add the button name / value if specified
+          if (typeof self.attr('name') !== "undefined") {
+            $('<input type="hidden">').attr('name', self.attr('name')).attr('value', self.attr('value')).appendTo(form);
+          }
+          form.submit();
+        });
+      }
+
+      self.popover({
+        trigger: 'manual',
+        title: options.title,
+        html: true,
+        placement: options.placement,
+        container: options.container,
+        //Avoid using multiline strings, no support in older browsers.
+        content: options.content + '<p class="button-group" style="margin-top: 10px; text-align: center;"><button type="button" class="btn btn-small confirm-dialog-btn-abort">' + options.noBtn + '</button> <button type="button" class="btn btn-small btn-danger confirm-dialog-btn-confirm">' + options.yesBtn + '</button></p>'
+      }).click(function (e) {
+        if (last && last !== self) {
+          last.popover('hide').removeClass('popconfirm-active');
+        }
+        last = self;
+      });
+
+      $(document).on('click', function () {
+        if (last) {
+          last.popover('hide').removeClass('popconfirm-active');
+        }
+      });
+
+      self.bind('click', function (e) {
+        eventToConfirm = e;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('.popconfirm-active').not(self).popover('hide').removeClass('popconfirm-active');
+        self.popover('show').addClass('popconfirm-active');
+
+        $(document).find('.popover .confirm-dialog-btn-confirm').one('click', function (e) {
+          for (i = 0; i < arrayActions.length; i = i + 1) {
+            arrayActions[i].apply(self, [eventToConfirm]);
+          }
+
+          for (i = 0; i < arrayDelegatedActions.length; i = i + 1) {
+            arrayDelegatedActions[i].apply(self, [eventToConfirm.originalEvent]);
+          }
+
+          self.popover('hide').removeClass('popconfirm-active');
+        });
+        $(document).find('.popover .confirm-dialog-btn-abord').bind('click', function (e) {
+          self.popover('hide').removeClass('popconfirm-active');
+        });
+      });
+    });
+  }
+});
 
 /***/ }),
 
@@ -641,6 +1316,18 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _FilesScreen = __webpack_require__(/*! ../../_common/js/FilesScreen */ "../../app/frontend/_common/js/FilesScreen.js");
+
+var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
+
+var _FileSave = __webpack_require__(/*! ../../_common/js/FileSave */ "../../app/frontend/_common/js/FileSave.js");
+
+var _FileSave2 = _interopRequireDefault(_FileSave);
+
+var _toast = __webpack_require__(/*! ../../_common/js/toast */ "../../app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
+
 var _View = __webpack_require__(/*! ./View */ "../../app/frontend/designer/js/View.js");
 
 var _View2 = _interopRequireDefault(_View);
@@ -657,36 +1344,19 @@ var _FilterPane = __webpack_require__(/*! ./FilterPane */ "../../app/frontend/de
 
 var _FilterPane2 = _interopRequireDefault(_FilterPane);
 
-var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "../../app/frontend/designer/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
 var _SelectionToolPolicy = __webpack_require__(/*! ./policy/SelectionToolPolicy */ "../../app/frontend/designer/js/policy/SelectionToolPolicy.js");
 
 var _SelectionToolPolicy2 = _interopRequireDefault(_SelectionToolPolicy);
 
-var _FilesScreen = __webpack_require__(/*! ./view/FilesScreen */ "../../app/frontend/designer/js/view/FilesScreen.js");
+var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/designer/js/Configuration.js");
 
-var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
-
-var _FileSave = __webpack_require__(/*! ../../_common/js/FileSave */ "../../app/frontend/_common/js/FileSave.js");
-
-var _FileSave2 = _interopRequireDefault(_FileSave);
-
-var _toast = __webpack_require__(/*! ../../_common/js/toast */ "../../app/frontend/_common/js/toast.js");
-
-var _toast2 = _interopRequireDefault(_toast);
+var _Configuration2 = _interopRequireDefault(_Configuration);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
+var storage = __webpack_require__(/*! ../../_common/js/BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
 
 /**
  * wait asyn that an DOM element is present
@@ -727,7 +1397,7 @@ var Application = function () {
       this.permissions = permissions;
       this.hasUnsavedChanges = false;
 
-      this.filePane = new _FilesScreen2.default(permissions);
+      this.filePane = new _FilesScreen2.default(_Configuration2.default, permissions.shapes);
 
       this.documentConfigurationTempl = {
         baseClass: "draw2d.SetFigure",
@@ -757,7 +1427,7 @@ var Application = function () {
       //
       this.documentConfiguration = $.extend({}, this.documentConfigurationTempl);
 
-      this.storage = _BackendStorage2.default;
+      this.storage = storage;
       this.view = new _View2.default(this, "canvas", permissions);
       this.toolbar = new _Toolbar2.default(this, ".toolbar", this.view, permissions);
       this.layer = new _Layer2.default(this, "layer_elements", this.view, permissions);
@@ -772,7 +1442,7 @@ var Application = function () {
       //
       var file = this.getParam("file");
       if (file) {
-        this.fileLoad(file);
+        this.load(_Configuration2.default.backend.user.get(file));
       } else {
         this.fileNew();
       }
@@ -876,18 +1546,21 @@ var Application = function () {
       return results[1];
     }
   }, {
-    key: "fileLoad",
-    value: function fileLoad(name) {
+    key: "load",
+    value: function load(file) {
       var _this2 = this;
 
       this.view.clear();
       $("#leftTabStrip .editor").click();
 
-      return this.storage.loadFile(name).then(function (content) {
+      return this.storage.loadUrl(file).then(function (content) {
+        if (typeof content === "string") {
+          content = JSON.parse(content);
+        }
         _this2.view.clear();
         _this2.view.centerDocument();
         var reader = new draw2d.io.json.Reader();
-        reader.unmarshal(_this2.view, content);
+        reader.unmarshal(_this2.view, content.draw2d);
         _this2.getConfiguration();
         _this2.view.getCommandStack().markSaveLocation();
         _this2.view.centerDocument();
@@ -990,16 +1663,32 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   fileSuffix: ".shape",
+
   backend: {
-    shape: {
-      list: "/backend/shape/list",
-      image: function image(file) {
-        return "../shapes/" + file;
-      },
+    user: {
       get: function get(file) {
-        return "../backend/shape/get?filePath=" + file;
+        return "../backend/user/shape/get?filePath=" + file;
       },
-      save: "/backend/shape/save"
+      image: function image(file) {
+        return "../shapes/user/" + file;
+      },
+      list: function list(path) {
+        return "../backend/user/shape/list?path=" + path;
+      },
+      save: "../backend/user/shape/save"
+    },
+
+    global: {
+      get: function get(file) {
+        return "../backend/global/shape/get?filePath=" + file;
+      },
+      image: function image(file) {
+        return "../backend/global/shape/image?filePath=" + file;
+      },
+      list: function list(path) {
+        return "../backend/global/shape/list?path=" + path;
+      },
+      folder: "../backend/global/shape/folder"
     }
   },
 
@@ -5830,172 +6519,6 @@ $(window).load(function () {
 
 /***/ }),
 
-/***/ "../../app/frontend/designer/js/io/BackendStorage.js":
-/*!*************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/designer/js/io/BackendStorage.js ***!
-  \*************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/frontend/designer/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var BackendStorage = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function BackendStorage() {
-    _classCallCheck(this, BackendStorage);
-
-    this.fileName = "";
-    Object.preventExtensions(this);
-  }
-
-  _createClass(BackendStorage, [{
-    key: "getFiles",
-    value: function getFiles(path) {
-      return $.ajax({
-        url: _Configuration2.default.backend.shape.list,
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          path: path
-        }
-      }).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if (typeof response === "string") response = JSON.parse(response);
-
-        var files = response.files;
-        // sort the result
-        // Directories are always on top
-        //
-        files.sort(function (a, b) {
-          if (a.type === b.type) {
-            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
-            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
-            return 0;
-          }
-          if (a.type === "dir") {
-            return -1;
-          }
-          return 1;
-        });
-        return files;
-      });
-    }
-  }, {
-    key: "saveFile",
-    value: function saveFile(json, imageDataUrl, fileName, commitMessage) {
-      return $.ajax({
-        url: _Configuration2.default.backend.shape.save,
-        method: "POST",
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          commitMessage: commitMessage,
-          filePath: fileName,
-          content: JSON.stringify({ draw2d: json, image: imageDataUrl }, undefined, 2)
-        }
-      });
-    }
-  }, {
-    key: "loadFile",
-    value: function loadFile(fileName) {
-      this.fileName = fileName;
-      return this.loadUrl(_Configuration2.default.backend.shape.get(fileName));
-    }
-
-    /**
-     * Load the file content of the given path
-     *
-     * @param fileName
-     * @returns {*}
-     */
-
-  }, {
-    key: "loadUrl",
-    value: function loadUrl(url) {
-      return _axios2.default.get(url).then(function (response) {
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if (typeof response === "string") response = JSON.parse(response).data;else response = response.data;
-
-        if (response.draw2d) return response.draw2d;
-        return response;
-      });
-    }
-  }, {
-    key: "dirname",
-    value: function dirname(path) {
-      if (path === undefined || path === null || path.length === 0) return null;
-
-      var segments = path.split("/");
-      if (segments.length <= 1) return null;
-
-      segments = segments.filter(function (n) {
-        return n != "";
-      });
-      path = segments.slice(0, -1).join("/");
-      return path === "" ? null : path + "/";
-    }
-  }, {
-    key: "basename",
-    value: function basename(path) {
-      if (path === null || path === "" || path === undefined) {
-        return null;
-      }
-      return path.split(/[\\/]/).pop();
-    }
-  }, {
-    key: "currentDir",
-    get: function get() {
-      return this.dirname(this.dirname());
-    }
-  }, {
-    key: "currentFile",
-    get: function get() {
-      return this.fileName;
-    },
-    set: function set(name) {
-      this.fileName = name;
-
-      var url = window.location.href.split('?')[0] + '?file=' + name;
-      history.pushState({ id: 'editor', file: name }, 'Brainbox Designer ' + name, url);
-    }
-  }]);
-
-  return BackendStorage;
-}();
-
-var storage = new BackendStorage();
-exports.default = storage;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "../../app/frontend/designer/js/io/FigureWriter.js":
 /*!***********************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/designer/js/io/FigureWriter.js ***!
@@ -7281,128 +7804,6 @@ module.exports = exports["default"];
 
   Mousetrap.init();
 })(Mousetrap);
-
-/***/ }),
-
-/***/ "../../app/frontend/designer/js/view/FilesScreen.js":
-/*!************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/designer/js/view/FilesScreen.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/frontend/designer/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _hogan = __webpack_require__(/*! hogan.js */ "../../node_modules/hogan.js/lib/hogan.js");
-
-var _hogan2 = _interopRequireDefault(_hogan);
-
-var _BackendStorage = __webpack_require__(/*! ../io/BackendStorage */ "../../app/frontend/designer/js/io/BackendStorage.js");
-
-var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- *
- * The **GraphicalEditor** is responsible for layout and dialog handling.
- *
- * @author Andreas Herz
- */
-
-var Files = function () {
-
-  /**
-   * @constructor
-   *
-   * @param {String} canvasId the id of the DOM element to use as paint container
-   */
-  function Files(permissions) {
-    _classCallCheck(this, Files);
-
-    this.render(permissions);
-  }
-
-  _createClass(Files, [{
-    key: "render",
-    value: function render(permissions) {
-
-      if (permissions.shapes.list === false) {
-        return;
-      }
-
-      // load demo files
-      //
-      function loadShapes(path) {
-        _BackendStorage2.default.getFiles(path).then(function (files) {
-          files = files.filter(function (file) {
-            return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
-          });
-          files = files.map(function (file) {
-            return _extends({}, file, {
-              readonly: true,
-              folder: path,
-              title: file.name.replace(_Configuration2.default.fileSuffix, ""),
-              image: _Configuration2.default.backend.shape.image(path + file.name.replace(_Configuration2.default.fileSuffix, ".png"))
-            });
-          });
-          if (path.length !== 0) {
-            files.unshift({
-              name: _BackendStorage2.default.dirname(path),
-              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
-              type: "dir",
-              dir: true,
-              readonly: true,
-              back: "_back",
-              title: ".."
-            });
-          }
-
-          var compiled = _hogan2.default.compile($("#filesTemplate").html());
-          var output = compiled.render({ folder: path, files: files });
-          $("#appShapeFiles").html($(output));
-          $("#appShapeFiles .list-group-item[data-type='dir']").on("click", function (event) {
-            var $el = $(event.currentTarget);
-            var name = $el.data("name");
-            loadShapes(name);
-          });
-
-          $("#appShapeFiles .list-group-item[data-type='file']").on("click", function (event) {
-            var $el = $(event.currentTarget);
-            var name = $el.data("name");
-            $el.addClass("spinner");
-            app.fileLoad(name).then(function () {
-              $el.removeClass("spinner");
-              app.historyShape(name);
-            });
-          });
-        });
-      }
-
-      loadShapes("");
-    }
-  }]);
-
-  return Files;
-}();
-
-exports.default = Files;
-module.exports = exports["default"];
 
 /***/ }),
 
@@ -46192,6 +46593,77 @@ Remarkable.prototype.renderInline = function (str, env) {
 
 /***/ }),
 
+/***/ "../../node_modules/sanitize-filename/index.js":
+/*!*******************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/sanitize-filename/index.js ***!
+  \*******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*jshint node:true*/
+
+
+/**
+ * Replaces characters in strings that are illegal/unsafe for filenames.
+ * Unsafe characters are either removed or replaced by a substitute set
+ * in the optional `options` object.
+ *
+ * Illegal Characters on Various Operating Systems
+ * / ? < > \ : * | "
+ * https://kb.acronis.com/content/39790
+ *
+ * Unicode Control codes
+ * C0 0x00-0x1f & C1 (0x80-0x9f)
+ * http://en.wikipedia.org/wiki/C0_and_C1_control_codes
+ *
+ * Reserved filenames on Unix-based systems (".", "..")
+ * Reserved filenames in Windows ("CON", "PRN", "AUX", "NUL", "COM1",
+ * "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+ * "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", and
+ * "LPT9") case-insesitively and with or without filename extensions.
+ *
+ * Capped at 255 characters in length.
+ * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
+ *
+ * @param  {String} input   Original filename
+ * @param  {Object} options {replacement: String | Function }
+ * @return {String}         Sanitized filename
+ */
+
+var truncate = __webpack_require__(/*! truncate-utf8-bytes */ "../../node_modules/truncate-utf8-bytes/browser.js");
+
+var illegalRe = /[\/\?<>\\:\*\|"]/g;
+var controlRe = /[\x00-\x1f\x80-\x9f]/g;
+var reservedRe = /^\.+$/;
+var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+var windowsTrailingRe = /[\. ]+$/;
+
+function sanitize(input, replacement) {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be string');
+  }
+  var sanitized = input
+    .replace(illegalRe, replacement)
+    .replace(controlRe, replacement)
+    .replace(reservedRe, replacement)
+    .replace(windowsReservedRe, replacement)
+    .replace(windowsTrailingRe, replacement);
+  return truncate(sanitized, 255);
+}
+
+module.exports = function (input, options) {
+  var replacement = (options && options.replacement) || '';
+  var output = sanitize(input, replacement);
+  if (replacement === '') {
+    return output;
+  }
+  return sanitize(output, '');
+};
+
+
+/***/ }),
+
 /***/ "../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js":
 /*!**********************************************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js ***!
@@ -46469,6 +46941,137 @@ module.exports = function (list, options) {
     lastIdentifiers = newLastIdentifiers;
   };
 };
+
+/***/ }),
+
+/***/ "../../node_modules/truncate-utf8-bytes/browser.js":
+/*!***********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/truncate-utf8-bytes/browser.js ***!
+  \***********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var truncate = __webpack_require__(/*! ./lib/truncate */ "../../node_modules/truncate-utf8-bytes/lib/truncate.js");
+var getLength = __webpack_require__(/*! utf8-byte-length/browser */ "../../node_modules/utf8-byte-length/browser.js");
+module.exports = truncate.bind(null, getLength);
+
+
+/***/ }),
+
+/***/ "../../node_modules/truncate-utf8-bytes/lib/truncate.js":
+/*!****************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/truncate-utf8-bytes/lib/truncate.js ***!
+  \****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function isHighSurrogate(codePoint) {
+  return codePoint >= 0xd800 && codePoint <= 0xdbff;
+}
+
+function isLowSurrogate(codePoint) {
+  return codePoint >= 0xdc00 && codePoint <= 0xdfff;
+}
+
+// Truncate string by size in bytes
+module.exports = function truncate(getLength, string, byteLength) {
+  if (typeof string !== "string") {
+    throw new Error("Input must be string");
+  }
+
+  var charLength = string.length;
+  var curByteLength = 0;
+  var codePoint;
+  var segment;
+
+  for (var i = 0; i < charLength; i += 1) {
+    codePoint = string.charCodeAt(i);
+    segment = string[i];
+
+    if (isHighSurrogate(codePoint) && isLowSurrogate(string.charCodeAt(i + 1))) {
+      i += 1;
+      segment += string[i];
+    }
+
+    curByteLength += getLength(segment);
+
+    if (curByteLength === byteLength) {
+      return string.slice(0, i + 1);
+    }
+    else if (curByteLength > byteLength) {
+      return string.slice(0, i - segment.length + 1);
+    }
+  }
+
+  return string;
+};
+
+
+
+/***/ }),
+
+/***/ "../../node_modules/utf8-byte-length/browser.js":
+/*!********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/utf8-byte-length/browser.js ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function isHighSurrogate(codePoint) {
+  return codePoint >= 0xd800 && codePoint <= 0xdbff;
+}
+
+function isLowSurrogate(codePoint) {
+  return codePoint >= 0xdc00 && codePoint <= 0xdfff;
+}
+
+// Truncate string by size in bytes
+module.exports = function getByteLength(string) {
+  if (typeof string !== "string") {
+    throw new Error("Input must be string");
+  }
+
+  var charLength = string.length;
+  var byteLength = 0;
+  var codePoint = null;
+  var prevCodePoint = null;
+  for (var i = 0; i < charLength; i++) {
+    codePoint = string.charCodeAt(i);
+    // handle 4-byte non-BMP chars
+    // low surrogate
+    if (isLowSurrogate(codePoint)) {
+      // when parsing previous hi-surrogate, 3 is added to byteLength
+      if (prevCodePoint != null && isHighSurrogate(prevCodePoint)) {
+        byteLength += 1;
+      }
+      else {
+        byteLength += 3;
+      }
+    }
+    else if (codePoint <= 0x7f ) {
+      byteLength += 1;
+    }
+    else if (codePoint >= 0x80 && codePoint <= 0x7ff) {
+      byteLength += 2;
+    }
+    else if (codePoint >= 0x800 && codePoint <= 0xffff) {
+      byteLength += 3;
+    }
+    prevCodePoint = codePoint;
+  }
+
+  return byteLength;
+};
+
 
 /***/ }),
 

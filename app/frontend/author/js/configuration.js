@@ -1,26 +1,27 @@
 export default {
   fileSuffix: ".sheet",
+
   backend: {
-    file: {
-      list:   path  => `../backend/sheet/list?path=${path}`,
-      get:    file  => `../backend/sheet/get?filePath=${file}`,
-      image:  file  => `../_common/images/files.markdown.svg`,
-      del:             `../backend/sheet/delete`,
-      rename:          `../backend/sheet/rename`,
-      save:            `../backend/sheet/save`,
-      folder:          `../backend/sheet/folder`
+    user: {
+      list:   path  => `../backend/user/sheet/list?path=${path}`,
+      get:    file  => `../backend/user/sheet/get?filePath=${file}`,
+      image:  file  => `../_common/images/files_markdown.svg`,
+      del:             `../backend/user/sheet/delete`,
+      rename:          `../backend/user/sheet/rename`,
+      save:            `../backend/user/sheet/save`,
+      folder:          `../backend/user/sheet/folder`
     },
 
-    demo:{
-      list:   path  => `../backend/demo/sheet/list?path=${path}`,
-      get:    file  => `../backend/demo/sheet/get?filePath=${file}`,
-      image:  file  => `../_common/images/files.markdown.svg`,
-      folder:          `../backend/demo/sheet/folder`
+    global:{
+      list:   path  => `../backend/global/sheet/list?path=${path}`,
+      get:    file  => `../backend/global/sheet/get?filePath=${file}`,
+      image:  file  => `../_common/images/files_markdown.svg`,
+      folder:          `../backend/global/sheet/folder`
     }
   },
 
   shapes: {
-    url: "../shapes/",
+    url: "../shapes/global/",
     version: "0.0.0" // updated during after loading from the index.json file
   },
 

@@ -1,11 +1,11 @@
 import fileSave from "../../_common/js/FileSave"
 import Files from "../../_common/js/FilesScreen"
-let storage = require('../../_common/js/BackendStorage')(conf)
 
 import Toolbar from "./toolbar"
 import View from "./view"
 import conf from "./configuration"
 
+let storage = require('../../_common/js/BackendStorage')(conf)
 
 class Application {
   /**
@@ -27,7 +27,7 @@ class Application {
 
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
-    this.filePane = new Files(conf, permissions)
+    this.filePane = new Files(conf, permissions.sheets)
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
 
 
@@ -41,14 +41,14 @@ class Application {
     let demo = this.getParam("demo")
     if (this.fileName) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.file.get(this.fileName))
+      this.load(conf.backend.user.get(this.fileName))
     }
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     else if (demo) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.demo.get(demo))
+      this.load(conf.backend.global.get(demo))
     }
 
     // listen on the history object to load files

@@ -1,5 +1,6 @@
 import Hogan from "hogan.js"
 import axios from "axios"
+import "./PopConfirm"
 
 let inputPrompt =require("./InputPrompt")
 
@@ -12,22 +13,60 @@ export default class Files {
    */
   constructor(conf, permissions) {
     this.conf = conf
-    this.render(conf, permissions.sheets)
+    this.render(conf, permissions)
+
+    $("body").append(` 
+        <script id="filesTemplate" type="text/x-jsrender">
+        <div class="fileOperations">
+            <div data-folder="{{folder}}" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>
+            <div data-folder="{{folder}}" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>
+        </div>
+        <div>Folder: {{folder}}</div>
+        <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
+        {{#files}}
+          <li class="list-group-item"  data-type="{{type}}"  data-delete="{{delete}}" data-update="{{update}}" data-name="{{folder}}{{name}}">
+            <div class="media thumb">
+               {{#dir}}
+                  <a class="media-left">
+                  <div style="width: 48px; height: 48px">
+                    <img style="width:100%; height:100%; object-fit: contain"  src="../_common/images/files_folder{{back}}.svg">
+                  </div>
+                  </a>
+               {{/dir}}
+               {{^dir}}
+                  <a class="thumbnail media-left">
+                  <div style="width: 48px; height: 48px">
+                    <img style="width:100%; height:100%; object-fit: contain" src="{{image}}">
+                  </div>
+                  </a>
+               {{/dir}}
+              <div class="media-body">
+                <h4 class="media-heading">{{title}}</h4>
+                {{#delete}}
+                    <div class="deleteIcon fa fa-trash-o" data-toggle="confirmation" ></div>
+                {{/delete}}
+              </div>
+            </div>
+          </li>
+        {{/files}}
+        </ul>
+        </script>
+    `)
   }
 
   render(conf, permissions) {
     let storage = require("./BackendStorage")(conf)
 
     this.initTabs(permissions)
-    this.initPane("#userFiles", conf.backend.file, permissions      , "")
-    this.initPane("#demoFiles", conf.backend.demo, permissions.demos, "")
+    this.initPane("#userFiles", conf.backend.user, permissions      , "")
+    this.initPane("#demoFiles", conf.backend.global, permissions.global, "")
 
     socket.on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
       if (preview.length === 0) {
         this.render()
       } else {
-        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
+        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
       }
     })
 
@@ -42,7 +81,7 @@ export default class Files {
       let folder = $(event.target).data("folder") || ""
       inputPrompt.show("Create Folder", "Folder name", value => {
         storage.createDemoFolder(folder+value)
-        this.initPane("#demoFiles", conf.backend.demo, permissions.demos, folder)
+        this.initPane("#demoFiles", conf.backend.global, permissions.global, folder)
       })
     })
   }
@@ -50,7 +89,7 @@ export default class Files {
   initTabs(permissions) {
     // user can see private files and the demo files
     //
-    if(permissions.list===true && permissions.demos.list===true) {
+    if(permissions.list===true && permissions.global.list===true) {
       $('#material-tabs').each(function () {
         let $active, $content, $links = $(this).find('a');
         $active = $($links[0]);
@@ -74,19 +113,19 @@ export default class Files {
         })
       })
     }
-    else if (permissions.list===false && permissions.demos.list===true){
+    else if (permissions.list===false && permissions.global.list===true){
       $('#material-tabs').remove()
       $("#demoFiles").show()
       $("#userFiles").remove()
       $("#files .title span").html("Load a demo lesson file")
     }
-    else if (permissions.list===true && permissions.demos.list===false){
+    else if (permissions.list===true && permissions.global.list===false){
       $('#material-tabs').remove()
       $("#demoFiles").remove()
       $("#userFiles").show()
       $("#files .title span").html("Load a lesson document")
     }
-    else if (permissions.list===true && permissions.demos.list===false) {
+    else if (permissions.list===true && permissions.global.list===false) {
     }
   }
 
@@ -175,7 +214,7 @@ export default class Files {
                 if (type !== "dir") {
                   newName = storage.sanitize(newName) + conf.fileSuffix
                 }
-                axios.post(conf.backend.file.rename, {from: name, to: newName})
+                axios.post(conf.backend.user.rename, {from: name, to: newName})
                   .then(() => {
                     $replaceWith.remove()
                     $el.html(newName.replace(conf.fileSuffix, ""))
@@ -211,7 +250,7 @@ export default class Files {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
-          let file = conf.backend.demo.get(name)
+          let file = conf.backend.global.get(name)
           app.load(file).then(() => {
             $el.removeClass("spinner")
           })
