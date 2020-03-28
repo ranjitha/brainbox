@@ -59,7 +59,7 @@ export default class Files {
 
     this.initTabs(permissions)
     this.initPane("user",   "#userFiles", conf.backend.user,   permissions      , "")
-    this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, "")
+    this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, "")
 
     socket.on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
@@ -73,15 +73,15 @@ export default class Files {
     $(document).on("click", "#userFiles .fileOperationsFolderAdd", (event) => {
       let folder = $(event.target).data("folder") || ""
       inputPrompt.show("Create Folder", "Folder name", value => {
-        storage.createUserFolder(folder+value)
-        this.initPane("user", "#userFiles", conf.backend.file, permissions, folder)
+        storage.createFolder(folder+value, "user")
+        this.initPane("user", "#userFiles", conf.backend.user, permissions, folder)
       })
     })
-    $(document).on("click", "#demoFiles .fileOperationsFolderAdd", (event) => {
+    $(document).on("click", "#globalFiles .fileOperationsFolderAdd", (event) => {
       let folder = $(event.target).data("folder") || ""
       inputPrompt.show("Create Folder", "Folder name", value => {
-        storage.createDemoFolder(folder+value)
-        this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, folder)
+        storage.createFolder(folder+value, "global")
+        this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder)
       })
     })
   }
@@ -115,13 +115,13 @@ export default class Files {
     }
     else if (permissions.list===false && permissions.global.list===true){
       $('#material-tabs').remove()
-      $("#demoFiles").show()
+      $("#globalFiles").show()
       $("#userFiles").remove()
       $("#files .title span").html("Load a demo lesson file")
     }
     else if (permissions.list===true && permissions.global.list===false){
       $('#material-tabs').remove()
-      $("#demoFiles").remove()
+      $("#globalFiles").remove()
       $("#userFiles").show()
       $("#files .title span").html("Load a lesson document")
     }
@@ -139,7 +139,7 @@ export default class Files {
     // load demo files
     //
     function loadPane(path) {
-      storage.__getFiles( backendConf.list(path)).then((files) => {
+      storage.getFiles( path, scope).then((files) => {
         files = files.filter(file => file.name.endsWith(conf.fileSuffix) || file.type === "dir")
         files = files.map(file => {
           return {
@@ -173,7 +173,7 @@ export default class Files {
         $(paneSelector + " .deleteIcon").on("click", (event) => {
           let $el = $(event.target).closest(".list-group-item")
           let name = $el.data("name")
-          storage.deleteFile(name).then(() => {
+          storage.deleteFile(name, scope).then(() => {
             let parent = $el.closest(".list-group-item")
             parent.hide('slow', () => parent.remove())
           })
@@ -250,8 +250,7 @@ export default class Files {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
-          let file = conf.backend[scope].get(name)
-          app.load(file).then(() => {
+          app.load(name, scope).then(() => {
             $el.removeClass("spinner")
             history.pushState({
               id: 'editor',

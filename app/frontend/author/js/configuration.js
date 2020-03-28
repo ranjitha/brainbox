@@ -7,7 +7,7 @@ export default {
       list:   path  => `../backend/user/sheet/list?path=${path}`,
       get:    file  => `../backend/user/sheet/get?filePath=${file}`,
       image:  file  => `../_common/images/files_markdown.svg`,
-      del:             `../backend/user/sheet/delete`,
+      delete:          `../backend/user/sheet/delete`,
       rename:          `../backend/user/sheet/rename`,
       save:            `../backend/user/sheet/save`,
       folder:          `../backend/user/sheet/folder`

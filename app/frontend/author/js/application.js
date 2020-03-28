@@ -25,6 +25,7 @@ class Application {
         Mousetrap.unpause()
       });
 
+    this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
     this.filePane = new Files(conf, permissions.sheets)
@@ -37,18 +38,18 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    this.fileName = this.getParam("user")
+    let user = this.getParam("user")
     let global = this.getParam("global")
-    if (this.fileName) {
+    if (user) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.user.get(this.fileName))
+      this.load(user, "user")
     }
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     else if (global) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.global.get(global))
+      this.load(global, "global")
     }
 
     // listen on the history object to load files
@@ -56,7 +57,7 @@ class Application {
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.id === 'editor') {
         // Render new content for the homepage
-        this.fileLoad(event.state.file)
+        this.load(event.state.file, event.state.scope)
       }
     })
     $("#leftTabStrip .files").click()
@@ -82,24 +83,18 @@ class Application {
     return results[1]
   }
 
-  fileLoad(name){
-    $("#leftTabStrip .editor").click()
-    return this.storage.loadFile(name)
-      .then((content) => {
-        this.view.setDocument(content.json)
-        return content
-      })
-  }
 
   fileSave() {
-    fileSave.show(this.storage, this.view)
+    fileSave.show(this.currentFile, this.storage, this.view)
   }
 
-  load(file){
+  load(name, scope){
+    let url = conf.backend[scope].get(name)
     $("#leftTabStrip .editor").click()
-    return this.storage.loadUrl(file)
+    return this.storage.loadUrl(url)
       .then((content) => {
         this.view.setDocument(content.json)
+        this.currentFile = { name, scope}
         return content
       })
   }

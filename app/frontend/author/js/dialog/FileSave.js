@@ -30,7 +30,7 @@ class Dialog {
                                         <div class="form-group">
                                             <div class="col-lg-12">
                                                 <input type="text"
-                                                       class="form-control floating-label githubFileName"
+                                                       class="form-control floating-label fileName"
                                                        value=""
                                                         >
                                             </div>
@@ -42,7 +42,7 @@ class Dialog {
                                     <div class="form-group">
                                       <div class="col-lg-12">
                                         <input type="text"
-                                               class="form-control floating-label githubCommitMessage"
+                                               class="form-control floating-label commitMessage"
                                                value=""
                                         >
                                       </div>
@@ -75,10 +75,10 @@ class Dialog {
    *
    * @since 4.0.0
    */
-  show(storage, view) {
+  show(currentFile, storage, view) {
 
-      $("#fileSaveDialog .githubFileName").val(storage.currentFile?storage.currentFile:"NewDocument"+conf.fileSuffix)
-      $("#fileSaveDialog .githubCommitMessage").val('commit message')
+      $("#fileSaveDialog .fileName").val(currentFile.name)
+      $("#fileSaveDialog .commitMessage").val('change reason')
 
       $('#fileSaveDialog').on('shown.bs.modal', (event) => {
         $(event.currentTarget).find('input:first').focus()
@@ -91,11 +91,14 @@ class Dialog {
       $("#fileSaveDialog .okButton").off('click').on("click", () => {
         Mousetrap.unpause()
         let json = view.document
-        let newName = $("#fileSaveDialog .githubFileName").val()
-        let commitMessage = $("#fileSaveDialog .githubCommitMessage").val()
-        storage.saveFile(json, newName, commitMessage)
-          .then(() => {
-            storage.currentFile = newName
+        let name = $("#fileSaveDialog .fileName").val()
+        name = name.replace(conf.fileSuffix, "")
+        currentFile.name = name + conf.fileSuffix
+        let commitMessage = $("#fileSaveDialog .commitMessage").val()
+        storage.saveFile(json, currentFile.name, commitMessage)
+          .then(( response) => {
+            let data = response.data
+            currentFile.name = data.filePath
             $('#fileSaveDialog').modal('hide')
           });
       })

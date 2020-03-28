@@ -43,7 +43,7 @@ class Application {
   init(permissions){
     this.permissions = permissions
     this.hasUnsavedChanges = false
-
+    this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.filePane = new Files(conf, permissions.shapes)
 
     this.documentConfigurationTempl = {
@@ -92,9 +92,9 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    let file = this.getParam("user")
-    if (file) {
-      this.load(conf.backend.user.get(file))
+    let user = this.getParam("user")
+    if (user) {
+      this.load(user, "user")
     }
     else {
       this.fileNew()
@@ -106,7 +106,7 @@ class Application {
       if (event.state && event.state.id === 'editor') {
         let scope = event.state.scope
         let url = conf.backend[scope].get(event.state.file)
-        this.load(url)
+        this.load(url, scope)
       }
     })
 
@@ -211,11 +211,12 @@ class Application {
   }
 
 
-  load(file){
+  load(name, scope){
+    let url = conf.backend[scope].get(name)
     this.view.clear()
     $("#leftTabStrip .editor").click()
 
-    return this.storage.loadUrl(file)
+    return this.storage.loadUrl(url)
       .then((content) => {
         if (typeof content === "string"){
           content = JSON.parse(content)
@@ -229,6 +230,8 @@ class Application {
         this.view.centerDocument()
         this.hasUnsavedChanges = false
         $("#editorFileSave div").removeClass("highlight")
+        this.currentFile = { name, scope}
+
         return content
       })
   }
@@ -247,7 +250,7 @@ class Application {
 
   fileSave() {
     this.setConfiguration()
-    fileSave.show(this.storage,this.view, () => {
+    fileSave.show(this.currentFile, this.storage,this.view, () => {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")

@@ -159,7 +159,7 @@ module.exports = {
   getBase64Image: generic.getBase64Image,
   renameFile: generic.renameFile,
   deleteFile: generic.deleteFile,
-  writeFile: generic.deleteFile,
+  writeFile: generic.writeFile,
   createFolder: generic.createFolder,
 
   writeShape: function (baseDir, subDir, content, reason, res ){

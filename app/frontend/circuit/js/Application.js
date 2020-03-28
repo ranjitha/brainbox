@@ -49,6 +49,7 @@ class Application {
   }
 
   init(permissions) {
+    this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.permissions = permissions
     this.hasUnsavedChanges = false
     this.palette = new Palette(permissions)
@@ -73,36 +74,25 @@ class Application {
     })
 
     $("#editorFileSave").on("click", () => {
-      let callback = () => {
-        this.hasUnsavedChanges = false
-        toast("Saved")
-        $("#editorFileSave div").removeClass("highlight")
-      }
-      if (this.permissions.brains.create && this.permissions.brains.update) {
-        // allow the user to enter a file name....
-        fileSave.show(this.view, this.fileName, callback)
-      } else if (this.permissions.brains.create) {
-        // just save the file with a generated filename. It is a codepen-like modus
-        fileSave.save(this.view, this.fileName, callback)
-      }
+      this.fileSave()
     })
 
 
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    this.fileName = this.getParam("user")
+    let user = this.getParam("user")
     let global = this.getParam("global")
-    if (this.fileName) {
+    if (user) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.user.get(this.fileName))
+      this.load(user, "user")
     }
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     else if (global) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.global.get(global))
+      this.load(global, "global")
     }
     else {
       this.fileNew()
@@ -113,16 +103,16 @@ class Application {
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.id === 'editor') {
         let scope = event.state.scope
-        let url = conf.backend[scope].get(event.state.file)
-        this.load(url)
+        this.load(event.state.file, scope)
       }
     })
   }
 
-  load(file) {
+  load(name, scope) {
+    let url = conf.backend[scope].get(name)
     this.view.clear()
     $("#leftTabStrip .editor").click()
-    return storage.loadUrl(file)
+    return storage.loadUrl(url)
       .then((content) => {
         this.view.clear()
         reader.unmarshal(this.view, content)
@@ -130,10 +120,11 @@ class Application {
         this.view.centerDocument()
         this.hasUnsavedChanges = false
         $("#editorFileSave div").removeClass("highlight")
+        this.currentFile = { name, scope}
 
         // check if a tutorial exists for the named file and load/activate them
         //
-        storage.loadUrl(file.replace(conf.fileSuffix, ".guide"))
+        storage.loadUrl(url.replace(conf.fileSuffix, ".guide"))
           .then(content => {
             if (typeof content === "string") {
               content = JSON.parse(content)
@@ -171,6 +162,20 @@ class Application {
     return results[1]
   }
 
+  fileSave(){
+    let callback = () => {
+      this.hasUnsavedChanges = false
+      toast("Saved")
+      $("#editorFileSave div").removeClass("highlight")
+    }
+    if (this.permissions.brains.create && this.permissions.brains.update) {
+      // allow the user to enter a file name....
+      fileSave.show(this.currentFile, this.view, callback)
+    } else if (this.permissions.brains.create) {
+      // just save the file with a generated filename. It is a codepen-like modus
+      fileSave.save(this.currentFile, this.view, callback)
+    }
+  }
 
   fileNew(shapeTemplate, fileName) {
     $("#leftTabStrip .editor").click()

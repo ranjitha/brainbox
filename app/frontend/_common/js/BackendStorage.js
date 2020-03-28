@@ -12,16 +12,8 @@ class BackendStorage {
     this.conf = conf
   }
 
-  getFiles(path){
-    return this.__getFiles( this.conf.backend.user.list(path))
-  }
-
-  getDemos(path){
-    return this.__getFiles( this.conf.backend.global.list(path))
-  }
-
-  __getFiles(path) {
-    return axios.get(path)
+  getFiles(path, scope) {
+    return axios.get(this.conf.backend[scope].list(path))
       .then((response) => {
         // happens in "serverless" mode on the gh-pages/docs installation
         //
@@ -52,42 +44,30 @@ class BackendStorage {
   }
 
 
-  saveFile(json, fileName) {
+  saveFile(json, fileName, scope) {
     let data = {
       filePath: fileName,
       content: JSON.stringify(json, undefined, 2)
     }
-    return axios.post(this.conf.backend.user.save, data)
+    return axios.post(this.conf.backend[scope].save, data)
   }
 
-  loadFile(fileName) {
-    return this.loadUrl(this.conf.backend.user.get(fileName))
-  }
 
-  loadDemo(fileName) {
-    return this.loadUrl(this.conf.backend.global.get(fileName))
-  }
-
-  deleteFile(fileName) {
+  deleteFile(fileName, scope) {
     let data = {
       filePath: fileName
     }
-    return axios.post(this.conf.backend.user.del,data )
+    return axios.post(this.conf.backend[scope].delete,data )
   }
 
-  createUserFolder(folderName){
+
+  createFolder(folderName, scope){
     let data = {
       filePath: folderName
     }
-    return axios.post(this.conf.backend.user.folder, data)
+    return axios.post(this.conf.backend[scope].folder, data)
   }
 
-  createDemoFolder(folderName){
-    let data = {
-      filePath: folderName
-    }
-    return axios.post(this.conf.backend.global.folder, data)
-  }
 
   /**
    * Load the file content of the given path

@@ -74,11 +74,11 @@ class Dialog {
    *
    * @since 4.0.0
    */
-  show(storage, canvas, callback) {
+  show(currentFile, storage, canvas, callback) {
 
     new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
       $("#fileSaveDialog .filePreview").attr("src", imageDataUrl)
-      $("#fileSaveDialog .githubFileName").val(storage.currentFile?storage.currentFile:"NewDocument"+conf.fileSuffix)
+      $("#fileSaveDialog .githubFileName").val(currentFile.name)
       $("#fileSaveDialog .githubCommitMessage").val('commit message')
 
       $('#fileSaveDialog').on('shown.bs.modal', (event) => {
@@ -93,11 +93,14 @@ class Dialog {
         Mousetrap.unpause()
         let writer = new draw2d.io.json.Writer()
         writer.marshal(canvas, json => {
-          let newName = $("#fileSaveDialog .githubFileName").val()
+          let name = $("#fileSaveDialog .githubFileName").val()
+          name = name.replace(conf.fileSuffix, "")
+          currentFile.name = name + conf.fileSuffix
           let commitMessage = $("#fileSaveDialog .githubCommitMessage").val()
-          storage.saveFile(json, imageDataUrl, newName, commitMessage)
-            .then(() => {
-              storage.currentFile = newName
+          storage.saveFile(json, imageDataUrl, currentFile.name , commitMessage)
+            .then((response) => {
+              let data = response.data
+              currentFile.name = data.filePath
               $('#fileSaveDialog').modal('hide')
               if(callback) {
                 callback()

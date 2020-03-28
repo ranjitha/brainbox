@@ -96,7 +96,7 @@ export default class Toolbar {
     //
     this.deleteButton = $('<div class="image-button" id="editDelete" data-toggle="tooltip" title="Delete <span class=\'highlight\'> [ Del ]</span>"  ><img class="icon disabled" src="./images/toolbar_delete.svg"/><div>Delete</div></div>')
     buttonGroup.append(this.deleteButton)
-    this.html .delegate("#editDelete:not(.disabled)", "click", function () {
+    this.html.delegate("#editDelete:not(.disabled)", "click", function () {
       view.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
       view.getSelection().each(function (index, figure) {
         let cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE))

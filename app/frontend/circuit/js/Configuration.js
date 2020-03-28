@@ -20,7 +20,7 @@ export default {
       list:   path => `../backend/user/brain/list?path=${path}`,
       get:    file => `../backend/user/brain/get?filePath=${file}`,
       image:  file => `../backend/user/brain/image?filePath=${file}`,
-      del:            `../backend/user/brain/delete`,
+      delete:         `../backend/user/brain/delete`,
       rename:         `../backend/user/brain/rename`,
       save:           `../backend/user/brain/save`,
       folder:         `../backend/user/brain/folder`
@@ -30,6 +30,9 @@ export default {
       list:   path => `../backend/global/brain/list?path=${path}`,
       get:    file => `../backend/global/brain/get?filePath=${file}`,
       image:  file => `../backend/global/brain/image?filePath=${file}`,
+      delete:         `../backend/global/brain/delete`,
+      rename:         `../backend/global/brain/rename`,
+      save:           `../backend/global/brain/save`,
       folder:         `../backend/global/brain/folder`
     }
   },

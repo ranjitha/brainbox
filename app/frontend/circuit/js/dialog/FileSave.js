@@ -57,9 +57,9 @@ class Dialog {
 
   /**
    */
-  show(canvas, defaultFileName, callback) {
+  show(currentFile, canvas, defaultFileName, callback) {
     Mousetrap.pause()
-    $("#fileSaveDialog .githubFileName").val(defaultFileName)
+    $("#fileSaveDialog .githubFileName").val(currentFile.name)
 
     $('#fileSaveDialog').off('shown.bs.modal').on('shown.bs.modal', (event) => {
       $(event.currentTarget).find('input:first').focus()
@@ -71,8 +71,8 @@ class Dialog {
     $("#fileSaveDialog .okButton").off("click").on("click", () => {
       let name = $("#fileSaveDialog .githubFileName").val()
       name = name.replace(conf.fileSuffix, "")
-      name = name + conf.fileSuffix
-      this.save(canvas, name, ()=>{
+      currentFile.name = name + conf.fileSuffix
+      this.save(canvas, currentFile.name, ()=>{
         Mousetrap.unpause()
         $('#fileSaveDialog').modal('hide')
         if(callback) {
@@ -82,17 +82,14 @@ class Dialog {
     })
   }
 
-  save(canvas, name, callback){
+  save(currentFile, canvas, name, callback){
     canvas.setCurrentSelection(null)
     writer.marshal(canvas, json => {
       // to forbid path in the file names you must uncomment this line
       storage.saveFile(json, name)
         .then(function (response) {
           let data = response.data
-          if(typeof data === "string"){
-            data = JSON.parse(data)
-          }
-          app.historyFile(data.filePath, "user")
+          currentFile.name = data.filePath
           if(callback) {
             callback()
           }
