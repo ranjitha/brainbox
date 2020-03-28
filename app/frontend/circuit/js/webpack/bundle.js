@@ -96,6 +96,45 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/frontend/_common/js/AuthorDialog.js":
+/*!*************************************************!*\
+  !*** ./app/frontend/_common/js/AuthorDialog.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf) {
+      window.open(conf.author.url, "author");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/BackendStorage.js":
 /*!***************************************************!*\
   !*** ./app/frontend/_common/js/BackendStorage.js ***!
@@ -276,6 +315,140 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/DesignerDialog.js":
+/*!***************************************************!*\
+  !*** ./app/frontend/_common/js/DesignerDialog.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+__webpack_require__(/*! google-code-prettify/bin/prettify.min.css */ "./node_modules/google-code-prettify/bin/prettify.min.css");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf, figure) {
+      if (figure) {
+        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
+        var pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape" + "&tutorial=design";
+        window.open(pathToDesign, "designer");
+      } else {
+        var _pathToDesign = conf.designer.url;
+        window.open(_pathToDesign, "designer");
+      }
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/FileSave.js":
+/*!*********************************************!*\
+  !*** ./app/frontend/_common/js/FileSave.js ***!
+  \*********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  /**
+   * @method
+   *
+   * Open the file picker and load the selected file.<br>
+   *
+   * @param {Function} successCallback callback method if the user select a file and the content is loaded
+   * @param {Function} errorCallback method to call if any error happens
+   *
+   * @since 4.0.0
+   */
+
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf, storage, canvas, callback) {
+
+      new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
+        $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
+        $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + conf.fileSuffix);
+        $("#fileSaveDialog .githubCommitMessage").val('commit message');
+
+        $('#fileSaveDialog').on('shown.bs.modal', function (event) {
+          $(event.currentTarget).find('input:first').focus();
+        });
+        $("#fileSaveDialog").modal("show");
+        Mousetrap.pause();
+
+        // Save Button
+        //
+        $("#fileSaveDialog .okButton").off('click').on("click", function () {
+          Mousetrap.unpause();
+          var writer = new draw2d.io.json.Writer();
+          writer.marshal(canvas, function (json) {
+            var newName = $("#fileSaveDialog .githubFileName").val();
+            var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
+            storage.saveFile(json, imageDataUrl, newName, commitMessage).then(function () {
+              storage.currentFile = newName;
+              $('#fileSaveDialog').modal('hide');
+              if (callback) {
+                callback();
+              }
+            });
+          });
+        });
+      }, canvas.getBoundingBox().scale(20, 20));
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/FilesScreen.js":
 /*!************************************************!*\
   !*** ./app/frontend/_common/js/FilesScreen.js ***!
@@ -297,6 +470,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
 
 var _hogan2 = _interopRequireDefault(_hogan);
+
+var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -486,15 +663,7 @@ var Files = function () {
                   if (type !== "dir") {
                     newName = storage.sanitize(newName) + conf.fileSuffix;
                   }
-                  $.ajax({
-                    url: conf.backend.file.rename,
-                    method: "POST",
-                    xhrFields: { withCredentials: true },
-                    data: {
-                      from: name,
-                      to: newName
-                    }
-                  }).then(function () {
+                  _axios2.default.post(conf.backend.file.rename, { from: name, to: newName }).then(function () {
                     $replaceWith.remove();
                     $el.html(newName.replace(conf.fileSuffix, ""));
                     $el.show();
@@ -1079,6 +1248,22 @@ var _createClass = function () { function defineProperties(target, props) { for 
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       */
 
 
+var _FileSave = __webpack_require__(/*! ../../_common/js/FileSave */ "./app/frontend/_common/js/FileSave.js");
+
+var _FileSave2 = _interopRequireDefault(_FileSave);
+
+var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
+
+var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
+
+var _AuthorDialog = __webpack_require__(/*! ../../_common/js/AuthorDialog */ "./app/frontend/_common/js/AuthorDialog.js");
+
+var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
+
+var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
+
 var _Palette = __webpack_require__(/*! ./Palette */ "./app/frontend/circuit/js/Palette.js");
 
 var _Palette2 = _interopRequireDefault(_Palette);
@@ -1095,14 +1280,6 @@ var _AddonScreen = __webpack_require__(/*! ./view/AddonScreen */ "./app/frontend
 
 var _AddonScreen2 = _interopRequireDefault(_AddonScreen);
 
-var _FileOpen = __webpack_require__(/*! ./dialog/FileOpen */ "./app/frontend/circuit/js/dialog/FileOpen.js");
-
-var _FileOpen2 = _interopRequireDefault(_FileOpen);
-
-var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/circuit/js/dialog/FileSave.js");
-
-var _FileSave2 = _interopRequireDefault(_FileSave);
-
 var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/circuit/js/Configuration.js");
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
@@ -1110,18 +1287,6 @@ var _Configuration2 = _interopRequireDefault(_Configuration);
 var _Reader = __webpack_require__(/*! ./io/Reader */ "./app/frontend/circuit/js/io/Reader.js");
 
 var _Reader2 = _interopRequireDefault(_Reader);
-
-var _DesignerDialog = __webpack_require__(/*! ./dialog/DesignerDialog */ "./app/frontend/circuit/js/dialog/DesignerDialog.js");
-
-var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
-
-var _AuthorDialog = __webpack_require__(/*! ./dialog/AuthorDialog */ "./app/frontend/circuit/js/dialog/AuthorDialog.js");
-
-var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
-
-var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
-
-var _toast2 = _interopRequireDefault(_toast);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1182,21 +1347,12 @@ var Application = function () {
 
       this.view.getCommandStack().addEventListener(this);
 
-      if (permissions.brains.list) {
-        $("#fileOpen, #editorFileOpen").show();
-        $("#fileOpen, #editorFileOpen").on("click", function () {
-          new _FileOpen2.default().show(_this.view);
-        });
-      } else {
-        $("#fileOpen, #editorFileOpen").remove();
-      }
-
       $("#applicationSwitchDesigner").on("click", function () {
-        new _DesignerDialog2.default().show();
+        _DesignerDialog2.default.show(_Configuration2.default);
       });
 
       $("#applicationSwitchAuthor").on("click", function () {
-        new _AuthorDialog2.default().show();
+        _AuthorDialog2.default.show(_Configuration2.default);
       });
 
       $("#editorFileSave").on("click", function () {
@@ -2595,7 +2751,7 @@ var _MarkdownDialog = __webpack_require__(/*! ./dialog/MarkdownDialog */ "./app/
 
 var _MarkdownDialog2 = _interopRequireDefault(_MarkdownDialog);
 
-var _DesignerDialog = __webpack_require__(/*! ./dialog/DesignerDialog */ "./app/frontend/circuit/js/dialog/DesignerDialog.js");
+var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
 
 var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
 
@@ -2931,10 +3087,10 @@ exports.default = draw2d.Canvas.extend({
                 }
                 break;
               case "design":
-                new _DesignerDialog2.default().show(figure);
+                _DesignerDialog2.default.show(_Configuration2.default, figure);
                 break;
               case "help":
-                new _MarkdownDialog2.default().show(figure);
+                _MarkdownDialog2.default.show(_Configuration2.default, figure);
                 break;
               case "delete":
                 _this.getCommandStack().execute(new draw2d.command.CommandDelete(figure));
@@ -3269,57 +3425,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/circuit/js/dialog/AuthorDialog.js":
-/*!********************************************************!*\
-  !*** ./app/frontend/circuit/js/dialog/AuthorDialog.js ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var CodeDialog = function () {
-  function CodeDialog() {
-    _classCallCheck(this, CodeDialog);
-  }
-
-  _createClass(CodeDialog, [{
-    key: "show",
-    value: function show(circuit) {
-      if (circuit) {
-        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-        var pathToDesign = _Configuration2.default.author.url + "&file=" + baseName + ".shape" + "&tutorial=design";
-        window.open(pathToDesign, "author");
-      } else {
-        var _pathToDesign = _Configuration2.default.author.url;
-        window.open(_pathToDesign, "author");
-      }
-    }
-  }]);
-
-  return CodeDialog;
-}();
-
-exports.default = CodeDialog;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "./app/frontend/circuit/js/dialog/CodeDialog.js":
 /*!******************************************************!*\
   !*** ./app/frontend/circuit/js/dialog/CodeDialog.js ***!
@@ -3374,61 +3479,6 @@ var CodeDialog = function () {
           window.open(pathToDesign, "designer");
         });
       });
-    }
-  }]);
-
-  return CodeDialog;
-}();
-
-exports.default = CodeDialog;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/dialog/DesignerDialog.js":
-/*!**********************************************************!*\
-  !*** ./app/frontend/circuit/js/dialog/DesignerDialog.js ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-__webpack_require__(/*! google-code-prettify/bin/prettify.min.css */ "./node_modules/google-code-prettify/bin/prettify.min.css");
-
-var _prettify = __webpack_require__(/*! google-code-prettify/bin/prettify.min */ "./node_modules/google-code-prettify/bin/prettify.min.js");
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var CodeDialog = function () {
-  function CodeDialog() {
-    _classCallCheck(this, CodeDialog);
-  }
-
-  _createClass(CodeDialog, [{
-    key: "show",
-    value: function show(figure) {
-      if (figure) {
-        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-        var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape" + "&tutorial=design";
-        window.open(pathToDesign, "designer");
-      } else {
-        var _pathToDesign = _Configuration2.default.designer.url;
-        window.open(_pathToDesign, "designer");
-      }
     }
   }]);
 
@@ -3535,227 +3585,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/circuit/js/dialog/FileOpen.js":
-/*!****************************************************!*\
-  !*** ./app/frontend/circuit/js/dialog/FileOpen.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
-
-var _hogan2 = _interopRequireDefault(_hogan);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var storage = __webpack_require__(/*! ../../../_common/js/BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
-
-var FileOpen = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function FileOpen() {
-    _classCallCheck(this, FileOpen);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(FileOpen, [{
-    key: 'show',
-    value: function show(view) {
-      $('#fileOpenDialog').modal('show');
-      this.fetchPathContent("", view);
-    }
-  }, {
-    key: 'fetchPathContent',
-    value: function fetchPathContent(newPath, view) {
-      var _this = this;
-
-      storage.getFiles(newPath).then(function (files) {
-        files = files.filter(function (file) {
-          return file.name.endsWith(_Configuration2.default.fileSuffix) || file.type === "dir";
-        });
-
-        var compiled = _hogan2.default.compile('\n               {{^rootDir}}     \n               <a href="#" class="list-group-item githubPath" data-type="dir" data-path="{{parentPath}}" >\n                   <span class="glyphicon glyphicon-menu-left"></span>\n                   ..\n               </a>\n               {{/rootDir}}\n               {{#files}}\n                 <a href="#" data-draw2d="{{draw2d}}" class="list-group-item githubPath text-nowrap" data-type="{{type}}" data-path="{{currentDir}}{{name}}" data-id="{{id}}">\n                    <span class="glyphicon {{icon}}"></span>\n                    {{{name}}}\n                 </a>\n               {{/files}}\n          ');
-
-        var parentPath = storage.dirname(newPath);
-        var output = compiled.render({
-          parentPath: parentPath,
-          currentDir: newPath,
-          files: files,
-          rootDir: newPath === null,
-          draw2d: function draw2d() {
-            return this.name.endsWith(_Configuration2.default.fileSuffix);
-          },
-          icon: function icon() {
-            if (this.name.endsWith(_Configuration2.default.fileSuffix)) {
-              return "fa fa-object-group";
-            }
-            return this.type === "dir" ? "fa fa-folder-o" : "fa fa-file-o";
-          }
-        });
-
-        $("#fileOpenDialog .list-group").html($(output));
-        $("#fileOpenDialog .list-group").scrollTop(0);
-
-        $(".githubPath[data-type='dir']").on("click", function (event) {
-          _this.fetchPathContent($(event.currentTarget).data("path"), view);
-        });
-
-        $('.githubPath*[data-draw2d="true"][data-type="file"]').on("click", function (event) {
-          var path = $(event.currentTarget).data("path");
-          app.historyFile(path);
-          app.load(_Configuration2.default.backend.file.get(path));
-          $('#fileOpenDialog').modal('hide');
-          event.preventDefault();
-        });
-      });
-    }
-  }]);
-
-  return FileOpen;
-}();
-
-exports.default = FileOpen;
-module.exports = exports['default'];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/dialog/FileSave.js":
-/*!****************************************************!*\
-  !*** ./app/frontend/circuit/js/dialog/FileSave.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-var _Writer = __webpack_require__(/*! ../io/Writer */ "./app/frontend/circuit/js/io/Writer.js");
-
-var _Writer2 = _interopRequireDefault(_Writer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var storage = __webpack_require__(/*! ../../../_common/js/BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(_Configuration2.default);
-
-var FileSave = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function FileSave() {
-    _classCallCheck(this, FileSave);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(FileSave, [{
-    key: 'show',
-    value: function show(canvas, defaultFileName, callback) {
-      var _this = this;
-
-      Mousetrap.pause();
-      $("#fileSaveDialog .githubFileName").val(defaultFileName);
-
-      $('#fileSaveDialog').off('shown.bs.modal').on('shown.bs.modal', function (event) {
-        $(event.currentTarget).find('input:first').focus();
-      });
-      $("#fileSaveDialog").modal("show");
-
-      // Button: Commit to GitHub
-      //
-      $("#fileSaveDialog .okButton").off("click").on("click", function () {
-        var name = $("#fileSaveDialog .githubFileName").val();
-        name = name.replace(_Configuration2.default.fileSuffix, "");
-        name = name + _Configuration2.default.fileSuffix;
-        _this.save(canvas, name, function () {
-          Mousetrap.unpause();
-          $('#fileSaveDialog').modal('hide');
-          if (callback) {
-            callback();
-          }
-        });
-      });
-    }
-  }, {
-    key: 'save',
-    value: function save(canvas, name, callback) {
-      canvas.setCurrentSelection(null);
-      _Writer2.default.marshal(canvas, function (json) {
-        // to forbid path in the file names you must uncomment this line
-        storage.saveFile(json, name).then(function (response) {
-          var data = response.data;
-          if (typeof data === "string") {
-            data = JSON.parse(data);
-          }
-          app.historyFile(data.filePath);
-          if (callback) {
-            callback();
-          }
-        });
-      });
-    }
-  }]);
-
-  return FileSave;
-}();
-
-exports.default = FileSave;
-module.exports = exports['default'];
-
-/***/ }),
-
 /***/ "./app/frontend/circuit/js/dialog/MarkdownDialog.js":
 /*!**********************************************************!*\
   !*** ./app/frontend/circuit/js/dialog/MarkdownDialog.js ***!
@@ -3774,10 +3603,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _remarkable = __webpack_require__(/*! remarkable */ "./node_modules/remarkable/dist/esm/index.browser.js");
 
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
 var _CircuitFigure = __webpack_require__(/*! ../figures/CircuitFigure */ "./app/frontend/circuit/js/figures/CircuitFigure.js");
 
 var _CircuitFigure2 = _interopRequireDefault(_CircuitFigure);
@@ -3786,9 +3611,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var MarkdownDialog = function () {
-  function MarkdownDialog() {
-    _classCallCheck(this, MarkdownDialog);
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
 
     this.defaults = {
       html: true, // Enable HTML tags in source
@@ -3800,11 +3625,11 @@ var MarkdownDialog = function () {
     };
   }
 
-  _createClass(MarkdownDialog, [{
+  _createClass(Dialog, [{
     key: "show",
-    value: function show(figure) {
+    value: function show(conf, figure) {
       var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-      var pathToMD = _Configuration2.default.shapes.url + baseName + ".md";
+      var pathToMD = conf.shapes.url + baseName + ".md";
       $.get(pathToMD, function (content) {
         var version = figure.VERSION;
         var markdownParser = new _remarkable.Remarkable('full', this.defaults);
@@ -3821,13 +3646,13 @@ var MarkdownDialog = function () {
 
         $("#markdownDialog .editButton").off("click").on("click", function () {
           var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape";
+          var pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape";
           window.open(pathToDesign, "designer");
         });
 
         $("#markdownDialog .editButtonGuided").off("click").on("click", function () {
           var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape" + "&tutorial=markdown";
+          var pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape" + "&tutorial=markdown";
           window.open(pathToDesign, "designer");
         });
       });
@@ -3846,10 +3671,11 @@ var MarkdownDialog = function () {
     }
   }]);
 
-  return MarkdownDialog;
+  return Dialog;
 }();
 
-exports.default = MarkdownDialog;
+var dialog = new Dialog();
+exports.default = dialog;
 module.exports = exports["default"];
 
 /***/ }),
@@ -5520,54 +5346,6 @@ var Reader = draw2d.io.json.Reader.extend({
 
 var reader = new Reader();
 exports.default = reader;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/io/Writer.js":
-/*!**********************************************!*\
-  !*** ./app/frontend/circuit/js/io/Writer.js ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * The Writer is responsible to convert the circuit into a self contained
- * JSON with a preview image and the state of the UI.
- *
- */
-var Writer = draw2d.io.json.Writer.extend({
-
-  init: function init() {
-    this._super();
-  },
-
-  marshal: function marshal(canvas, callback) {
-    new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
-      var writer = new draw2d.io.json.Writer();
-      writer.marshal(canvas, function (json) {
-        var data = {
-          draw2d: json,
-          image: imageDataUrl,
-          view: {
-            timerBase: canvas.timerBase,
-            probeWindow: canvas.probeWindow.visible
-          }
-        };
-        callback(data);
-      });
-    }, canvas.getBoundingBox().scale(10, 10));
-  }
-});
-
-var writer = new Writer();
-exports.default = writer;
 module.exports = exports["default"];
 
 /***/ }),
@@ -7968,7 +7746,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 250px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#githubNewFileDialog .filePreview {\n  font-size: 115px;\n  color: #C71D3D;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: brown;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 20px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: 5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#files #userFilesTab.active ~ span.yellow-bar {\n  left: 0;\n  width: 120px;\n}\n#files #demoFilesTab.active ~ span.yellow-bar {\n  left: 126px;\n  width: 85px;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n#codePreviewDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#codePreviewDialog .modal-body .prettyprint {\n  margin: 0;\n  border: 0;\n  border-radius: 0;\n  overflow: hidden;\n  display: inline-block;\n}\n#markdownDialog .version {\n  opacity: 0.6;\n}\n#markdownDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#webUSBHelpDialog .modal-body {\n  min-height: 310px;\n}\n#webUSBHelpDialog .modal-body .html {\n  padding: 20px;\n  max-height: 310px;\n  overflow: auto;\n  border-radius: 0;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #C71D3D;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #C71D3D;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  position: absolute;\n  top: -30px;\n  cursor: pointer;\n  color: black;\n  width: 100%;\n  border-bottom: 2px solid #009DAC;\n  text-align: center;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #C71D3D;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Simulator\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: #B2E2F2;\n  white-space: nowrap;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .paletteContainer {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .paletteContainer .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .paletteContainer .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .paletteContainer .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.workspace .paletteContainer .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .pallette_item {\n  padding: 0px;\n}\n.workspace .paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .paletteContainer .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #C71D3D;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#addon {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#addon .branding {\n  color: #C71D3D;\n}\n#addon .btn {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n#addon .btn:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n#addon .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#addon .paragraph .block {\n  padding-bottom: 30px;\n}\n#addon .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#addon .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#addon .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#addon .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#addon footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #C71D3D;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.toolbar .group .form-horizontal {\n  text-align: center;\n  display: flex;\n}\n.toolbar .group .form-horizontal .statusIndicator {\n  margin: 20px;\n}\n.toolbar .group .form-horizontal .statusIndicator img {\n  display: block;\n  cursor: pointer;\n  margin: auto;\n}\n.toolbar .group .form-horizontal .statusIndicator img:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.toolbar .group .form-horizontal .statusIndicator span {\n  font-size: 0.8em;\n  text-align: center;\n  width: 100%;\n  display: inline-block;\n  white-space: nowrap;\n}\n.toolbar .group .form-horizontal .statusIndicator .notSupported {\n  display: none;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator .connected {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img:hover {\n  box-shadow: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled span {\n  opacity: 0.5;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .notSupported {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) span {\n  color: red;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .notSupported {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .disconnected {\n  display: block;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 70px;\n  z-index: 1000;\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 250px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#githubNewFileDialog .filePreview {\n  font-size: 115px;\n  color: #C71D3D;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: brown;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#files #userFilesTab.active ~ span.yellow-bar {\n  left: 0;\n  width: 120px;\n}\n#files #demoFilesTab.active ~ span.yellow-bar {\n  left: 126px;\n  width: 85px;\n}\nbody {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n#codePreviewDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#codePreviewDialog .modal-body .prettyprint {\n  margin: 0;\n  border: 0;\n  border-radius: 0;\n  overflow: hidden;\n  display: inline-block;\n}\n#markdownDialog .version {\n  opacity: 0.6;\n}\n#markdownDialog .modal-body {\n  max-height: 70%;\n  overflow: scroll;\n}\n#webUSBHelpDialog .modal-body {\n  min-height: 310px;\n}\n#webUSBHelpDialog .modal-body .html {\n  padding: 20px;\n  max-height: 310px;\n  overflow: auto;\n  border-radius: 0;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #C71D3D;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #C71D3D;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  position: absolute;\n  top: -30px;\n  cursor: pointer;\n  color: black;\n  width: 100%;\n  border-bottom: 2px solid #009DAC;\n  text-align: center;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #C71D3D;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Simulator\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: #B2E2F2;\n  white-space: nowrap;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .paletteContainer {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .paletteContainer .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .paletteContainer .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .paletteContainer .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n.workspace .paletteContainer .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .pallette_item {\n  padding: 0px;\n}\n.workspace .paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .paletteContainer .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .paletteContainer .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #C71D3D;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#addon {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#addon .branding {\n  color: #C71D3D;\n}\n#addon .btn {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n#addon .btn:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n#addon .paragraph h3 {\n  color: #C71D3D;\n  padding-top: 45px;\n}\n#addon .paragraph .block {\n  padding-bottom: 30px;\n}\n#addon .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#addon .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#addon .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#addon .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#addon footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#addon footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #C71D3D;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.toolbar .group .form-horizontal {\n  text-align: center;\n  display: flex;\n}\n.toolbar .group .form-horizontal .statusIndicator {\n  margin: 20px;\n}\n.toolbar .group .form-horizontal .statusIndicator img {\n  display: block;\n  cursor: pointer;\n  margin: auto;\n}\n.toolbar .group .form-horizontal .statusIndicator img:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.toolbar .group .form-horizontal .statusIndicator span {\n  font-size: 0.8em;\n  text-align: center;\n  width: 100%;\n  display: inline-block;\n  white-space: nowrap;\n}\n.toolbar .group .form-horizontal .statusIndicator .notSupported {\n  display: none;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator .connected {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img {\n  opacity: 0.5;\n  cursor: not-allowed;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled img:hover {\n  box-shadow: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled span {\n  opacity: 0.5;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .notSupported {\n  display: block;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.disabled .disconnected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) span {\n  color: red;\n  font-weight: bold;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .notSupported {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .connected {\n  display: none;\n}\n.toolbar .group .form-horizontal .statusIndicator.error:not(.disabled) .disconnected {\n  display: block;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 70px;\n  z-index: 1000;\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n", ""]);
 
 // exports
 

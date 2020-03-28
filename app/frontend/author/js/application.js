@@ -1,11 +1,11 @@
-import Toolbar from "./toolbar"
-import FileOpen from "./dialog/FileOpen"
-import FileSave from "./dialog/FileSave"
+import fileSave from "../../_common/js/FileSave"
 import Files from "../../_common/js/FilesScreen"
-import View from "./view"
-import conf from "./configuration";
-
 let storage = require('../../_common/js/BackendStorage')(conf)
+
+import Toolbar from "./toolbar"
+import View from "./view"
+import conf from "./configuration"
+
 
 class Application {
   /**
@@ -91,14 +91,9 @@ class Application {
       })
   }
 
-  fileOpen() {
-    new FileOpen().show(this.storage, this.view)
-  }
-
   fileSave() {
-    new FileSave().show(this.storage, this.view)
+    fileSave.show(conf, this.storage, this.view)
   }
-
 
   load(file){
     $("#leftTabStrip .editor").click()

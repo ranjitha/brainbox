@@ -1,4 +1,5 @@
 import Hogan from "hogan.js"
+import axios from "axios"
 
 let inputPrompt =require("./InputPrompt")
 
@@ -174,21 +175,13 @@ export default class Files {
                 if (type !== "dir") {
                   newName = storage.sanitize(newName) + conf.fileSuffix
                 }
-                $.ajax({
-                    url: conf.backend.file.rename,
-                    method: "POST",
-                    xhrFields: {withCredentials: true},
-                    data: {
-                      from: name,
-                      to: newName
-                    }
-                  }
-                ).then(() => {
-                  $replaceWith.remove()
-                  $el.html(newName.replace(conf.fileSuffix, ""))
-                  $el.show()
-                  parent.data("name", newName)
-                })
+                axios.post(conf.backend.file.rename, {from: name, to: newName})
+                  .then(() => {
+                    $replaceWith.remove()
+                    $el.html(newName.replace(conf.fileSuffix, ""))
+                    $el.show()
+                    parent.data("name", newName)
+                  })
               } else {
                 // get the value and post them here
                 $replaceWith.remove()

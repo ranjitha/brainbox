@@ -1,5 +1,8 @@
-import DesignerDialog from "./dialog/DesignerDialog"
-import SimulatorDialog from "./dialog/SimulatorDialog"
+import designerDialog from "../../_common/js/DesignerDialog"
+import simulatorDialog from "../../_common/js/SimulatorDialog"
+
+import conf from "./configuration"
+
 
 export default class Toolbar {
 
@@ -7,20 +10,6 @@ export default class Toolbar {
     this.html = $(elementId)
     this.app = app
     this.view = view
-
-    /////////////////////////////////////////////
-    // File Operations
-    //
-    this.openButton = $("#editorFileOpen")
-    this.openButton.on("click", () => {
-      this.openButton.tooltip("hide")
-      app.fileOpen()
-    })
-    Mousetrap.bindGlobal("ctrl+o", () => {
-      this.openButton.click()
-      return false
-    })
-
 
     this.saveButton = $("#editorFileSave")
     this.saveButton.on("click", () => {
@@ -58,11 +47,11 @@ export default class Toolbar {
     })
 
     $("#applicationSwitchDesigner").on("click", () => {
-      new DesignerDialog().show()
+      designerDialog.show(conf)
     })
 
     $("#applicationSwitchSimulator").on("click", () => {
-      new SimulatorDialog().show()
+      simulatorDialog.show(conf)
     })
 
     // enable the tooltip for all buttons

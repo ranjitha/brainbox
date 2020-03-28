@@ -11,8 +11,8 @@ import GeoDifferenceToolPolicy from "./policy/GeoDifferenceToolPolicy"
 import FigureCodeEdit from "./dialog/FigureCodeEdit"
 import FigureMarkdownEdit from "./dialog/FigureMarkdownEdit"
 import FigureTest from "./dialog/FigureTest"
-import SimulatorDialog from "./dialog/SimulatorDialog"
-import AuthorDialog from "./dialog/AuthorDialog"
+import simulatorDialog from "../../_common/js/SimulatorDialog"
+import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
 
 export default class Toolbar {
@@ -290,10 +290,10 @@ export default class Toolbar {
     `)
     buttonGroup.append(appSwitchButtons)
     $(document).on("click", "#applicationSwitchSimulator", () => {
-      new SimulatorDialog().show()
+      simulatorDialog.show(conf)
     })
     $(document).on("click", "#applicationSwitchAuthor", () => {
-      new AuthorDialog().show()
+      authorDialog.show(conf)
     })
 
 

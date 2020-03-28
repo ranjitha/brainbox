@@ -5,10 +5,9 @@ import Layer from "./Layer"
 import FilterPane from "./FilterPane"
 import storage from "./io/BackendStorage"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
-import FileOpen from "./dialog/FileOpen"
-import FileSave from "./dialog/FileSave"
 import Files from "./view/FilesScreen"
-import toast from "../../_common/js/toast";
+import FileSave from "../../_common/js/FileSave"
+import toast from "../../_common/js/toast"
 
 /**
  *
@@ -245,10 +244,6 @@ class Application {
       this.view.getCommandStack().markSaveLocation()
       this.view.centerDocument()
     }
-  }
-
-  fileOpen() {
-    new FileOpen().show(this.storage, this.view)
   }
 
   fileSave() {

@@ -12,8 +12,8 @@ import ProbeFigure from "./figures/ProbeFigure"
 import conf from "./Configuration"
 import Connection from "./figures/Connection"
 import SimulationEditPolicy from "./SimulationEditPolicy"
-import MarkdownDialog from "./dialog/MarkdownDialog"
-import DesignerDialog from "./dialog/DesignerDialog"
+import markdownDialog from "./dialog/MarkdownDialog"
+import designerDialog from "../../_common/js/DesignerDialog"
 import CodeDialog from "./dialog/CodeDialog"
 import WebUSBHelpDialog from "./dialog/WebUSBHelpDialog"
 
@@ -322,10 +322,10 @@ export default draw2d.Canvas.extend({
                 }
                 break
               case "design":
-                new DesignerDialog().show(figure)
+                designerDialog.show(conf, figure)
                 break
               case "help":
-                new MarkdownDialog().show(figure)
+                markdownDialog.show(conf, figure)
                 break
               case "delete":
                 _this.getCommandStack().execute(new draw2d.command.CommandDelete(figure))

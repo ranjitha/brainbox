@@ -1,8 +1,7 @@
 import {Remarkable, utils} from "remarkable"
-import conf from "../Configuration";
 import CircuitFigure from "../figures/CircuitFigure";
 
-export default class MarkdownDialog {
+class Dialog {
 
   constructor() {
     this.defaults = {
@@ -15,7 +14,7 @@ export default class MarkdownDialog {
     }
   }
 
-  show(figure) {
+  show(conf, figure) {
     let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
     let pathToMD = conf.shapes.url + baseName + ".md"
     $.get(pathToMD, function (content) {
@@ -64,3 +63,6 @@ export default class MarkdownDialog {
     return true;
   }
 }
+
+let dialog = new Dialog()
+export default dialog

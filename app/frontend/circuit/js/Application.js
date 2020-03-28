@@ -4,19 +4,18 @@
  *
  * @author Andreas Herz
  */
+import FileSave from "../../_common/js/FileSave"
+import designerDialog from "../../_common/js/DesignerDialog"
+import authorDialog from "../../_common/js/AuthorDialog"
+import toast from "../../_common/js/toast"
+let storage = require('../../_common/js/BackendStorage')(conf)
+
 import Palette from "./Palette"
 import View from "./View"
 import Files from "../../_common/js/FilesScreen"
 import Addons from "./view/AddonScreen"
-import FileOpen from "./dialog/FileOpen"
-import FileSave from "./dialog/FileSave"
 import conf from "./Configuration"
 import reader from "./io/Reader"
-import DesignerDialog from "./dialog/DesignerDialog"
-import AuthorDialog from "./dialog/AuthorDialog"
-import toast from "../../_common/js/toast"
-
-let storage = require('../../_common/js/BackendStorage')(conf)
 
 /**
  * wait asyn that an DOM element is present
@@ -65,20 +64,12 @@ class Application {
 
     this.view.getCommandStack().addEventListener(this)
 
-    if(permissions.brains.list){
-      $("#fileOpen, #editorFileOpen").show()
-      $("#fileOpen, #editorFileOpen").on("click", () => { new FileOpen().show(this.view) })
-    }
-    else{
-      $("#fileOpen, #editorFileOpen").remove()
-    }
-
     $("#applicationSwitchDesigner").on("click", () => {
-      new DesignerDialog().show()
+      designerDialog.show(conf)
     })
 
     $("#applicationSwitchAuthor").on("click", () => {
-      new AuthorDialog().show()
+      authorDialog.show(conf)
     })
 
     $("#editorFileSave").on("click", () => {

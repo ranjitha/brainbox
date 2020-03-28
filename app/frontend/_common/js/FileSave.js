@@ -1,6 +1,5 @@
-import conf from "./../Configuration"
 
-export default class FileSave {
+class Dialog {
 
   /**
    * @constructor
@@ -19,7 +18,7 @@ export default class FileSave {
    *
    * @since 4.0.0
    */
-  show(storage, canvas, callback) {
+  show(conf, storage, canvas, callback) {
 
     new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
       $("#fileSaveDialog .filePreview").attr("src", imageDataUrl)
@@ -53,3 +52,7 @@ export default class FileSave {
     }, canvas.getBoundingBox().scale(20, 20))
   }
 }
+
+let dialog = new Dialog()
+
+export default dialog
