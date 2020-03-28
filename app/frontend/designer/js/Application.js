@@ -93,8 +93,12 @@ class Application {
     // the draw2d.shape github repository
     //
     let user = this.getParam("user")
+    let global = this.getParam("global")
     if (user) {
       this.load(user, "user")
+    }
+    else if (global) {
+      this.load(global, "global")
     }
     else {
       this.fileNew()

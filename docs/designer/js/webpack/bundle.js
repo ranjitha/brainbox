@@ -347,7 +347,6 @@ var Files = function () {
       setTimeout(function () {
         var w1 = $("#userFilesTab").outerWidth();
         var w2 = $("#globalFilesTab").outerWidth();
-        console.log(w2);
         $("<style id='materialStyle'>").prop("type", "text/css").html("\n        #userFilesTab.active ~ span.yellow-bar{\n          left: 0px;\n          width: " + w1 + "px;\n        }\n        #globalFilesTab.active ~ span.yellow-bar{\n          left: " + w1 + "px;\n          width: " + w2 + "px;\n        })").appendTo("head");
       }, 100);
     }
@@ -420,12 +419,12 @@ var Files = function () {
         $('#material-tabs').remove();
         $("#globalFiles").show();
         $("#userFiles").remove();
-        $("#files .title span").html("Load a demo lesson file");
+        $("#files .title span").html("Open a document");
       } else if (permissions.list === true && permissions.global.list === false) {
         $('#material-tabs').remove();
         $("#globalFiles").remove();
         $("#userFiles").show();
-        $("#files .title span").html("Load a lesson document");
+        $("#files .title span").html("Open a document");
       } else if (permissions.list === true && permissions.global.list === false) {}
     }
   }, {
@@ -472,24 +471,27 @@ var Files = function () {
             $(paneSelector + " .fileOperations").remove();
           }
 
-          $(paneSelector + " .deleteIcon").on("click", function (event) {
-            var $el = $(event.target).closest(".list-group-item");
-            var name = $el.data("name");
-            storage.deleteFile(name, scope).then(function () {
-              var parent = $el.closest(".list-group-item");
-              parent.hide('slow', function () {
-                return parent.remove();
+          if (permissions.delete === true) {
+            $(paneSelector + " .deleteIcon").on("click", function (event) {
+              var $el = $(event.target).closest(".list-group-item");
+              var name = $el.data("name");
+              storage.deleteFile(name, scope).then(function () {
+                var parent = $el.closest(".list-group-item");
+                parent.hide('slow', function () {
+                  return parent.remove();
+                });
               });
             });
-          });
+            $(paneSelector + " [data-toggle='confirmation']").popConfirm({
+              title: "Delete File?",
+              content: "",
+              placement: "bottom" // (top, right, bottom, left)
+            });
+          }
 
-          $(paneSelector + " [data-toggle='confirmation']").popConfirm({
-            title: "Delete File?",
-            content: "",
-            placement: "bottom" // (top, right, bottom, left)
-          });
-
-          if (!_this.serverless) {
+          // Rename of a file or folder is the very same as delete -> create
+          // I this case the user must have the two permissions to rename a folder or file
+          if (!_this.serverless && permissions.delete === true && permissions.create === true) {
             $(paneSelector + " .list-group-item h4").on("click", function (event) {
 
               var $el = $(event.currentTarget);
@@ -1345,8 +1347,11 @@ var Application = function () {
       // the draw2d.shape github repository
       //
       var user = this.getParam("user");
+      var global = this.getParam("global");
       if (user) {
         this.load(user, "user");
+      } else if (global) {
+        this.load(global, "global");
       } else {
         this.fileNew();
       }

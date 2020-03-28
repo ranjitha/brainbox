@@ -63,7 +63,6 @@ export default class Files {
     setTimeout(()=>{
       let w1= $("#userFilesTab").outerWidth()
       let w2= $("#globalFilesTab").outerWidth()
-      console.log(w2)
       $("<style id='materialStyle'>")
         .prop("type", "text/css")
         .html(`
@@ -143,13 +142,13 @@ export default class Files {
       $('#material-tabs').remove()
       $("#globalFiles").show()
       $("#userFiles").remove()
-      $("#files .title span").html("Load a demo lesson file")
+      $("#files .title span").html("Open a document")
     }
     else if (permissions.list===true && permissions.global.list===false){
       $('#material-tabs').remove()
       $("#globalFiles").remove()
       $("#userFiles").show()
-      $("#files .title span").html("Load a lesson document")
+      $("#files .title span").html("Open a document")
     }
     else if (permissions.list===true && permissions.global.list===false) {
     }
@@ -196,23 +195,26 @@ export default class Files {
           $(paneSelector + " .fileOperations").remove()
         }
 
-        $(paneSelector + " .deleteIcon").on("click", (event) => {
-          let $el = $(event.target).closest(".list-group-item")
-          let name = $el.data("name")
-          storage.deleteFile(name, scope).then(() => {
-            let parent = $el.closest(".list-group-item")
-            parent.hide('slow', () => parent.remove())
+        if(permissions.delete === true) {
+          $(paneSelector + " .deleteIcon").on("click", (event) => {
+            let $el = $(event.target).closest(".list-group-item")
+            let name = $el.data("name")
+            storage.deleteFile(name, scope).then(() => {
+              let parent = $el.closest(".list-group-item")
+              parent.hide('slow', () => parent.remove())
+            })
           })
-        })
+          $(paneSelector + " [data-toggle='confirmation']").popConfirm({
+            title: "Delete File?",
+            content: "",
+            placement: "bottom" // (top, right, bottom, left)
+          })
+        }
 
-        $(paneSelector + " [data-toggle='confirmation']").popConfirm({
-          title: "Delete File?",
-          content: "",
-          placement: "bottom" // (top, right, bottom, left)
-        })
 
-
-        if (!_this.serverless) {
+        // Rename of a file or folder is the very same as delete -> create
+        // I this case the user must have the two permissions to rename a folder or file
+        if (!_this.serverless && permissions.delete === true && permissions.create === true) {
           $(paneSelector + " .list-group-item h4").on("click", (event) => {
 
             let $el = $(event.currentTarget)

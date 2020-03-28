@@ -43,7 +43,7 @@ module.exports = {
       global:  {
         create: true,
         update: true,
-        delete: true,
+        delete: false,
         read: true,
         list: true
       }
