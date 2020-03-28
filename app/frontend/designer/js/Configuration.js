@@ -1,5 +1,6 @@
 export default {
   fileSuffix: ".shape",
+  appName: "Brainbox Designer",
 
   backend: {
     user: {

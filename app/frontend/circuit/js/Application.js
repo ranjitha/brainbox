@@ -4,7 +4,6 @@
  *
  * @author Andreas Herz
  */
-import FileSave from "../../_common/js/FileSave"
 import designerDialog from "../../_common/js/DesignerDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
@@ -15,6 +14,7 @@ import Files from "../../_common/js/FilesScreen"
 import Addons from "./view/AddonScreen"
 import conf from "./Configuration"
 import reader from "./io/Reader"
+import fileSave from "./dialog/FileSave"
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 /**
@@ -80,10 +80,10 @@ class Application {
       }
       if (this.permissions.brains.create && this.permissions.brains.update) {
         // allow the user to enter a file name....
-        new FileSave().show(this.view, this.fileName, callback)
+        fileSave.show(this.view, this.fileName, callback)
       } else if (this.permissions.brains.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        new FileSave().save(this.view, this.fileName, callback)
+        fileSave.save(this.view, this.fileName, callback)
       }
     })
 
@@ -91,8 +91,8 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    this.fileName = this.getParam("file")
-    let demo = this.getParam("demo")
+    this.fileName = this.getParam("user")
+    let global = this.getParam("global")
     if (this.fileName) {
       $("#leftTabStrip .editor").click()
       this.load(conf.backend.user.get(this.fileName))
@@ -100,9 +100,9 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    else if (demo) {
+    else if (global) {
       $("#leftTabStrip .editor").click()
-      this.load(conf.backend.global.get(demo))
+      this.load(conf.backend.global.get(global))
     }
     else {
       this.fileNew()
@@ -110,13 +110,13 @@ class Application {
 
     // listen on the history object to load files
     //
-    window.onpopstate = (event) => {
-      if (history.state && history.state.id === 'editor') {
-        // Render new content for the homepage
-        $("#leftTabStrip .editor").click()
-        this.load(history.state.file)
+    window.addEventListener('popstate', (event) => {
+      if (event.state && event.state.id === 'editor') {
+        let scope = event.state.scope
+        let url = conf.backend[scope].get(event.state.file)
+        this.load(url)
       }
-    }
+    })
   }
 
   load(file) {
@@ -149,21 +149,6 @@ class Application {
           })
         return content
       })
-  }
-
-  historyDemo(file) {
-    history.pushState({
-      id: 'editor',
-      file: name
-    }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?demo=' + file)
-  }
-
-  historyFile(file) {
-    this.fileName = file
-    history.pushState({
-      id: 'editor',
-      file: name
-    }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?file=' + file)
   }
 
   getParam(name) {

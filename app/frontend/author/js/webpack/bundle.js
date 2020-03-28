@@ -324,92 +324,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/_common/js/FileSave.js":
-/*!*********************************************!*\
-  !*** ./app/frontend/_common/js/FileSave.js ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Dialog = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function Dialog() {
-    _classCallCheck(this, Dialog);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf, storage, canvas, callback) {
-
-      new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
-        $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
-        $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + conf.fileSuffix);
-        $("#fileSaveDialog .githubCommitMessage").val('commit message');
-
-        $('#fileSaveDialog').on('shown.bs.modal', function (event) {
-          $(event.currentTarget).find('input:first').focus();
-        });
-        $("#fileSaveDialog").modal("show");
-        Mousetrap.pause();
-
-        // Save Button
-        //
-        $("#fileSaveDialog .okButton").off('click').on("click", function () {
-          Mousetrap.unpause();
-          var writer = new draw2d.io.json.Writer();
-          writer.marshal(canvas, function (json) {
-            var newName = $("#fileSaveDialog .githubFileName").val();
-            var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
-            storage.saveFile(json, imageDataUrl, newName, commitMessage).then(function () {
-              storage.currentFile = newName;
-              $('#fileSaveDialog').modal('hide');
-              if (callback) {
-                callback();
-              }
-            });
-          });
-        });
-      }, canvas.getBoundingBox().scale(20, 20));
-    }
-  }]);
-
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-
-exports.default = dialog;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "./app/frontend/_common/js/FilesScreen.js":
 /*!************************************************!*\
   !*** ./app/frontend/_common/js/FilesScreen.js ***!
@@ -468,8 +382,8 @@ var Files = function () {
       var storage = __webpack_require__(/*! ./BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(conf);
 
       this.initTabs(permissions);
-      this.initPane("#userFiles", conf.backend.user, permissions, "");
-      this.initPane("#demoFiles", conf.backend.global, permissions.global, "");
+      this.initPane("user", "#userFiles", conf.backend.user, permissions, "");
+      this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, "");
 
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
@@ -484,14 +398,14 @@ var Files = function () {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createUserFolder(folder + value);
-          _this2.initPane("#userFiles", conf.backend.file, permissions, folder);
+          _this2.initPane("user", "#userFiles", conf.backend.file, permissions, folder);
         });
       });
       $(document).on("click", "#demoFiles .fileOperationsFolderAdd", function (event) {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createDemoFolder(folder + value);
-          _this2.initPane("#demoFiles", conf.backend.global, permissions.global, folder);
+          _this2.initPane("global", "#demoFiles", conf.backend.global, permissions.global, folder);
         });
       });
     }
@@ -539,7 +453,7 @@ var Files = function () {
     }
   }, {
     key: "initPane",
-    value: function initPane(paneSelector, backendConf, permissions, initialPath) {
+    value: function initPane(scope, paneSelector, backendConf, permissions, initialPath) {
       var storage = __webpack_require__(/*! ./BackendStorage */ "./app/frontend/_common/js/BackendStorage.js")(this.conf);
       if (permissions.list === false) {
         return;
@@ -662,9 +576,14 @@ var Files = function () {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
-            var file = conf.backend.global.get(name);
+            var file = conf.backend[scope].get(name);
             app.load(file).then(function () {
               $el.removeClass("spinner");
+              history.pushState({
+                id: 'editor',
+                scope: scope,
+                file: name
+              }, conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
             });
           });
         });
@@ -1188,10 +1107,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _FileSave = __webpack_require__(/*! ../../_common/js/FileSave */ "./app/frontend/_common/js/FileSave.js");
-
-var _FileSave2 = _interopRequireDefault(_FileSave);
-
 var _FilesScreen = __webpack_require__(/*! ../../_common/js/FilesScreen */ "./app/frontend/_common/js/FilesScreen.js");
 
 var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
@@ -1203,6 +1118,10 @@ var _toolbar2 = _interopRequireDefault(_toolbar);
 var _view = __webpack_require__(/*! ./view */ "./app/frontend/author/js/view.js");
 
 var _view2 = _interopRequireDefault(_view);
+
+var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/author/js/dialog/FileSave.js");
+
+var _FileSave2 = _interopRequireDefault(_FileSave);
 
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
@@ -1246,8 +1165,8 @@ var Application = function () {
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
-      this.fileName = this.getParam("file");
-      var demo = this.getParam("demo");
+      this.fileName = this.getParam("user");
+      var global = this.getParam("global");
       if (this.fileName) {
         $("#leftTabStrip .editor").click();
         this.load(_configuration2.default.backend.user.get(this.fileName));
@@ -1255,9 +1174,9 @@ var Application = function () {
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
-      else if (demo) {
+      else if (global) {
           $("#leftTabStrip .editor").click();
-          this.load(_configuration2.default.backend.global.get(demo));
+          this.load(_configuration2.default.backend.global.get(global));
         }
 
       // listen on the history object to load files
@@ -1305,7 +1224,7 @@ var Application = function () {
   }, {
     key: "fileSave",
     value: function fileSave() {
-      _FileSave2.default.show(_configuration2.default, this.storage, this.view);
+      _FileSave2.default.show(this.storage, this.view);
     }
   }, {
     key: "load",
@@ -1317,23 +1236,6 @@ var Application = function () {
         _this3.view.setDocument(content.json);
         return content;
       });
-    }
-  }, {
-    key: "historyDemo",
-    value: function historyDemo(file) {
-      history.pushState({
-        id: 'editor',
-        file: name
-      }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?demo=' + file);
-    }
-  }, {
-    key: "historyFile",
-    value: function historyFile(file) {
-      this.fileName = file;
-      history.pushState({
-        id: 'author',
-        file: name
-      }, 'Brainbox Author | ' + name, window.location.href.split('?')[0] + '?file=' + file);
     }
   }]);
 
@@ -1361,6 +1263,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   fileSuffix: ".sheet",
+  appName: "Brainbox Author",
 
   backend: {
     user: {
@@ -1412,6 +1315,91 @@ exports.default = {
   }
 
 };
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/dialog/FileSave.js":
+/*!***************************************************!*\
+  !*** ./app/frontend/author/js/dialog/FileSave.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _configuration = __webpack_require__(/*! ./../configuration */ "./app/frontend/author/js/configuration.js");
+
+var _configuration2 = _interopRequireDefault(_configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+    /**
+     * @constructor
+     *
+     */
+    function Dialog() {
+        _classCallCheck(this, Dialog);
+
+        $("body").append(" \n          <div id=\"fileSaveDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n                <div class=\"modal-content\">\n                    <div class=\"modal-header\">\n                        <h4 class=\"media-heading\">Save Sheet</h4>\n                    </div>\n                    <div class=\"modal-body\">\n                        <div class=\"media\">\n                            <div class=\"media-left media-middle\">\n                                <a href=\"#\">\n                                    <img class=\"media-object filePreview\" src=\"\">\n                                </a>\n                            </div>\n                            <div class=\"media-body\">\n        \n                                <form class=\"form-horizontal\">\n                                    <br>\n                                    Filename:\n                                    <fieldset>\n                                        <div class=\"form-group\">\n                                            <div class=\"col-lg-12\">\n                                                <input type=\"text\"\n                                                       class=\"form-control floating-label githubFileName\"\n                                                       value=\"\"\n                                                        >\n                                            </div>\n                                        </div>\n        \n                                    </fieldset>\n                                  Change Reason:\n                                  <fieldset>\n                                    <div class=\"form-group\">\n                                      <div class=\"col-lg-12\">\n                                        <input type=\"text\"\n                                               class=\"form-control floating-label githubCommitMessage\"\n                                               value=\"\"\n                                        >\n                                      </div>\n                                    </div>\n        \n                                  </fieldset>\n                                    <div class=\"row\"></div>\n        \n                                </form>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"modal-footer\">\n                        <button class=\"btn\" data-dismiss=\"modal\">Abort</button>\n                        <button class=\"btn btn-primary okButton\"><span>Save</span></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n    ");
+    }
+
+    /**
+     * @method
+     *
+     * Open the file picker and load the selected file.<br>
+     *
+     * @param {Function} successCallback callback method if the user select a file and the content is loaded
+     * @param {Function} errorCallback method to call if any error happens
+     *
+     * @since 4.0.0
+     */
+
+
+    _createClass(Dialog, [{
+        key: "show",
+        value: function show(storage, view) {
+
+            $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + _configuration2.default.fileSuffix);
+            $("#fileSaveDialog .githubCommitMessage").val('commit message');
+
+            $('#fileSaveDialog').on('shown.bs.modal', function (event) {
+                $(event.currentTarget).find('input:first').focus();
+            });
+            $("#fileSaveDialog").modal("show");
+            Mousetrap.pause();
+
+            // Save Button
+            //
+            $("#fileSaveDialog .okButton").off('click').on("click", function () {
+                Mousetrap.unpause();
+                var json = view.document;
+                var newName = $("#fileSaveDialog .githubFileName").val();
+                var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
+                storage.saveFile(json, newName, commitMessage).then(function () {
+                    storage.currentFile = newName;
+                    $('#fileSaveDialog').modal('hide');
+                });
+            });
+        }
+    }]);
+
+    return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
 module.exports = exports["default"];
 
 /***/ }),

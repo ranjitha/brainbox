@@ -315,92 +315,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "../../app/frontend/_common/js/FileSave.js":
-/*!***************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/FileSave.js ***!
-  \***************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Dialog = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function Dialog() {
-    _classCallCheck(this, Dialog);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf, storage, canvas, callback) {
-
-      new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
-        $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
-        $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + conf.fileSuffix);
-        $("#fileSaveDialog .githubCommitMessage").val('commit message');
-
-        $('#fileSaveDialog').on('shown.bs.modal', function (event) {
-          $(event.currentTarget).find('input:first').focus();
-        });
-        $("#fileSaveDialog").modal("show");
-        Mousetrap.pause();
-
-        // Save Button
-        //
-        $("#fileSaveDialog .okButton").off('click').on("click", function () {
-          Mousetrap.unpause();
-          var writer = new draw2d.io.json.Writer();
-          writer.marshal(canvas, function (json) {
-            var newName = $("#fileSaveDialog .githubFileName").val();
-            var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
-            storage.saveFile(json, imageDataUrl, newName, commitMessage).then(function () {
-              storage.currentFile = newName;
-              $('#fileSaveDialog').modal('hide');
-              if (callback) {
-                callback();
-              }
-            });
-          });
-        });
-      }, canvas.getBoundingBox().scale(20, 20));
-    }
-  }]);
-
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-
-exports.default = dialog;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "../../app/frontend/_common/js/FilesScreen.js":
 /*!******************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/_common/js/FilesScreen.js ***!
@@ -459,8 +373,8 @@ var Files = function () {
       var storage = __webpack_require__(/*! ./BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(conf);
 
       this.initTabs(permissions);
-      this.initPane("#userFiles", conf.backend.user, permissions, "");
-      this.initPane("#demoFiles", conf.backend.global, permissions.global, "");
+      this.initPane("user", "#userFiles", conf.backend.user, permissions, "");
+      this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, "");
 
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
@@ -475,14 +389,14 @@ var Files = function () {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createUserFolder(folder + value);
-          _this2.initPane("#userFiles", conf.backend.file, permissions, folder);
+          _this2.initPane("user", "#userFiles", conf.backend.file, permissions, folder);
         });
       });
       $(document).on("click", "#demoFiles .fileOperationsFolderAdd", function (event) {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createDemoFolder(folder + value);
-          _this2.initPane("#demoFiles", conf.backend.global, permissions.global, folder);
+          _this2.initPane("global", "#demoFiles", conf.backend.global, permissions.global, folder);
         });
       });
     }
@@ -530,7 +444,7 @@ var Files = function () {
     }
   }, {
     key: "initPane",
-    value: function initPane(paneSelector, backendConf, permissions, initialPath) {
+    value: function initPane(scope, paneSelector, backendConf, permissions, initialPath) {
       var storage = __webpack_require__(/*! ./BackendStorage */ "../../app/frontend/_common/js/BackendStorage.js")(this.conf);
       if (permissions.list === false) {
         return;
@@ -653,9 +567,14 @@ var Files = function () {
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
-            var file = conf.backend.global.get(name);
+            var file = conf.backend[scope].get(name);
             app.load(file).then(function () {
               $el.removeClass("spinner");
+              history.pushState({
+                id: 'editor',
+                scope: scope,
+                file: name
+              }, conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
             });
           });
         });
@@ -1320,10 +1239,6 @@ var _FilesScreen = __webpack_require__(/*! ../../_common/js/FilesScreen */ "../.
 
 var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
 
-var _FileSave = __webpack_require__(/*! ../../_common/js/FileSave */ "../../app/frontend/_common/js/FileSave.js");
-
-var _FileSave2 = _interopRequireDefault(_FileSave);
-
 var _toast = __webpack_require__(/*! ../../_common/js/toast */ "../../app/frontend/_common/js/toast.js");
 
 var _toast2 = _interopRequireDefault(_toast);
@@ -1351,6 +1266,10 @@ var _SelectionToolPolicy2 = _interopRequireDefault(_SelectionToolPolicy);
 var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/designer/js/Configuration.js");
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
+
+var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "../../app/frontend/designer/js/dialog/FileSave.js");
+
+var _FileSave2 = _interopRequireDefault(_FileSave);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1440,7 +1359,7 @@ var Application = function () {
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
-      var file = this.getParam("file");
+      var file = this.getParam("user");
       if (file) {
         this.load(_Configuration2.default.backend.user.get(file));
       } else {
@@ -1451,8 +1370,9 @@ var Application = function () {
       //
       window.addEventListener('popstate', function (event) {
         if (event.state && event.state.id === 'editor') {
-          // Render new content for the homepage
-          _this.fileLoad(event.state.file);
+          var scope = event.state.scope;
+          var url = _Configuration2.default.backend[scope].get(event.state.file);
+          _this.load(url);
         }
       });
 
@@ -1588,13 +1508,11 @@ var Application = function () {
       var _this3 = this;
 
       this.setConfiguration();
-      var callback = function callback() {
+      _FileSave2.default.show(this.storage, this.view, function () {
         _this3.hasUnsavedChanges = false;
         (0, _toast2.default)("Saved");
         $("#editorFileSave div").removeClass("highlight");
-      };
-
-      new _FileSave2.default().show(this.storage, this.view, callback);
+      });
     }
   }, {
     key: "getConfiguration",
@@ -1617,14 +1535,6 @@ var Application = function () {
       if (figures.getSize() > 0) {
         figures.first().setUserData(this.documentConfiguration);
       }
-    }
-  }, {
-    key: "historyShape",
-    value: function historyShape(file) {
-      history.pushState({
-        id: 'editor',
-        file: name
-      }, 'Brainbox Designer | ' + name, window.location.href.split('?')[0] + '?file=' + file);
     }
   }, {
     key: "stackChanged",
@@ -1663,6 +1573,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   fileSuffix: ".shape",
+  appName: "Brainbox Designer",
 
   backend: {
     user: {
@@ -3294,6 +3205,99 @@ var FigureTest = function () {
 }();
 
 exports.default = FigureTest;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "../../app/frontend/designer/js/dialog/FileSave.js":
+/*!***********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/designer/js/dialog/FileSave.js ***!
+  \***********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/frontend/designer/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+
+    $("body").append(" \n          <div id=\"fileSaveDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n                <div class=\"modal-content\">\n                    <div class=\"modal-header\">\n                        <h4 class=\"media-heading\">Save Shape </h4>\n                    </div>\n                    <div class=\"modal-body\">\n                        <div class=\"media\">\n                            <div class=\"media-left media-middle\">\n                                <a href=\"#\">\n                                    <img class=\"media-object filePreview\" src=\"\">\n                                </a>\n                            </div>\n                            <div class=\"media-body\">\n        \n                                <form class=\"form-horizontal\">\n                                    <br>\n                                    Filename:\n                                    <fieldset>\n                                        <div class=\"form-group\">\n                                            <div class=\"col-lg-12\">\n                                                <input type=\"text\"\n                                                       class=\"form-control floating-label githubFileName\"\n                                                       value=\"\"\n                                                        >\n                                            </div>\n                                        </div>\n        \n                                    </fieldset>\n                                  Change Reason:\n                                  <fieldset>\n                                    <div class=\"form-group\">\n                                      <div class=\"col-lg-12\">\n                                        <input type=\"text\"\n                                               class=\"form-control floating-label githubCommitMessage\"\n                                               value=\"\"\n                                        >\n                                      </div>\n                                    </div>\n        \n                                  </fieldset>\n                                    <div class=\"row\"></div>\n                                </form>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"modal-footer\">\n                        <button class=\"btn\" data-dismiss=\"modal\">Abort</button>\n                        <button class=\"btn btn-primary okButton\"><span>Save</span></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n    ");
+  }
+
+  /**
+   * @method
+   *
+   * Open the file picker and load the selected file.<br>
+   *
+   * @param {Function} successCallback callback method if the user select a file and the content is loaded
+   * @param {Function} errorCallback method to call if any error happens
+   *
+   * @since 4.0.0
+   */
+
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(storage, canvas, callback) {
+
+      new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
+        $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
+        $("#fileSaveDialog .githubFileName").val(storage.currentFile ? storage.currentFile : "NewDocument" + _Configuration2.default.fileSuffix);
+        $("#fileSaveDialog .githubCommitMessage").val('commit message');
+
+        $('#fileSaveDialog').on('shown.bs.modal', function (event) {
+          $(event.currentTarget).find('input:first').focus();
+        });
+        $("#fileSaveDialog").modal("show");
+        Mousetrap.pause();
+
+        // Save Button
+        //
+        $("#fileSaveDialog .okButton").off('click').on("click", function () {
+          Mousetrap.unpause();
+          var writer = new draw2d.io.json.Writer();
+          writer.marshal(canvas, function (json) {
+            var newName = $("#fileSaveDialog .githubFileName").val();
+            var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
+            storage.saveFile(json, imageDataUrl, newName, commitMessage).then(function () {
+              storage.currentFile = newName;
+              $('#fileSaveDialog').modal('hide');
+              if (callback) {
+                callback();
+              }
+            });
+          });
+        });
+      }, canvas.getBoundingBox().scale(20, 20));
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
 module.exports = exports["default"];
 
 /***/ }),

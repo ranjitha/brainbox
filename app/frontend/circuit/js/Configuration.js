@@ -10,6 +10,7 @@
 //
 export default {
   fileSuffix: ".brain",
+  appName: "Brainbox Simulator",
 
   backend: {
 

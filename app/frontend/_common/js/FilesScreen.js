@@ -58,8 +58,8 @@ export default class Files {
     let storage = require("./BackendStorage")(conf)
 
     this.initTabs(permissions)
-    this.initPane("#userFiles", conf.backend.user, permissions      , "")
-    this.initPane("#demoFiles", conf.backend.global, permissions.global, "")
+    this.initPane("user",   "#userFiles", conf.backend.user,   permissions      , "")
+    this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, "")
 
     socket.on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
@@ -74,14 +74,14 @@ export default class Files {
       let folder = $(event.target).data("folder") || ""
       inputPrompt.show("Create Folder", "Folder name", value => {
         storage.createUserFolder(folder+value)
-        this.initPane("#userFiles", conf.backend.file, permissions, folder)
+        this.initPane("user", "#userFiles", conf.backend.file, permissions, folder)
       })
     })
     $(document).on("click", "#demoFiles .fileOperationsFolderAdd", (event) => {
       let folder = $(event.target).data("folder") || ""
       inputPrompt.show("Create Folder", "Folder name", value => {
         storage.createDemoFolder(folder+value)
-        this.initPane("#demoFiles", conf.backend.global, permissions.global, folder)
+        this.initPane("global", "#demoFiles", conf.backend.global, permissions.global, folder)
       })
     })
   }
@@ -129,7 +129,7 @@ export default class Files {
     }
   }
 
-  initPane(paneSelector, backendConf, permissions, initialPath) {
+  initPane(scope, paneSelector, backendConf, permissions, initialPath) {
     let storage = require("./BackendStorage")(this.conf)
     if(permissions.list===false){
       return
@@ -250,9 +250,14 @@ export default class Files {
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
-          let file = conf.backend.global.get(name)
+          let file = conf.backend[scope].get(name)
           app.load(file).then(() => {
             $el.removeClass("spinner")
+            history.pushState({
+              id: 'editor',
+              scope: scope,
+              file: name
+            }, conf.appName+' | ' + name, window.location.href.split('?')[0] + '?'+scope+'=' + name)
           })
         })
       })

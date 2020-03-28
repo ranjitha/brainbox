@@ -1,5 +1,4 @@
 import Files from "../../_common/js/FilesScreen"
-import FileSave from "../../_common/js/FileSave"
 import toast from "../../_common/js/toast"
 
 import View from "./View"
@@ -8,6 +7,7 @@ import Layer from "./Layer"
 import FilterPane from "./FilterPane"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import conf from "./Configuration"
+import fileSave from "./dialog/FileSave"
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -92,7 +92,7 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    let file = this.getParam("file")
+    let file = this.getParam("user")
     if (file) {
       this.load(conf.backend.user.get(file))
     }
@@ -104,8 +104,9 @@ class Application {
     //
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.id === 'editor') {
-        // Render new content for the homepage
-        this.fileLoad(event.state.file)
+        let scope = event.state.scope
+        let url = conf.backend[scope].get(event.state.file)
+        this.load(url)
       }
     })
 
@@ -246,13 +247,11 @@ class Application {
 
   fileSave() {
     this.setConfiguration()
-    let callback = () => {
+    fileSave.show(this.storage,this.view, () => {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
-    }
-
-    new FileSave().show(this.storage,this.view, callback)
+    })
   }
 
 
@@ -274,13 +273,6 @@ class Application {
     if (figures.getSize() > 0) {
       figures.first().setUserData(this.documentConfiguration)
     }
-  }
-
-  historyShape(file) {
-    history.pushState({
-      id: 'editor',
-      file: name
-    }, 'Brainbox Designer | ' + name, window.location.href.split('?')[0] + '?file=' + file)
   }
 
 

@@ -1,5 +1,6 @@
 export default {
   fileSuffix: ".sheet",
+  appName: "Brainbox Author",
 
   backend: {
     user: {
