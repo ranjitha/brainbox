@@ -7,6 +7,7 @@
 import designerDialog from "../../_common/js/DesignerDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
+import checkElement from "../../_common/js/checkElement"
 
 import Palette from "./Palette"
 import View from "./View"
@@ -15,27 +16,7 @@ import Addons from "./view/AddonScreen"
 import conf from "./Configuration"
 import reader from "./io/Reader"
 import fileSave from "./dialog/FileSave"
-
 let storage = require('../../_common/js/BackendStorage')(conf)
-/**
- * wait asyn that an DOM element is present
- * Usage: checkElement("<selector>").then(function(){alert("element found")})
- *
- * @returns {Promise<any>}
- */
-function rafAsync() {
-  return new Promise(resolve => {
-    requestAnimationFrame(resolve); //faster than set time out
-  });
-}
-
-function checkElement(selector) {
-  if (document.querySelector(selector) === null) {
-    return rafAsync().then(() => checkElement(selector));
-  } else {
-    return Promise.resolve(true);
-  }
-}
 
 
 class Application {

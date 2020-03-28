@@ -12,8 +12,7 @@ export default class Files {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   constructor(conf, permissions) {
-    this.conf = conf
-    this.render(conf, permissions)
+    $("#files_tab a").on("click", this.onShow)
 
     $("body").append(` 
         <script id="filesTemplate" type="text/x-jsrender">
@@ -52,6 +51,33 @@ export default class Files {
         </ul>
         </script>
     `)
+
+    this.conf = conf
+    this.render(conf, permissions)
+  }
+
+  onShow() {
+    if($("#materialStyle").length)
+      return
+
+    setTimeout(()=>{
+      let w1= $("#userFilesTab").outerWidth()
+      let w2= $("#globalFilesTab").outerWidth()
+      console.log(w2)
+      $("<style id='materialStyle'>")
+        .prop("type", "text/css")
+        .html(`
+        #userFilesTab.active ~ span.yellow-bar{
+          left: 0px;
+          width: ${w1}px;
+        }
+        #globalFilesTab.active ~ span.yellow-bar{
+          left: ${w1}px;
+          width: ${w2}px;
+        })`
+        )
+        .appendTo("head")
+    },100)
   }
 
   render(conf, permissions) {
