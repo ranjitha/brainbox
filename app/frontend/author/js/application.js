@@ -25,6 +25,7 @@ class Application {
         Mousetrap.unpause()
       });
 
+    this.permissions = permissions
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
@@ -85,7 +86,21 @@ class Application {
 
 
   fileSave() {
-    fileSave.show(this.currentFile, this.storage, this.view)
+    // if the user didn't has the access to write "global" files, the scope of the file is changed
+    // // from "global" to "user". In fact the user creates a copy in his/her own repository.
+    //
+    if(this.permissions.sheets.global.update ===false){
+      this.currentFile.scope = "user"
+    }
+
+    if (this.permissions.sheets.create && this.permissions.sheets.update) {
+      // allow the user to enter/change the file name....
+      fileSave.show(this.currentFile, this.storage, this.view)
+    } else if (this.permissions.sheets.create) {
+      // just save the file with a generated filename. It is a codepen-like modus
+      fileSave.save(this.currentFile, this.storage, this.view)
+    }
+
   }
 
   load(name, scope){

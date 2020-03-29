@@ -1,4 +1,5 @@
 import conf from "../Configuration"
+import fs from "path"
 
 class Dialog {
 
@@ -78,7 +79,7 @@ class Dialog {
 
     new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
       $("#fileSaveDialog .filePreview").attr("src", imageDataUrl)
-      $("#fileSaveDialog .githubFileName").val(currentFile.name)
+      $("#fileSaveDialog .githubFileName").val(fs.basename(currentFile.name).replace(conf.fileSuffix, ""))
       $("#fileSaveDialog .githubCommitMessage").val('commit message')
 
       $('#fileSaveDialog').on('shown.bs.modal', (event) => {
@@ -95,13 +96,20 @@ class Dialog {
         writer.marshal(canvas, json => {
           let name = $("#fileSaveDialog .githubFileName").val()
           name = name.replace(conf.fileSuffix, "")
-          currentFile.name = name + conf.fileSuffix
+          name = fs.basename(name) // remove any directories
+          currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
           let commitMessage = $("#fileSaveDialog .githubCommitMessage").val()
           storage.saveFile(json, imageDataUrl, currentFile.name , commitMessage)
             .then((response) => {
+              $('#fileSaveDialog').modal('hide')
               let data = response.data
               currentFile.name = data.filePath
-              $('#fileSaveDialog').modal('hide')
+              history.pushState({
+                id: 'editor',
+                scope: currentFile.scope,
+                file: currentFile.name
+              }, conf.appName+' | ' + name, window.location.href.split('?')[0] + '?'+currentFile.scope+'=' + currentFile.name)
+
               if(callback) {
                 callback()
               }

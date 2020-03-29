@@ -1,4 +1,5 @@
 import conf from "./../configuration"
+import fs from "path"
 
 class Dialog {
 
@@ -75,9 +76,9 @@ class Dialog {
    *
    * @since 4.0.0
    */
-  show(currentFile, storage, view) {
+  show(currentFile, storage, view, callback) {
 
-      $("#fileSaveDialog .fileName").val(currentFile.name)
+      $("#fileSaveDialog .fileName").val(fs.basename(currentFile.name).replace(conf.fileSuffix, ""))
       $("#fileSaveDialog .commitMessage").val('change reason')
 
       $('#fileSaveDialog').on('shown.bs.modal', (event) => {
@@ -90,18 +91,34 @@ class Dialog {
       //
       $("#fileSaveDialog .okButton").off('click').on("click", () => {
         Mousetrap.unpause()
-        let json = view.document
         let name = $("#fileSaveDialog .fileName").val()
         name = name.replace(conf.fileSuffix, "")
-        currentFile.name = name + conf.fileSuffix
-        let commitMessage = $("#fileSaveDialog .commitMessage").val()
-        storage.saveFile(json, currentFile.name, commitMessage)
-          .then(( response) => {
-            let data = response.data
-            currentFile.name = data.filePath
-            $('#fileSaveDialog').modal('hide')
-          });
+        name = fs.basename(name) // remove any directories
+        currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
+        this.save(currentFile, storage, view, (response)=>{
+          $('#fileSaveDialog').modal('hide')
+          if(typeof callback === "function"){
+            callback(response)
+          }
+        })
       })
+  }
+
+  save(currentFile, storage, view, callback){
+    let json = view.document
+    storage.saveFile(json, currentFile.name, currentFile.scope)
+      .then(( response) => {
+        let data = response.data
+        currentFile.name = data.filePath
+        history.pushState({
+          id: 'editor',
+          scope: currentFile.scope,
+          file: currentFile.name
+        }, conf.appName+' | ' + name, window.location.href.split('?')[0] + '?'+currentFile.scope+'=' + currentFile.name)
+        if(typeof callback === "function"){
+          callback(response)
+        }
+      });
   }
 }
 

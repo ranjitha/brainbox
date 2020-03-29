@@ -1,6 +1,7 @@
 import Hogan from "hogan.js"
 import axios from "axios"
 import "./PopConfirm"
+import fs from "path"
 
 let inputPrompt =require("./InputPrompt")
 
@@ -23,7 +24,14 @@ export default class Files {
         <div>Folder: {{folder}}</div>
         <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
         {{#files}}
-          <li class="list-group-item"  data-type="{{type}}"  data-delete="{{delete}}" data-update="{{update}}" data-name="{{folder}}{{name}}">
+          <li class="list-group-item"  
+                  data-type="{{type}}"  
+                  data-delete="{{delete}}" 
+                  data-update="{{update}}" 
+                  data-folder="{{folder}}" 
+                  data-title="{{title}}" 
+                  data-name="{{folder}}{{name}}"
+                  >
             <div class="media thumb">
                {{#dir}}
                   <a class="media-left">
@@ -165,20 +173,20 @@ export default class Files {
     //
     function loadPane(path) {
       storage.getFiles( path, scope).then((files) => {
-        files = files.filter(file => file.name.endsWith(conf.fileSuffix) || file.type === "dir")
+        files = files.filter(file => file.name.endsWith(_this.conf.fileSuffix) || file.type === "dir")
         files = files.map(file => {
           return {
             ...file,
             delete: permissions.delete,
             update: permissions.update,
-            folder: path,
-            image: backendConf.image(path+file.name),
-            title: file.name.replace(conf.fileSuffix, "")
+            title: file.name.replace(_this.conf.fileSuffix,""),
+            image: backendConf.image(file.filePath)
           }
         })
+
         if (path.length !== 0) {
           files.unshift({
-            name: storage.dirname(path),
+            name: fs.dirname(path),
             folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
             type: "dir",
             dir: true,
@@ -215,39 +223,61 @@ export default class Files {
         // Rename of a file or folder is the very same as delete -> create
         // I this case the user must have the two permissions to rename a folder or file
         if (!_this.serverless && permissions.delete === true && permissions.create === true) {
-          $(paneSelector + " .list-group-item h4").on("click", (event) => {
-
-            let $el = $(event.currentTarget)
-            let parent = $el.closest(".list-group-item")
-            let update = parent.data("update")
-            // can happen if the "serverless" websocket event comes too late
-            //
-            if (_this.serverless || update===false) {
+          $(paneSelector + " .list-group-item h4").off("click").on("click", (event) => {
+            // check if the editor is already visible. We can do on/off of events or do it this way....
+            if($(".filenameInplaceEdit").length>0){
+              $(".filenameInplaceEdit").focus()
+              $("#filenameHelpBlock").html("press ESC if you want abort the rename operation")
               return
             }
 
             Mousetrap.pause()
+
+            let $el = $(event.currentTarget)
+            let parent = $el.closest(".list-group-item")
             let name = parent.data("name")
+            let folder = parent.data("folder")
+            let title = parent.data("title")
             let type = parent.data("type")
-            let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />')
+            let $replaceWith = $(`
+                   <input type="input" class="filenameInplaceEdit" value="${title}" />
+                   <small id="filenameHelpBlock" class="form-text text-muted">
+                       
+                   </small>`)
             $el.hide()
             $el.after($replaceWith)
             $replaceWith.focus()
             $replaceWith.on("click", () => false)
 
-            let fire = () => {
+            // Rename the file on the Server
+            //
+            function fire(){
               Mousetrap.unpause()
               let newName = $replaceWith.val()
               if (newName !== "") {
                 if (type !== "dir") {
                   newName = storage.sanitize(newName) + conf.fileSuffix
                 }
-                axios.post(conf.backend.user.rename, {from: name, to: newName})
-                  .then(() => {
+                // nothing to do
+                if(newName === title){
+                  $replaceWith.remove()
+                  $el.show()
+                  return
+                }
+
+                newName = folder + newName
+                axios.post(conf.backend[scope].rename, {from: name, to: newName})
+                  .then((response) => {
+                    let resTitle = response.data.name.replace(_this.conf.fileSuffix,"")
+                    let resName = response.data.name
                     $replaceWith.remove()
-                    $el.html(newName.replace(conf.fileSuffix, ""))
+                    $el.html(resName)
                     $el.show()
-                    parent.data("name", newName)
+                    parent.data("title", resTitle)
+                    parent.data("name", resName)
+                  })
+                  .catch(()=>{
+                    $("#filenameHelpBlock").html("invalid file name")
                   })
               } else {
                 // get the value and post them here
@@ -255,10 +285,18 @@ export default class Files {
                 $el.show()
               }
             }
-            $replaceWith.blur(fire)
-            $replaceWith.keypress((e) => {
-              if (e.which === 13) {
-                fire()
+
+            // Cancel the rename operation
+            //
+            function cancel(){
+              $replaceWith.remove()
+              $el.show()
+            }
+
+            $replaceWith.on("keydown",(e) => {
+              switch(e.which){
+                case 13 : fire(); break;
+                case 27 : cancel(); break;
               }
             })
             event.preventDefault()
@@ -269,12 +307,27 @@ export default class Files {
 
 
         $(paneSelector + " .list-group-item[data-type='dir']").on("click", (event) => {
+          // check if the editor is already visible. We can do on/off of events or do it this way....
+          if($(".filenameInplaceEdit").length>0){
+            $(".filenameInplaceEdit").focus()
+            $("#filenameHelpBlock").html("press ESC if you want abort the rename operation")
+            return
+          }
           let $el = $(event.currentTarget)
           let name = $el.data("name")
+          if(name !=="" && !name.endsWith("/")){
+            name = name +"/"
+          }
           loadPane(name)
         })
 
         $(paneSelector + " .list-group-item[data-type='file']").on("click", (event) => {
+          // check if the editor is already visible. We can do on/off of events or do it this way....
+          if($(".filenameInplaceEdit").length>0){
+            $(".filenameInplaceEdit").focus()
+            $("#filenameHelpBlock").html("press ESC if you want abort the rename operation")
+            return
+          }
           let $el = $(event.currentTarget)
           let name = $el.data("name")
           $el.addClass("spinner")
@@ -290,5 +343,10 @@ export default class Files {
       })
     }
     loadPane(initialPath)
+  }
+
+
+  initInplaceEdit(){
+
   }
 }

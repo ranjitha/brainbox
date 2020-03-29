@@ -159,8 +159,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
-
 var BackendStorage = function () {
 
   /**
@@ -224,14 +222,6 @@ var BackendStorage = function () {
       };
       return _axios2.default.post(this.conf.backend[scope].folder, data);
     }
-
-    /**
-     * Load the file content of the given path
-     *
-     * @param fileName
-     * @returns {*}
-     */
-
   }, {
     key: "loadUrl",
     value: function loadUrl(url) {
@@ -244,35 +234,14 @@ var BackendStorage = function () {
       });
     }
   }, {
-    key: "dirname",
-    value: function dirname(path) {
-      if (path === undefined || path === null || path.length === 0) return null;
-
-      var segments = path.split("/");
-      if (segments.length <= 1) return null;
-
-      segments = segments.filter(function (n) {
-        return n !== "";
-      });
-      path = segments.slice(0, -1).join("/");
-      return path === "" ? null : path + "/";
-    }
-  }, {
     key: "sanitize",
     value: function sanitize(file) {
-      file = _sanitize(file, "_");
+      var sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
+      file = sanitize(file, "_");
       file = file.replace(this.conf.fileSuffix, "");
       // I don't like dots in the name to
       file = file.replace(RegExp("[.]", "g"), "_");
       return file;
-    }
-  }, {
-    key: "basename",
-    value: function basename(path) {
-      if (path === null || path === "" || path === undefined) {
-        return null;
-      }
-      return path.split(/[\\/]/).pop();
     }
   }]);
 
@@ -315,6 +284,10 @@ var _axios2 = _interopRequireDefault(_axios);
 
 __webpack_require__(/*! ./PopConfirm */ "../../app/frontend/_common/js/PopConfirm.js");
 
+var _path = __webpack_require__(/*! path */ "../../node_modules/path-browserify/index.js");
+
+var _path2 = _interopRequireDefault(_path);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -333,7 +306,7 @@ var Files = function () {
 
     $("#files_tab a").on("click", this.onShow);
 
-    $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  data-type=\"{{type}}\"  data-delete=\"{{delete}}\" data-update=\"{{update}}\" data-name=\"{{folder}}{{name}}\">\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
+    $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  \n                  data-type=\"{{type}}\"  \n                  data-delete=\"{{delete}}\" \n                  data-update=\"{{update}}\" \n                  data-folder=\"{{folder}}\" \n                  data-title=\"{{title}}\" \n                  data-name=\"{{folder}}{{name}}\"\n                  >\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
 
     this.conf = conf;
     this.render(conf, permissions);
@@ -441,20 +414,20 @@ var Files = function () {
       function loadPane(path) {
         storage.getFiles(path, scope).then(function (files) {
           files = files.filter(function (file) {
-            return file.name.endsWith(conf.fileSuffix) || file.type === "dir";
+            return file.name.endsWith(_this.conf.fileSuffix) || file.type === "dir";
           });
           files = files.map(function (file) {
             return _extends({}, file, {
               delete: permissions.delete,
               update: permissions.update,
-              folder: path,
-              image: backendConf.image(path + file.name),
-              title: file.name.replace(conf.fileSuffix, "")
+              title: file.name.replace(_this.conf.fileSuffix, ""),
+              image: backendConf.image(file.filePath)
             });
           });
+
           if (path.length !== 0) {
             files.unshift({
-              name: storage.dirname(path),
+              name: _path2.default.dirname(path),
               folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
               type: "dir",
               dir: true,
@@ -492,21 +465,23 @@ var Files = function () {
           // Rename of a file or folder is the very same as delete -> create
           // I this case the user must have the two permissions to rename a folder or file
           if (!_this.serverless && permissions.delete === true && permissions.create === true) {
-            $(paneSelector + " .list-group-item h4").on("click", function (event) {
-
-              var $el = $(event.currentTarget);
-              var parent = $el.closest(".list-group-item");
-              var update = parent.data("update");
-              // can happen if the "serverless" websocket event comes too late
-              //
-              if (_this.serverless || update === false) {
+            $(paneSelector + " .list-group-item h4").off("click").on("click", function (event) {
+              // check if the editor is already visible. We can do on/off of events or do it this way....
+              if ($(".filenameInplaceEdit").length > 0) {
+                $(".filenameInplaceEdit").focus();
+                $("#filenameHelpBlock").html("press ESC if you want abort the rename operation");
                 return;
               }
 
               Mousetrap.pause();
+
+              var $el = $(event.currentTarget);
+              var parent = $el.closest(".list-group-item");
               var name = parent.data("name");
+              var folder = parent.data("folder");
+              var title = parent.data("title");
               var type = parent.data("type");
-              var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />');
+              var $replaceWith = $("\n                   <input type=\"input\" class=\"filenameInplaceEdit\" value=\"" + title + "\" />\n                   <small id=\"filenameHelpBlock\" class=\"form-text text-muted\">\n                       \n                   </small>");
               $el.hide();
               $el.after($replaceWith);
               $replaceWith.focus();
@@ -514,29 +489,54 @@ var Files = function () {
                 return false;
               });
 
-              var fire = function fire() {
+              // Rename the file on the Server
+              //
+              function fire() {
                 Mousetrap.unpause();
                 var newName = $replaceWith.val();
                 if (newName !== "") {
                   if (type !== "dir") {
                     newName = storage.sanitize(newName) + conf.fileSuffix;
                   }
-                  _axios2.default.post(conf.backend.user.rename, { from: name, to: newName }).then(function () {
+                  // nothing to do
+                  if (newName === title) {
                     $replaceWith.remove();
-                    $el.html(newName.replace(conf.fileSuffix, ""));
                     $el.show();
-                    parent.data("name", newName);
+                    return;
+                  }
+
+                  newName = folder + newName;
+                  _axios2.default.post(conf.backend[scope].rename, { from: name, to: newName }).then(function (response) {
+                    var resTitle = response.data.name.replace(_this.conf.fileSuffix, "");
+                    var resName = response.data.name;
+                    $replaceWith.remove();
+                    $el.html(resName);
+                    $el.show();
+                    parent.data("title", resTitle);
+                    parent.data("name", resName);
+                  }).catch(function () {
+                    $("#filenameHelpBlock").html("invalid file name");
                   });
                 } else {
                   // get the value and post them here
                   $replaceWith.remove();
                   $el.show();
                 }
-              };
-              $replaceWith.blur(fire);
-              $replaceWith.keypress(function (e) {
-                if (e.which === 13) {
-                  fire();
+              }
+
+              // Cancel the rename operation
+              //
+              function cancel() {
+                $replaceWith.remove();
+                $el.show();
+              }
+
+              $replaceWith.on("keydown", function (e) {
+                switch (e.which) {
+                  case 13:
+                    fire();break;
+                  case 27:
+                    cancel();break;
                 }
               });
               event.preventDefault();
@@ -546,12 +546,27 @@ var Files = function () {
           }
 
           $(paneSelector + " .list-group-item[data-type='dir']").on("click", function (event) {
+            // check if the editor is already visible. We can do on/off of events or do it this way....
+            if ($(".filenameInplaceEdit").length > 0) {
+              $(".filenameInplaceEdit").focus();
+              $("#filenameHelpBlock").html("press ESC if you want abort the rename operation");
+              return;
+            }
             var $el = $(event.currentTarget);
             var name = $el.data("name");
+            if (name !== "" && !name.endsWith("/")) {
+              name = name + "/";
+            }
             loadPane(name);
           });
 
           $(paneSelector + " .list-group-item[data-type='file']").on("click", function (event) {
+            // check if the editor is already visible. We can do on/off of events or do it this way....
+            if ($(".filenameInplaceEdit").length > 0) {
+              $(".filenameInplaceEdit").focus();
+              $("#filenameHelpBlock").html("press ESC if you want abort the rename operation");
+              return;
+            }
             var $el = $(event.currentTarget);
             var name = $el.data("name");
             $el.addClass("spinner");
@@ -568,6 +583,9 @@ var Files = function () {
       }
       loadPane(initialPath);
     }
+  }, {
+    key: "initInplaceEdit",
+    value: function initInplaceEdit() {}
   }]);
 
   return Files;
@@ -3222,6 +3240,10 @@ var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/fron
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
 
+var _path = __webpack_require__(/*! path */ "../../node_modules/path-browserify/index.js");
+
+var _path2 = _interopRequireDefault(_path);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -3256,7 +3278,7 @@ var Dialog = function () {
 
       new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
         $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
-        $("#fileSaveDialog .githubFileName").val(currentFile.name);
+        $("#fileSaveDialog .githubFileName").val(_path2.default.basename(currentFile.name).replace(_Configuration2.default.fileSuffix, ""));
         $("#fileSaveDialog .githubCommitMessage").val('commit message');
 
         $('#fileSaveDialog').on('shown.bs.modal', function (event) {
@@ -3273,12 +3295,19 @@ var Dialog = function () {
           writer.marshal(canvas, function (json) {
             var name = $("#fileSaveDialog .githubFileName").val();
             name = name.replace(_Configuration2.default.fileSuffix, "");
-            currentFile.name = name + _Configuration2.default.fileSuffix;
+            name = _path2.default.basename(name); // remove any directories
+            currentFile.name = _path2.default.join(_path2.default.dirname(currentFile.name), name + _Configuration2.default.fileSuffix);
             var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
             storage.saveFile(json, imageDataUrl, currentFile.name, commitMessage).then(function (response) {
+              $('#fileSaveDialog').modal('hide');
               var data = response.data;
               currentFile.name = data.filePath;
-              $('#fileSaveDialog').modal('hide');
+              history.pushState({
+                id: 'editor',
+                scope: currentFile.scope,
+                file: currentFile.name
+              }, _Configuration2.default.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + currentFile.scope + '=' + currentFile.name);
+
               if (callback) {
                 callback();
               }
@@ -10918,7 +10947,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: black;\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 270px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: brown;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n}\n.tooltip {\n  z-index: 1000000;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n.content {\n  position: absolute;\n  top: 60px;\n  right: 250px;\n  left: 220px;\n  overflow: scroll;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  bottom: 0;\n  background-color: #FFFFFF;\n}\n#canvas {\n  width: 6000px;\n  height: 6000px;\n}\n#canvas_config {\n  position: fixed;\n  width: 40px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n  border: 1px solid transparent;\n  background-color: rgba(178, 226, 242, 0.3);\n}\n#canvas_config:hover {\n  border: 1px solid #C71D3D !important;\n}\n#canvas_config:hover {\n  color: #C71D3D;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C71D3D;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C71D3D;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C71D3D;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #9a172f;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 90px;\n  border-bottom: 1px solid #222222;\n  font-weight: 500;\n  font-size: 12px;\n  padding: 4px 4px 4px 20px;\n  letter-spacing: 5px;\n  text-align: left;\n  color: #C71D3D;\n  box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);\n}\n#layer #layer_elements {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: fixed;\n  top: 120px;\n  bottom: 0;\n  width: 220px;\n  overflow: auto;\n}\n#layer #layer_elements .layerElement {\n  background-color: #fafafa;\n  color: black;\n  cursor: move;\n  font-weight: 400;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 5px;\n  text-align: left;\n  border: 1px solid transparent;\n  border-bottom: 1px solid #222222;\n}\n#layer #layer_elements .layerElement::before {\n  content: \"\";\n  display: block;\n  width: 20px;\n  height: 20px;\n  float: left;\n  margin-right: 5px;\n}\n#layer #layer_elements .layerElement.ExtLine::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_line.svg */ "../../app/frontend/designer/images/layer_line.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyRect::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_rect.svg */ "../../app/frontend/designer/images/layer_rect.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyCircle::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_circle.svg */ "../../app/frontend/designer/images/layer_circle.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtLabel::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_text.svg */ "../../app/frontend/designer/images/layer_text.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtPort::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_port.svg */ "../../app/frontend/designer/images/layer_port.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement[data-visibility=\"false\"] {\n  opacity: 0.5;\n  font-style: italic;\n}\n#layer #layer_elements .layerElement .icon {\n  cursor: pointer;\n  padding-right: 4px;\n  width: 20px;\n  height: 20px;\n}\n#layer #layer_elements .layerElement .icon * {\n  stroke: black !important;\n}\n#layer #layer_elements .layerElement .icon:hover * {\n  stroke: #C71D3D !important;\n}\n#layer #layer_elements .layerSelectedElement {\n  background-color: #f5f5f5;\n  color: black;\n  border-style: dotted;\n  border-width: 1px;\n  border-color: #C71D3D;\n  font-weight: 600;\n}\n#codeDialog {\n  z-index: 10000;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n#codeDialog .codeContainer {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n}\n#codeDialog .tinyFlyoverMenu.codeOverlay {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n  z-index: 1;\n}\n#testDialog .testInfo {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#testDialog #testCanvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 15000;\n}\n#testDialog .tinyFlyoverMenu {\n  top: 15px;\n  z-index: 15001;\n}\n#FigureMarkdownEdit .tinyFlyoverMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n  position: absolute;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0;\n  position: absolute;\n}\n#FigureMarkdownEdit .markdownRendering {\n  width: 50%;\n  display: inline-block;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 250px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .filter_header {\n  background: none repeat scroll 0 0 #303030;\n  position: fixed;\n  height: 30px;\n  width: 250px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C71D3D;\n}\n#filter .filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 250px;\n  height: 30px;\n  background: none repeat scroll 0 0 #303030;\n}\n#filter .filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 250px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter .filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter .filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter .filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter .filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter .filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter .filter_actions .icon:hover {\n  color: #C71D3D;\n}\n#filter .filter_actions .filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0 !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter .filter_actions .filter-heading .icon {\n  width: 15px;\n}\n#filter .filter_actions .filter-heading .icon * {\n  stroke: white !important;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(199, 29, 61, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n#tool_shape.open .dropdown-menu {\n  -webkit-transform: scale(1, 1);\n  opacity: 1;\n  transform: scale(1, 1);\n}\n#tool_shape .dropdown-menu {\n  opacity: 0.1;\n  animation-fill-mode: forwards;\n  transform: scale(1, 0);\n  transform-origin: 0 0 ;\n  display: block;\n  transition: all 0.2s ease;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape .tool_shape_entry img {\n  height: 30px;\n  padding-right: 20px;\n}\n#tool_shape .tool_shape_entry .tool_label {\n  min-width: 95px;\n  display: inline-block;\n}\n#tool_shape .tool_shape_entry .tool_shortcut {\n  color: rgba(0, 0, 0, 0.5);\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n  min-width: 180px;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Designer\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -70px);\n  -moz-transform: rotate(-90deg) translate(-90px, -70px);\n  -ms-transform: rotate(-90deg) translate(-90px, -70px);\n  transform: rotate(-90deg) translate(-90px, -70px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: rgba(0, 0, 0, 0.4);\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 270px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: #C71D3D;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n}\n.tooltip {\n  z-index: 1000000;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n.content {\n  position: absolute;\n  top: 60px;\n  right: 250px;\n  left: 220px;\n  overflow: scroll;\n  padding: 0;\n  margin: 0;\n  border: 0;\n  bottom: 0;\n  background-color: #FFFFFF;\n}\n#canvas {\n  width: 6000px;\n  height: 6000px;\n}\n#canvas_config {\n  position: fixed;\n  width: 40px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n  border: 1px solid transparent;\n  background-color: rgba(178, 226, 242, 0.3);\n}\n#canvas_config:hover {\n  border: 1px solid #C71D3D !important;\n}\n#canvas_config:hover {\n  color: #C71D3D;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C71D3D;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C71D3D;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C71D3D;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #9a172f;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 90px;\n  border-bottom: 1px solid #222222;\n  font-weight: 500;\n  font-size: 12px;\n  padding: 4px 4px 4px 20px;\n  letter-spacing: 5px;\n  text-align: left;\n  color: #C71D3D;\n  box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);\n}\n#layer #layer_elements {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: fixed;\n  top: 120px;\n  bottom: 0;\n  width: 220px;\n  overflow: auto;\n}\n#layer #layer_elements .layerElement {\n  background-color: #fafafa;\n  color: black;\n  cursor: move;\n  font-weight: 400;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 5px;\n  text-align: left;\n  border: 1px solid transparent;\n  border-bottom: 1px solid #222222;\n}\n#layer #layer_elements .layerElement::before {\n  content: \"\";\n  display: block;\n  width: 20px;\n  height: 20px;\n  float: left;\n  margin-right: 5px;\n}\n#layer #layer_elements .layerElement.ExtLine::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_line.svg */ "../../app/frontend/designer/images/layer_line.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyRect::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_rect.svg */ "../../app/frontend/designer/images/layer_rect.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.PolyCircle::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_circle.svg */ "../../app/frontend/designer/images/layer_circle.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtLabel::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_text.svg */ "../../app/frontend/designer/images/layer_text.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement.ExtPort::before {\n  background: url(" + escape(__webpack_require__(/*! ../images/layer_port.svg */ "../../app/frontend/designer/images/layer_port.svg")) + ") no-repeat;\n  background-size: cover;\n}\n#layer #layer_elements .layerElement[data-visibility=\"false\"] {\n  opacity: 0.5;\n  font-style: italic;\n}\n#layer #layer_elements .layerElement .icon {\n  cursor: pointer;\n  padding-right: 4px;\n  width: 20px;\n  height: 20px;\n}\n#layer #layer_elements .layerElement .icon * {\n  stroke: black !important;\n}\n#layer #layer_elements .layerElement .icon:hover * {\n  stroke: #C71D3D !important;\n}\n#layer #layer_elements .layerSelectedElement {\n  background-color: #f5f5f5;\n  color: black;\n  border-style: dotted;\n  border-width: 1px;\n  border-color: #C71D3D;\n  font-weight: 600;\n}\n#codeDialog {\n  z-index: 10000;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n#codeDialog .codeContainer {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n}\n#codeDialog .tinyFlyoverMenu.codeOverlay {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n  z-index: 1;\n}\n#testDialog .testInfo {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#testDialog #testCanvas {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 15000;\n}\n#testDialog .tinyFlyoverMenu {\n  top: 15px;\n  z-index: 15001;\n}\n#FigureMarkdownEdit .tinyFlyoverMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n  position: absolute;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0;\n  position: absolute;\n}\n#FigureMarkdownEdit .markdownRendering {\n  width: 50%;\n  display: inline-block;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C71D3D !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 250px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .filter_header {\n  background: none repeat scroll 0 0 #303030;\n  position: fixed;\n  height: 30px;\n  width: 250px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C71D3D;\n}\n#filter .filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 250px;\n  height: 30px;\n  background: none repeat scroll 0 0 #303030;\n}\n#filter .filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 250px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter .filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter .filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter .filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter .filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter .filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter .filter_actions .icon:hover {\n  color: #C71D3D;\n}\n#filter .filter_actions .filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0 !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter .filter_actions .filter-heading .icon {\n  width: 15px;\n}\n#filter .filter_actions .filter-heading .icon * {\n  stroke: white !important;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(199, 29, 61, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n#tool_shape.open .dropdown-menu {\n  -webkit-transform: scale(1, 1);\n  opacity: 1;\n  transform: scale(1, 1);\n}\n#tool_shape .dropdown-menu {\n  opacity: 0.1;\n  animation-fill-mode: forwards;\n  transform: scale(1, 0);\n  transform-origin: 0 0 ;\n  display: block;\n  transition: all 0.2s ease;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape .tool_shape_entry img {\n  height: 30px;\n  padding-right: 20px;\n}\n#tool_shape .tool_shape_entry .tool_label {\n  min-width: 95px;\n  display: inline-block;\n}\n#tool_shape .tool_shape_entry .tool_shortcut {\n  color: rgba(0, 0, 0, 0.5);\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n  min-width: 180px;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Designer\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -70px);\n  -moz-transform: rotate(-90deg) translate(-90px, -70px);\n  -ms-transform: rotate(-90deg) translate(-90px, -70px);\n  transform: rotate(-90deg) translate(-90px, -70px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #C71D3D;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #C71D3D;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #C71D3D;\n}\n#figureConfigDialog .form-group textarea {\n  min-width: 300px;\n  min-height: 100px;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #C71D3D;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #C71D3D;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
 
 // exports
 
@@ -41216,6 +41245,548 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
     }
 }) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
 
+
+/***/ }),
+
+/***/ "../../node_modules/path-browserify/index.js":
+/*!*****************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/path-browserify/index.js ***!
+  \*****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {// 'path' module extracted from Node.js v8.11.1 (only the posix part)
+// transplited with Babel
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+function assertPath(path) {
+  if (typeof path !== 'string') {
+    throw new TypeError('Path must be a string. Received ' + JSON.stringify(path));
+  }
+}
+
+// Resolves . and .. elements in a path with directory names
+function normalizeStringPosix(path, allowAboveRoot) {
+  var res = '';
+  var lastSegmentLength = 0;
+  var lastSlash = -1;
+  var dots = 0;
+  var code;
+  for (var i = 0; i <= path.length; ++i) {
+    if (i < path.length)
+      code = path.charCodeAt(i);
+    else if (code === 47 /*/*/)
+      break;
+    else
+      code = 47 /*/*/;
+    if (code === 47 /*/*/) {
+      if (lastSlash === i - 1 || dots === 1) {
+        // NOOP
+      } else if (lastSlash !== i - 1 && dots === 2) {
+        if (res.length < 2 || lastSegmentLength !== 2 || res.charCodeAt(res.length - 1) !== 46 /*.*/ || res.charCodeAt(res.length - 2) !== 46 /*.*/) {
+          if (res.length > 2) {
+            var lastSlashIndex = res.lastIndexOf('/');
+            if (lastSlashIndex !== res.length - 1) {
+              if (lastSlashIndex === -1) {
+                res = '';
+                lastSegmentLength = 0;
+              } else {
+                res = res.slice(0, lastSlashIndex);
+                lastSegmentLength = res.length - 1 - res.lastIndexOf('/');
+              }
+              lastSlash = i;
+              dots = 0;
+              continue;
+            }
+          } else if (res.length === 2 || res.length === 1) {
+            res = '';
+            lastSegmentLength = 0;
+            lastSlash = i;
+            dots = 0;
+            continue;
+          }
+        }
+        if (allowAboveRoot) {
+          if (res.length > 0)
+            res += '/..';
+          else
+            res = '..';
+          lastSegmentLength = 2;
+        }
+      } else {
+        if (res.length > 0)
+          res += '/' + path.slice(lastSlash + 1, i);
+        else
+          res = path.slice(lastSlash + 1, i);
+        lastSegmentLength = i - lastSlash - 1;
+      }
+      lastSlash = i;
+      dots = 0;
+    } else if (code === 46 /*.*/ && dots !== -1) {
+      ++dots;
+    } else {
+      dots = -1;
+    }
+  }
+  return res;
+}
+
+function _format(sep, pathObject) {
+  var dir = pathObject.dir || pathObject.root;
+  var base = pathObject.base || (pathObject.name || '') + (pathObject.ext || '');
+  if (!dir) {
+    return base;
+  }
+  if (dir === pathObject.root) {
+    return dir + base;
+  }
+  return dir + sep + base;
+}
+
+var posix = {
+  // path.resolve([from ...], to)
+  resolve: function resolve() {
+    var resolvedPath = '';
+    var resolvedAbsolute = false;
+    var cwd;
+
+    for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+      var path;
+      if (i >= 0)
+        path = arguments[i];
+      else {
+        if (cwd === undefined)
+          cwd = process.cwd();
+        path = cwd;
+      }
+
+      assertPath(path);
+
+      // Skip empty entries
+      if (path.length === 0) {
+        continue;
+      }
+
+      resolvedPath = path + '/' + resolvedPath;
+      resolvedAbsolute = path.charCodeAt(0) === 47 /*/*/;
+    }
+
+    // At this point the path should be resolved to a full absolute path, but
+    // handle relative paths to be safe (might happen when process.cwd() fails)
+
+    // Normalize the path
+    resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute);
+
+    if (resolvedAbsolute) {
+      if (resolvedPath.length > 0)
+        return '/' + resolvedPath;
+      else
+        return '/';
+    } else if (resolvedPath.length > 0) {
+      return resolvedPath;
+    } else {
+      return '.';
+    }
+  },
+
+  normalize: function normalize(path) {
+    assertPath(path);
+
+    if (path.length === 0) return '.';
+
+    var isAbsolute = path.charCodeAt(0) === 47 /*/*/;
+    var trailingSeparator = path.charCodeAt(path.length - 1) === 47 /*/*/;
+
+    // Normalize the path
+    path = normalizeStringPosix(path, !isAbsolute);
+
+    if (path.length === 0 && !isAbsolute) path = '.';
+    if (path.length > 0 && trailingSeparator) path += '/';
+
+    if (isAbsolute) return '/' + path;
+    return path;
+  },
+
+  isAbsolute: function isAbsolute(path) {
+    assertPath(path);
+    return path.length > 0 && path.charCodeAt(0) === 47 /*/*/;
+  },
+
+  join: function join() {
+    if (arguments.length === 0)
+      return '.';
+    var joined;
+    for (var i = 0; i < arguments.length; ++i) {
+      var arg = arguments[i];
+      assertPath(arg);
+      if (arg.length > 0) {
+        if (joined === undefined)
+          joined = arg;
+        else
+          joined += '/' + arg;
+      }
+    }
+    if (joined === undefined)
+      return '.';
+    return posix.normalize(joined);
+  },
+
+  relative: function relative(from, to) {
+    assertPath(from);
+    assertPath(to);
+
+    if (from === to) return '';
+
+    from = posix.resolve(from);
+    to = posix.resolve(to);
+
+    if (from === to) return '';
+
+    // Trim any leading backslashes
+    var fromStart = 1;
+    for (; fromStart < from.length; ++fromStart) {
+      if (from.charCodeAt(fromStart) !== 47 /*/*/)
+        break;
+    }
+    var fromEnd = from.length;
+    var fromLen = fromEnd - fromStart;
+
+    // Trim any leading backslashes
+    var toStart = 1;
+    for (; toStart < to.length; ++toStart) {
+      if (to.charCodeAt(toStart) !== 47 /*/*/)
+        break;
+    }
+    var toEnd = to.length;
+    var toLen = toEnd - toStart;
+
+    // Compare paths to find the longest common path from root
+    var length = fromLen < toLen ? fromLen : toLen;
+    var lastCommonSep = -1;
+    var i = 0;
+    for (; i <= length; ++i) {
+      if (i === length) {
+        if (toLen > length) {
+          if (to.charCodeAt(toStart + i) === 47 /*/*/) {
+            // We get here if `from` is the exact base path for `to`.
+            // For example: from='/foo/bar'; to='/foo/bar/baz'
+            return to.slice(toStart + i + 1);
+          } else if (i === 0) {
+            // We get here if `from` is the root
+            // For example: from='/'; to='/foo'
+            return to.slice(toStart + i);
+          }
+        } else if (fromLen > length) {
+          if (from.charCodeAt(fromStart + i) === 47 /*/*/) {
+            // We get here if `to` is the exact base path for `from`.
+            // For example: from='/foo/bar/baz'; to='/foo/bar'
+            lastCommonSep = i;
+          } else if (i === 0) {
+            // We get here if `to` is the root.
+            // For example: from='/foo'; to='/'
+            lastCommonSep = 0;
+          }
+        }
+        break;
+      }
+      var fromCode = from.charCodeAt(fromStart + i);
+      var toCode = to.charCodeAt(toStart + i);
+      if (fromCode !== toCode)
+        break;
+      else if (fromCode === 47 /*/*/)
+        lastCommonSep = i;
+    }
+
+    var out = '';
+    // Generate the relative path based on the path difference between `to`
+    // and `from`
+    for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
+      if (i === fromEnd || from.charCodeAt(i) === 47 /*/*/) {
+        if (out.length === 0)
+          out += '..';
+        else
+          out += '/..';
+      }
+    }
+
+    // Lastly, append the rest of the destination (`to`) path that comes after
+    // the common path parts
+    if (out.length > 0)
+      return out + to.slice(toStart + lastCommonSep);
+    else {
+      toStart += lastCommonSep;
+      if (to.charCodeAt(toStart) === 47 /*/*/)
+        ++toStart;
+      return to.slice(toStart);
+    }
+  },
+
+  _makeLong: function _makeLong(path) {
+    return path;
+  },
+
+  dirname: function dirname(path) {
+    assertPath(path);
+    if (path.length === 0) return '.';
+    var code = path.charCodeAt(0);
+    var hasRoot = code === 47 /*/*/;
+    var end = -1;
+    var matchedSlash = true;
+    for (var i = path.length - 1; i >= 1; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47 /*/*/) {
+          if (!matchedSlash) {
+            end = i;
+            break;
+          }
+        } else {
+        // We saw the first non-path separator
+        matchedSlash = false;
+      }
+    }
+
+    if (end === -1) return hasRoot ? '/' : '.';
+    if (hasRoot && end === 1) return '//';
+    return path.slice(0, end);
+  },
+
+  basename: function basename(path, ext) {
+    if (ext !== undefined && typeof ext !== 'string') throw new TypeError('"ext" argument must be a string');
+    assertPath(path);
+
+    var start = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i;
+
+    if (ext !== undefined && ext.length > 0 && ext.length <= path.length) {
+      if (ext.length === path.length && ext === path) return '';
+      var extIdx = ext.length - 1;
+      var firstNonSlashEnd = -1;
+      for (i = path.length - 1; i >= 0; --i) {
+        var code = path.charCodeAt(i);
+        if (code === 47 /*/*/) {
+            // If we reached a path separator that was not part of a set of path
+            // separators at the end of the string, stop now
+            if (!matchedSlash) {
+              start = i + 1;
+              break;
+            }
+          } else {
+          if (firstNonSlashEnd === -1) {
+            // We saw the first non-path separator, remember this index in case
+            // we need it if the extension ends up not matching
+            matchedSlash = false;
+            firstNonSlashEnd = i + 1;
+          }
+          if (extIdx >= 0) {
+            // Try to match the explicit extension
+            if (code === ext.charCodeAt(extIdx)) {
+              if (--extIdx === -1) {
+                // We matched the extension, so mark this as the end of our path
+                // component
+                end = i;
+              }
+            } else {
+              // Extension does not match, so our result is the entire path
+              // component
+              extIdx = -1;
+              end = firstNonSlashEnd;
+            }
+          }
+        }
+      }
+
+      if (start === end) end = firstNonSlashEnd;else if (end === -1) end = path.length;
+      return path.slice(start, end);
+    } else {
+      for (i = path.length - 1; i >= 0; --i) {
+        if (path.charCodeAt(i) === 47 /*/*/) {
+            // If we reached a path separator that was not part of a set of path
+            // separators at the end of the string, stop now
+            if (!matchedSlash) {
+              start = i + 1;
+              break;
+            }
+          } else if (end === -1) {
+          // We saw the first non-path separator, mark this as the end of our
+          // path component
+          matchedSlash = false;
+          end = i + 1;
+        }
+      }
+
+      if (end === -1) return '';
+      return path.slice(start, end);
+    }
+  },
+
+  extname: function extname(path) {
+    assertPath(path);
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    var preDotState = 0;
+    for (var i = path.length - 1; i >= 0; --i) {
+      var code = path.charCodeAt(i);
+      if (code === 47 /*/*/) {
+          // If we reached a path separator that was not part of a set of path
+          // separators at the end of the string, stop now
+          if (!matchedSlash) {
+            startPart = i + 1;
+            break;
+          }
+          continue;
+        }
+      if (end === -1) {
+        // We saw the first non-path separator, mark this as the end of our
+        // extension
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46 /*.*/) {
+          // If this is our first dot, mark it as the start of our extension
+          if (startDot === -1)
+            startDot = i;
+          else if (preDotState !== 1)
+            preDotState = 1;
+      } else if (startDot !== -1) {
+        // We saw a non-dot and non-path separator before our dot, so we should
+        // have a good chance at having a non-empty extension
+        preDotState = -1;
+      }
+    }
+
+    if (startDot === -1 || end === -1 ||
+        // We saw a non-dot character immediately before the dot
+        preDotState === 0 ||
+        // The (right-most) trimmed path component is exactly '..'
+        preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+      return '';
+    }
+    return path.slice(startDot, end);
+  },
+
+  format: function format(pathObject) {
+    if (pathObject === null || typeof pathObject !== 'object') {
+      throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof pathObject);
+    }
+    return _format('/', pathObject);
+  },
+
+  parse: function parse(path) {
+    assertPath(path);
+
+    var ret = { root: '', dir: '', base: '', ext: '', name: '' };
+    if (path.length === 0) return ret;
+    var code = path.charCodeAt(0);
+    var isAbsolute = code === 47 /*/*/;
+    var start;
+    if (isAbsolute) {
+      ret.root = '/';
+      start = 1;
+    } else {
+      start = 0;
+    }
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i = path.length - 1;
+
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    var preDotState = 0;
+
+    // Get non-dir info
+    for (; i >= start; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47 /*/*/) {
+          // If we reached a path separator that was not part of a set of path
+          // separators at the end of the string, stop now
+          if (!matchedSlash) {
+            startPart = i + 1;
+            break;
+          }
+          continue;
+        }
+      if (end === -1) {
+        // We saw the first non-path separator, mark this as the end of our
+        // extension
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46 /*.*/) {
+          // If this is our first dot, mark it as the start of our extension
+          if (startDot === -1) startDot = i;else if (preDotState !== 1) preDotState = 1;
+        } else if (startDot !== -1) {
+        // We saw a non-dot and non-path separator before our dot, so we should
+        // have a good chance at having a non-empty extension
+        preDotState = -1;
+      }
+    }
+
+    if (startDot === -1 || end === -1 ||
+    // We saw a non-dot character immediately before the dot
+    preDotState === 0 ||
+    // The (right-most) trimmed path component is exactly '..'
+    preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+      if (end !== -1) {
+        if (startPart === 0 && isAbsolute) ret.base = ret.name = path.slice(1, end);else ret.base = ret.name = path.slice(startPart, end);
+      }
+    } else {
+      if (startPart === 0 && isAbsolute) {
+        ret.name = path.slice(1, startDot);
+        ret.base = path.slice(1, end);
+      } else {
+        ret.name = path.slice(startPart, startDot);
+        ret.base = path.slice(startPart, end);
+      }
+      ret.ext = path.slice(startDot, end);
+    }
+
+    if (startPart > 0) ret.dir = path.slice(0, startPart - 1);else if (isAbsolute) ret.dir = '/';
+
+    return ret;
+  },
+
+  sep: '/',
+  delimiter: ':',
+  win32: null,
+  posix: null
+};
+
+posix.posix = posix;
+
+module.exports = posix;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../process/browser.js */ "../../node_modules/process/browser.js")))
 
 /***/ }),
 

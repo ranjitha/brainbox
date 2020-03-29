@@ -17,6 +17,9 @@ export default {
       list:   path  => `../backend/global/sheet/list?path=${path}`,
       get:    file  => `../backend/global/sheet/get?filePath=${file}`,
       image:  file  => `../_common/images/files_markdown.svg`,
+      delete:          `../backend/global/sheet/delete`,
+      rename:          `../backend/global/sheet/rename`,
+      save:            `../backend/global/sheet/save`,
       folder:          `../backend/global/sheet/folder`
     }
   },

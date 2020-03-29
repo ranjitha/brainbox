@@ -87,6 +87,7 @@
     "n": "2.1.0",
     "node-ttl": "0.0.5",
     "onoff": "^5.0.1",
+    "path-browserify": "^1.0.1",
     "prettify": "0.1.7",
     "prompt": "1.0.0",
     "puppeteer": "^2.1.1",

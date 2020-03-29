@@ -66,11 +66,11 @@ module.exports = {
 
 
   init: function(app, args){
-    const brainsHomeDir   = args.folder + "brains/"
-    const sheetsHomeDir   = args.folder + "sheets/"
-    const sheetsAppDir    = path.normalize(__dirname + '/../../repository/sheets/')
-    const shapesAppDir    = path.normalize(__dirname + '/../../repository/shapes/')
-    const brainsAppDir    = path.normalize(__dirname + '/../../repository/brains/')
+    const brainsHomeDir   = args.folder + "brains"+path.sep
+    const sheetsHomeDir   = args.folder + "sheets"+path.sep
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','sheets')+path.sep)
+    const shapesAppDir    = path.normalize(path.join(__dirname, '..','..','repository','shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','brains')+path.sep)
 
     // Ensure that the required storage folder exists
     //

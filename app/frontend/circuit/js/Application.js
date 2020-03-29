@@ -149,6 +149,13 @@ class Application {
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
     }
+    // if the user didn't has the access to write "global" files, the scope of the file is changed
+    // // from "global" to "user". In fact the user creates a copy in his/her own repository.
+    //
+    if(this.permissions.brains.global.update ===false){
+      this.currentFile.scope = "user"
+    }
+
     if (this.permissions.brains.create && this.permissions.brains.update) {
       // allow the user to enter a file name....
       fileSave.show(this.currentFile, this.view, callback)

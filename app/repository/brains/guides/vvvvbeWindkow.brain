@@ -1,0 +1,335 @@
+{
+  "draw2d": [
+    {
+      "type": "circuit_flipflop_DFlipFlop",
+      "id": "66844723-0950-3664-0a12-e0f0b443a827",
+      "x": 2308,
+      "y": 2805.9470250000004,
+      "width": 41.5,
+      "height": 53.052974999999606,
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "file": "circuit/flipflop/DFlipFlop.shape"
+      },
+      "cssClass": "circuit_flipflop_DFlipFlop",
+      "bgColor": "rgba(0,0,0,0)",
+      "color": "rgba(27,27,27,1)",
+      "stroke": 0,
+      "radius": 0,
+      "dasharray": null,
+      "labels": []
+    },
+    {
+      "type": "circuit_switch_PushButton",
+      "id": "15b09c86-55d7-2ed8-b7a5-6d2d06c41ea0",
+      "x": 2106.98615,
+      "y": 2737.516,
+      "width": 45.35582499999964,
+      "height": 27.483999999999924,
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "file": "circuit/switch/PushButton.shape"
+      },
+      "cssClass": "circuit_switch_PushButton",
+      "bgColor": "rgba(0,0,0,0)",
+      "color": "rgba(27,27,27,1)",
+      "stroke": 0,
+      "radius": 0,
+      "dasharray": null,
+      "value": true,
+      "labels": []
+    },
+    {
+      "type": "circuit_display_Led",
+      "id": "c0bbab39-5100-89d9-2b7d-9e901f4b62f8",
+      "x": 2485,
+      "y": 2800,
+      "width": 30,
+      "height": 32,
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "file": "circuit/display/Led.shape"
+      },
+      "cssClass": "circuit_display_Led",
+      "bgColor": "rgba(0,0,0,0)",
+      "color": "rgba(27,27,27,1)",
+      "stroke": 0,
+      "radius": 0,
+      "dasharray": null,
+      "labels": []
+    },
+    {
+      "type": "circuit_pulse_10hz",
+      "id": "26c97094-fd9f-ab27-bc25-3959cce842fd",
+      "x": 2103,
+      "y": 2860,
+      "width": 37.328125,
+      "height": 49.5,
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "file": "circuit/pulse/10hz.shape"
+      },
+      "cssClass": "circuit_pulse_10hz",
+      "bgColor": "rgba(0,0,0,0)",
+      "color": "rgba(27,27,27,1)",
+      "stroke": 0,
+      "radius": 0,
+      "dasharray": null,
+      "labels": []
+    },
+    {
+      "type": "Connection",
+      "id": "0ce8f010-a759-d4e2-c344-9ca2d559fc9b",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {},
+      "cssClass": "Connection",
+      "stroke": 1.5,
+      "color": "rgba(0,120,242,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "ConnectionSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 2153.1640625,
+          "y": 2761.5
+        },
+        {
+          "x": 2230.58203125,
+          "y": 2761.5
+        },
+        {
+          "x": 2230.58203125,
+          "y": 2816.8370250000007
+        },
+        {
+          "x": 2308,
+          "y": 2816.8370250000007
+        }
+      ],
+      "router": "ConnectionRouter",
+      "radius": 2,
+      "routingMetaData": {
+        "routedByUserInteraction": false,
+        "fromDir": 1,
+        "toDir": 3
+      },
+      "source": {
+        "node": "15b09c86-55d7-2ed8-b7a5-6d2d06c41ea0",
+        "port": "Port"
+      },
+      "target": {
+        "node": "66844723-0950-3664-0a12-e0f0b443a827",
+        "port": "input_d"
+      },
+      "labels": [
+        {
+          "type": "ProbeFigure",
+          "id": "116a7fb9-7854-a62f-842c-e7174f95d010",
+          "x": 2209,
+          "y": 2781,
+          "width": 42.8125,
+          "height": 15.125,
+          "alpha": 1,
+          "selectable": false,
+          "draggable": false,
+          "angle": 0,
+          "userData": {},
+          "cssClass": "ProbeFigure",
+          "ports": [],
+          "bgColor": "rgba(255,255,255,1)",
+          "color": "rgba(0,0,0,1)",
+          "stroke": 0,
+          "radius": 0,
+          "dasharray": null,
+          "text": "Signal",
+          "outlineStroke": 0,
+          "outlineColor": "rgba(0,0,0,0)",
+          "fontSize": 8,
+          "fontColor": "rgba(8,8,8,1)",
+          "fontFamily": null,
+          "editor": "draw2d.ui.LabelInplaceEditor",
+          "index": 0,
+          "locator": "draw2d.layout.locator.ManhattanMidpointLocator"
+        }
+      ]
+    },
+    {
+      "type": "Connection",
+      "id": "d01b7379-8bc5-4bdb-c518-7d7a97389b6d",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {},
+      "cssClass": "Connection",
+      "stroke": 1.5,
+      "color": "rgba(0,120,242,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "ConnectionSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 2350.5081250000003,
+          "y": 2816.8370250000007
+        },
+        {
+          "x": 2417.2540625,
+          "y": 2816.8370250000007
+        },
+        {
+          "x": 2417.2540625,
+          "y": 2816.5
+        },
+        {
+          "x": 2484,
+          "y": 2816.5
+        }
+      ],
+      "router": "ConnectionRouter",
+      "radius": 2,
+      "routingMetaData": {
+        "routedByUserInteraction": false,
+        "fromDir": 1,
+        "toDir": 3
+      },
+      "source": {
+        "node": "66844723-0950-3664-0a12-e0f0b443a827",
+        "port": "output_q"
+      },
+      "target": {
+        "node": "c0bbab39-5100-89d9-2b7d-9e901f4b62f8",
+        "port": "Port"
+      },
+      "labels": [
+        {
+          "type": "ProbeFigure",
+          "id": "883c18fb-8971-403b-6f1b-ff122b05fc6c",
+          "x": 2394,
+          "y": 2809,
+          "width": 45.03125,
+          "height": 15,
+          "alpha": 1,
+          "selectable": false,
+          "draggable": false,
+          "angle": 0,
+          "userData": {},
+          "cssClass": "ProbeFigure",
+          "ports": [],
+          "bgColor": "rgba(255,255,255,1)",
+          "color": "rgba(0,0,0,1)",
+          "stroke": 0,
+          "radius": 0,
+          "dasharray": null,
+          "text": "Output",
+          "outlineStroke": 0,
+          "outlineColor": "rgba(0,0,0,0)",
+          "fontSize": 8,
+          "fontColor": "rgba(8,8,8,1)",
+          "fontFamily": null,
+          "editor": "draw2d.ui.LabelInplaceEditor",
+          "index": 2,
+          "locator": "draw2d.layout.locator.ManhattanMidpointLocator"
+        }
+      ]
+    },
+    {
+      "type": "Connection",
+      "id": "54d65bb5-da2b-50d3-828e-d1d8ab3c94ec",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {},
+      "cssClass": "Connection",
+      "stroke": 1.5,
+      "color": "rgba(0,120,242,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "ConnectionSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 2141.402929330439,
+          "y": 2894.4879999999994
+        },
+        {
+          "x": 2224.7014646652196,
+          "y": 2894.4879999999994
+        },
+        {
+          "x": 2224.7014646652196,
+          "y": 2848.3827125000007
+        },
+        {
+          "x": 2308,
+          "y": 2848.3827125000007
+        }
+      ],
+      "router": "ConnectionRouter",
+      "radius": 2,
+      "routingMetaData": {
+        "routedByUserInteraction": false,
+        "fromDir": 1,
+        "toDir": 3
+      },
+      "source": {
+        "node": "26c97094-fd9f-ab27-bc25-3959cce842fd",
+        "port": "Port"
+      },
+      "target": {
+        "node": "66844723-0950-3664-0a12-e0f0b443a827",
+        "port": "input_t"
+      },
+      "labels": [
+        {
+          "type": "ProbeFigure",
+          "id": "dcbb2eb1-e0f3-d2fc-07dd-123cd247684f",
+          "x": 2204,
+          "y": 2863,
+          "width": 40.03125,
+          "height": 15,
+          "alpha": 1,
+          "selectable": false,
+          "draggable": false,
+          "angle": 0,
+          "userData": {},
+          "cssClass": "ProbeFigure",
+          "ports": [],
+          "bgColor": "rgba(255,255,255,1)",
+          "color": "rgba(0,0,0,1)",
+          "stroke": 0,
+          "radius": 0,
+          "dasharray": null,
+          "text": "Clock",
+          "outlineStroke": 0,
+          "outlineColor": "rgba(0,0,0,0)",
+          "fontSize": 8,
+          "fontColor": "rgba(8,8,8,1)",
+          "fontFamily": null,
+          "editor": "draw2d.ui.LabelInplaceEditor",
+          "index": 1,
+          "locator": "draw2d.layout.locator.ManhattanMidpointLocator"
+        }
+      ]
+    }
+  ],
+  "image": "data:image/png;base64,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",
+  "view": {
+    "timerBase": 8,
+    "probeWindow": false
+  }
+}

@@ -1,3 +1,5 @@
+import fs from "path"
+
 import conf from "../Configuration"
 import writer from '../io/Writer'
 
@@ -57,9 +59,9 @@ class Dialog {
 
   /**
    */
-  show(currentFile, canvas, defaultFileName, callback) {
+  show(currentFile, canvas, callback) {
     Mousetrap.pause()
-    $("#fileSaveDialog .githubFileName").val(currentFile.name)
+    $("#fileSaveDialog .githubFileName").val(fs.basename(currentFile.name).replace(conf.fileSuffix, ""))
 
     $('#fileSaveDialog').off('shown.bs.modal').on('shown.bs.modal', (event) => {
       $(event.currentTarget).find('input:first').focus()
@@ -69,29 +71,36 @@ class Dialog {
     // Button: Commit to GitHub
     //
     $("#fileSaveDialog .okButton").off("click").on("click", () => {
+      Mousetrap.unpause()
       let name = $("#fileSaveDialog .githubFileName").val()
       name = name.replace(conf.fileSuffix, "")
-      currentFile.name = name + conf.fileSuffix
-      this.save(canvas, currentFile.name, ()=>{
-        Mousetrap.unpause()
+      name = fs.basename(name) // remove any directories
+      currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
+      this.save(currentFile, canvas, (response)=>{
         $('#fileSaveDialog').modal('hide')
         if(callback) {
-          callback()
+          callback(response)
         }
       })
     })
   }
 
-  save(currentFile, canvas, name, callback){
+  save(currentFile, canvas, callback){
     canvas.setCurrentSelection(null)
     writer.marshal(canvas, json => {
-      // to forbid path in the file names you must uncomment this line
-      storage.saveFile(json, name)
+      storage.saveFile(json, currentFile.name, currentFile.scope)
         .then(function (response) {
           let data = response.data
           currentFile.name = data.filePath
+
+          history.pushState({
+            id: 'editor',
+            scope: currentFile.scope,
+            file: currentFile.name
+          }, conf.appName+' | ' + name, window.location.href.split('?')[0] + '?'+currentFile.scope+'=' + currentFile.name)
+
           if(callback) {
-            callback()
+            callback(response)
           }
         })
     })

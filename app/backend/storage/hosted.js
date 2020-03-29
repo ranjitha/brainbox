@@ -1,4 +1,4 @@
-const generic = require("./_base_")
+const _base_ = require("./_base_")
 const path = require('path')
 const express = require('express')
 const shortid = require('shortid')
@@ -36,11 +36,11 @@ module.exports = {
       }
     },
     shapes:{
-      create: false,
-      update: false,
-      delete: false,
-      read: false,
-      list: false,
+      create: false,   // in hosted mode it is not allowed to create personal shapes...makes no sense
+      update: false,   // no personal shapes right now
+      delete: false,   // no personal shapes right now
+      read: false,     // no personal shapes right now
+      list: false,     // no personal shapes right now
       global:  {
         create: false,
         update: false,
@@ -51,10 +51,10 @@ module.exports = {
     },
     sheets:{
       create: true,
-      update: false,
-      delete: false,
+      update: false,   // no modification of existing shapes..just create a new one
+      delete: false,   // no modification of existing shapes..just create a new one
       read: true,
-      list: false,
+      list: false,     // we didn't expose all existing sheets. the user must copy&paste the URL for further access
       global:  {
         create: false,
         update: false,
@@ -67,14 +67,12 @@ module.exports = {
 
   init: async function(app, args){
     let folder = args.folder
-    if(!folder.endsWith("/")){
-      folder = folder + "/"
-    }
-    const brainsHomeDir   = folder + "brains_db"
-    const sheetsHomeDir   = folder + "sheet_db"
-    const shapeAppDir     = path.normalize(__dirname + '/../../repository/shapes/')
-    const brainsAppDir    = path.normalize(__dirname + '/../../repository/brains/')
-    const sheetsAppDir    = path.normalize(__dirname + '/../../repository/sheets/')
+
+    const brainsHomeDir   = path.join(folder ,"brains_db")
+    const sheetsHomeDir   = path.join(folder ,"sheet_db")
+    const shapeAppDir     = path.normalize(path.join(__dirname, '..', '..', 'repository','shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository','brains')+path.sep)
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository','sheets')+path.sep)
 
     // Ensure that the required storage folder exists
     //
@@ -85,8 +83,8 @@ module.exports = {
       console.log(err)
     })
 
-    var levelup = require('levelup')
-    var leveldown = require('leveldown')
+    let levelup = require('levelup')
+    let leveldown = require('leveldown')
     dbs[brainsHomeDir]=levelup(leveldown(brainsHomeDir))
     dbs[sheetsHomeDir]=levelup(leveldown(sheetsHomeDir))
 
@@ -102,76 +100,70 @@ module.exports = {
     console.log("|    Circuit: "+brainsHomeDir)
     console.log("|    Sheets: "+sheetsHomeDir)
 
+
+    // =================================================================
+    // Only supported URLs are listed here. e.g. write (POST) operations
+    // to a global shape or sheet ends in a 404
+    // In this case only TWO post operation allows. "user.sheet" and "user.brain"
+    // =================================================================
+
+
     // =================================================================
     // Handle Sheet files
     //
     // =================================================================
-    // app.get('/backend/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
     app.get('/backend/user/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
-    // not supported in the hosted version. We just create new files on every save....like Codepen
-    // app.post('/backend/user/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
-    // app.post('/backend/user/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
-    app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeBrain(sheetsHomeDir,      req.body.filePath, req.body.content, res))
-
+    app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,      req.body.filePath, req.body.content, res))
 
 
     // =================================================================
     // Handle brain files
     //
     // =================================================================
-    // app.get('/backend/user/brain/list',    (req, res) => module.exports.listFiles(brainsHomeDir,      req.query.path, res))
     app.get('/backend/user/brain/get',     (req, res) => module.exports.getJSONFile(brainsHomeDir,    req.query.filePath, res))
     app.get('/backend/user/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
-    // not supported in the hosted version. We just create new files on every save....like Codepen
-    // app.post('/backend/user/brain/delete', (req, res) => module.exports.deleteFile(brainsHomeDir,     req.body.filePath, res))
-    // app.post('/backend/user/brain/rename', (req, res) => module.exports.renameFile(brainsHomeDir,     req.body.from, req.body.to, res))
     app.post('/backend/user/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
 
 
     // =================================================================
-    // Handle pre-installed brain/sheet files
-    //
+    // Handle pre-installed brain files
+    // (processed by the "_base_" filesystem based implementation
     // =================================================================
-    app.get('/backend/global/brain/list',  (req, res) => generic.listFiles(brainsAppDir, req.query.path, res))
-    app.get('/backend/global/brain/get',   (req, res) => generic.getJSONFile(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/global/brain/image', (req, res) => generic.getBase64Image(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/global/sheet/list',  (req, res) => generic.listFiles(sheetsAppDir, req.query.path, res))
-    app.get('/backend/global/sheet/get',   (req, res) => generic.getJSONFile(sheetsAppDir, req.query.filePath, res))
-    app.get('/backend/global/sheet/image', (req, res) => generic.getBase64Image(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/global/brain/list',  (req, res) => _base_.listFiles(brainsAppDir, req.query.path, res))
+    app.get('/backend/global/brain/get',   (req, res) => _base_.getJSONFile(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/global/brain/image', (req, res) => _base_.getBase64Image(brainsAppDir, req.query.filePath, res))
 
 
     // =================================================================
-    // Handle update files
-    // hosted version didn'T have an UI-based update screen
+    // Handle pre-installed sheet files
+    // (processed by the "_base_" filesystem based implementation
     // =================================================================
-    // app.get('/backend/updates/shapes', (req, res) => update.getLatestShapeRelease(res))
-    // app.post('/backend/updates/shapes', async (req, res) => update.upgradeTo(shapeAppDir, req.body.url, res))
+    app.get('/backend/global/sheet/list',  (req, res) => _base_.listFiles(sheetsAppDir, req.query.path, res))
+    app.get('/backend/global/sheet/get',   (req, res) => _base_.getJSONFile(sheetsAppDir, req.query.filePath, res))
+    app.get('/backend/global/sheet/image', (req, res) => _base_.getBase64Image(sheetsAppDir, req.query.filePath, res))
 
 
     // =================================================================
     // Handle system shape files
-    //
+    // (processed by the "_base_" filesystem based implementation
     // =================================================================
     app.use('/shapes/global', express.static(shapeAppDir));
-    app.get('/backend/global/shape/list',  (req, res) => generic.listFiles(shapeAppDir, req.query.path, res))
-    app.get('/backend/global/shape/get',   (req, res) => generic.getJSONFile(shapeAppDir, req.query.filePath, res))
-    app.get('/backend/global/shape/image', (req, res) => generic.getBase64Image(shapeAppDir, req.query.filePath, res))
-    // it is not allowed to update the shape files in the hosted version....updates happens via CLI
-    // app.post('/backend/global/shape/delete', (req, res) => module.exports.deleteFile(shapeAppDir, req.body.filePath, res))
-    // app.post('/backend/global/shape/rename', (req, res) => module.exports.renameFile(shapeAppDir, req.body.from, req.body.to, res))
-    // app.post('/backend/global/shape/save', (req, res) => module.exports.writeShape(shapeAppDir, req.body.filePath, req.body.content, req.body.commitMessage, res))
+    app.get('/backend/global/shape/list',  (req, res) => _base_.listFiles(shapeAppDir, req.query.path, res))
+    app.get('/backend/global/shape/get',   (req, res) => _base_.getJSONFile(shapeAppDir, req.query.filePath, res))
+    app.get('/backend/global/shape/image', (req, res) => _base_.getBase64Image(shapeAppDir, req.query.filePath, res))
   },
 
-  renameFile: ()=>{},
-  deleteFile: ()=>{},
-  writeShape: ()=>{},
-  createFolder: ()=>{},
 
   getJSONFile: function (baseDir, subDir, res) {
+    // you are asking for DB which didn't exists
+    if(!(baseDir in dbs)){
+      res.status(404).send('Not found')
+    }
+
     dbs[baseDir].get(subDir, (err, value) => {
         if(err) {
+          // you are asking for a key which didn't exists
           res.status(404).send('Not found')
-
         }
         else {
           res.setHeader('Content-Type', 'application/json')
@@ -181,6 +173,11 @@ module.exports = {
   },
 
   getBase64Image: function (baseDir, subDir, res) {
+    // you are asking for DB which didn't exists
+    if(!(baseDir in dbs)){
+      res.status(404).send('Not found')
+    }
+
     dbs[baseDir].get(subDir, (err, contents) => {
       if (err) {
         res.status(404).send('Not found')
@@ -201,9 +198,19 @@ module.exports = {
     // every save of a file ends in a NEW file. Like a codepen page.
     // The new filename is the return value of this call
     //
-    module.exports.writeFile(baseDir, shortid.generate()+".brain", content, res, (subDir, err)=>{
-      res.setHeader('Content-Type', 'application/json')
-      res.send({ filePath: subDir })
+    module.exports.writeFile(baseDir, shortid.generate()+".brain", content, res, (newSubDir, err)=>{
+      if (err) {
+        res.status(403).send('No permission')
+      } else {
+        res.setHeader('Content-Type', 'application/json')
+        res.send({
+          name: newSubDir,
+          filePath: newSubDir,
+          folder: "",
+          type: "file",
+          dir: false
+        })
+      }
     })
   },
 
@@ -211,16 +218,28 @@ module.exports = {
     // every save of a file ends in a NEW file. Like a codepen page.
     // The new filename is the return value of this call
     //
-    module.exports.writeFile(baseDir, shortid.generate()+".sheet", content, res, (subDir, err)=>{
-      res.setHeader('Content-Type', 'application/json')
-      res.send({ filePath: subDir })
+    module.exports.writeFile(baseDir, shortid.generate()+".sheet", content, res, (newSubDir, err)=>{
+      if (err) {
+        res.status(403).send('No permission')
+      } else {
+        res.setHeader('Content-Type', 'application/json')
+        res.send({
+          name: newSubDir,
+          filePath: newSubDir,
+          folder: "",
+          type: "file",
+          dir: false
+        })
+      }
     })
   },
 
-
   writeFile: function (baseDir, subDir, content, res, callback) {
+    if(!(baseDir in dbs)){
+      callback( null, 'Not found')
+    }
+
     dbs[baseDir].put(subDir, content, err => {
-      if (err) console.log(err)
       if(typeof callback === "function") {
         callback(subDir, err)
       }
