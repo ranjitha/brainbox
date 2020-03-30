@@ -897,9 +897,7 @@ var Userinfo = function Userinfo(permissions) {
     $("#userinfo_toggler").remove();
   } else {
     _axios2.default.get("../userinfo").then(function (response) {
-      console.log(response);
       $("#userinfo_toggler .dropdown-menu").html(" \n          <div class=\"userContainer\">\n          <img  src=\"../_common/images/toolbar_user.svg\"/>\n          <div>" + response.data.displayName + "</div>\n          <button class=\"logoutButton\">Logout</button>\n          </div>\n        ");
-
       $("#userinfo_toggler .logoutButton").on("click", function () {
         window.location.replace("../logout");
       });

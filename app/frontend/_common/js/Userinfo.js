@@ -12,7 +12,6 @@ export default class Userinfo {
     }
     else {
       axios.get("../userinfo").then((response) => {
-        console.log(response)
         $("#userinfo_toggler .dropdown-menu").html(` 
           <div class="userContainer">
           <img  src="../_common/images/toolbar_user.svg"/>
@@ -20,7 +19,6 @@ export default class Userinfo {
           <button class="logoutButton">Logout</button>
           </div>
         `)
-
         $("#userinfo_toggler .logoutButton").on("click", () => { window.location.replace("../logout");})
       })
     }
