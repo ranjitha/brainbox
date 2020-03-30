@@ -1096,6 +1096,33 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/toast.js":
+/*!******************************************!*\
+  !*** ./app/frontend/_common/js/toast.js ***!
+  \******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = function (text) {
+  var _this = this;
+
+  $("body").append($("<div id=\"notificationToast\">" + text + "</div>"));
+  $("#notificationToast").delay(900).animate({ top: "+=20" }, 500).delay(1500).animate({ top: "-=20" }, 300, function () {
+    $(_this).remove();
+  });
+};
+
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/author/js/application.js":
 /*!***********************************************!*\
   !*** ./app/frontend/author/js/application.js ***!
@@ -1131,6 +1158,10 @@ var _FileSave2 = _interopRequireDefault(_FileSave);
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
 var _configuration2 = _interopRequireDefault(_configuration);
+
+var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1220,6 +1251,14 @@ var Application = function () {
   }, {
     key: "fileSave",
     value: function fileSave() {
+      var _this2 = this;
+
+      var callback = function callback() {
+        _this2.hasUnsavedChanges = false;
+        (0, _toast2.default)("Saved");
+        $("#editorFileSave div").removeClass("highlight");
+      };
+
       // if the user didn't has the access to write "global" files, the scope of the file is changed
       // // from "global" to "user". In fact the user creates a copy in his/her own repository.
       //
@@ -1229,24 +1268,35 @@ var Application = function () {
 
       if (this.permissions.sheets.create && this.permissions.sheets.update) {
         // allow the user to enter/change the file name....
-        _FileSave2.default.show(this.currentFile, this.storage, this.view);
+        _FileSave2.default.show(this.currentFile, this.storage, this.view, callback);
       } else if (this.permissions.sheets.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        _FileSave2.default.save(this.currentFile, this.storage, this.view);
+        _FileSave2.default.save(this.currentFile, this.storage, this.view, callback);
       }
     }
   }, {
     key: "load",
     value: function load(name, scope) {
-      var _this2 = this;
+      var _this3 = this;
 
       var url = _configuration2.default.backend[scope].get(name);
       $("#leftTabStrip .editor").click();
       return this.storage.loadUrl(url).then(function (content) {
-        _this2.view.setDocument(content.json);
-        _this2.currentFile = { name: name, scope: scope };
+        _this3.view.setDocument(content.json);
+        _this3.currentFile = { name: name, scope: scope };
         return content;
       });
+    }
+  }, {
+    key: "stackChanged",
+    value: function stackChanged(event) {
+      if (event.isPreChangeEvent()) {
+        return; // silently
+      }
+      if (event.getStack().canUndo()) {
+        $("#editorFileSave div").addClass("highlight");
+        this.hasUnsavedChanges = true;
+      }
     }
   }]);
 

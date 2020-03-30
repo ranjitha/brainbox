@@ -4,6 +4,7 @@ import Toolbar from "./toolbar"
 import View from "./view"
 import fileSave from "./dialog/FileSave"
 import conf from "./configuration"
+import toast from "../../_common/js/toast";
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -86,6 +87,12 @@ class Application {
 
 
   fileSave() {
+    let callback = () => {
+      this.hasUnsavedChanges = false
+      toast("Saved")
+      $("#editorFileSave div").removeClass("highlight")
+    }
+
     // if the user didn't has the access to write "global" files, the scope of the file is changed
     // // from "global" to "user". In fact the user creates a copy in his/her own repository.
     //
@@ -95,10 +102,10 @@ class Application {
 
     if (this.permissions.sheets.create && this.permissions.sheets.update) {
       // allow the user to enter/change the file name....
-      fileSave.show(this.currentFile, this.storage, this.view)
+      fileSave.show(this.currentFile, this.storage, this.view, callback)
     } else if (this.permissions.sheets.create) {
       // just save the file with a generated filename. It is a codepen-like modus
-      fileSave.save(this.currentFile, this.storage, this.view)
+      fileSave.save(this.currentFile, this.storage, this.view, callback)
     }
 
   }
@@ -114,6 +121,15 @@ class Application {
       })
   }
 
+  stackChanged(event) {
+    if (event.isPreChangeEvent()) {
+      return // silently
+    }
+    if (event.getStack().canUndo()){
+      $("#editorFileSave div").addClass("highlight")
+      this.hasUnsavedChanges = true
+    }
+  }
 }
 
 
