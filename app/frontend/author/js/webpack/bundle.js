@@ -1200,13 +1200,14 @@ var Application = function () {
       this.view = new _view2.default(this, "#editor .content", permissions);
       this.filePane = new _FilesScreen2.default(_configuration2.default, permissions.sheets);
       this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
+      this.view.commandStack.on("change", this);
 
-      // check if the user has added a "file" parameter. In this case we load the shape from
-      // the draw2d.shape github repository
+      // Show the user an alert if there are unsaved changes
       //
-      // check if the user has added a "file" parameter. In this case we load the shape from
-      // the draw2d.shape github repository
-      //
+      window.onbeforeunload = function () {
+        return _this.hasUnsavedChanges ? "The changes you made will be lost if you navigate away from this page" : undefined;
+      };
+
       var user = this.getParam("user");
       var global = this.getParam("global");
       if (user) {
@@ -1229,7 +1230,6 @@ var Application = function () {
           _this.load(event.state.file, event.state.scope);
         }
       });
-      $("#leftTabStrip .files").click();
     }
   }, {
     key: "getParam",
@@ -1294,9 +1294,7 @@ var Application = function () {
   }, {
     key: "stackChanged",
     value: function stackChanged(event) {
-      if (event.isPreChangeEvent()) {
-        return; // silently
-      }
+
       if (event.getStack().canUndo()) {
         $("#editorFileSave div").addClass("highlight");
         this.hasUnsavedChanges = true;
@@ -5068,7 +5066,7 @@ var View = function () {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"));
 
-    this.commandStack.on("change", this.stackChanged);
+    this.commandStack.on("change", this);
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
       _this.commandStack.undo();

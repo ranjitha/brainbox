@@ -33,14 +33,14 @@ class Application {
     this.view = new View(this, "#editor .content", permissions)
     this.filePane = new Files(conf, permissions.sheets)
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
+    this.view.commandStack.on("change", this)
 
+    // Show the user an alert if there are unsaved changes
+    //
+    window.onbeforeunload = ()=> {
+      return this.hasUnsavedChanges?  "The changes you made will be lost if you navigate away from this page": undefined;
+    }
 
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
-    // check if the user has added a "file" parameter. In this case we load the shape from
-    // the draw2d.shape github repository
-    //
     let user = this.getParam("user")
     let global = this.getParam("global")
     if (user) {
@@ -63,7 +63,6 @@ class Application {
         this.load(event.state.file, event.state.scope)
       }
     })
-    $("#leftTabStrip .files").click()
   }
 
   getParam(name) {
@@ -123,9 +122,7 @@ class Application {
   }
 
   stackChanged(event) {
-    if (event.isPreChangeEvent()) {
-      return // silently
-    }
+
     if (event.getStack().canUndo()){
       $("#editorFileSave div").addClass("highlight")
       this.hasUnsavedChanges = true
