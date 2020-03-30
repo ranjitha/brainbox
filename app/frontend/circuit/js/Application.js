@@ -4,6 +4,7 @@
  *
  * @author Andreas Herz
  */
+import Userinfo from "../../_common/js/Userinfo"
 import designerDialog from "../../_common/js/DesignerDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
@@ -37,6 +38,7 @@ class Application {
     this.view = new View("draw2dCanvas", permissions)
     this.filePane = new Files(conf, permissions.brains)
     this.addonPane = new Addons(permissions)
+    this.userinfo = new Userinfo(permissions)
 
     // Show the user an alert if there are unsaved changes
     //
