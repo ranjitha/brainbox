@@ -1,5 +1,5 @@
 
-export default class View {
+export default class Document {
 
   /**
    * @constructor
@@ -51,5 +51,9 @@ export default class View {
 
   forEach(callback){
     return this.json.forEach(callback)
+  }
+
+  clone(){
+    return new Document(JSON.parse(JSON.stringify(this.json)))
   }
 }

@@ -5,6 +5,7 @@ import View from "./view"
 import fileSave from "./dialog/FileSave"
 import conf from "./configuration"
 import toast from "../../_common/js/toast";
+import Document from "./document"
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -115,7 +116,7 @@ class Application {
     $("#leftTabStrip .editor").click()
     return this.storage.loadUrl(url)
       .then((content) => {
-        this.view.setDocument(content.json)
+        this.view.setDocument(new Document(content.json))
         this.currentFile = { name, scope}
         return content
       })

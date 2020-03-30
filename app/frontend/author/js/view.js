@@ -1,3 +1,6 @@
+import CommandStack from "./commands/CommandStack"
+import State from "./commands/State"
+
 const shortid = require('shortid')
 const Document = require("./document")
 const MarkdownEditor = require("./editor/markdown/editor")
@@ -11,6 +14,7 @@ export default class View {
    */
   constructor(app, id, permissions) {
 
+    this.commandStack = new CommandStack()
     this.markdownEditor = new MarkdownEditor()
     this.brainEditor = new BrainEditor()
     this.document = new Document()
@@ -20,81 +24,95 @@ export default class View {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"))
 
-    $(document).on("click", ".content", event => {
-      this.onUnselect()
-    })
+    this.commandStack.on("change", this.stackChanged)
 
-    $(document).on("click", ".sections .section .sectionContent", event => {
-      let section = this.document.get($(event.target).closest(".section").data("id"))
-      this.onSelect(section)
-      return false
-    })
+    $(".toolbar")
+      .delegate("#editUndo:not(.disabled)", "click", () => {
+        this.commandStack.undo()
+      })
+      .delegate("#editRedo:not(.disabled)", "click", () => {
+        this.commandStack.redo()
+      })
 
-    $(document).on("click","#sectionMenuUp", event=>{
-      let id = $(event.target).data("id")
-      let index = this.document.index(id)
-      if(index>0) {
-        let prev = this.activeSection.prev()
-        this.activeSection.insertBefore(prev)
-        this.document.move(index, index-1)
-      }
-      return false
-    })
 
-    $(document).on("click","#sectionMenuDown", event=>{
-      let id = $(event.target).data("id")
-      let index = this.document.index(id)
-      if(index<this.document.length-1) {
-        let prev = this.activeSection.next()
-        this.activeSection.insertAfter(prev)
-        this.document.move(index, index+1)
-      }
-      return false
-    })
-
-    $(document).on("dblclick", ".sections .section .sectionContent", event => {
-      let section = this.document.get($(event.target).closest(".section").data("id"))
-      this.onSelect(section)
-      this.onEdit(section)
-      return false
-    })
-    $(document).on("click","#sectionMenuEdit", event=>{
-      this.onEdit(this.document.get($(event.target).data("id")))
-      return false
-    })
-    $(document).on("click","#sectionMenuDelete", event=>{
-      this.onDelete(this.document.get($(event.target).data("id")))
-      return false
-    })
-    $(document).on("click","#sectionMenuCommitEdit", event=>{
-      this.onCommitEdit(this.document.get($(event.target).data("id")))
-      return false
-    })
-    $(document).on("click","#sectionMenuCancelEdit", event=>{
-      this.onCancelEdit()
-      return false
-    })
-    $(document).on("click","#sectionMenuInsertMarkdown", event=>{
-      let section = this.addMarkdown($(event.target).data("index"))
-      this.onSelect(section)
-      this.onEdit(section)
-      return false
-    })
-    $(document).on("click","#sectionMenuInsertBrain", event=>{
-      let section = this.addBrain($(event.target).data("index"))
-      this.onSelect(section)
-      this.onEdit(section)
-      return false
-    })
-
+    $(document)
+      .on("click", ".content", () => {
+        this.onUnselect()
+      })
+      .on("click", ".sections .section .sectionContent", event => {
+        let section = this.document.get($(event.target).closest(".section").data("id"))
+        this.onSelect(section)
+        return false
+      })
+      .on("click","#sectionMenuUp", event=>{
+        let id = $(event.target).data("id")
+        let index = this.document.index(id)
+        if(index>0) {
+          this.commandStack.push(new State(this))
+          let prev = this.activeSection.prev()
+          this.activeSection.insertBefore(prev)
+          this.document.move(index, index-1)
+        }
+        return false
+      })
+      .on("click","#sectionMenuDown", event=>{
+        let id = $(event.target).data("id")
+        let index = this.document.index(id)
+        if(index<this.document.length-1) {
+          this.commandStack.push(new State(this))
+          let prev = this.activeSection.next()
+          this.activeSection.insertAfter(prev)
+          this.document.move(index, index+1)
+        }
+        return false
+      })
+      .on("dblclick", ".sections .section .sectionContent", event => {
+        let section = this.document.get($(event.target).closest(".section").data("id"))
+        this.onSelect(section)
+        this.onEdit(section)
+        return false
+      })
+      .on("click","#sectionMenuEdit", event=>{
+        this.onEdit(this.document.get($(event.target).data("id")))
+        return false
+      })
+      .on("click","#sectionMenuDelete", event=>{
+        this.onDelete(this.document.get($(event.target).data("id")))
+        return false
+      })
+      .on("click","#sectionMenuCommitEdit", event=>{
+        this.onCommitEdit(this.document.get($(event.target).data("id")))
+        return false
+      })
+      .on("click","#sectionMenuCancelEdit", event=>{
+        this.onCancelEdit()
+        return false
+      })
+      .on("click","#sectionMenuInsertMarkdown", event=>{
+        let section = this.addMarkdown($(event.target).data("index"))
+        this.onSelect(section)
+        this.onEdit(section)
+        return false
+      })
+      .on("click","#sectionMenuInsertBrain", event=>{
+        let section = this.addBrain($(event.target).data("index"))
+        this.onSelect(section)
+        this.onEdit(section)
+        return false
+      })
   }
 
-  setDocument(json){
-    this.document = new Document(json)
+  setDocument(document){
+    this.document = document
     this.render(this.document)
   }
 
+  getDocument(){
+    return this.document
+  }
+
   addMarkdown(index){
+    this.commandStack.push(new State(this))
     let section = {
       id: shortid.generate(),
       type: "markdown",
@@ -111,6 +129,7 @@ export default class View {
   }
 
   addBrain(index){
+    this.commandStack.push(new State(this))
     let section = {
       id: shortid.generate(),
       type: "brain",
@@ -247,11 +266,13 @@ export default class View {
   }
 
   onDelete(section){
+    this.commandStack.push(new State(this))
     this.document.remove(section.id)
     this.render(this.document)
   }
 
   onCommitEdit(){
+    this.commandStack.push(new State(this))
     this.currentEditor.commit()
       .then(()=>{
         this.currentEditor = null;
@@ -267,5 +288,27 @@ export default class View {
         this.currentEditor = null;
         this.render(this.document)
       })
+  }
+
+  /**
+   * @method
+   * Sent when an event occurs on the command stack. draw2d.command.CommandStackEvent.getDetail()
+   * can be used to identify the type of event which has occurred.
+   *
+   * @template
+   *
+   * @param {draw2d.command.CommandStackEvent} event
+   **/
+  stackChanged (event) {
+    $("#editUndo").addClass("disabled")
+    $("#editRedo").addClass("disabled")
+
+    if (event.getStack().canUndo()) {
+      $("#editUndo").removeClass("disabled")
+    }
+
+    if (event.getStack().canRedo()) {
+      $("#editRedo").removeClass("disabled")
+    }
   }
 }

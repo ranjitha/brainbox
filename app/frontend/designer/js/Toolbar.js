@@ -69,7 +69,7 @@ export default class Toolbar {
     //
     buttonGroup = $('<div class="group"></div>')
     this.html.append(buttonGroup)
-    this.undoButton = $('<div class="image-button" id="editUndo" data-toggle="tooltip" title="Undo <span class=\'highlight\'> [ Ctrl+Z ]</span>"  ><img class="icon disabled"  src="./images/toolbar_undo.svg"/><div>Undo</div></div>')
+    this.undoButton = $('<div class="image-button" id="editUndo" data-toggle="tooltip" title="Undo <span class=\'highlight\'> [ Ctrl+Z ]</span>"  ><img class="icon disabled"  src="../_common/images/toolbar_undo.svg"/><div>Undo</div></div>')
     buttonGroup.append(this.undoButton)
     this.html .delegate("#editUndo:not(.disabled)", "click", () => {
       this.view.getCommandStack().undo()
@@ -82,7 +82,7 @@ export default class Toolbar {
 
     // Inject the REDO Button and the callback
     //
-    this.redoButton = $('<div class="image-button" id="editRedo" data-toggle="tooltip" title="Redo <span class=\'highlight\'> [ Ctrl+Y ]</span>"  ><img  class="icon disabled" src="./images/toolbar_redo.svg"/><div>Redo</div></div>')
+    this.redoButton = $('<div class="image-button" id="editRedo" data-toggle="tooltip" title="Redo <span class=\'highlight\'> [ Ctrl+Y ]</span>"  ><img  class="icon disabled" src="../_common/images/toolbar_redo.svg"/><div>Redo</div></div>')
     buttonGroup.append(this.redoButton)
     this.html .delegate("#editRedo:not(.disabled)", "click", () => {
       this.view.getCommandStack().redo()
@@ -94,7 +94,7 @@ export default class Toolbar {
 
     // Inject the DELETE Button
     //
-    this.deleteButton = $('<div class="image-button" id="editDelete" data-toggle="tooltip" title="Delete <span class=\'highlight\'> [ Del ]</span>"  ><img class="icon disabled" src="./images/toolbar_delete.svg"/><div>Delete</div></div>')
+    this.deleteButton = $('<div class="image-button" id="editDelete" data-toggle="tooltip" title="Delete <span class=\'highlight\'> [ Del ]</span>"  ><img class="icon disabled" src="../_common/images/toolbar_delete.svg"/><div>Delete</div></div>')
     buttonGroup.append(this.deleteButton)
     this.html.delegate("#editDelete:not(.disabled)", "click", function () {
       view.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
