@@ -5,14 +5,17 @@ const shortid = require('shortid')
 const colors = require('colors')
 const makeDir = require('make-dir')
 
-
+// central hash map for all leveldb instances. The key for the map is "brainsHomeDir" and "sheetsHomeDir"
+// We map the files to leveldb keys for the persistence
+//
 let dbs = []
 
-// Storage backend for the personal usage
-//
+
 module.exports = {
+
   // the permissions are exposed to the UI. The UI can enable/disable features regarding
-  // to the settings
+  // to the settings. Each persistence has its very own behaviour and feature set
+  //
   permissions: {
     authentication:{
       enabled: false
@@ -65,6 +68,8 @@ module.exports = {
     }
   },
 
+  // Init the persistence
+  //
   init: async function(app, args){
     let folder = args.folder
 
@@ -107,6 +112,7 @@ module.exports = {
     // In this case only TWO post operation allows. "user.sheet" and "user.brain"
     // =================================================================
 
+    app.use(express.static(__dirname + '/../../frontend'));
 
     // =================================================================
     // Handle Sheet files
@@ -155,7 +161,7 @@ module.exports = {
 
 
   getJSONFile: function (baseDir, subDir, res) {
-    // you are asking for DB which didn't exists
+    // you are asking for a leveldb which didn't exists
     if(!(baseDir in dbs)){
       res.status(404).send('Not found')
     }
@@ -173,7 +179,7 @@ module.exports = {
   },
 
   getBase64Image: function (baseDir, subDir, res) {
-    // you are asking for DB which didn't exists
+    // you are asking for a leveldb which didn't exists
     if(!(baseDir in dbs)){
       res.status(404).send('Not found')
     }

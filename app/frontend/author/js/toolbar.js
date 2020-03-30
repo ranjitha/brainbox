@@ -1,3 +1,5 @@
+import Userinfo from "../../_common/js/Userinfo"
+
 import designerDialog from "../../_common/js/DesignerDialog"
 import simulatorDialog from "../../_common/js/SimulatorDialog"
 
@@ -10,6 +12,7 @@ export default class Toolbar {
     this.html = $(elementId)
     this.app = app
     this.view = view
+    this.userinfo = new Userinfo(permissions)
 
     this.saveButton = $("#editorFileSave")
     this.saveButton.on("click", () => {

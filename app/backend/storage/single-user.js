@@ -77,6 +77,7 @@ module.exports = {
     makeDir(sheetsHomeDir)
     makeDir(brainsHomeDir)
 
+
     console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
     console.log("| This kind of storage is perfect for personal usage.                      |")
     console.log("| You can choose another storage with the '--storage' command line argument|")
@@ -84,6 +85,8 @@ module.exports = {
     console.log("| User File Locations:                                                     |")
     console.log("|    Circuit: "+brainsHomeDir)
     console.log("|    Author: "+sheetsHomeDir)
+
+    app.use(express.static(__dirname + '/../../frontend'));
 
     // =================================================================
     // Handle user Author files

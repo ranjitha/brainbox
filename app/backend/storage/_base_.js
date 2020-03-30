@@ -240,7 +240,7 @@ module.exports = {
 
   writeFile: function (baseDir, subDir, content, res, callback) {
     let file = path.join(baseDir, subDir)
-    let dir = path.dirname(file)
+    let dir = path.dirname(file)+path.sep
 
     // check that the normalize path is the same as the concatenated. It is possible that these are not the same
     // if the "subDir" contains dots like "/dir1/dir2/../../". It is a file path attack via API calls
@@ -254,7 +254,9 @@ module.exports = {
     //
     dir = path.normalize(dir)
     if(!dir.startsWith(baseDir)){
-      console.log("'file' path is out of baseDir")
+      console.log("'dir' path is out of baseDir")
+      console.log("baseDir",baseDir)
+      console.log("file", dir)
       res.status(403).send('Unable to write file')
       return
     }

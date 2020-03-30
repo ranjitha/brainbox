@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const express = require('express')
+
 const app = express()
 const http = require('http').Server(app)
 const { program } = require('commander')
@@ -9,12 +10,12 @@ const io = require('./comm/websocket').connect(http, {path: '/socket.io'})
 const mqtt = require('./comm/hive-mqtt').connect(io, "freegroup/brainbox")
 const raspi = require("./comm/raspi").connect(io)
 
+
 program
   .option('--arduino <boolean>','Allow the server to communicate to an Arduino which is connected via USB', false)
-  .option('--storage <string>', 'The storage backend to use. Possible values are ["personal", "hosted"]', "personal")
+  .option('--storage <string>', 'The storage backend to use. Possible values are ["single-user", "shared-hosted"]', "single-user")
   .option('--folder <string>',  'The storage folder to use if the type of storage supports it', process.env.HOME + "/.brainbox/" )
   .option('--port <number>',    'The port number for the server to use', 7400)
-
 
 program.parse(process.argv)
 
@@ -31,7 +32,6 @@ const storage = require("./storage/"+program.storage)
 // Tell the bodyparser middleware to accept more data
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}))
-
 
 
 // Determine the IP:PORT to use for the http server
@@ -64,7 +64,6 @@ async function  runServer() {
   // provide the  WebApp with this very simple
   // HTTP server. Good enough for an private raspi access
   //
-  app.use(express.static(__dirname + '/../frontend'));
   app.use('/.well-known/acme-challenge', express.static(__dirname +'/../ssl/'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));
