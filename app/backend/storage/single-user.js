@@ -84,7 +84,7 @@ module.exports = {
     console.log("| You can choose another storage with the '--storage' command line argument|")
     console.log("|                                                                          |")
     console.log("| User File Locations:                                                     |")
-    console.log("|    Circuit: "+brainsHomeDir)
+    console.log("|    Simulator: "+brainsHomeDir)
     console.log("|    Author: "+sheetsHomeDir)
 
     app.use(express.static(__dirname + '/../../frontend'));

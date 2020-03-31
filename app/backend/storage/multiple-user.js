@@ -13,6 +13,8 @@ const update = require("../update")
 const {thumbnail} = require("../converter/thumbnail")
 const db = require('./multiple-user/db')
 
+let permissionsAnonym = require("./multiple-user/permissions-anonym")
+let permissionsUser   = require("./multiple-user/permissions-user")
 
 let brainsHomeDir = null
 let sheetsHomeDir = null
@@ -56,64 +58,13 @@ function userFolder(baseFolder, req){
   return baseFolder+ req.user.username+path.sep
 }
 
-let defaultPermissions = {
-  featureset:{
-    authentication: true,
-      sharing: true
-  },
-  updates:{
-    update: true,
-      list: true
-  },
-  brains:{
-    create: true,
-      update: true,
-      delete: true,
-      read: true,
-      list:  true,
-      global:  {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  },
-  shapes:{
-    create: false,
-      update: false,
-      delete: false,
-      read: false,
-      list: false,
-      global:  {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  },
-  sheets:{
-    create: true,
-      update: true,
-      delete: true,
-      read: true,
-      list: true,
-      global: {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  }
-}
 
 // Storage backend for the personal usage
 //
 module.exports = {
 
   init: function(app, args){
+
     // add & configure middleware
     app.use(Session({
       genid: () =>  uuid(),
@@ -133,11 +84,16 @@ module.exports = {
     // session.
     app.use(passport.initialize());
     app.use(passport.session());
+
+    // inject the authentication endpoints.
+    //
     app.get('/login', (req, res) => { res.render('login') })
     app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
     app.get('/logout', (req, res)=> { req.logout(); res.redirect('/'); })
 
 
+    // calculate the persistence folder for the brains/sheets files
+    //
     brainsHomeDir   = args.folder + "brains"+path.sep
     sheetsHomeDir   = args.folder + "sheets"+path.sep
     const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'sheets')+path.sep)
@@ -156,24 +112,41 @@ module.exports = {
     console.log("| You can choose another storage with the '--storage' command line argument|")
     console.log("|                                                                          |")
     console.log("| User File Locations:                                                     |")
-    console.log("|    Circuit: "+brainsHomeDir)
+    console.log("|    Simulator: "+brainsHomeDir)
     console.log("|    Author: "+sheetsHomeDir)
 
     let auth = require('connect-ensure-login')
 
     // each backend storage with authentication MUST have an "userinfo" endpoint
     //
-    app.get('/userinfo',  auth.ensureLoggedIn(), (req, res) => { res.send({
-      username : req.user.username,
-      displayName : req.user.displayName
-    })})
+    app.get('/userinfo', (req, res) => {
+      if(!req.isAuthenticated || !req.isAuthenticated()) {
+        res.status(403).send("user not logged in")
+      }
+      else{
+        res.send({
+          username : req.user.username,
+          displayName : req.user.displayName
+        })
+      }
+    })
 
-    app.get('/permissions', (req, res) => res.send(defaultPermissions))
+    // the UI ask for the permissions of the related user to setup the UI in good fashion.
+    // This is just for the UI part. the backend protects the endpoints as well.
+    //
+    app.get('/permissions', (req, res) => {
+      if(!req.isAuthenticated || !req.isAuthenticated()) {
+        res.send(permissionsAnonym)
+      }
+      else{
+        res.send(permissionsUser)
+      }
+    })
 
-    // create the route for the three different apps of brainbox
+    // Serve the static content for the three different apps of brainbox
     // (designer, simulator, author)
     //
-    app.use(auth.ensureLoggedIn(),express.static(__dirname + '/../../frontend'));
+    app.use(express.static(__dirname + '/../../frontend'));
 
     // =================================================================
     // endpoints for shared circuits / sheets
@@ -212,9 +185,9 @@ module.exports = {
     // Handle pre-installed brain files
     //
     // =================================================================
-    app.get('/backend/global/brain/list',    auth.ensureLoggedIn(), (req, res) => module.exports.listFiles(brainsAppDir,      req.query.path, res))
-    app.get('/backend/global/brain/get',     auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(brainsAppDir,    req.query.filePath, res))
-    app.get('/backend/global/brain/image',   auth.ensureLoggedIn(), (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.get('/backend/global/brain/list',    (req, res) => module.exports.listFiles(brainsAppDir,      req.query.path, res))
+    app.get('/backend/global/brain/get',     (req, res) => module.exports.getJSONFile(brainsAppDir,    req.query.filePath, res))
+    app.get('/backend/global/brain/image',   (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
     app.post('/backend/global/brain/delete', auth.ensureLoggedIn(), (req, res) => module.exports.deleteFile(brainsAppDir,     req.body.filePath, res))
     app.post('/backend/global/brain/rename', auth.ensureLoggedIn(), (req, res) => module.exports.renameFile(brainsAppDir,     req.body.from, req.body.to, res))
     app.post('/backend/global/brain/save',   auth.ensureLoggedIn(), (req, res) => module.exports.writeBrain(brainsAppDir,     req.body.filePath, req.body.content, res))
@@ -224,8 +197,8 @@ module.exports = {
     // Handle pre-installed brain files
     //
     // =================================================================
-    app.get('/backend/global/sheet/list',    auth.ensureLoggedIn(), (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
-    app.get('/backend/global/sheet/get',     auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(sheetsAppDir,  req.query.filePath, res))
+    app.get('/backend/global/sheet/list',    (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
+    app.get('/backend/global/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsAppDir,  req.query.filePath, res))
     app.post('/backend/global/sheet/delete', auth.ensureLoggedIn(), (req, res) => module.exports.deleteFile(sheetsAppDir,   req.body.filePath, res))
     app.post('/backend/global/sheet/rename', auth.ensureLoggedIn(), (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
     app.post('/backend/global/sheet/save',   auth.ensureLoggedIn(), (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))

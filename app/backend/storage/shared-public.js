@@ -102,7 +102,7 @@ module.exports = {
     console.log("| System creates always a new one. It works like https://codepen.io        |")
     console.log("|                                                                          |")
     console.log("| "+"File Location:".bold+"                                                           |")
-    console.log("|    Circuit: "+brainsHomeDir)
+    console.log("|    Simulator: "+brainsHomeDir)
     console.log("|    Sheets: "+sheetsHomeDir)
 
 

@@ -1,0 +1,52 @@
+{
+  "featureset": {
+    "authentication": true,
+    "sharing": true
+  },
+  "updates": {
+    "update": true,
+    "list": true
+  },
+  "brains": {
+    "create": true,
+    "update": true,
+    "delete": true,
+    "read": true,
+    "list": true,
+    "global": {
+      "create": false,
+      "update": false,
+      "delete": false,
+      "read": true,
+      "list": true
+    }
+  },
+  "shapes": {
+    "create": false,
+    "update": false,
+    "delete": false,
+    "read": false,
+    "list": false,
+    "global": {
+      "create": false,
+      "update": false,
+      "delete": false,
+      "read": true,
+      "list": true
+    }
+  },
+  "sheets": {
+    "create": true,
+    "update": true,
+    "delete": true,
+    "read": true,
+    "list": true,
+    "global": {
+      "create": false,
+      "update": false,
+      "delete": false,
+      "read": true,
+      "list": true
+    }
+  }
+}
