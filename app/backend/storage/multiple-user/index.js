@@ -8,13 +8,13 @@ const Strategy = require('passport-local').Strategy
 const Session = require('express-session')
 const FileStore = require('session-file-store')(Session)
 
-const generic = require("./_base_")
-const update = require("../update")
-const {thumbnail} = require("../converter/thumbnail")
-const db = require('./multiple-user/db')
+const generic = require("../_base_")
+const update = require("../../update")
+const {thumbnail} = require("../../converter/thumbnail")
+const db = require('./db')
 
-let permissionsAnonym = require("./multiple-user/permissions-anonym")
-let permissionsUser   = require("./multiple-user/permissions-user")
+let permissionsAnonym = require("./permissions-anonym")
+let permissionsUser   = require("./permissions-user")
 
 let brainsHomeDir = null
 let sheetsHomeDir = null
@@ -76,7 +76,7 @@ module.exports = {
 
     // Configure view engine to render EJS templates for the login page
     //
-    app.set('views', __dirname + '/multiple-user/views');
+    app.set('views', __dirname + '/views');
     app.set('view engine', 'ejs');
     app.use(require('express-session')({ secret: 'keyboard cat', resave: false, saveUninitialized: false }));
 
@@ -96,9 +96,9 @@ module.exports = {
     //
     brainsHomeDir   = args.folder + "brains"+path.sep
     sheetsHomeDir   = args.folder + "sheets"+path.sep
-    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'sheets')+path.sep)
-    const shapesAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'shapes')+path.sep)
-    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'brains')+path.sep)
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'sheets')+path.sep)
+    const shapesAppDir    = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'brains')+path.sep)
 
     // Ensure that the required storage folder exists
     //
@@ -146,7 +146,7 @@ module.exports = {
     // Serve the static content for the three different apps of brainbox
     // (designer, simulator, author)
     //
-    app.use(express.static(__dirname + '/../../frontend'));
+    app.use(express.static(__dirname + '/../../../frontend'));
 
     // =================================================================
     // endpoints for shared circuits / sheets
@@ -241,7 +241,7 @@ module.exports = {
   },
 
   writeShape: function (baseDir, subDir, content, reason, res ){
-    const io = require('../comm/websocket').io
+    const io = require('../../comm/websocket').io
 
     module.exports.writeFile(baseDir, subDir, content, res, (err)=>{
       // inform the browser that the processing of the
@@ -269,7 +269,7 @@ module.exports = {
 
   writeBrain: function (baseDir, subDir, content, res ) {
     module.exports.writeFile(baseDir, subDir, content, res, (err) => {
-      const io = require('../comm/websocket').io
+      const io = require('../../comm/websocket').io
       io.sockets.emit("brain:generated", {
         filePath: subDir
       })

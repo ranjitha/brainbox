@@ -4914,14 +4914,18 @@ var Toolbar = function Toolbar(app, view, elementId, permissions) {
   this.userinfo = new _Userinfo2.default(permissions);
 
   this.saveButton = $("#editorFileSave");
-  this.saveButton.on("click", function () {
-    _this.saveButton.tooltip("hide");
-    app.fileSave();
-  });
-  Mousetrap.bindGlobal("ctrl+s", function (event) {
-    _this.saveButton.click();
-    return false;
-  });
+  if (permissions.sheets.update || permissions.sheets.create) {
+    this.saveButton.on("click", function () {
+      _this.saveButton.tooltip("hide");
+      app.fileSave();
+    });
+    Mousetrap.bindGlobal("ctrl+s", function () {
+      _this.saveButton.click();
+      return false;
+    });
+  } else {
+    this.saveButton.remove();
+  }
 
   /////////////////////////////////////////////
   // Editor Operations

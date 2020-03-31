@@ -56,9 +56,14 @@ class Application {
       authorDialog.show(conf)
     })
 
-    $("#editorFileSave").on("click", () => {
-      this.fileSave()
-    })
+    if(permissions.brains.update || permissions.brains.create) {
+      $("#editorFileSave").on("click", () => {
+        this.fileSave()
+      })
+    }
+    else{
+      $("#editorFileSave").remove()
+    }
 
 
     // check if the user has added a "file" parameter. In this case we load the shape from

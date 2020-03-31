@@ -1,4 +1,4 @@
-const _base_ = require("./_base_")
+const _base_ = require("../_base_")
 const path = require('path')
 const express = require('express')
 const shortid = require('shortid')
@@ -75,9 +75,9 @@ module.exports = {
 
     const brainsHomeDir   = path.join(folder ,"brains_db")
     const sheetsHomeDir   = path.join(folder ,"sheet_db")
-    const shapeAppDir     = path.normalize(path.join(__dirname, '..', '..', 'repository','shapes')+path.sep)
-    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository','brains')+path.sep)
-    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository','sheets')+path.sep)
+    const shapeAppDir     = path.normalize(path.join(__dirname, '..', '..', '..', 'repository','shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', '..', 'repository','brains')+path.sep)
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', '..', 'repository','sheets')+path.sep)
 
     // Ensure that the required storage folder exists
     //
@@ -112,7 +112,7 @@ module.exports = {
     // In this case only TWO post operation allows. "user.sheet" and "user.brain"
     // =================================================================
 
-    app.use(express.static(__dirname + '/../../frontend'));
+    app.use(express.static(__dirname + '/../../../frontend'));
 
     app.get('/permissions', (req, res) => res.send(defaultPermissions))
 

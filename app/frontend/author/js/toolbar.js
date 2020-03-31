@@ -15,14 +15,19 @@ export default class Toolbar {
     this.userinfo = new Userinfo(permissions)
 
     this.saveButton = $("#editorFileSave")
-    this.saveButton.on("click", () => {
-      this.saveButton.tooltip("hide")
-      app.fileSave()
-    })
-    Mousetrap.bindGlobal("ctrl+s", (event) => {
-      this.saveButton.click()
-      return false
-    })
+    if(permissions.sheets.update || permissions.sheets.create) {
+      this.saveButton.on("click", () => {
+        this.saveButton.tooltip("hide")
+        app.fileSave()
+      })
+      Mousetrap.bindGlobal("ctrl+s", () => {
+        this.saveButton.click()
+        return false
+      })
+    }
+    else{
+      this.saveButton.remove()
+    }
 
 
     /////////////////////////////////////////////

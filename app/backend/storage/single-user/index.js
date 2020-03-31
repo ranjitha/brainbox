@@ -1,10 +1,11 @@
-const generic = require("./_base_")
-const update = require("../update")
 const path = require('path')
 const express = require('express')
-const {thumbnail} = require("../converter/thumbnail")
 const colors = require('colors')
-const makeDir = require('make-dir');
+const makeDir = require('make-dir')
+
+const generic = require("../_base_")
+const update = require("../../update")
+const {thumbnail} = require("../../converter/thumbnail")
 
 // the permissions are exposed to the UI. The UI can enable/disable features regarding
 // this settings
@@ -69,9 +70,9 @@ module.exports = {
   init: function(app, args){
     const brainsHomeDir   = args.folder + "brains"+path.sep
     const sheetsHomeDir   = args.folder + "sheets"+path.sep
-    const sheetsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','sheets')+path.sep)
-    const shapesAppDir    = path.normalize(path.join(__dirname, '..','..','repository','shapes')+path.sep)
-    const brainsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','brains')+path.sep)
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..','..','..','repository','sheets')+path.sep)
+    const shapesAppDir    = path.normalize(path.join(__dirname, '..','..','..','repository','shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..','..','..','repository','brains')+path.sep)
 
     // Ensure that the required storage folder exists
     //
@@ -87,7 +88,7 @@ module.exports = {
     console.log("|    Simulator: "+brainsHomeDir)
     console.log("|    Author: "+sheetsHomeDir)
 
-    app.use(express.static(__dirname + '/../../frontend'));
+    app.use(express.static(__dirname + '/../../../frontend'));
 
     app.get('/permissions', (req, res) => res.send(defaultPermissions))
 
@@ -168,7 +169,7 @@ module.exports = {
   createFolder: generic.createFolder,
 
   writeShape: function (baseDir, subDir, content, reason, res ){
-    const io = require('../comm/websocket').io
+    const io = require('../../comm/websocket').io
 
     module.exports.writeFile(baseDir, subDir, content, res, (err)=>{
       // inform the browser that the processing of the
@@ -196,7 +197,7 @@ module.exports = {
 
   writeBrain: function (baseDir, subDir, content, res ) {
     module.exports.writeFile(baseDir, subDir, content, res, (err) => {
-      const io = require('../comm/websocket').io
+      const io = require('../../comm/websocket').io
       io.sockets.emit("brain:generated", {
         filePath: subDir
       })

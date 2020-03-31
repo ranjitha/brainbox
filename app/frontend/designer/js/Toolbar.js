@@ -14,6 +14,7 @@ import FigureTest from "./dialog/FigureTest"
 import simulatorDialog from "../../_common/js/SimulatorDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
+import Userinfo from "../../_common/js/Userinfo";
 
 export default class Toolbar {
 
@@ -52,7 +53,8 @@ export default class Toolbar {
       })
     }
 
-    if(permissions.shapes.update) {
+    console.log(permissions)
+    if(permissions.shapes.update || permissions.shapes.create) {
       this.saveButton = $('<div class="image-button"  id="editorFileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>')
       buttonGroup.append(this.saveButton)
       this.saveButton.on("click", () => {
@@ -286,7 +288,15 @@ export default class Toolbar {
                     </form>
                 </ul>
             </label>
-          </span>
+            <label id="userinfo_toggler" class="dropdown" >
+                  <span class="image-button"  id="userinfoButton" data-toggle="dropdown">
+                    <img  src="../_common/images/toolbar_user.svg"/>
+                  </span>
+
+                  <div class="dropdown-menu" role="menu" >
+                  </div>
+                </label>
+            </span>
     `)
     buttonGroup.append(appSwitchButtons)
     $(document).on("click", "#applicationSwitchSimulator", () => {
@@ -296,6 +306,10 @@ export default class Toolbar {
       authorDialog.show(conf)
     })
 
+
+    // now everything is in place and we can install the Userinfo event handler
+    //
+    this.userinfo = new Userinfo(permissions)
 
     // enable the tooltip for all buttons
     //

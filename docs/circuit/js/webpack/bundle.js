@@ -1354,9 +1354,13 @@ var Application = function () {
         _AuthorDialog2.default.show(_Configuration2.default);
       });
 
-      $("#editorFileSave").on("click", function () {
-        _this.fileSave();
-      });
+      if (permissions.brains.update || permissions.brains.create) {
+        $("#editorFileSave").on("click", function () {
+          _this.fileSave();
+        });
+      } else {
+        $("#editorFileSave").remove();
+      }
 
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
