@@ -7,7 +7,7 @@ export default class Userinfo {
 
   constructor(permissions){
 
-    if(permissions.authentication.enabled === false){
+    if(permissions.featureset.authentication === false){
       $("#userinfo_toggler").remove()
     }
     else {

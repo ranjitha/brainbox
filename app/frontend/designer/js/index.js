@@ -1,10 +1,9 @@
+import axios from "axios"
 
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import global from "./global"
 import conf from "./Configuration"
-
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
@@ -67,8 +66,9 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("permissions", (permissions) => {
-    socket.off("permissions")
+  axios.get("../permissions").then( (response) => {
+    let permissions = response.data
+
     app = require("./Application")
     app.init(permissions)
     shape_designer.app = app

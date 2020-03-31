@@ -893,7 +893,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Userinfo = function Userinfo(permissions) {
   _classCallCheck(this, Userinfo);
 
-  if (permissions.authentication.enabled === false) {
+  if (permissions.featureset.authentication === false) {
     $("#userinfo_toggler").remove();
   } else {
     _axios2.default.get("../userinfo").then(function (response) {
@@ -4780,6 +4780,10 @@ module.exports = exports["default"];
 "use strict";
 
 
+var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
 __webpack_require__(/*! ../less/index.less */ "./app/frontend/author/less/index.less");
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/font-awesome/css/font-awesome.css");
@@ -4842,8 +4846,8 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("permissions", function (permissions) {
-    socket.off("permissions");
+  _axios2.default.get("../permissions").then(function (response) {
+    var permissions = response.data;
     // we must load the "shape/index.js" in the global scope.
     //
     $.getScript(_configuration2.default.shapes.url + "index.js", function () {

@@ -56,63 +56,62 @@ function userFolder(baseFolder, req){
   return baseFolder+ req.user.username+path.sep
 }
 
-// Storage backend for the personal usage
-//
-module.exports = {
-  // the permissions are exposed to the UI. The UI can enable/disable features regardings
-  // this settings
-  permissions: {
-    authentication:{
-      enabled: true
-    },
-    updates:{
-      update: true,
+let defaultPermissions = {
+  featureset:{
+    authentication: true,
+      sharing: true
+  },
+  updates:{
+    update: true,
       list: true
-    },
-    brains:{
-      create: true,
+  },
+  brains:{
+    create: true,
       update: true,
       delete: true,
       read: true,
       list:  true,
       global:  {
-        create: false,
+      create: false,
         update: false,
         delete: false,
         read: true,
         list: true
-      }
-    },
-    shapes:{
-      create: false,
+    }
+  },
+  shapes:{
+    create: false,
       update: false,
       delete: false,
       read: false,
       list: false,
       global:  {
-        create: false,
+      create: false,
         update: false,
         delete: false,
         read: true,
         list: true
-      }
-    },
-    sheets:{
-      create: true,
+    }
+  },
+  sheets:{
+    create: true,
       update: true,
       delete: true,
       read: true,
       list: true,
       global: {
-        create: false,
+      create: false,
         update: false,
         delete: false,
         read: true,
         list: true
-      }
     }
-  },
+  }
+}
 
+// Storage backend for the personal usage
+//
+module.exports = {
 
   init: function(app, args){
     // add & configure middleware
@@ -141,17 +140,19 @@ module.exports = {
 
     brainsHomeDir   = args.folder + "brains"+path.sep
     sheetsHomeDir   = args.folder + "sheets"+path.sep
-    const sheetsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','sheets')+path.sep)
-    const shapesAppDir    = path.normalize(path.join(__dirname, '..','..','repository','shapes')+path.sep)
-    const brainsAppDir    = path.normalize(path.join(__dirname, '..','..','repository','brains')+path.sep)
+    const sheetsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'sheets')+path.sep)
+    const shapesAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'shapes')+path.sep)
+    const brainsAppDir    = path.normalize(path.join(__dirname, '..', '..', 'repository', 'brains')+path.sep)
 
     // Ensure that the required storage folder exists
     //
     makeDir(sheetsHomeDir)
     makeDir(brainsHomeDir)
 
-    console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
-    console.log("| This kind of storage is perfect for personal usage.                      |")
+    console.log("| You are using the "+"'multiple-user'".bold.green+" file storage engine.                   |")
+    console.log("| This kind of storage is perfect for small or medium user groups.         |")
+    console.log("| It contains a simple user management and a basic login page.             |")
+    console.log("|                                                                          |")
     console.log("| You can choose another storage with the '--storage' command line argument|")
     console.log("|                                                                          |")
     console.log("| User File Locations:                                                     |")
@@ -167,10 +168,21 @@ module.exports = {
       displayName : req.user.displayName
     })})
 
+    app.get('/permissions', (req, res) => res.send(defaultPermissions))
+
     // create the route for the three different apps of brainbox
     // (designer, simulator, author)
     //
     app.use(auth.ensureLoggedIn(),express.static(__dirname + '/../../frontend'));
+
+    // =================================================================
+    // endpoints for shared circuits / sheets
+    //
+    // =================================================================
+    app.get('/backend/shared/sheet/get',   auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(sharedFolder(sheetsHomeDir, req), req.query.filePath, res))
+    app.post('/backend/shared/sheet/save', auth.ensureLoggedIn(), (req, res) => module.exports.writeSheet(sharedFolder(sheetsHomeDir, req),  req.body.filePath, req.body.content, res))
+    app.get('/backend/shared/brain/get',   auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(sharedFolder(brainsHomeDir, req), req.query.filePath, res))
+    app.post('/backend/shared/brain/save', auth.ensureLoggedIn(), (req, res) => module.exports.writeBrain(sharedFolder(brainsHomeDir, req),  req.body.filePath, req.body.content, res))
 
     // =================================================================
     // Handle user Author files
@@ -178,7 +190,6 @@ module.exports = {
     // =================================================================
     app.get('/backend/user/sheet/list',   auth.ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(sheetsHomeDir, req),      req.query.path, res))
     app.get('/backend/user/sheet/get',    auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(sheetsHomeDir, req),    req.query.filePath, res))
-    app.get('/backend/user/sheet/desc',   auth.ensureLoggedIn(), (req, res) => module.exports.getBase64Image(userFolder(sheetsHomeDir, req), req.query.filePath, res))
     app.post('/backend/user/sheet/delete',auth.ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(sheetsHomeDir, req),     req.body.filePath, res))
     app.post('/backend/user/sheet/rename',auth.ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req),     req.body.from, req.body.to, res))
     app.post('/backend/user/sheet/save',  auth.ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req),     req.body.filePath, req.body.content, res))
@@ -225,9 +236,9 @@ module.exports = {
     //
     // =================================================================
     app.use('/shapes/global', express.static(shapesAppDir));
-    app.get('/backend/global/shape/list',    auth.ensureLoggedIn(), (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
-    app.get('/backend/global/shape/get',     auth.ensureLoggedIn(), (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
-    app.get('/backend/global/shape/image',   auth.ensureLoggedIn(), (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
+    app.get('/backend/global/shape/list',    (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
+    app.get('/backend/global/shape/get',     (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
+    app.get('/backend/global/shape/image',   (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
     app.post('/backend/global/shape/delete', auth.ensureLoggedIn(), (req, res) => module.exports.deleteFile(shapesAppDir,     req.body.filePath, res))
     app.post('/backend/global/shape/rename', auth.ensureLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
     app.post('/backend/global/shape/save',   auth.ensureLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))

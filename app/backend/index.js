@@ -71,38 +71,6 @@ async function  runServer() {
 
   await storage.init(app, program)
 
-  console.log("|                                                                          |")
-  console.log("| "+"Enabled Features:".bold+"                                                        |")
-  console.log("|   "+"Authentication".bold+"                                                         |")
-  console.log(`|   [${storage.permissions.authentication.enabled?'X':' '}] Login Screen                                                       |`)
-  console.log("|                                                                          |")
-  console.log("|   "+"Circuit Simulator".bold+"                                                      |")
-  console.log(`|   [${storage.permissions.brains.create?'X'.green:' '}] Save new circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.update?'X'.green:' '}] Update circuit diagrams                                            |`)
-  console.log(`|   [${storage.permissions.brains.list  ?'X'.green:' '}] Show all circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.demos ?'X'.green:' '}] Show demo circuit diagrams                                         |`)
-  console.log(`|   [${storage.permissions.brains.delete?'X'.green:' '}] Delete a circuit diagrams                                          |`)
-  console.log(`|   [${storage.permissions.brains.read  ?'X'.green:' '}] Open a circuit diagrams                                            |`)
-  console.log("|                                                                          |")
-  console.log("|   "+"Shape Designer".bold+"                                                         |")
-  console.log(`|   [${storage.permissions.shapes.create?'X'.green:' '}] Create new shapes                                                  |`)
-  console.log(`|   [${storage.permissions.shapes.update?'X'.green:' '}] Change existing shapes                                             |`)
-  console.log(`|   [${storage.permissions.shapes.list  ?'X'.green:' '}] Show all shapes                                                    |`)
-  console.log(`|   [${storage.permissions.shapes.delete?'X'.green:' '}] Delete an existing shape                                           |`)
-  console.log(`|   [${storage.permissions.shapes.read  ?'X'.green:' '}] Using a shape                                                      |`)
-  console.log("|                                                                          |")
-  console.log("|   "+"Updates".bold+"                                                                |")
-  console.log(`|   [${storage.permissions.updates.list?'X'.green:' '}] Show available updates                                             |`)
-  console.log(`|   [${storage.permissions.updates.update?'X'.green:' '}] Allow to install available updates                                 |`)
-  console.log("|                                                                          |")
-  console.log("| "+"Hardware Connection:".bold+"                                                     |")
-  console.log(`|   [${program.arduino?'X'.green:' '}] Connect Arduino via USB                                            |`)
-
-  console.log("|==========================================================================|")
-
-  io.on('connection', socket => {
-    socket.emit('permissions', storage.permissions);
-  })
 
   http.listen(program.port, function () {
     console.log('| System is up and running. Copy the URL below and open this               |');

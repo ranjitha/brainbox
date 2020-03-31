@@ -1,3 +1,4 @@
+import axios from "axios"
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import conf from "./configuration"
@@ -62,8 +63,8 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("permissions", (permissions) => {
-    socket.off("permissions")
+  axios.get("../permissions").then( (response) => {
+    let permissions = response.data
     // we must load the "shape/index.js" in the global scope.
     //
     $.getScript(conf.shapes.url + "index.js", function () {

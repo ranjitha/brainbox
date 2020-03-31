@@ -1,3 +1,4 @@
+import axios from "axios"
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 
@@ -61,8 +62,8 @@ $(window).load(function () {
   // Init the UI after we have receive the UI/UX permissions of this kind of installation
   // (fake event from the socket.io mock )
   //
-  socket.on("permissions", (permissions) => {
-    socket.off(permissions)
+  axios.get("../permissions").then( (response) => {
+    let permissions = response.data
 
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code

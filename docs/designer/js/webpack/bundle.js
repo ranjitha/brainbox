@@ -6466,6 +6466,10 @@ module.exports = exports["default"];
 "use strict";
 
 
+var _axios = __webpack_require__(/*! axios */ "../../node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
 __webpack_require__(/*! ../less/index.less */ "../../app/frontend/designer/less/index.less");
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "../../node_modules/font-awesome/css/font-awesome.css");
@@ -6483,8 +6487,6 @@ __webpack_require__(/*! ./figure/index */ "../../app/frontend/designer/js/figure
 __webpack_require__(/*! ./filter/index */ "../../app/frontend/designer/js/filter/index.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
@@ -6535,8 +6537,9 @@ $(window).load(function () {
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //
-  socket.on("permissions", function (permissions) {
-    socket.off("permissions");
+  _axios2.default.get("../permissions").then(function (response) {
+    var permissions = response.data;
+
     app = __webpack_require__(/*! ./Application */ "../../app/frontend/designer/js/Application.js");
     app.init(permissions);
     shape_designer.app = app;

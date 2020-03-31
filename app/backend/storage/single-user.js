@@ -6,63 +6,64 @@ const {thumbnail} = require("../converter/thumbnail")
 const colors = require('colors')
 const makeDir = require('make-dir');
 
-
-// Storage backend for the personal usage
-//
-module.exports = {
-  // the permissions are exposed to the UI. The UI can enable/disable features regardings
-  // this settings
-  permissions: {
-    authentication:{
-      enabled: false
-    },
-    updates:{
-      update: true,
+// the permissions are exposed to the UI. The UI can enable/disable features regarding
+// this settings
+let defaultPermissions = {
+  featureset:{
+    authentication: false,
+      sharing: false
+  },
+  updates:{
+    update: true,
       list: true
-    },
-    brains:{
-      create: true,
+  },
+  brains:{
+    create: true,
       update: true,
       delete: true,
       read: true,
       list:  true,
       global:  {
-        create: true,
+      create: true,
         update: true,
         delete: true,
         read: true,
         list: true
-      }
-    },
-    shapes:{
-      create: false,
+    }
+  },
+  shapes:{
+    create: false,
       update: false,
       delete: false,
       read: false,
       list: false,
       global:  {
-        create: true,
+      create: true,
         update: true,
         delete: false,
         read: true,
         list: true
-      }
-    },
-    sheets:{
-      create: true,
+    }
+  },
+  sheets:{
+    create: true,
       update: true,
       delete: true,
       read: true,
       list: true,
       global: {
-        create: true,
+      create: true,
         update: true,
         delete: true,
         read: true,
         list: true
-      }
     }
-  },
+  }
+}
+
+// Storage backend for the personal usage
+//
+module.exports = {
 
 
   init: function(app, args){
@@ -78,7 +79,7 @@ module.exports = {
     makeDir(brainsHomeDir)
 
 
-    console.log("| You are using the "+"'personal'".bold.green+" file storage engine.                        |")
+    console.log("| You are using the "+"'single-user'".bold.green+" file storage engine.                     |")
     console.log("| This kind of storage is perfect for personal usage.                      |")
     console.log("| You can choose another storage with the '--storage' command line argument|")
     console.log("|                                                                          |")
@@ -88,13 +89,14 @@ module.exports = {
 
     app.use(express.static(__dirname + '/../../frontend'));
 
+    app.get('/permissions', (req, res) => res.send(defaultPermissions))
+
     // =================================================================
     // Handle user Author files
     //
     // =================================================================
     app.get('/backend/user/sheet/list',    (req, res) => module.exports.listFiles(sheetsHomeDir,      req.query.path, res))
     app.get('/backend/user/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
-    app.get('/backend/user/sheet/desc',    (req, res) => module.exports.getBase64Image(sheetsHomeDir, req.query.filePath, res))
     app.post('/backend/user/sheet/delete', (req, res) => module.exports.deleteFile(sheetsHomeDir,     req.body.filePath, res))
     app.post('/backend/user/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
     app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,     req.body.filePath, req.body.content, res))
