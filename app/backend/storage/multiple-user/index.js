@@ -8,6 +8,7 @@ const passport = require('passport')
 const Strategy = require('passport-local').Strategy
 const Session = require('express-session')
 const FileStore = require('session-file-store')(Session)
+const bcrypt = require("bcrypt")
 
 const generic = require("../_base_")
 const update = require("../../update")
@@ -32,12 +33,19 @@ let sheetsSharedDir = null
 passport.use(new Strategy(
   function(username, password, cb) {
     db.users.findByUsername(username, function(err, user) {
-      if (err) { return cb(err); }
-      if (!user) { return cb(null, false); }
-      if (user.password !== password) { return cb(null, false); }
-      return cb(null, user);
-    });
-  }));
+      if (err)   { return cb(err) }
+      if (!user) { return cb(null, false) }
+
+      bcrypt.compare(password, user.password)
+        .then(function(result) {
+          if(result){
+            return cb(null, user)
+          }
+          return cb(null, false)
+        })
+
+    })
+  }))
 
 // Configure Passport authenticated session persistence.
 //
@@ -105,6 +113,8 @@ module.exports = {
 
   init: function(app, args){
 
+    db.users.init(app, args)
+
     // add & configure middleware
     app.use(Session({
       genid: () =>  uuid(),
@@ -122,8 +132,8 @@ module.exports = {
 
     // Initialize Passport and restore authentication state, if any, from the
     // session.
-    app.use(passport.initialize());
-    app.use(passport.session());
+    app.use(passport.initialize())
+    app.use(passport.session())
 
     // inject the authentication endpoints.
     //

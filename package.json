@@ -61,6 +61,7 @@
   "dependencies": {
     "@octokit/rest": "^17.1.0",
     "axios": "^0.19.2",
+    "bcrypt": "^4.0.1",
     "body-parser": "1.18.3",
     "bootstrap-toggle": "^2.2.2",
     "codemirror": "^5.26.0",
@@ -83,6 +84,7 @@
     "levelup": "^4.3.2",
     "lodash": "^4.17.15",
     "lodash.assign": "^4.2.0",
+    "lowdb": "^1.0.0",
     "make-dir": "^3.0.2",
     "markdown-it": "^10.0.0",
     "markdown-it-asciimath": "^1.0.0",
