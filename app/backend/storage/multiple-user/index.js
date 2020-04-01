@@ -202,10 +202,23 @@ module.exports = {
       }
     })
 
+
+    let userRest = require("./user-rest")
+    app.get('/backend/admin/user',        ensureAdminLoggedIn(), userRest.list)
+    app.get('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.get)
+    app.delete('/backend/admin/user/:id', ensureAdminLoggedIn(), userRest.delete)
+    app.put('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.put)
+    app.post('/backend/admin/user',       ensureAdminLoggedIn(), userRest.post)
+
+
     // Serve the static content for the three different apps of brainbox
     // (designer, simulator, author)
     //
-    app.use(express.static(__dirname + '/../../../frontend'));
+    app.use('/_common',  express.static(__dirname + '/../../../frontend/_common'));
+    app.use('/designer', express.static(__dirname + '/../../../frontend/designer'));
+    app.use('/circuit',  express.static(__dirname + '/../../../frontend/designer'));
+    app.use('/author',   express.static(__dirname + '/../../../frontend/designer'));
+    app.use('/user',     ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
 
 
     // =================================================================

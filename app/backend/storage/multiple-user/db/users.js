@@ -10,17 +10,15 @@ let db = null
 let salt = null
 
 let defaultUsers = [
-  { id: 1, username: 'admin', password: 'secret', displayName: 'Admin', role:"admin", email: 'admin@example.com' },
-  { id: 2, username: 'jack',  password: 'secret', displayName: 'Jack',  role:"user",  email: 'jack@example.com' },
-  { id: 3, username: 'jill',  password: 'secret', displayName: 'Jill',  role:"user",  email: 'jill@example.com' }
+  { id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role:"admin", email: 'admin@example.com' },
+  { id: "2", username: 'jack',  password: 'secret', displayName: 'Jack',  role:"user",  email: 'jack@example.com' },
+  { id: "3", username: 'jill',  password: 'secret', displayName: 'Jill',  role:"user",  email: 'jill@example.com' }
 ]
 
 exports.init = async function(app, args){
   let userDBDir  = path.join(args.folder, "users", path.sep)
   let userDBFile = path.join(userDBDir, 'db.json')
   let initialRun = !fs.existsSync(userDBFile)
-
-  console.log(initialRun)
 
   // Ensure that the required storage folder exists
   //
@@ -67,6 +65,49 @@ exports.findByUsername = function(username, cb) {
       .get('users')
       .find({ username })
       .value()
+    return cb(null, user)
+  })
+}
+
+exports.all = function(cb) {
+  process.nextTick(function() {
+    let users = db
+      .get('users')
+      .value()
+    users.forEach( user => {
+      delete user.password
+    })
+    return cb(null, users)
+  })
+}
+
+exports.delete = function(id, cb) {
+  process.nextTick(function() {
+    db
+      .get('users')
+      .remove({ id })
+      .write()
+    return cb(null)
+  })
+}
+
+exports.update = function(id, user, cb) {
+  process.nextTick(function() {
+    db
+      .get('users')
+      .find({ id })
+      .assign(user)
+      .write()
+    return cb(null, user)
+  })
+}
+
+exports.create = function(user, cb) {
+  process.nextTick(function() {
+    db
+      .get('users')
+      .push(user)
+      .write()
     return cb(null, user)
   })
 }
