@@ -47,7 +47,6 @@ exports.init = async function(app, args){
   }
 }
 
-
 exports.findById = function(id, cb) {
   process.nextTick(function() {
     let user = db

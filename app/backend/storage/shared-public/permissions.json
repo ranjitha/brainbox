@@ -1,23 +1,23 @@
 {
-  "featureset": {
-    "authentication": true,
+  "featureset":{
+    "authentication": false,
     "sharing": false,
     "simulator": true,
     "designer": true,
     "author": true,
     "usermanagement": false
   },
-  "updates": {
+  "updates":{
     "update": false,
     "list": false
   },
-  "brains": {
-    "create": false,
+  "brains":{
+    "create": true,
     "update": false,
     "delete": false,
     "read": true,
     "list": false,
-    "global": {
+    "global":  {
       "create": false,
       "update": false,
       "delete": false,
@@ -25,13 +25,13 @@
       "list": true
     }
   },
-  "shapes": {
+  "shapes":{
     "create": false,
     "update": false,
     "delete": false,
     "read": false,
     "list": false,
-    "global": {
+    "global":  {
       "create": false,
       "update": false,
       "delete": false,
@@ -39,13 +39,13 @@
       "list": true
     }
   },
-  "sheets": {
-    "create": false,
+  "sheets":{
+    "create": true,
     "update": false,
     "delete": false,
     "read": true,
     "list": false,
-    "global": {
+    "global":  {
       "create": false,
       "update": false,
       "delete": false,

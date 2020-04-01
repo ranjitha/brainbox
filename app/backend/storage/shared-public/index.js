@@ -13,58 +13,7 @@ let dbs = []
 // the permissions are exposed to the UI. The UI can enable/disable features regarding
 // to the settings. Each persistence has its very own behaviour and feature set
 //
-let defaultPermissions = {
-  featureset:{
-    authentication: false,
-      sharing: false
-  },
-  updates:{
-    update: false,
-      list: false
-  },
-  brains:{
-    create: true,
-      update: false,
-      delete: false,
-      read: true,
-      list: false,
-      global:  {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  },
-  shapes:{
-    create: false,   // in hosted mode it is not allowed to create personal shapes...makes no sense
-      update: false,   // no personal shapes right now
-      delete: false,   // no personal shapes right now
-      read: false,     // no personal shapes right now
-      list: false,     // no personal shapes right now
-      global:  {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  },
-  sheets:{
-    create: true,
-      update: false,   // no modification of existing shapes..just create a new one
-      delete: false,   // no modification of existing shapes..just create a new one
-      read: true,
-      list: false,     // we didn't expose all existing sheets. the user must copy&paste the URL for further access
-      global:  {
-      create: false,
-        update: false,
-        delete: false,
-        read: true,
-        list: true
-    }
-  }
-}
+let defaultPermissions = require("./permissions")
 
 module.exports = {
 

@@ -9,58 +9,7 @@ const {thumbnail} = require("../../converter/thumbnail")
 
 // the permissions are exposed to the UI. The UI can enable/disable features regarding
 // this settings
-let defaultPermissions = {
-  featureset:{
-    authentication: false,
-      sharing: false
-  },
-  updates:{
-    update: true,
-      list: true
-  },
-  brains:{
-    create: true,
-      update: true,
-      delete: true,
-      read: true,
-      list:  true,
-      global:  {
-      create: true,
-        update: true,
-        delete: true,
-        read: true,
-        list: true
-    }
-  },
-  shapes:{
-    create: false,
-      update: false,
-      delete: false,
-      read: false,
-      list: false,
-      global:  {
-      create: true,
-        update: true,
-        delete: false,
-        read: true,
-        list: true
-    }
-  },
-  sheets:{
-    create: true,
-      update: true,
-      delete: true,
-      read: true,
-      list: true,
-      global: {
-      create: true,
-        update: true,
-        delete: true,
-        read: true,
-        list: true
-    }
-  }
-}
+let defaultPermissions = require("./permissions")
 
 // Storage backend for the personal usage
 //
