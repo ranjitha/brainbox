@@ -52,8 +52,7 @@ export default class Toolbar {
         return false
       })
     }
-
-    console.log(permissions)
+    debugger
     if(permissions.shapes.update || permissions.shapes.create) {
       this.saveButton = $('<div class="image-button"  id="editorFileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="./images/toolbar_upload.svg"/><div>Save</div></div>')
       buttonGroup.append(this.saveButton)

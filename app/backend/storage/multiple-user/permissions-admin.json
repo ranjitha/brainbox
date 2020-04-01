@@ -4,8 +4,8 @@
     "share": true
   },
   "updates": {
-    "update": false,
-    "list": false
+    "update": true,
+    "list": true
   },
   "brains": {
     "create": true,
@@ -28,9 +28,9 @@
     "read": false,
     "list": false,
     "global": {
-      "create": false,
-      "update": false,
-      "delete": false,
+      "create": true,
+      "update": true,
+      "delete": true,
       "read": true,
       "list": true
     }
@@ -42,9 +42,9 @@
     "read": true,
     "list": true,
     "global": {
-      "create": false,
-      "update": false,
-      "delete": false,
+      "create": true,
+      "update": true,
+      "delete": true,
       "read": true,
       "list": true
     }

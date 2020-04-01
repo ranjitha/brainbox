@@ -29,6 +29,17 @@ export default class Toolbar {
       this.saveButton.remove()
     }
 
+    this.shareButton = $("#editorFileShare")
+    if(permissions.featureset.share) {
+      this.shareButton.on("click", () => {
+        this.shareButton.tooltip("hide")
+        app.fileShare()
+      })
+    }
+    else{
+      this.shareButton.remove()
+    }
+
 
     /////////////////////////////////////////////
     // Editor Operations

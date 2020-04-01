@@ -1,3 +1,4 @@
+import shareDialog from "../../_common/js/LinkShareDialog"
 import Files from "../../_common/js/FilesScreen"
 
 import Toolbar from "./toolbar"
@@ -43,6 +44,7 @@ class Application {
 
     let user = this.getParam("user")
     let global = this.getParam("global")
+    let shared = this.getParam("shared")
     if (user) {
       $("#leftTabStrip .editor").click()
       this.load(user, "user")
@@ -53,6 +55,10 @@ class Application {
     else if (global) {
       $("#leftTabStrip .editor").click()
       this.load(global, "global")
+    }
+    else if (shared) {
+      $("#leftTabStrip .editor").click()
+      this.load(shared, "shared")
     }
 
     // listen on the history object to load files
@@ -108,6 +114,17 @@ class Application {
       fileSave.save(this.currentFile, this.storage, this.view, callback)
     }
 
+  }
+
+
+  fileShare() {
+    let json = this.view.document
+    storage.saveFile(json, "unused", "shared")
+      .then(( response) => {
+        let data = response.data
+        let file = data.filePath
+        shareDialog.show(file)
+      })
   }
 
   load(name, scope){

@@ -14,7 +14,10 @@ export default {
 
   backend: {
 
-    configuration:  `../backend/configuration`,
+    shared: {
+      get:    file  => `../backend/shared/brain/get?filePath=${file}`,
+      save:            `../backend/shared/brain/save`,
+    },
 
     user: {
       list:   path => `../backend/user/brain/list?path=${path}`,

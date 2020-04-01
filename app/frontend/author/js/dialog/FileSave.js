@@ -120,6 +120,7 @@ class Dialog {
         }
       });
   }
+
 }
 
 let dialog = new Dialog()
