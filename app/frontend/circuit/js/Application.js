@@ -6,6 +6,7 @@
  */
 import Userinfo from "../../_common/js/Userinfo"
 import designerDialog from "../../_common/js/DesignerDialog"
+import userAdminDialog from "../../_common/js/UserAdminDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
 import checkElement from "../../_common/js/checkElement"
@@ -38,7 +39,7 @@ class Application {
     this.view = new View("draw2dCanvas", permissions)
     this.filePane = new Files(conf, permissions.brains)
     this.addonPane = new Addons(permissions)
-    this.userinfo = new Userinfo(permissions)
+    this.userinfo = new Userinfo(permissions, conf)
 
     // Show the user an alert if there are unsaved changes
     //
@@ -55,6 +56,14 @@ class Application {
     $("#applicationSwitchAuthor").on("click", () => {
       authorDialog.show(conf)
     })
+    if(permissions.featureset.usermanagement===true) {
+      $(document).on("click", "#applicationSwitchUser", () => {
+        userAdminDialog.show(conf)
+      })
+    }
+    else{
+      $("#applicationSwitchUser").remove()
+    }
 
     if(permissions.brains.update || permissions.brains.create) {
       $("#editorFileSave").on("click", () => {

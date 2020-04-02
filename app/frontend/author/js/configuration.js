@@ -1,6 +1,7 @@
 export default {
   fileSuffix: ".sheet",
   appName: "Brainbox Author",
+  loginRedirect: "./author/",
 
   backend: {
     shared: {
@@ -36,6 +37,10 @@ export default {
   color: {
     high: "#C21B7A",
     low:  "#0078F2"
+  },
+
+  useradmin: {
+    url: "../user"
   },
 
   designer: {

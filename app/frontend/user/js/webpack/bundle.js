@@ -96,6 +96,132 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/frontend/_common/js/AuthorDialog.js":
+/*!*************************************************!*\
+  !*** ./app/frontend/_common/js/AuthorDialog.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf) {
+      window.open(conf.author.url, "author");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/DesignerDialog.js":
+/*!***************************************************!*\
+  !*** ./app/frontend/_common/js/DesignerDialog.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+__webpack_require__(/*! google-code-prettify/bin/prettify.min.css */ "./node_modules/google-code-prettify/bin/prettify.min.css");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf, figure) {
+      if (figure) {
+        var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
+        var pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "&global=" + baseName + ".shape";
+        window.open(pathToDesign, "designer");
+      } else {
+        var _pathToDesign = conf.designer.url;
+        window.open(_pathToDesign, "designer");
+      }
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/SimulatorDialog.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/_common/js/SimulatorDialog.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf) {
+      window.open(conf.simulator.url, "circuit");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/Userinfo.js":
 /*!*********************************************!*\
   !*** ./app/frontend/_common/js/Userinfo.js ***!
@@ -121,7 +247,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Userinfo = function () {
-  function Userinfo(permissions) {
+  function Userinfo(permissions, conf) {
     var _this = this;
 
     _classCallCheck(this, Userinfo);
@@ -136,13 +262,13 @@ var Userinfo = function () {
         $("#userinfo_toggler img").attr("src", icon);
         $("#userinfo_toggler .dropdown-menu").html(" \n              <div class=\"userContainer\">\n                <img  src=\"" + icon + "\"/>\n                <div>" + _this.user.displayName + "</div>\n                <div>" + role + "</div>\n                <button class=\"logoutButton\">Logout</button>\n              </div>\n          ");
         $("#userinfo_toggler .logoutButton").on("click", function () {
-          window.location.replace("../logout");
+          window.location.replace("../logout?returnTo=" + conf.loginRedirect);
         });
       }).catch(function () {
         var loginButton = $("<button class='loginButton'>Login</button>");
         $("#userinfo_toggler").html(loginButton);
         loginButton.on("click", function () {
-          window.location.replace("../login");
+          window.location.replace("../login?returnTo=" + conf.loginRedirect);
         });
       });
     }
@@ -450,7 +576,7 @@ var App = function () {
       this.palette = new Palette(this);
       this.view = new View(this);
       this.toolbar = new Toolbar(this);
-      this.userinfo = new Userinfo(permissions, this);
+      this.userinfo = new Userinfo(permissions, conf);
     }
   }]);
 
@@ -477,8 +603,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  fileSuffix: ".sheet",
-  appName: "Brainbox Author",
+  appName: "Brainbox Admin",
+  loginRedirect: "./user/",
 
   backend: {
     admin: {
@@ -514,22 +640,16 @@ exports.default = {
     }
   },
 
-  shapes: {
-    url: "../shapes/global/",
-    version: "0.0.0" // updated during after loading from the index.json file
-  },
-
-  color: {
-    high: "#C21B7A",
-    low: "#0078F2"
-  },
-
   designer: {
-    url: "../designer/"
+    url: "../designer"
   },
 
   simulator: {
     url: "../circuit/"
+  },
+
+  author: {
+    url: "../author/"
   }
 
 };
@@ -624,6 +744,22 @@ var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_
 
 var _toast2 = _interopRequireDefault(_toast);
 
+var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
+
+var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
+
+var _SimulatorDialog = __webpack_require__(/*! ../../_common/js/SimulatorDialog */ "./app/frontend/_common/js/SimulatorDialog.js");
+
+var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
+
+var _AuthorDialog = __webpack_require__(/*! ../../_common/js/AuthorDialog */ "./app/frontend/_common/js/AuthorDialog.js");
+
+var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
+
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/user/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -636,10 +772,8 @@ var Toolbar = function Toolbar(app) {
     $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
       var element = $(e);
       var field = element.data("id");
-      console.log(field, element.val());
       user[field] = element.val();
     });
-    console.log(user);
     _Users2.default.save(user).then(function (updatedUser) {
       (0, _toast2.default)("Saved");
       app.view.setUser(updatedUser);
@@ -663,6 +797,16 @@ var Toolbar = function Toolbar(app) {
       });
       app.palette.update();
     });
+  });
+
+  $(document).on("click", "#applicationSwitchSimulator", function () {
+    _SimulatorDialog2.default.show(_Configuration2.default);
+  });
+  $(document).on("click", "#applicationSwitchAuthor", function () {
+    _AuthorDialog2.default.show(_Configuration2.default);
+  });
+  $(document).on("click", "#applicationSwitchDesigner", function () {
+    _DesignerDialog2.default.show(_Configuration2.default);
   });
 };
 
@@ -2799,6 +2943,25 @@ exports.push([module.i, "/*!\n *  Font Awesome 4.7.0 by @davegandy - http://font
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js!./node_modules/google-code-prettify/bin/prettify.min.css":
+/*!******************************************************************************************!*\
+  !*** ./node_modules/css-loader!./node_modules/google-code-prettify/bin/prettify.min.css ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".pln{color:#000}@media screen{.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.pun,.opn,.clo{color:#660}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec,.var{color:#606}.fun{color:red}}@media print,projection{.str{color:#060}.kwd{color:#006;font-weight:bold}.com{color:#600;font-style:italic}.typ{color:#404;font-weight:bold}.lit{color:#044}.pun,.opn,.clo{color:#440}.tag{color:#006;font-weight:bold}.atn{color:#404}.atv{color:#060}}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style-type:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js!./node_modules/less-loader/dist/cjs.js!./app/frontend/user/less/index.less":
 /*!************************************************************************************************************!*\
   !*** ./node_modules/css-loader!./node_modules/less-loader/dist/cjs.js!./app/frontend/user/less/index.less ***!
@@ -3026,6 +3189,37 @@ module.exports = "js/webpack/af7ae505a9eed503f8b8e6982036873e.woff2";
 /***/ (function(module, exports) {
 
 module.exports = "js/webpack/fee66e712a8a08eef5805a46892932ad.woff";
+
+/***/ }),
+
+/***/ "./node_modules/google-code-prettify/bin/prettify.min.css":
+/*!****************************************************************!*\
+  !*** ./node_modules/google-code-prettify/bin/prettify.min.css ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var api = __webpack_require__(/*! ../../style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+            var content = __webpack_require__(/*! !../../css-loader!./prettify.min.css */ "./node_modules/css-loader/index.js!./node_modules/google-code-prettify/bin/prettify.min.css");
+
+            content = content.__esModule ? content.default : content;
+
+            if (typeof content === 'string') {
+              content = [[module.i, content, '']];
+            }
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = api(content, options);
+
+var exported = content.locals ? content.locals : {};
+
+
+
+module.exports = exported;
 
 /***/ }),
 

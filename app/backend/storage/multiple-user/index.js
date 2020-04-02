@@ -137,8 +137,14 @@ module.exports = {
 
     // inject the authentication endpoints.
     //
-    app.get('/login',  (req, res) => { res.render('login') })
-    app.get('/logout', (req, res) => { req.logout(); res.redirect('/'); })
+    app.get('/login',  (req, res) => {
+      req.session.returnTo = req.query.returnTo
+      res.render('login')
+    })
+    app.get('/logout', (req, res) => {
+      req.logout();
+      res.redirect( req.query.returnTo || '/')
+    })
     app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
 
 
@@ -184,7 +190,6 @@ module.exports = {
         else{
           res.send(permissionsUser)
         }
-
       }
     })
 
@@ -296,8 +301,8 @@ module.exports = {
   createFolder: generic.createFolder,
 
   onLoggedIn(req, res){
-    res.redirect('/')
-    console.log(sheetsHomeDir+req.user.username)
+    let returnTo = req.session.returnTo || '/'
+    res.redirect(returnTo)
     makeDir(sheetsHomeDir+req.user.username)
     makeDir(brainsHomeDir+req.user.username)
   },

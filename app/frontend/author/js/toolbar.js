@@ -1,9 +1,9 @@
-import Userinfo from "../../_common/js/Userinfo"
 
 import designerDialog from "../../_common/js/DesignerDialog"
 import simulatorDialog from "../../_common/js/SimulatorDialog"
 
 import conf from "./configuration"
+import userAdminDialog from "../../_common/js/UserAdminDialog";
 
 
 export default class Toolbar {
@@ -12,7 +12,6 @@ export default class Toolbar {
     this.html = $(elementId)
     this.app = app
     this.view = view
-    this.userinfo = new Userinfo(permissions)
 
     this.saveButton = $("#editorFileSave")
     if(permissions.sheets.update || permissions.sheets.create) {
@@ -72,6 +71,15 @@ export default class Toolbar {
     $("#applicationSwitchSimulator").on("click", () => {
       simulatorDialog.show(conf)
     })
+
+    if(permissions.featureset.usermanagement===true) {
+      $(document).on("click", "#applicationSwitchUser", () => {
+        userAdminDialog.show(conf)
+      })
+    }
+    else{
+      $("#applicationSwitchUser").remove()
+    }
 
     // enable the tooltip for all buttons
     //

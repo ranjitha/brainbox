@@ -1,6 +1,7 @@
 export default {
   fileSuffix: ".shape",
   appName: "Brainbox Designer",
+  loginRedirect: "./designer/",
 
   backend: {
     user: {
@@ -16,6 +17,11 @@ export default {
       list:   path => `../backend/global/shape/list?path=${path}`,
       folder:         `../backend/global/shape/folder`
     }
+  },
+
+
+  useradmin: {
+    url: "../user"
   },
 
   simulator: {

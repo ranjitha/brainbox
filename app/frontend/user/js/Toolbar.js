@@ -1,5 +1,9 @@
 import users from "./Users"
 import toast from "../../_common/js/toast"
+import designerDialog from "../../_common/js/DesignerDialog"
+import simulatorDialog from "../../_common/js/SimulatorDialog"
+import authorDialog from "../../_common/js/AuthorDialog"
+import conf from "./Configuration"
 
 export default class Toolbar{
 
@@ -10,10 +14,8 @@ export default class Toolbar{
       $("#editor .content input[data-id], #editor .content select[data-id]").each( (i, e) => {
         let element = $(e)
         let field = element.data("id")
-        console.log(field, element.val())
         user[field] = element.val()
       })
-      console.log(user)
       users.save(user).then((updatedUser)=>{
         toast("Saved")
         app.view.setUser(updatedUser)
@@ -40,5 +42,16 @@ export default class Toolbar{
         app.palette.update()
       })
     })
+
+    $(document).on("click", "#applicationSwitchSimulator", () => {
+      simulatorDialog.show(conf)
+    })
+    $(document).on("click", "#applicationSwitchAuthor", () => {
+      authorDialog.show(conf)
+    })
+    $(document).on("click", "#applicationSwitchDesigner", () => {
+      designerDialog.show(conf)
+    })
+
   }
 }

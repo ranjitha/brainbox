@@ -5,7 +5,7 @@ import axios from "axios"
 export default class Userinfo {
 
 
-  constructor(permissions){
+  constructor(permissions, conf){
 
     if(permissions.featureset.authentication === false){
       $("#userinfo_toggler").remove()
@@ -25,13 +25,13 @@ export default class Userinfo {
                 <button class="logoutButton">Logout</button>
               </div>
           `)
-          $("#userinfo_toggler .logoutButton").on("click", () => { window.location.replace("../logout");})
+          $("#userinfo_toggler .logoutButton").on("click", () => { window.location.replace("../logout?returnTo="+conf.loginRedirect);})
         })
         .catch( () => {
           let loginButton = $("<button class='loginButton'>Login</button>")
           $("#userinfo_toggler").html(loginButton)
           loginButton.on("click", ()=>{
-            window.location.replace("../login")
+            window.location.replace("../login?returnTo="+conf.loginRedirect)
           })
         })
     }

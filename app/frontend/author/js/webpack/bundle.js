@@ -940,6 +940,45 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/UserAdminDialog.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/_common/js/UserAdminDialog.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf) {
+      window.open(conf.useradmin.url, "user");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/Userinfo.js":
 /*!*********************************************!*\
   !*** ./app/frontend/_common/js/Userinfo.js ***!
@@ -965,7 +1004,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Userinfo = function () {
-  function Userinfo(permissions) {
+  function Userinfo(permissions, conf) {
     var _this = this;
 
     _classCallCheck(this, Userinfo);
@@ -980,13 +1019,13 @@ var Userinfo = function () {
         $("#userinfo_toggler img").attr("src", icon);
         $("#userinfo_toggler .dropdown-menu").html(" \n              <div class=\"userContainer\">\n                <img  src=\"" + icon + "\"/>\n                <div>" + _this.user.displayName + "</div>\n                <div>" + role + "</div>\n                <button class=\"logoutButton\">Logout</button>\n              </div>\n          ");
         $("#userinfo_toggler .logoutButton").on("click", function () {
-          window.location.replace("../logout");
+          window.location.replace("../logout?returnTo=" + conf.loginRedirect);
         });
       }).catch(function () {
         var loginButton = $("<button class='loginButton'>Login</button>");
         $("#userinfo_toggler").html(loginButton);
         loginButton.on("click", function () {
-          window.location.replace("../login");
+          window.location.replace("../login?returnTo=" + conf.loginRedirect);
         });
       });
     }
@@ -1284,6 +1323,14 @@ var _FilesScreen = __webpack_require__(/*! ../../_common/js/FilesScreen */ "./ap
 
 var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
 
+var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
+
+var _Userinfo2 = _interopRequireDefault(_Userinfo);
+
+var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
+
 var _toolbar = __webpack_require__(/*! ./toolbar */ "./app/frontend/author/js/toolbar.js");
 
 var _toolbar2 = _interopRequireDefault(_toolbar);
@@ -1299,10 +1346,6 @@ var _FileSave2 = _interopRequireDefault(_FileSave);
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
 var _configuration2 = _interopRequireDefault(_configuration);
-
-var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
-
-var _toast2 = _interopRequireDefault(_toast);
 
 var _document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
 
@@ -1341,6 +1384,8 @@ var Application = function () {
       this.view = new _view2.default(this, "#editor .content", permissions);
       this.filePane = new _FilesScreen2.default(_configuration2.default, permissions.sheets);
       this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
+      this.userinfo = new _Userinfo2.default(permissions, _configuration2.default);
+
       this.view.commandStack.on("change", this);
 
       // Show the user an alert if there are unsaved changes
@@ -1765,6 +1810,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   fileSuffix: ".sheet",
   appName: "Brainbox Author",
+  loginRedirect: "./author/",
 
   backend: {
     shared: {
@@ -1814,6 +1860,10 @@ exports.default = {
   color: {
     high: "#C21B7A",
     low: "#0078F2"
+  },
+
+  useradmin: {
+    url: "../user"
   },
 
   designer: {
@@ -4996,10 +5046,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
-
-var _Userinfo2 = _interopRequireDefault(_Userinfo);
-
 var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
 
 var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
@@ -5011,6 +5057,10 @@ var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
 var _configuration2 = _interopRequireDefault(_configuration);
+
+var _UserAdminDialog = __webpack_require__(/*! ../../_common/js/UserAdminDialog */ "./app/frontend/_common/js/UserAdminDialog.js");
+
+var _UserAdminDialog2 = _interopRequireDefault(_UserAdminDialog);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -5024,7 +5074,6 @@ var Toolbar = function Toolbar(app, view, elementId, permissions) {
   this.html = $(elementId);
   this.app = app;
   this.view = view;
-  this.userinfo = new _Userinfo2.default(permissions);
 
   this.saveButton = $("#editorFileSave");
   if (permissions.sheets.update || permissions.sheets.create) {
@@ -5080,6 +5129,14 @@ var Toolbar = function Toolbar(app, view, elementId, permissions) {
   $("#applicationSwitchSimulator").on("click", function () {
     _SimulatorDialog2.default.show(_configuration2.default);
   });
+
+  if (permissions.featureset.usermanagement === true) {
+    $(document).on("click", "#applicationSwitchUser", function () {
+      _UserAdminDialog2.default.show(_configuration2.default);
+    });
+  } else {
+    $("#applicationSwitchUser").remove();
+  }
 
   // enable the tooltip for all buttons
   //

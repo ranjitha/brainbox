@@ -11,6 +11,7 @@
 export default {
   fileSuffix: ".brain",
   appName: "Brainbox Simulator",
+  loginRedirect: "./circuit/",
 
   backend: {
 
@@ -55,6 +56,11 @@ export default {
   updates: {
     url: "../backend/updates",
     shapes: "../backend/updates/shapes"
+  },
+
+
+  useradmin: {
+    url: "../user"
   },
 
   shapes: {

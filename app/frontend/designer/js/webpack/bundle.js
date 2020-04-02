@@ -859,6 +859,45 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/UserAdminDialog.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/_common/js/UserAdminDialog.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(conf) {
+      window.open(conf.useradmin.url, "user");
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/Userinfo.js":
 /*!*********************************************!*\
   !*** ./app/frontend/_common/js/Userinfo.js ***!
@@ -884,7 +923,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Userinfo = function () {
-  function Userinfo(permissions) {
+  function Userinfo(permissions, conf) {
     var _this = this;
 
     _classCallCheck(this, Userinfo);
@@ -899,13 +938,13 @@ var Userinfo = function () {
         $("#userinfo_toggler img").attr("src", icon);
         $("#userinfo_toggler .dropdown-menu").html(" \n              <div class=\"userContainer\">\n                <img  src=\"" + icon + "\"/>\n                <div>" + _this.user.displayName + "</div>\n                <div>" + role + "</div>\n                <button class=\"logoutButton\">Logout</button>\n              </div>\n          ");
         $("#userinfo_toggler .logoutButton").on("click", function () {
-          window.location.replace("../logout");
+          window.location.replace("../logout?returnTo=" + conf.loginRedirect);
         });
       }).catch(function () {
         var loginButton = $("<button class='loginButton'>Login</button>");
         $("#userinfo_toggler").html(loginButton);
         loginButton.on("click", function () {
-          window.location.replace("../login");
+          window.location.replace("../login?returnTo=" + conf.loginRedirect);
         });
       });
     }
@@ -1341,6 +1380,10 @@ var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/des
 
 var _FileSave2 = _interopRequireDefault(_FileSave);
 
+var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
+
+var _Userinfo2 = _interopRequireDefault(_Userinfo);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1421,6 +1464,7 @@ var Application = function () {
       this.toolbar = new _Toolbar2.default(this, ".toolbar", this.view, permissions);
       this.layer = new _Layer2.default(this, "layer_elements", this.view, permissions);
       this.filter = new _FilterPane2.default(this, "#filter .filter_actions", this.view, permissions);
+      this.userinfo = new _Userinfo2.default(permissions, _Configuration2.default);
 
       this.view.installEditPolicy(new _SelectionToolPolicy2.default());
 
@@ -1650,6 +1694,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   fileSuffix: ".shape",
   appName: "Brainbox Designer",
+  loginRedirect: "./designer/",
 
   backend: {
     user: {
@@ -1677,6 +1722,10 @@ exports.default = {
       },
       folder: "../backend/global/shape/folder"
     }
+  },
+
+  useradmin: {
+    url: "../user"
   },
 
   simulator: {
@@ -2116,13 +2165,13 @@ var _AuthorDialog = __webpack_require__(/*! ../../_common/js/AuthorDialog */ "./
 
 var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
 
+var _UserAdminDialog = __webpack_require__(/*! ../../_common/js/UserAdminDialog */ "./app/frontend/_common/js/UserAdminDialog.js");
+
+var _UserAdminDialog2 = _interopRequireDefault(_UserAdminDialog);
+
 var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
 
 var _toast2 = _interopRequireDefault(_toast);
-
-var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
-
-var _Userinfo2 = _interopRequireDefault(_Userinfo);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2363,7 +2412,7 @@ var Toolbar = function () {
       new _FigureMarkdownEdit2.default().show();
     });
 
-    var appSwitchButtons = $(" \n         <span class=\"group applicationSwitch\">\n            <label id=\"applicationSwitch_toggler\" class=\"dropdown\" >\n\n                <span class=\"image-button\"  id=\"applicationSwitchButton\" data-toggle=\"dropdown\">\n                  <img  src=\"../_common/images/toolbar_app_switch.svg\"/>\n                </span>\n\n                <ul class=\"dropdown-menu\" role=\"menu\" >\n                    <form class=\"form-horizontal\" role=\"form\">\n\n                      <label id=\"applicationSwitchSimulator\" class=\"image-button\">\n                        <img src=\"../_common/images/app_simulator.svg\"/>\n                        <div>Circuit<br>Simulator</div>\n                      </label>\n\n                      <label id=\"applicationSwitchAuthor\" class=\"image-button\" >\n                        <img src=\"../_common/images/app_lessons.svg\"/>\n                        <div>Lesson<br>Author</div>\n                      </label>\n\n                    </form>\n                </ul>\n            </label>\n            <label id=\"userinfo_toggler\" class=\"dropdown\" >\n                  <span class=\"image-button\"  id=\"userinfoButton\" data-toggle=\"dropdown\">\n                    <img  src=\"../_common/images/toolbar_user.svg\"/>\n                  </span>\n\n                  <div class=\"dropdown-menu\" role=\"menu\" >\n                  </div>\n                </label>\n            </span>\n    ");
+    var appSwitchButtons = $(" \n         <span class=\"group applicationSwitch\">\n            <label id=\"applicationSwitch_toggler\" class=\"dropdown\" >\n\n                <span class=\"image-button\"  id=\"applicationSwitchButton\" data-toggle=\"dropdown\">\n                  <img  src=\"../_common/images/toolbar_app_switch.svg\"/>\n                </span>\n\n                <ul class=\"dropdown-menu\" role=\"menu\" >\n                    <form class=\"form-horizontal\" role=\"form\">\n\n                      <label id=\"applicationSwitchSimulator\" class=\"image-button\">\n                        <img src=\"../_common/images/app_simulator.svg\"/>\n                        <div>Circuit<br>Simulator</div>\n                      </label>\n\n                      <label id=\"applicationSwitchAuthor\" class=\"image-button\" >\n                        <img src=\"../_common/images/app_lessons.svg\"/>\n                        <div>Lesson<br>Author</div>\n                      </label>\n                      \n                      <label id=\"applicationSwitchUser\" class=\"image-button\" >\n                        <img src=\"../_common/images/app_user.svg\"/>\n                        <div>User<br>Management</div>\n                      </label>\n\n                    </form>\n                </ul>\n            </label>\n            <label id=\"userinfo_toggler\" class=\"dropdown\" >\n                  <span class=\"image-button\"  id=\"userinfoButton\" data-toggle=\"dropdown\">\n                    <img  src=\"../_common/images/toolbar_user.svg\"/>\n                  </span>\n\n                  <div class=\"dropdown-menu\" role=\"menu\" >\n                  </div>\n                </label>\n            </span>\n    ");
     buttonGroup.append(appSwitchButtons);
     $(document).on("click", "#applicationSwitchSimulator", function () {
       _SimulatorDialog2.default.show(conf);
@@ -2371,10 +2420,13 @@ var Toolbar = function () {
     $(document).on("click", "#applicationSwitchAuthor", function () {
       _AuthorDialog2.default.show(conf);
     });
-
-    // now everything is in place and we can install the Userinfo event handler
-    //
-    this.userinfo = new _Userinfo2.default(permissions);
+    if (permissions.featureset.usermanagement === true) {
+      $(document).on("click", "#applicationSwitchUser", function () {
+        _UserAdminDialog2.default.show(conf);
+      });
+    } else {
+      $("#applicationSwitchUser").remove();
+    }
 
     // enable the tooltip for all buttons
     //

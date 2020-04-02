@@ -8,6 +8,7 @@ import FilterPane from "./FilterPane"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import conf from "./Configuration"
 import fileSave from "./dialog/FileSave"
+import Userinfo from "../../_common/js/Userinfo";
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -84,6 +85,7 @@ class Application {
     this.toolbar = new Toolbar(this, ".toolbar", this.view, permissions)
     this.layer = new Layer(this, "layer_elements", this.view, permissions)
     this.filter = new FilterPane(this, "#filter .filter_actions", this.view, permissions)
+    this.userinfo = new Userinfo(permissions, conf)
 
     this.view.installEditPolicy(new SelectionToolPolicy())
 

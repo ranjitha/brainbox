@@ -1,6 +1,6 @@
 export default {
-  fileSuffix: ".sheet",
-  appName: "Brainbox Author",
+  appName: "Brainbox Admin",
+  loginRedirect: "./user/",
 
   backend: {
     admin: {
@@ -24,22 +24,17 @@ export default {
     }
   },
 
-  shapes: {
-    url: "../shapes/global/",
-    version: "0.0.0" // updated during after loading from the index.json file
-  },
-
-  color: {
-    high: "#C21B7A",
-    low:  "#0078F2"
-  },
 
   designer: {
-    url: "../designer/"
+    url: "../designer"
   },
 
   simulator: {
     url: "../circuit/"
+  },
+
+  author: {
+    url: "../author/"
   }
 
 }

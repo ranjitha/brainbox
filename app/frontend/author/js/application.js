@@ -1,11 +1,12 @@
 import shareDialog from "../../_common/js/LinkShareDialog"
 import Files from "../../_common/js/FilesScreen"
+import Userinfo from "../../_common/js/Userinfo"
+import toast from "../../_common/js/toast";
 
 import Toolbar from "./toolbar"
 import View from "./view"
 import fileSave from "./dialog/FileSave"
 import conf from "./configuration"
-import toast from "../../_common/js/toast";
 import Document from "./document"
 
 let storage = require('../../_common/js/BackendStorage')(conf)
@@ -34,6 +35,8 @@ class Application {
     this.view = new View(this, "#editor .content", permissions)
     this.filePane = new Files(conf, permissions.sheets)
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
+    this.userinfo = new Userinfo(permissions, conf)
+
     this.view.commandStack.on("change", this)
 
     // Show the user an alert if there are unsaved changes

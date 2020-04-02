@@ -13,7 +13,7 @@ class App {
     this.palette = new Palette(this)
     this.view = new View(this)
     this.toolbar = new Toolbar(this)
-    this.userinfo = new Userinfo(permissions, this)
+    this.userinfo = new Userinfo(permissions, conf)
   }
 }
 

@@ -13,8 +13,8 @@ import FigureMarkdownEdit from "./dialog/FigureMarkdownEdit"
 import FigureTest from "./dialog/FigureTest"
 import simulatorDialog from "../../_common/js/SimulatorDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
+import userAdminDialog from "../../_common/js/UserAdminDialog"
 import toast from "../../_common/js/toast"
-import Userinfo from "../../_common/js/Userinfo";
 
 export default class Toolbar {
 
@@ -283,6 +283,11 @@ export default class Toolbar {
                         <img src="../_common/images/app_lessons.svg"/>
                         <div>Lesson<br>Author</div>
                       </label>
+                      
+                      <label id="applicationSwitchUser" class="image-button" >
+                        <img src="../_common/images/app_user.svg"/>
+                        <div>User<br>Management</div>
+                      </label>
 
                     </form>
                 </ul>
@@ -304,11 +309,15 @@ export default class Toolbar {
     $(document).on("click", "#applicationSwitchAuthor", () => {
       authorDialog.show(conf)
     })
+    if(permissions.featureset.usermanagement===true) {
+      $(document).on("click", "#applicationSwitchUser", () => {
+        userAdminDialog.show(conf)
+      })
+    }
+    else{
+      $("#applicationSwitchUser").remove()
+    }
 
-
-    // now everything is in place and we can install the Userinfo event handler
-    //
-    this.userinfo = new Userinfo(permissions)
 
     // enable the tooltip for all buttons
     //
