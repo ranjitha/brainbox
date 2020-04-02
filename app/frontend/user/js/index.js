@@ -1,14 +1,14 @@
 import axios from "axios"
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
-import conf from "./configuration"
+import conf from "./Configuration"
 
-require('js-treeview/dist/treeview.min.css')
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
 $.widget.bridge('uibutton', $.ui.button)
 $.widget.bridge('uitooltip', $.ui.tooltip)
+
 
 // required to be compatible with jquery.layout and jquery.handsontable
 //
@@ -52,10 +52,8 @@ $(window).load(function () {
   // export all required classes for deserialize JSON with "eval"
   // "eval" code didn't sees imported class or code
   //
-  let global = require("./global")
-  for (let k in global) window[k] = global[k];
 
-  socket = io({
+  let socket = io({
       path: '/socket.io'
     })
 
@@ -64,15 +62,12 @@ $(window).load(function () {
   //
   axios.get("../permissions").then( (response) => {
     let permissions = response.data
-    // we must load the "shape/index.js" in the global scope.
-    //
-    $.getScript(conf.shapes.url + "index.js", function () {
-      app = require("./application")
-      app.init(permissions)
-      $(".loader").fadeOut(500, function () {
-        $(this).remove();
-      })
-      inlineSVG.init()
+    let app = require("./Application")
+    app.init(permissions)
+    $(".loader").fadeOut(500, function () {
+      $(this).remove();
     })
+
   })
+
 })
