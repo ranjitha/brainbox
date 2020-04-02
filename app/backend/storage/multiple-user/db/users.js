@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt");
 
 
 let db = null
-let salt = null
 
 let defaultUsers = [
   { id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role:"admin", email: 'admin@example.com' },

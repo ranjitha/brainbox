@@ -1,4 +1,5 @@
 import Hogan from "hogan.js";
+import axios from "axios"
 
 export default class View{
 
@@ -21,6 +22,18 @@ export default class View{
         $("#editorDelete").addClass("disabled")
       }
     }
+
+    $(document).on("click", "#passwordReset", ()=>{
+      let user = {}
+      $("#editor .content input[data-id], #editor .content select[data-id]").each( (i, e) => {
+        let element = $(e)
+        let field = element.data("id")
+        user[field] = element.val()
+      })
+      axios.post("../password/request", user).then( (response)=>{
+        alert(response.data)
+      })
+    })
 
     let tmpl = Hogan.compile($("#userformTemplate").html());
     let html = tmpl.render({

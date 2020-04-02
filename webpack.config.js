@@ -6,5 +6,6 @@ module.exports =[
   require('./webpack/designer.config'),
   require('./webpack/user.config'),
   require('./webpack/demo-circuit.config'),
-  require('./webpack/demo-designer.config')
+  require('./webpack/demo-designer.config'),
+  require('./webpack/login.config')
 ];

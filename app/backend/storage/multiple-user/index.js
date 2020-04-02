@@ -33,7 +33,7 @@ let sheetsSharedDir = null
 passport.use(new Strategy(
   function(username, password, cb) {
     db.users.findByUsername(username, function(err, user) {
-      if (err)   { return cb(err) }
+      if (err)   { return cb(null, false) }
       if (!user) { return cb(null, false) }
       bcrypt.compare(password, user.password)
         .then(function(result) {
@@ -137,16 +137,17 @@ module.exports = {
 
     // inject the authentication endpoints.
     //
-    app.get('/login',  (req, res) => {
+    app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
+    app.use('/login',  (req, res, next)=>{
       req.session.returnTo = req.query.returnTo
-      res.render('login')
-    })
+      console.log()
+      next()
+    },express.static(__dirname + '/../../../frontend/login'))
+
     app.get('/logout', (req, res) => {
       req.logout();
       res.redirect( req.query.returnTo || '/')
     })
-    app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
-
 
     // calculate the persistence folder for the brains/sheets files
     //
@@ -193,7 +194,16 @@ module.exports = {
       }
     })
 
+    // Rest password API
+    // only an admin can create a "reset password" request right now
+    //
+    let passwordRest = require("./password-rest")
+    app.post("/password/request", ensureAdminLoggedIn(), passwordRest.resetRequest)
+    app.post("/password/set",                            passwordRest.reset)
 
+
+    // Usermanagement API
+    //
     let userRest = require("./user-rest")
     app.get('/backend/admin/user',        ensureAdminLoggedIn(), userRest.list)
     app.get('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.get)
