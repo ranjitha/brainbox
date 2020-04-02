@@ -9,7 +9,6 @@ export default class Palette {
       let element = $(event.target)
       let id = "" + element.data("id")
       userDb.findById(id).then( (user)=>{
-        console.log(user)
         $(".paletteItem").removeClass("selected")
         element.addClass("selected")
         app.view.setUser(user)

@@ -65,7 +65,12 @@ exports.findByUsername = function(username, cb) {
       .get('users')
       .find({ username })
       .value()
-    return cb(null, user)
+    if(user) {
+      return cb(null, user)
+    }
+    else{
+      return cb(new Error("not found"))
+    }
   })
 }
 

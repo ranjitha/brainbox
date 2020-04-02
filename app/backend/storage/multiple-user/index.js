@@ -35,7 +35,6 @@ passport.use(new Strategy(
     db.users.findByUsername(username, function(err, user) {
       if (err)   { return cb(err) }
       if (!user) { return cb(null, false) }
-
       bcrypt.compare(password, user.password)
         .then(function(result) {
           if(result){
@@ -43,7 +42,6 @@ passport.use(new Strategy(
           }
           return cb(null, false)
         })
-
     })
   }))
 
@@ -55,13 +53,15 @@ passport.use(new Strategy(
 // serializing, and querying the user record by ID from the database when
 // deserializing.
 passport.serializeUser(function(user, cb) {
-  cb(null, user.id);
+  cb(null, user.id)
 });
 
 passport.deserializeUser(function(id, cb) {
   db.users.findById(id, function (err, user) {
-    if (err) { return cb(err); }
-    cb(null, user);
+    if (err) {
+      return cb(null, false)
+    }
+    cb(null, user)
   });
 });
 

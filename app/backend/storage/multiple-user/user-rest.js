@@ -1,4 +1,5 @@
 const shortid = require('shortid')
+var sanitize = require("sanitize-filename");
 
 const db = require('./db')
 
@@ -59,9 +60,21 @@ exports.put = (req, res) => {
 
 exports.post = (req, res) => {
   let user = req.body
+
+  if(!user.username){ res.status(400).send("username"); return  }
+  if(!user.password){ res.status(400).send("password"); return  }
+  if(!user.displayName){ res.status(400).send("displayName"); return  }
+
   user.id = shortid.generate()
-  db.users.create(user, (error, userCreated)=>{
-    res.status(200).send(mapUser(userCreated))
+  user.username = sanitize(user.username).replace(/ /g,"")
+  db.users.findByUsername(user.username, (error, dublicatUser)=>{
+    if(error){
+      db.users.create(user, (error, userCreated) => {
+        res.status(200).send(mapUser(userCreated))
+      })
+    }
+    else {
+      res.status(422).send("username")
+    }
   })
 }
-
