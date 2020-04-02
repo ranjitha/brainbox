@@ -7,6 +7,6 @@ export default function(text){
     .animate({ top: "+=20" }, 500)
     .delay(1500)
     .animate({ top: "-=20" }, 300, ()=>{
-       $(this).remove()
+      $("#notificationToast").remove()
     })
 }

@@ -38,7 +38,25 @@
       <div class="workspace">
 
         <div class="toolbar navbar-default">
-          <span class="group applicationSwitch">
+           <span class="group" id="editorgroup_fileoperations">
+              <span class="image-button disabled" id="editorFileSave" >
+                <img title="Save circuit" src="../_common/images/toolbar_save.svg"/>
+                <div>Save</div>
+              </span>
+              <span class="image-button" id="editorAdd">
+                <img  src="../_common/images/toolbar_insert.svg"/>
+                <div>Add</div>
+              </span>
+           </span>
+
+           <span class="group">
+              <span class="image-button disabled" id="editorDelete">
+                <img  src="../_common/images/toolbar_delete.svg"/>
+                <div>Delete</div>
+              </span>
+           </span>
+
+           <span class="group applicationSwitch">
                 <label id="applicationSwitch_toggler" class="dropdown" >
                   <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
                     <img  src="../_common/images/toolbar_app_switch.svg"/>
@@ -78,7 +96,7 @@
               <a href="https://freegroup.github.io/brainbox/" target="_blank"><img src="../_common/images/favicon_64x64.svg"/></a>
               <div>
                 <h1>Brainbox</h1>
-                <h2>Admin</h2>
+                <h2>User Admin</h2>
               </div>
             </div>
             <div id="paletteFilter"></div>
@@ -99,18 +117,70 @@
 
 
 
-
-
   </div>
 </div>
 
 <script id="userlistTemplate" type="text/x-jsrender">
 {{#users}}
-    <div class="paletteItem">
+    <div class="paletteItem {{role}}" data-id="{{id}}">
       {{username}}
     </div>
 {{/users}}
 </script>
+
+
+<script id="userformTemplate" type="text/x-jsrender">
+
+  <div class="form">
+      <input type="hidden" id="userId" value="{{user.id}}" data-id="id">
+
+      {{#user.username}}
+      <div class="form-group">
+        <label for="userUsername">Login Name</label>
+        <input class="form-control" id="userUsername" placeholder="user name" value="{{user.username}}" readonly>
+        <small id="usernameHelp" class="form-text text-muted"></small>
+      </div>
+      {{/user.username}}
+      {{^user.username}}
+      <div class="form-group">
+        <label for="userUsername">User Name</label>
+        <input class="form-control" id="userUsername" placeholder="user name" value="{{user.username}}" data-id="username">
+        <small id="usernameHelp" class="form-text text-muted">required</small>
+      </div>
+      {{/user.username}}
+
+      <div class="form-group">
+        <label for="userDisplayName">Display Name</label>
+        <input class="form-control" id="userDisplayName" placeholder="user name" value="{{user.displayName}}" data-id="displayName">
+        <small id="displayNameHelp" class="form-text text-muted"></small>
+      </div>
+
+      <div class="form-group">
+        <label for="userEmail">E-Mail</label>
+        <input class="form-control" id="userEmail" placeholder="user name" value="{{user.email}}" data-id="email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </div>
+
+      {{^user.username}}
+      <div class="form-group">
+        <label for="userPassword">Password</label>
+        <input class="form-control" id="userPassword" placeholder="password" value="" data-id="password">
+        <small id="passwordHelp" class="form-text text-muted">required</small>
+      </div>
+      {{/user.username}}
+
+
+      <div class="form-group">
+        <label for="sel1">Role:</label>
+        <select class="form-control" id="sel1" value="{{user.role}}" style="width:auto" data-id="role">
+          {{#options}}
+          <option {{selected}} value="{{val}}" >{{label}}</option>
+          {{/options}}
+        </select>
+      </div>
+  </div>
+</script>
+
 
 
 <div class="loader">

@@ -3,11 +3,7 @@ export default {
   appName: "Brainbox Author",
 
   backend: {
-    shared: {
-      get:    file  => `../backend/shared/sheet/get?filePath=${file}`,
-      save:            `../backend/shared/sheet/save`,
-    },
-    user: {
+    admin: {
       list:   path  => `../backend/user/sheet/list?path=${path}`,
       get:    file  => `../backend/user/sheet/get?filePath=${file}`,
       image:  file  => `../_common/images/files_markdown.svg`,

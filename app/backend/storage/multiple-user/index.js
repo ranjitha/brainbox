@@ -169,20 +169,6 @@ module.exports = {
     console.log("|    Simulator: "+brainsHomeDir)
     console.log("|    Author: "+sheetsHomeDir)
 
-    // each backend storage with authentication MUST have an "userinfo" endpoint
-    //
-    app.get('/userinfo', (req, res) => {
-      if(!req.isAuthenticated || !req.isAuthenticated()) {
-        res.status(403).send("user not logged in")
-      }
-      else{
-        res.send({
-          username : req.user.username,
-          role : req.user.role,
-          displayName : req.user.displayName
-        })
-      }
-    })
 
     // the UI ask for the permissions of the related user to setup the UI in good fashion.
     // This is just for the UI part. the backend protects the endpoints as well.
@@ -209,6 +195,7 @@ module.exports = {
     app.delete('/backend/admin/user/:id', ensureAdminLoggedIn(), userRest.delete)
     app.put('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.put)
     app.post('/backend/admin/user',       ensureAdminLoggedIn(), userRest.post)
+    app.get('/userinfo',                                         userRest.userinfo)
 
 
     // Serve the static content for the three different apps of brainbox
@@ -216,8 +203,8 @@ module.exports = {
     //
     app.use('/_common',  express.static(__dirname + '/../../../frontend/_common'));
     app.use('/designer', express.static(__dirname + '/../../../frontend/designer'));
-    app.use('/circuit',  express.static(__dirname + '/../../../frontend/designer'));
-    app.use('/author',   express.static(__dirname + '/../../../frontend/designer'));
+    app.use('/circuit',  express.static(__dirname + '/../../../frontend/circuit'));
+    app.use('/author',   express.static(__dirname + '/../../../frontend/author'));
     app.use('/user',     ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
 
 

@@ -882,6 +882,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 
 var _axios2 = _interopRequireDefault(_axios);
@@ -890,29 +892,43 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Userinfo = function Userinfo(permissions) {
-  _classCallCheck(this, Userinfo);
+var Userinfo = function () {
+  function Userinfo(permissions) {
+    var _this = this;
 
-  if (permissions.featureset.authentication === false) {
-    $("#userinfo_toggler").remove();
-  } else {
-    _axios2.default.get("../userinfo").then(function (response) {
-      var icon = response.data.role === "admin" ? "../_common/images/toolbar_admin.svg" : "../_common/images/toolbar_user.svg";
-      var role = response.data.role === "admin" ? "(Administrator)" : "";
-      $("#userinfo_toggler img").attr("src", icon);
-      $("#userinfo_toggler .dropdown-menu").html(" \n              <div class=\"userContainer\">\n                <img  src=\"" + icon + "\"/>\n                <div>" + response.data.displayName + "</div>\n                <div>" + role + "</div>\n                <button class=\"logoutButton\">Logout</button>\n              </div>\n          ");
-      $("#userinfo_toggler .logoutButton").on("click", function () {
-        window.location.replace("../logout");
+    _classCallCheck(this, Userinfo);
+
+    if (permissions.featureset.authentication === false) {
+      $("#userinfo_toggler").remove();
+    } else {
+      _axios2.default.get("../userinfo").then(function (response) {
+        _this.user = response.data;
+        var icon = _this.user.role === "admin" ? "../_common/images/toolbar_admin.svg" : "../_common/images/toolbar_user.svg";
+        var role = _this.user.role === "admin" ? "(Administrator)" : "";
+        $("#userinfo_toggler img").attr("src", icon);
+        $("#userinfo_toggler .dropdown-menu").html(" \n              <div class=\"userContainer\">\n                <img  src=\"" + icon + "\"/>\n                <div>" + _this.user.displayName + "</div>\n                <div>" + role + "</div>\n                <button class=\"logoutButton\">Logout</button>\n              </div>\n          ");
+        $("#userinfo_toggler .logoutButton").on("click", function () {
+          window.location.replace("../logout");
+        });
+      }).catch(function () {
+        var loginButton = $("<button class='loginButton'>Login</button>");
+        $("#userinfo_toggler").html(loginButton);
+        loginButton.on("click", function () {
+          window.location.replace("../login");
+        });
       });
-    }).catch(function () {
-      var loginButton = $("<button class='loginButton'>Login</button>");
-      $("#userinfo_toggler").html(loginButton);
-      loginButton.on("click", function () {
-        window.location.replace("../login");
-      });
-    });
+    }
   }
-};
+
+  _createClass(Userinfo, [{
+    key: "getUser",
+    value: function getUser() {
+      return this.user;
+    }
+  }]);
+
+  return Userinfo;
+}();
 
 exports.default = Userinfo;
 module.exports = exports["default"];
@@ -1195,11 +1211,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (text) {
-  var _this = this;
-
   $("body").append($("<div id=\"notificationToast\">" + text + "</div>"));
   $("#notificationToast").delay(900).animate({ top: "+=20" }, 500).delay(1500).animate({ top: "-=20" }, 300, function () {
-    $(_this).remove();
+    $("#notificationToast").remove();
   });
 };
 

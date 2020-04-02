@@ -2,6 +2,7 @@ import axios from "axios"
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import conf from "./Configuration"
+import inlineSVG from "../../_common/js/inlineSVG"
 
 
 // Resolve name collision between jQuery UI and Twitter Bootstrap
@@ -67,7 +68,7 @@ $(window).load(function () {
     $(".loader").fadeOut(500, function () {
       $(this).remove();
     })
-
+    inlineSVG.init()
   })
 
 })

@@ -74,9 +74,6 @@ exports.all = function(cb) {
     let users = db
       .get('users')
       .value()
-    users.forEach( user => {
-      delete user.password
-    })
     return cb(null, users)
   })
 }
@@ -93,21 +90,34 @@ exports.delete = function(id, cb) {
 
 exports.update = function(id, user, cb) {
   process.nextTick(function() {
-    db
+    let currentUser = db
       .get('users')
       .find({ id })
-      .assign(user)
-      .write()
-    return cb(null, user)
+      .value()
+    if(currentUser) {
+      Object.assign(currentUser, user)
+      db
+        .get('users')
+        .find({id})
+        .assign(currentUser)
+        .write()
+      return cb(null, currentUser)
+    }
+    else{
+      return cp(new Error("unknown user"), null)
+    }
   })
 }
 
+
 exports.create = function(user, cb) {
   process.nextTick(function() {
-    db
-      .get('users')
-      .push(user)
-      .write()
-    return cb(null, user)
+    bcrypt.hash(user.password, 10, function(err, hash) {
+      user.password = hash
+      db.get("users")
+        .push(user)
+        .write()
+      return cb(null, user)
+    })
   })
 }

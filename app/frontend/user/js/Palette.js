@@ -1,18 +1,31 @@
 import Hogan from "hogan.js";
-import conf from "../../circuit/js/Configuration";
 
-let users = require("./Users")
+let userDb = require("./Users")
 
-export default class Palette{
+export default class Palette {
 
-  constructor(){
-    users.list().then(( data )=>{
+  constructor(app) {
+    $(document).on("click", "#paletteElements .paletteItem", (event) => {
+      let element = $(event.target)
+      let id = "" + element.data("id")
+      userDb.findById(id).then( (user)=>{
+        console.log(user)
+        $(".paletteItem").removeClass("selected")
+        element.addClass("selected")
+        app.view.setUser(user)
+      })
+    })
+
+    this.update()
+  }
+
+  update(){
+    userDb.list().then((users) => {
       let tmpl = Hogan.compile($("#userlistTemplate").html());
       let html = tmpl.render({
-        users: data
+        users: users
       })
-
-      $("#paletteElements").append(html)
+      $("#paletteElements").html(html)
     })
   }
 }
