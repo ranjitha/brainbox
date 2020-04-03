@@ -3923,114 +3923,6 @@ circuit_hardware_raspi_RaspiOUTPUT = circuit_hardware_raspi_RaspiOUTPUT.extend({
 // created with http://www.draw2d.org
 //
 //
-var circuit_pulse_10hz = CircuitFigure.extend({
-
-   NAME: "circuit_pulse_10hz",
-   VERSION: "1.0.44_80",
-
-   init:function(attr, setter, getter)
-   {
-     var _this = this;
-
-     this._super( $.extend({stroke:0, bgColor:null, width:34.1875,height:49.5},attr), setter, getter);
-     var port;
-     // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 102.87934186471664, y: 69.67272727272601 }));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("Port");
-     port.setMaxFanOut(20);
-   },
-
-   createShapeElement : function()
-   {
-      var shape = this._super();
-      this.originalWidth = 34.1875;
-      this.originalHeight= 49.5;
-      return shape;
-   },
-
-   createSet: function()
-   {
-       this.canvas.paper.setStart();
-       var shape = null;
-       // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L34.1875,0 L34.1875,49.5 L0,49.5");
-       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-       shape.data("name","BoundingBox");
-       
-       // Rectangle
-       shape = this.canvas.paper.path('M33.671875 49.5L3.671875 49.5L3.671875 19.5L33.671875 19.5Z');
-       shape.attr({"stroke":"rgba(48,48,48,1)","stroke-width":1,"fill":"rgba(255,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Rectangle");
-       
-       // Label
-       shape = this.canvas.paper.text(0,0,'10Hz');
-       shape.attr({"x":4,"y":10.5,"text-anchor":"start","text":"10Hz","font-family":"\"Arial\"","font-size":11,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-       shape.data("name","Label");
-       
-       // Line
-       shape = this.canvas.paper.path('M6.119575000000623 41.67239999999947L13.426774999999907,41.67239999999947L13.426774999999907,28.884799999999814L24.387574999999742,28.884799999999814L24.387574999999742,41.21569999999974L30.324674999999843,41.21569999999974');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(0,0,0,1)","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-
-       return this.canvas.paper.setFinish();
-   }
-});
-
-/**
- * by 'Draw2D Shape Designer'
- *
- * Custom JS code to tweak the standard behaviour of the generated
- * shape. add your custome code and event handler here.
- *
- *
- */
-circuit_pulse_10hz = circuit_pulse_10hz.extend({
-
-    init: function(attr, setter, getter){
-        this._super(attr, setter, getter);
-
-        this.attr({resizeable:false});
-        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
-
-        this.currentTimer=0;
-    },
-    
-    /**
-     * called every '10 [ms]' from the application. do a little bit calculation
-     * to change the state every 100ms (10Hz)
-     * 
-     **/
-    calculate:function()
-    {
-       // 10 ticks every 10ms => 10Hz    
-       this.currentTimer = (this.currentTimer+1)%10; 
-       if(this.currentTimer===0){
-           this.value = !this.value;
-           this.getOutputPort(0).setValue(this.value);
-       }
-    },
-    
-    onStart:function()
-    {
-        this.currentTimer=0;
-    },
-    
-    onStop:function()
-    {
-    }
-
-});
-
-
-// Generated Code for the Draw2D touch HTML5 lib.
-// File will be generated if you save the *.shape file.
-//
-// created with http://www.draw2d.org
-//
-//
 var circuit_pulse_50hz = CircuitFigure.extend({
 
    NAME: "circuit_pulse_50hz",
@@ -4123,178 +4015,6 @@ circuit_pulse_50hz = circuit_pulse_50hz.extend({
     
     onStop:function()
     {
-    }
-
-});
-
-
-// Generated Code for the Draw2D touch HTML5 lib.
-// File will be generated if you save the *.shape file.
-//
-// created with http://www.draw2d.org
-//
-//
-var circuit_pulse_Delay = CircuitFigure.extend({
-
-   NAME: "circuit_pulse_Delay",
-   VERSION: "1.0.44_80",
-
-   init:function(attr, setter, getter)
-   {
-     var _this = this;
-
-     this._super( $.extend({stroke:0, bgColor:null, width:84,height:69},attr), setter, getter);
-     var port;
-     // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 100.59523809523809, y: 52.11524637681209 }));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("Port");
-     port.setMaxFanOut(20);
-     // Port
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -1.1904761904761905, y: 52.11524637681209 }));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#37B1DE");
-     port.setName("Port");
-     port.setMaxFanOut(20);
-   },
-
-   createShapeElement : function()
-   {
-      var shape = this._super();
-      this.originalWidth = 84;
-      this.originalHeight= 69;
-      return shape;
-   },
-
-   createSet: function()
-   {
-       this.canvas.paper.setStart();
-       var shape = null;
-       // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L84,0 L84,69 L0,69");
-       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-       shape.data("name","BoundingBox");
-       
-       // Rectangle
-       shape = this.canvas.paper.path('M84 69L0 69L0 0L84 0Z');
-       shape.attr({"stroke":"rgba(48,48,48,1)","stroke-width":1,"fill":"rgba(255,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Rectangle");
-       
-       // Label
-       shape = this.canvas.paper.text(0,0,'delay');
-       shape.attr({"x":40.265625,"y":34.7265625,"text-anchor":"start","text":"delay","font-family":"\"Arial\"","font-size":13,"stroke":"none","fill":"#D4D4D4","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-       shape.data("name","Label");
-       
-       // Line
-       shape = this.canvas.paper.path('M3.502237499998955 18.776879999997618L7.155837499998597,18.776879999997618L10.809437499999149,18.776879999997618L10.80943749999824,5.006239999996978L40.60790533999989,5.1582835199978945L40.7756774999998,17.992499999997563L74.82772149999892,17.533747999996194');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(0,0,0,1)","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M2.7763174999963667 60.522479999995994L35.81032965999748,60.698116479995406L35.642557499997565,47.40719999999601L50.62567749999744,47.243359999995846L65.60879749999731,47.07951999999568L65.60879749999731,60.249280799996086L78.49271349999617,60.00024399999529');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(0,0,0,1)","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M9.586228750001283 30.218550000001414L9.91390875000252,46.930230000002666');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(255,5,105,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M32.75262875000226 38.50094999999965L28.574708750000354,45.873749999997926');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(255,5,105,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M9.171028750002733 38.167670000003454L32.763988749999044,38.495350000001054');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(255,5,105,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M26.418204481202338 30.914574268800607L32.574708750000354,37.373749999997926');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(255,5,105,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M10.916348593882503 20.631087969915825L10.654204593882241,28.347951969915812');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(168,168,168,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-       // Line
-       shape = this.canvas.paper.path('M35.63980459388222 45.23755196991533L35.80781268348346,27.62475196991545');
-       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(201,201,201,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Line");
-       
-
-       return this.canvas.paper.setFinish();
-   }
-});
-
-/**
- * by 'Draw2D Shape Designer'
- *
- * Custom JS code to tweak the standard behaviour of the generated
- * shape. add your custome code and event handler here.
- *
- *
- */
-circuit_pulse_Delay = circuit_pulse_Delay.extend({
-
-    init: function(attr, setter, getter){
-        var _this = this;
-        
-        this._super(attr, setter, getter);
-
-        this.on("change:userData.delay",function(emitter, event){
-            var value = event.value;
-            _this.delayedValues = []; 
-            _this.delayedValues.length = parseInt(parseInt(value)/10);
-            _this.pointer=0;
-            
-        });
-        this.attr({
-            resizeable:false,
-            "userData.delay":1500
-        });
-        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
-    },
-    
-    /**
-     * called every '10 [ms]' from the application. do a little bit calculation
-     * to change the state every 100ms (10Hz)
-     * 
-     **/
-    calculate:function()
-    {
-       this.getOutputPort(0).setValue(this.delayedValues[this.pointer]);
-       this.delayedValues[this.pointer] = this.getInputPort(0).getValue();
-       this.pointer = (this.pointer+1)%this.delayedValues.length; 
-    },
-    
-    onStart:function()
-    {
-        this.currentTimer=0;
-    },
-    
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [
-        {
-            name:"delay",
-            label:"Delay [ms]",
-            property:{
-                type: "integer",
-                min: 10,
-                max: 100,
-                increment:10
-        }
-        
-        }];
     }
 
 });
@@ -4863,6 +4583,113 @@ circuit_timer_Delay = circuit_timer_Delay.extend({
         }
         
         }];
+    }
+
+});
+
+
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var common_NewDocument = CircuitFigure.extend({
+
+   NAME: "common_NewDocument",
+   VERSION: "local-version",
+
+   init:function(attr, setter, getter)
+   {
+     var _this = this;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:109.63576058932597,height:109.63576058932597},attr), setter, getter);
+     var port;
+   },
+
+   createShapeElement : function()
+   {
+      var shape = this._super();
+      this.originalWidth = 109.63576058932597;
+      this.originalHeight= 109.63576058932597;
+      return shape;
+   },
+
+   createSet: function()
+   {
+       this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L109.63576058932597,0 L109.63576058932597,109.63576058932597 L0,109.63576058932597");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // 
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":54.817880294662984,"ry":54.817880294662984,"cx":54.817880294662984,"cy":54.817880294662984,"stroke":"none","stroke-width":0,"fill":"rgba(149,192,106,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","");
+       
+
+       return this.canvas.paper.setFinish();
+   }
+});
+
+/**
+ * Generated Code for the Draw2D touch HTML5 lib.
+ * File will be generated if you save the *.shape file.
+ *
+ * by 'Draw2D Shape Designer'
+ *
+ * Custom JS code to tweak the standard behaviour of the generated
+ * shape. add your custom code and event handler here.
+ *
+ * Looks disconcerting - extending my own class. But this is a good method to
+ * merge basic code and override them with custom methods.
+ */
+common_NewDocument = common_NewDocument.extend({
+
+    init: function(attr, setter, getter){
+         this._super(attr, setter, getter);
+
+         // your special code here
+    },
+
+    /**
+     *  Called by the simulator for every calculation
+     *  loop
+     *  @required
+     **/
+    calculate:function()
+    {
+    },
+
+
+    /**
+     *  Called if the simulation mode is starting
+     *  @required
+     **/
+    onStart:function()
+    {
+    },
+
+    /**
+     *  Called if the simulation mode is stopping
+     *  @required
+     **/
+    onStop:function()
+    {
+    },
+
+    /**
+     * Get the simulator a hint which kind of hardware the shapes requires or supports
+     * This helps the simulator to bring up some dialogs and messages if any new hardware is connected/get lost
+     * and your are running a circuit which needs this kind of hardware...
+     **/
+    getRequiredHardware: function(){
+      return {
+        raspi: false,
+        arduino: false
+      }
     }
 
 });

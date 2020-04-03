@@ -278,7 +278,7 @@ module.exports = {
     app.post('/backend/global/brain/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(brainsAppDir,   req.body.filePath, res))
 
     // =================================================================
-    // Handle pre-installed brain files
+    // Handle pre-installed sheet files
     //
     // =================================================================
     app.get('/backend/global/sheet/list',    (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
@@ -296,7 +296,13 @@ module.exports = {
     app.get('/backend/global/shape/list',    (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
     app.get('/backend/global/shape/get',     (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
     app.get('/backend/global/shape/image',   (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
-    app.post('/backend/global/shape/delete', ensureAdminLoggedIn(), (req, res) => module.exports.deleteFile(shapesAppDir,     req.body.filePath, res))
+    app.post('/backend/global/shape/delete', ensureAdminLoggedIn(), (req, res) => {
+      module.exports.deleteFile(shapesAppDir, req.body.filePath)
+      module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".js"))
+      module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".md"))
+      module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".custom"))
+      module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".png"), res)
+    })
     app.post('/backend/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
     app.post('/backend/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))
 

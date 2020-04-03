@@ -7,15 +7,16 @@ export default {
     user: {
       get:    file => `../backend/user/shape/get?filePath=${file}`,
       image:  file => `../shapes/user/${file}`,
-      list:   path => `../backend/user/shape/list?path=${path}`,
-      save:           "../backend/user/shape/save"
+      list:   path => `../backend/user/shape/list?path=${path}`
     },
 
     global:{
       get:    file => `../backend/global/shape/get?filePath=${file}`,
       image:  file => `../backend/global/shape/image?filePath=${file}`,
       list:   path => `../backend/global/shape/list?path=${path}`,
-      folder:         `../backend/global/shape/folder`
+      delete:         `../backend/global/shape/delete`,
+      folder:         `../backend/global/shape/folder`,
+      save:           `../backend/global/shape/save`
     }
   },
 

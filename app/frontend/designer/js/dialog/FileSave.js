@@ -38,18 +38,6 @@ class Dialog {
                                         </div>
         
                                     </fieldset>
-                                  Change Reason:
-                                  <fieldset>
-                                    <div class="form-group">
-                                      <div class="col-lg-12">
-                                        <input type="text"
-                                               class="form-control floating-label githubCommitMessage"
-                                               value=""
-                                        >
-                                      </div>
-                                    </div>
-        
-                                  </fieldset>
                                     <div class="row"></div>
                                 </form>
                             </div>
@@ -98,8 +86,7 @@ class Dialog {
           name = name.replace(conf.fileSuffix, "")
           name = fs.basename(name) // remove any directories
           currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
-          let commitMessage = $("#fileSaveDialog .githubCommitMessage").val()
-          storage.saveFile(json, imageDataUrl, currentFile.name , commitMessage)
+          storage.saveFile({draw2d: json, image: imageDataUrl}, currentFile.name , currentFile.scope)
             .then((response) => {
               $('#fileSaveDialog').modal('hide')
               let data = response.data

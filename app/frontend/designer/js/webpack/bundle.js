@@ -301,7 +301,7 @@ var Files = function () {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  function Files(conf, permissions) {
+  function Files(app, conf, permissions) {
     _classCallCheck(this, Files);
 
     $("#files_tab a").on("click", this.onShow);
@@ -309,6 +309,7 @@ var Files = function () {
     $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  \n                  data-type=\"{{type}}\"  \n                  data-delete=\"{{delete}}\" \n                  data-update=\"{{update}}\" \n                  data-folder=\"{{folder}}\" \n                  data-title=\"{{title}}\" \n                  data-name=\"{{folder}}{{name}}\"\n                  >\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
 
     this.conf = conf;
+    this.app = app;
     this.render(conf, permissions);
   }
 
@@ -324,6 +325,16 @@ var Files = function () {
       }, 100);
     }
   }, {
+    key: "refresh",
+    value: function refresh(conf, permissions, file) {
+      var directory = _path2.default.dirname(file.name);
+      if (file.scope === "user") {
+        this.initPane("user", "#userFiles", conf.backend.user, permissions, directory);
+      } else {
+        this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, directory);
+      }
+    }
+  }, {
     key: "render",
     value: function render(conf, permissions) {
       var _this2 = this;
@@ -337,7 +348,7 @@ var Files = function () {
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
         if (preview.length === 0) {
-          _this2.render();
+          _this2.render(permissions);
         } else {
           $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
         }
@@ -349,13 +360,20 @@ var Files = function () {
           storage.createFolder(folder + value, "user");
           _this2.initPane("user", "#userFiles", conf.backend.user, permissions, folder);
         });
-      });
-      $(document).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
+      }).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createFolder(folder + value, "global");
           _this2.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder);
         });
+      }).on("click", "#userFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "user");
+        _this2.app.fileSave();
+      }).on("click", "#globalFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "global");
+        _this2.app.fileSave();
       });
     }
   }, {
@@ -583,9 +601,6 @@ var Files = function () {
       }
       loadPane(initialPath);
     }
-  }, {
-    key: "initInplaceEdit",
-    value: function initInplaceEdit() {}
   }]);
 
   return Files;
@@ -1429,7 +1444,7 @@ var Application = function () {
       this.permissions = permissions;
       this.hasUnsavedChanges = false;
       this.currentFile = { name: "NewDocument" + _Configuration2.default.fileSuffix, scope: "user" };
-      this.filePane = new _FilesScreen2.default(_Configuration2.default, permissions.shapes);
+      this.filePane = new _FilesScreen2.default(this, _Configuration2.default, permissions.shapes);
 
       this.documentConfigurationTempl = {
         baseClass: "draw2d.SetFigure",
@@ -1611,16 +1626,18 @@ var Application = function () {
     }
   }, {
     key: "fileNew",
-    value: function fileNew(shapeTemplate) {
+    value: function fileNew(name, scope) {
+      $("#leftTabStrip .editor").click();
       this.view.clear();
-      this.storage.currentFile = null;
       this.documentConfiguration = $.extend({}, this.documentConfigurationTempl);
-
-      if (shapeTemplate) {
-        new draw2d.io.json.Reader().unmarshal(this.view, shapeTemplate);
-        this.view.getCommandStack().markSaveLocation();
-        this.view.centerDocument();
+      if (name) {
+        this.currentFile = { name: name, scope: scope };
+      } else {
+        // currently there is no support for "user" defined shapes. scope should be always "global"
+        this.currentFile = { name: "MyNewShape", scope: "global" };
       }
+      this.view.getCommandStack().markSaveLocation();
+      this.view.centerDocument();
     }
   }, {
     key: "fileSave",
@@ -1706,8 +1723,7 @@ exports.default = {
       },
       list: function list(path) {
         return "../backend/user/shape/list?path=" + path;
-      },
-      save: "../backend/user/shape/save"
+      }
     },
 
     global: {
@@ -1720,7 +1736,9 @@ exports.default = {
       list: function list(path) {
         return "../backend/global/shape/list?path=" + path;
       },
-      folder: "../backend/global/shape/folder"
+      delete: "../backend/global/shape/delete",
+      folder: "../backend/global/shape/folder",
+      save: "../backend/global/shape/save"
     }
   },
 
@@ -2204,20 +2222,7 @@ var Toolbar = function () {
     var buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
     this.html.append(buttonGroup);
 
-    if (permissions.shapes.list) {
-      this.openButton = $('<div class="image-button" id="editorFileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>');
-      buttonGroup.append(this.openButton);
-      this.openButton.on("click", function () {
-        _this.openButton.tooltip("hide");
-        app.fileOpen();
-      });
-      Mousetrap.bindGlobal("ctrl+o", function () {
-        _this.openButton.click();
-        return false;
-      });
-    }
-
-    if (permissions.shapes.update || permissions.shapes.create) {
+    if (permissions.shapes.global.update || permissions.shapes.global.create || permissions.shapes.update || permissions.shapes.create) {
       this.saveButton = $('<div class="image-button"  id="editorFileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="../_common/images/toolbar_save.svg"/><div>Save</div></div>');
       buttonGroup.append(this.saveButton);
       this.saveButton.on("click", function () {
@@ -3356,7 +3361,7 @@ module.exports = exports["default"];
 
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -3375,75 +3380,74 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Dialog = function () {
 
-  /**
-   * @constructor
-   *
-   */
-  function Dialog() {
-    _classCallCheck(this, Dialog);
+    /**
+     * @constructor
+     *
+     */
+    function Dialog() {
+        _classCallCheck(this, Dialog);
 
-    $("body").append(" \n          <div id=\"fileSaveDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n                <div class=\"modal-content\">\n                    <div class=\"modal-header\">\n                        <h4 class=\"media-heading\">Save Shape </h4>\n                    </div>\n                    <div class=\"modal-body\">\n                        <div class=\"media\">\n                            <div class=\"media-left media-middle\">\n                                <a href=\"#\">\n                                    <img class=\"media-object filePreview\" src=\"\">\n                                </a>\n                            </div>\n                            <div class=\"media-body\">\n        \n                                <form class=\"form-horizontal\">\n                                    <br>\n                                    Filename:\n                                    <fieldset>\n                                        <div class=\"form-group\">\n                                            <div class=\"col-lg-12\">\n                                                <input type=\"text\"\n                                                       class=\"form-control floating-label githubFileName\"\n                                                       value=\"\"\n                                                        >\n                                            </div>\n                                        </div>\n        \n                                    </fieldset>\n                                  Change Reason:\n                                  <fieldset>\n                                    <div class=\"form-group\">\n                                      <div class=\"col-lg-12\">\n                                        <input type=\"text\"\n                                               class=\"form-control floating-label githubCommitMessage\"\n                                               value=\"\"\n                                        >\n                                      </div>\n                                    </div>\n        \n                                  </fieldset>\n                                    <div class=\"row\"></div>\n                                </form>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"modal-footer\">\n                        <button class=\"btn\" data-dismiss=\"modal\">Abort</button>\n                        <button class=\"btn btn-primary okButton\"><span>Save</span></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n    ");
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(currentFile, storage, canvas, callback) {
-
-      new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
-        $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
-        $("#fileSaveDialog .githubFileName").val(_path2.default.basename(currentFile.name).replace(_Configuration2.default.fileSuffix, ""));
-        $("#fileSaveDialog .githubCommitMessage").val('commit message');
-
-        $('#fileSaveDialog').on('shown.bs.modal', function (event) {
-          $(event.currentTarget).find('input:first').focus();
-        });
-        $("#fileSaveDialog").modal("show");
-        Mousetrap.pause();
-
-        // Save Button
-        //
-        $("#fileSaveDialog .okButton").off('click').on("click", function () {
-          Mousetrap.unpause();
-          var writer = new draw2d.io.json.Writer();
-          writer.marshal(canvas, function (json) {
-            var name = $("#fileSaveDialog .githubFileName").val();
-            name = name.replace(_Configuration2.default.fileSuffix, "");
-            name = _path2.default.basename(name); // remove any directories
-            currentFile.name = _path2.default.join(_path2.default.dirname(currentFile.name), name + _Configuration2.default.fileSuffix);
-            var commitMessage = $("#fileSaveDialog .githubCommitMessage").val();
-            storage.saveFile(json, imageDataUrl, currentFile.name, commitMessage).then(function (response) {
-              $('#fileSaveDialog').modal('hide');
-              var data = response.data;
-              currentFile.name = data.filePath;
-              history.pushState({
-                id: 'editor',
-                scope: currentFile.scope,
-                file: currentFile.name
-              }, _Configuration2.default.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + currentFile.scope + '=' + currentFile.name);
-
-              if (callback) {
-                callback();
-              }
-            });
-          });
-        });
-      }, canvas.getBoundingBox().scale(20, 20));
+        $("body").append(" \n          <div id=\"fileSaveDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n                <div class=\"modal-content\">\n                    <div class=\"modal-header\">\n                        <h4 class=\"media-heading\">Save Shape </h4>\n                    </div>\n                    <div class=\"modal-body\">\n                        <div class=\"media\">\n                            <div class=\"media-left media-middle\">\n                                <a href=\"#\">\n                                    <img class=\"media-object filePreview\" src=\"\">\n                                </a>\n                            </div>\n                            <div class=\"media-body\">\n        \n                                <form class=\"form-horizontal\">\n                                    <br>\n                                    Filename:\n                                    <fieldset>\n                                        <div class=\"form-group\">\n                                            <div class=\"col-lg-12\">\n                                                <input type=\"text\"\n                                                       class=\"form-control floating-label githubFileName\"\n                                                       value=\"\"\n                                                        >\n                                            </div>\n                                        </div>\n        \n                                    </fieldset>\n                                    <div class=\"row\"></div>\n                                </form>\n                            </div>\n                        </div>\n                    </div>\n                    <div class=\"modal-footer\">\n                        <button class=\"btn\" data-dismiss=\"modal\">Abort</button>\n                        <button class=\"btn btn-primary okButton\"><span>Save</span></button>\n                    </div>\n                </div>\n            </div>\n        </div>\n    ");
     }
-  }]);
 
-  return Dialog;
+    /**
+     * @method
+     *
+     * Open the file picker and load the selected file.<br>
+     *
+     * @param {Function} successCallback callback method if the user select a file and the content is loaded
+     * @param {Function} errorCallback method to call if any error happens
+     *
+     * @since 4.0.0
+     */
+
+
+    _createClass(Dialog, [{
+        key: "show",
+        value: function show(currentFile, storage, canvas, callback) {
+
+            new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
+                $("#fileSaveDialog .filePreview").attr("src", imageDataUrl);
+                $("#fileSaveDialog .githubFileName").val(_path2.default.basename(currentFile.name).replace(_Configuration2.default.fileSuffix, ""));
+                $("#fileSaveDialog .githubCommitMessage").val('commit message');
+
+                $('#fileSaveDialog').on('shown.bs.modal', function (event) {
+                    $(event.currentTarget).find('input:first').focus();
+                });
+                $("#fileSaveDialog").modal("show");
+                Mousetrap.pause();
+
+                // Save Button
+                //
+                $("#fileSaveDialog .okButton").off('click').on("click", function () {
+                    Mousetrap.unpause();
+                    var writer = new draw2d.io.json.Writer();
+                    writer.marshal(canvas, function (json) {
+                        var name = $("#fileSaveDialog .githubFileName").val();
+                        name = name.replace(_Configuration2.default.fileSuffix, "");
+                        name = _path2.default.basename(name); // remove any directories
+                        currentFile.name = _path2.default.join(_path2.default.dirname(currentFile.name), name + _Configuration2.default.fileSuffix);
+                        storage.saveFile({ draw2d: json, image: imageDataUrl }, currentFile.name, currentFile.scope).then(function (response) {
+                            $('#fileSaveDialog').modal('hide');
+                            var data = response.data;
+                            currentFile.name = data.filePath;
+                            history.pushState({
+                                id: 'editor',
+                                scope: currentFile.scope,
+                                file: currentFile.name
+                            }, _Configuration2.default.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + currentFile.scope + '=' + currentFile.name);
+
+                            if (callback) {
+                                callback();
+                            }
+                        });
+                    });
+                });
+            }, canvas.getBoundingBox().scale(20, 20));
+        }
+    }]);
+
+    return Dialog;
 }();
 
 var dialog = new Dialog();

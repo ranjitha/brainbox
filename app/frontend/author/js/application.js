@@ -1,4 +1,5 @@
 import shareDialog from "../../_common/js/LinkShareDialog"
+import inputDialog from "../../_common/js/InputPrompt"
 import Files from "../../_common/js/FilesScreen"
 import Userinfo from "../../_common/js/Userinfo"
 import toast from "../../_common/js/toast";
@@ -33,7 +34,7 @@ class Application {
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
-    this.filePane = new Files(conf, permissions.sheets)
+    this.filePane = new Files(this, conf, permissions.sheets)
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
     this.userinfo = new Userinfo(permissions, conf)
 
@@ -100,6 +101,7 @@ class Application {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
+      this.filePane.refresh(conf, this.permissions.sheets, this.currentFile)
     }
 
     // if the user didn't has the access to write "global" files, the scope of the file is changed
@@ -128,6 +130,15 @@ class Application {
         let file = data.filePath
         shareDialog.show(file)
       })
+  }
+
+  fileNew(name, scope) {
+    $("#leftTabStrip .editor").click()
+    this.view.setDocument(new Document())
+    this.currentFile = { name, scope }
+    let section = this.view.addMarkdown(0)
+    this.view.onSelect(section)
+    this.view.onEdit(section)
   }
 
   load(name, scope){

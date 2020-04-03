@@ -40,20 +40,9 @@ export default class Toolbar {
     let buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
     this.html.append(buttonGroup)
 
-    if(permissions.shapes.list) {
-      this.openButton = $('<div class="image-button" id="editorFileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" ><img src="./images/toolbar_download.svg"/><div>Open</div></div>')
-      buttonGroup.append(this.openButton)
-      this.openButton.on("click", () => {
-        this.openButton.tooltip("hide")
-        app.fileOpen()
-      })
-      Mousetrap.bindGlobal("ctrl+o", () => {
-        this.openButton.click()
-        return false
-      })
-    }
 
-    if(permissions.shapes.update || permissions.shapes.create) {
+    if(permissions.shapes.global.update || permissions.shapes.global.create ||
+       permissions.shapes.update        || permissions.shapes.create) {
       this.saveButton = $('<div class="image-button"  id="editorFileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>"  ><img src="../_common/images/toolbar_save.svg"/><div>Save</div></div>')
       buttonGroup.append(this.saveButton)
       this.saveButton.on("click", () => {

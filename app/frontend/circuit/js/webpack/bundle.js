@@ -349,7 +349,7 @@ var Files = function () {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  function Files(conf, permissions) {
+  function Files(app, conf, permissions) {
     _classCallCheck(this, Files);
 
     $("#files_tab a").on("click", this.onShow);
@@ -357,6 +357,7 @@ var Files = function () {
     $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  \n                  data-type=\"{{type}}\"  \n                  data-delete=\"{{delete}}\" \n                  data-update=\"{{update}}\" \n                  data-folder=\"{{folder}}\" \n                  data-title=\"{{title}}\" \n                  data-name=\"{{folder}}{{name}}\"\n                  >\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
 
     this.conf = conf;
+    this.app = app;
     this.render(conf, permissions);
   }
 
@@ -372,6 +373,16 @@ var Files = function () {
       }, 100);
     }
   }, {
+    key: "refresh",
+    value: function refresh(conf, permissions, file) {
+      var directory = _path2.default.dirname(file.name);
+      if (file.scope === "user") {
+        this.initPane("user", "#userFiles", conf.backend.user, permissions, directory);
+      } else {
+        this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, directory);
+      }
+    }
+  }, {
     key: "render",
     value: function render(conf, permissions) {
       var _this2 = this;
@@ -385,7 +396,7 @@ var Files = function () {
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
         if (preview.length === 0) {
-          _this2.render();
+          _this2.render(permissions);
         } else {
           $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
         }
@@ -397,13 +408,20 @@ var Files = function () {
           storage.createFolder(folder + value, "user");
           _this2.initPane("user", "#userFiles", conf.backend.user, permissions, folder);
         });
-      });
-      $(document).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
+      }).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createFolder(folder + value, "global");
           _this2.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder);
         });
+      }).on("click", "#userFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "user");
+        _this2.app.fileSave();
+      }).on("click", "#globalFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "global");
+        _this2.app.fileSave();
       });
     }
   }, {
@@ -631,9 +649,6 @@ var Files = function () {
       }
       loadPane(initialPath);
     }
-  }, {
-    key: "initInplaceEdit",
-    value: function initInplaceEdit() {}
   }]);
 
   return Files;
@@ -1474,7 +1489,7 @@ var Application = function () {
       this.hasUnsavedChanges = false;
       this.palette = new _Palette2.default(permissions);
       this.view = new _View2.default("draw2dCanvas", permissions);
-      this.filePane = new _FilesScreen2.default(_Configuration2.default, permissions.brains);
+      this.filePane = new _FilesScreen2.default(this, _Configuration2.default, permissions.brains);
       this.addonPane = new _AddonScreen2.default(permissions);
       this.userinfo = new _Userinfo2.default(permissions, _Configuration2.default);
 
@@ -1645,18 +1660,15 @@ var Application = function () {
     }
   }, {
     key: "fileNew",
-    value: function fileNew(shapeTemplate, fileName) {
+    value: function fileNew(name, scope) {
       $("#leftTabStrip .editor").click();
 
       this.view.clear();
-      if (shapeTemplate) {
-        new Reader().unmarshal(this.view, shapeTemplate);
-      }
 
-      if (fileName) {
-        this.fileName = storage.sanitize(fileName) + _Configuration2.default.fileSuffix;
+      if (name) {
+        this.currentFile = { name: name, scope: scope };
       } else {
-        this.fileName = "MyNewBrain" + _Configuration2.default.fileSuffix;
+        this.currentFile = { name: "MyNewBrain", scope: "user" };
       }
       this.view.centerDocument();
     }

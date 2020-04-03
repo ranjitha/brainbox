@@ -12,7 +12,7 @@ export default class Files {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  constructor(conf, permissions) {
+  constructor(app, conf, permissions) {
     $("#files_tab a").on("click", this.onShow)
 
     $("body").append(` 
@@ -61,6 +61,7 @@ export default class Files {
     `)
 
     this.conf = conf
+    this.app = app
     this.render(conf, permissions)
   }
 
@@ -87,36 +88,57 @@ export default class Files {
     },100)
   }
 
+  refresh(conf, permissions, file){
+    let directory = fs.dirname(file.name)
+    if(file.scope==="user") {
+      this.initPane("user", "#userFiles", conf.backend.user, permissions, directory)
+    }
+    else {
+      this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, directory)
+    }
+  }
+
   render(conf, permissions) {
     let storage = require("./BackendStorage")(conf)
 
     this.initTabs(permissions)
-    this.initPane("user",   "#userFiles", conf.backend.user,   permissions      , "")
+    this.initPane("user",   "#userFiles",   conf.backend.user,   permissions       , "")
     this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, "")
 
     socket.on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
       if (preview.length === 0) {
-        this.render()
+        this.render(permissions)
       } else {
         $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
       }
     })
 
-    $(document).on("click", "#userFiles .fileOperationsFolderAdd", (event) => {
-      let folder = $(event.target).data("folder") || ""
-      inputPrompt.show("Create Folder", "Folder name", value => {
-        storage.createFolder(folder+value, "user")
-        this.initPane("user", "#userFiles", conf.backend.user, permissions, folder)
+    $(document)
+      .on("click", "#userFiles .fileOperationsFolderAdd", (event) => {
+        let folder = $(event.target).data("folder") || ""
+        inputPrompt.show("Create Folder", "Folder name", value => {
+          storage.createFolder(folder+value, "user")
+          this.initPane("user", "#userFiles", conf.backend.user, permissions, folder)
+        })
       })
-    })
-    $(document).on("click", "#globalFiles .fileOperationsFolderAdd", (event) => {
-      let folder = $(event.target).data("folder") || ""
-      inputPrompt.show("Create Folder", "Folder name", value => {
-        storage.createFolder(folder+value, "global")
-        this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder)
+      .on("click", "#globalFiles .fileOperationsFolderAdd", (event) => {
+        let folder = $(event.target).data("folder") || ""
+        inputPrompt.show("Create Folder", "Folder name", value => {
+          storage.createFolder(folder+value, "global")
+          this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder)
+        })
       })
-    })
+      .on("click", "#userFiles .fileOperationsDocumentAdd", (event) => {
+        let folder = $(event.target).data("folder") || ""
+        this.app.fileNew(folder+"NewDocument", "user")
+        this.app.fileSave()
+      })
+      .on("click", "#globalFiles .fileOperationsDocumentAdd", (event) => {
+        let folder = $(event.target).data("folder") || ""
+        this.app.fileNew(folder+"NewDocument", "global")
+        this.app.fileSave()
+      })
   }
 
   initTabs(permissions) {
@@ -345,8 +367,4 @@ export default class Files {
     loadPane(initialPath)
   }
 
-
-  initInplaceEdit(){
-
-  }
 }

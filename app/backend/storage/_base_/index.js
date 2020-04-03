@@ -10,6 +10,10 @@ module.exports = {
   listFiles: function (baseDir, subDir, res) {
     let listDir = path.join(baseDir, subDir)
 
+    if(!listDir.endsWith(path.sep))
+      listDir = listDir+path.sep
+
+    console.log(listDir, baseDir, subDir)
     // check that the normalize path is the same as the concatenated. It is possible that these are not the same
     // if the "subDir" contains dots like "/dir1/dir2/../../". It is a file path attack via API calls
     if (listDir !== path.normalize(listDir)) {
@@ -182,14 +186,14 @@ module.exports = {
     // if the "subDir" contains dots like "/dir1/dir2/../../". It is a file path attack via API calls
     if (file !== path.normalize(file)) {
       console.log("'file' path with dots")
-      res.status(403).send('Unable to delete file')
+      if(res) res.status(403).send('Unable to delete file')
       return
     }
 
     file = path.normalize(file)
     if(!file.startsWith(baseDir)){
       console.log("'subDir' isn't below baseDir")
-      res.status(403).send('Unable to delete image')
+      if(res) res.status(403).send('Unable to delete image')
       return
     }
 
@@ -198,7 +202,7 @@ module.exports = {
         // maybe a directory
         fs.removeSync(file)
       }
-      res.send('true')
+      if(res) res.send('true')
     })
   },
 

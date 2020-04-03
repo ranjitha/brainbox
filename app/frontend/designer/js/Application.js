@@ -45,7 +45,7 @@ class Application {
     this.permissions = permissions
     this.hasUnsavedChanges = false
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
-    this.filePane = new Files(conf, permissions.shapes)
+    this.filePane = new Files(this, conf, permissions.shapes)
 
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
@@ -242,16 +242,18 @@ class Application {
       })
   }
 
-  fileNew(shapeTemplate) {
+  fileNew(name, scope) {
+    $("#leftTabStrip .editor").click()
     this.view.clear()
-    this.storage.currentFile = null
     this.documentConfiguration = $.extend({}, this.documentConfigurationTempl)
-
-    if (shapeTemplate) {
-      new draw2d.io.json.Reader().unmarshal(this.view, shapeTemplate)
-      this.view.getCommandStack().markSaveLocation()
-      this.view.centerDocument()
+    if (name) {
+      this.currentFile = { name, scope }
+    } else {
+      // currently there is no support for "user" defined shapes. scope should be always "global"
+      this.currentFile = { name: "MyNewShape" , scope:"global"}
     }
+    this.view.getCommandStack().markSaveLocation()
+    this.view.centerDocument()
   }
 
   fileSave() {

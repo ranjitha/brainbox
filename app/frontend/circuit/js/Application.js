@@ -39,7 +39,7 @@ class Application {
     this.hasUnsavedChanges = false
     this.palette = new Palette(permissions)
     this.view = new View("draw2dCanvas", permissions)
-    this.filePane = new Files(conf, permissions.brains)
+    this.filePane = new Files(this, conf, permissions.brains)
     this.addonPane = new Addons(permissions)
     this.userinfo = new Userinfo(permissions, conf)
 
@@ -213,18 +213,15 @@ class Application {
     }
   }
 
-  fileNew(shapeTemplate, fileName) {
+  fileNew(name, scope) {
     $("#leftTabStrip .editor").click()
 
     this.view.clear()
-    if (shapeTemplate) {
-      new Reader().unmarshal(this.view, shapeTemplate)
-    }
 
-    if (fileName) {
-      this.fileName = storage.sanitize(fileName) + conf.fileSuffix
+    if (name) {
+      this.currentFile = { name, scope }
     } else {
-      this.fileName = "MyNewBrain" + conf.fileSuffix
+      this.currentFile = { name: "MyNewBrain" , scope:"user"}
     }
     this.view.centerDocument()
   }

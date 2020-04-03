@@ -310,7 +310,7 @@ var Files = function () {
    *
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
-  function Files(conf, permissions) {
+  function Files(app, conf, permissions) {
     _classCallCheck(this, Files);
 
     $("#files_tab a").on("click", this.onShow);
@@ -318,6 +318,7 @@ var Files = function () {
     $("body").append(" \n        <script id=\"filesTemplate\" type=\"text/x-jsrender\">\n        <div class=\"fileOperations\">\n            <div data-folder=\"{{folder}}\" class='fileOperationsFolderAdd   fa fa-plus' > Folder</div>\n            <div data-folder=\"{{folder}}\" class='fileOperationsDocumentAdd fa fa-plus' > Document</div>\n        </div>\n        <div>Folder: {{folder}}</div>\n        <ul class=\"list-group col-lg-10 col-md-10 col-xs-10 \">\n        {{#files}}\n          <li class=\"list-group-item\"  \n                  data-type=\"{{type}}\"  \n                  data-delete=\"{{delete}}\" \n                  data-update=\"{{update}}\" \n                  data-folder=\"{{folder}}\" \n                  data-title=\"{{title}}\" \n                  data-name=\"{{folder}}{{name}}\"\n                  >\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"thumbnail media-left\">\n                  <div style=\"width: 48px; height: 48px\">\n                    <img style=\"width:100%; height:100%; object-fit: contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n                {{#delete}}\n                    <div class=\"deleteIcon fa fa-trash-o\" data-toggle=\"confirmation\" ></div>\n                {{/delete}}\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n        </script>\n    ");
 
     this.conf = conf;
+    this.app = app;
     this.render(conf, permissions);
   }
 
@@ -333,6 +334,16 @@ var Files = function () {
       }, 100);
     }
   }, {
+    key: "refresh",
+    value: function refresh(conf, permissions, file) {
+      var directory = _path2.default.dirname(file.name);
+      if (file.scope === "user") {
+        this.initPane("user", "#userFiles", conf.backend.user, permissions, directory);
+      } else {
+        this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, directory);
+      }
+    }
+  }, {
     key: "render",
     value: function render(conf, permissions) {
       var _this2 = this;
@@ -346,7 +357,7 @@ var Files = function () {
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
         if (preview.length === 0) {
-          _this2.render();
+          _this2.render(permissions);
         } else {
           $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
         }
@@ -358,13 +369,20 @@ var Files = function () {
           storage.createFolder(folder + value, "user");
           _this2.initPane("user", "#userFiles", conf.backend.user, permissions, folder);
         });
-      });
-      $(document).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
+      }).on("click", "#globalFiles .fileOperationsFolderAdd", function (event) {
         var folder = $(event.target).data("folder") || "";
         inputPrompt.show("Create Folder", "Folder name", function (value) {
           storage.createFolder(folder + value, "global");
           _this2.initPane("global", "#globalFiles", conf.backend.global, permissions.global, folder);
         });
+      }).on("click", "#userFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "user");
+        _this2.app.fileSave();
+      }).on("click", "#globalFiles .fileOperationsDocumentAdd", function (event) {
+        var folder = $(event.target).data("folder") || "";
+        _this2.app.fileNew(folder + "NewDocument", "global");
+        _this2.app.fileSave();
       });
     }
   }, {
@@ -592,9 +610,6 @@ var Files = function () {
       }
       loadPane(initialPath);
     }
-  }, {
-    key: "initInplaceEdit",
-    value: function initInplaceEdit() {}
   }]);
 
   return Files;
@@ -1319,6 +1334,10 @@ var _LinkShareDialog = __webpack_require__(/*! ../../_common/js/LinkShareDialog 
 
 var _LinkShareDialog2 = _interopRequireDefault(_LinkShareDialog);
 
+var _InputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
+
+var _InputPrompt2 = _interopRequireDefault(_InputPrompt);
+
 var _FilesScreen = __webpack_require__(/*! ../../_common/js/FilesScreen */ "./app/frontend/_common/js/FilesScreen.js");
 
 var _FilesScreen2 = _interopRequireDefault(_FilesScreen);
@@ -1382,7 +1401,7 @@ var Application = function () {
       this.currentFile = { name: "NewDocument" + _configuration2.default.fileSuffix, scope: "user" };
       this.storage = storage;
       this.view = new _view2.default(this, "#editor .content", permissions);
-      this.filePane = new _FilesScreen2.default(_configuration2.default, permissions.sheets);
+      this.filePane = new _FilesScreen2.default(this, _configuration2.default, permissions.sheets);
       this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
       this.userinfo = new _Userinfo2.default(permissions, _configuration2.default);
 
@@ -1451,6 +1470,7 @@ var Application = function () {
         _this2.hasUnsavedChanges = false;
         (0, _toast2.default)("Saved");
         $("#editorFileSave div").removeClass("highlight");
+        _this2.filePane.refresh(_configuration2.default, _this2.permissions.sheets, _this2.currentFile);
       };
 
       // if the user didn't has the access to write "global" files, the scope of the file is changed
@@ -1477,6 +1497,16 @@ var Application = function () {
         var file = data.filePath;
         _LinkShareDialog2.default.show(file);
       });
+    }
+  }, {
+    key: "fileNew",
+    value: function fileNew(name, scope) {
+      $("#leftTabStrip .editor").click();
+      this.view.setDocument(new _document2.default());
+      this.currentFile = { name: name, scope: scope };
+      var section = this.view.addMarkdown(0);
+      this.view.onSelect(section);
+      this.view.onEdit(section);
     }
   }, {
     key: "load",
