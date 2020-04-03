@@ -5,62 +5,58 @@ import simulatorDialog from "../../_common/js/SimulatorDialog"
 import authorDialog from "../../_common/js/AuthorDialog"
 import conf from "./Configuration"
 
-export default class Toolbar{
+export default class Toolbar {
 
-  constructor(app){
+  constructor(app) {
 
-    $(document).on("click", "#editorFileSave:not(.disabled)", ( event )=>{
-      $("small.error").removeClass("error")
-      let user = {}
-      $("#editor .content input[data-id], #editor .content select[data-id]").each( (i, e) => {
-        let element = $(e)
-        let field = element.data("id")
-        user[field] = element.val()
+    $(document)
+      .on("click", "#editorFileSave:not(.disabled)", (event) => {
+        $("small.error").removeClass("error")
+        let user = {}
+        $("#editor .content input[data-id], #editor .content select[data-id]").each((i, e) => {
+          let element = $(e)
+          let field = element.data("id")
+          user[field] = element.val()
+        })
+        users.save(user)
+          .then((updatedUser) => {
+            toast("Saved")
+            app.view.setUser(updatedUser)
+            app.palette.update()
+          })
+          .catch((error) => {
+            let status = error.response.status
+            if (status === 400) {
+              let field = error.response.data
+              $("#" + field + "Help").html("required").addClass("error")
+            }
+          })
       })
-      users.save(user)
-        .then((updatedUser)=>{
-          toast("Saved")
-          app.view.setUser(updatedUser)
+      .on("click", "#editorAdd:not(.disabled)", (event) => {
+        let user = {
+          role: "user"
+        }
+        app.view.setUser(user)
+      })
+      .on("click", "#editorDelete:not(.disabled)", (event) => {
+        let user = {id: $("#editor .content input[data-id='id']").val()}
+        users.delete(user).then(() => {
+          toast("Deleted")
+          app.view.setUser({
+            role: "user"
+          })
           app.palette.update()
         })
-        .catch((error) => {
-          let status = error.response.status
-          if(status === 400){
-            let field = error.response.data
-            $("#"+field+"Help").html("required").addClass("error")
-          }
-        })
-    })
-
-
-    $(document).on("click", "#editorAdd:not(.disabled)", ( event )=>{
-      let user = {
-        role:"user"
-      }
-      app.view.setUser(user)
-    })
-
-
-    $(document).on("click", "#editorDelete:not(.disabled)", ( event )=>{
-      let user = { id: $("#editor .content input[data-id='id']").val() }
-      users.delete(user).then(()=>{
-        toast("Deleted")
-        app.view.setUser({
-          role:"user"
-        })
-        app.palette.update()
       })
-    })
-
-    $(document).on("click", "#applicationSwitchSimulator", () => {
-      simulatorDialog.show(conf)
-    })
-    $(document).on("click", "#applicationSwitchAuthor", () => {
-      authorDialog.show(conf)
-    })
-    $(document).on("click", "#applicationSwitchDesigner", () => {
-      designerDialog.show(conf)
-    })
+      .on("click", "#applicationSwitchSimulator", () => {
+        simulatorDialog.show(conf)
+      })
+      .on("click", "#applicationSwitchAuthor", () => {
+        authorDialog.show(conf)
+      })
+      .on("click", "#applicationSwitchDesigner", () => {
+        designerDialog.show(conf)
+      })
 
   }
 }

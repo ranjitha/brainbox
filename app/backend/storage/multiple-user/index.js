@@ -198,8 +198,15 @@ module.exports = {
     // only an admin can create a "reset password" request right now
     //
     let passwordRest = require("./password-rest")
-    app.post("/password/request", ensureAdminLoggedIn(), passwordRest.resetRequest)
-    app.post("/password/set",                            passwordRest.reset)
+    // endpoint to generate a password reset token
+    app.post("/password/token", ensureAdminLoggedIn(), passwordRest.token_post)
+    // endpoint to check if the token is valid
+    app.get("/password/token/:token", passwordRest.token_get)
+    // endpoint to set the password
+    app.post("/password", passwordRest.set)
+    // endpoint to serve the ui for the password reset
+    app.use("/password", express.static(__dirname + '/../../../frontend/resetpwd'))
+    // endpoint to check if the token is valid
 
 
     // Usermanagement API

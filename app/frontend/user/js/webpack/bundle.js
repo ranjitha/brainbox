@@ -785,16 +785,12 @@ var Toolbar = function Toolbar(app) {
         $("#" + field + "Help").html("required").addClass("error");
       }
     });
-  });
-
-  $(document).on("click", "#editorAdd:not(.disabled)", function (event) {
+  }).on("click", "#editorAdd:not(.disabled)", function (event) {
     var user = {
       role: "user"
     };
     app.view.setUser(user);
-  });
-
-  $(document).on("click", "#editorDelete:not(.disabled)", function (event) {
+  }).on("click", "#editorDelete:not(.disabled)", function (event) {
     var user = { id: $("#editor .content input[data-id='id']").val() };
     _Users2.default.delete(user).then(function () {
       (0, _toast2.default)("Deleted");
@@ -803,15 +799,11 @@ var Toolbar = function Toolbar(app) {
       });
       app.palette.update();
     });
-  });
-
-  $(document).on("click", "#applicationSwitchSimulator", function () {
+  }).on("click", "#applicationSwitchSimulator", function () {
     _SimulatorDialog2.default.show(_Configuration2.default);
-  });
-  $(document).on("click", "#applicationSwitchAuthor", function () {
+  }).on("click", "#applicationSwitchAuthor", function () {
     _AuthorDialog2.default.show(_Configuration2.default);
-  });
-  $(document).on("click", "#applicationSwitchDesigner", function () {
+  }).on("click", "#applicationSwitchDesigner", function () {
     _DesignerDialog2.default.show(_Configuration2.default);
   });
 };
@@ -986,8 +978,19 @@ var View = function () {
           var field = element.data("id");
           user[field] = element.val();
         });
-        _axios2.default.post("../password/request", user).then(function (response) {
-          alert(response.data);
+        _axios2.default.post("../password/token", user).then(function (response) {
+          var email = $("#userEmail").val();
+          var currentUrl = window.location.href.split('?')[0];
+          var segments = currentUrl.split("/");
+          segments.pop();
+          if (currentUrl.endsWith("/")) {
+            segments.pop();
+          }
+          var url = segments.join("/");
+          var username = $("#userDisplayName").val();
+          var subject = encodeURIComponent('Password reset request for BrainBox');
+          var emailBody = encodeURIComponent("Hi " + username + ", \n\n\nYou recently requested to reset your password for your BrainBox \naccount. Click the link to reset it.\n\n" + url + "/password?token=" + response.data + "\n\nIf you did not request a password reset, please ignore it or reply to let us know.\nThis password reset link is only valid for the next 30 minutes.\n\nThanks \n\n\nYou Brainbox Administrator\n");
+          window.open("mailto:" + email + "?subject=" + subject + "&body=" + emailBody);
         });
       });
 

@@ -30,8 +30,36 @@ export default class View{
         let field = element.data("id")
         user[field] = element.val()
       })
-      axios.post("../password/request", user).then( (response)=>{
-        alert(response.data)
+      axios.post("../password/token", user).then( (response)=>{
+        let email = $("#userEmail").val()
+        let currentUrl = window.location.href.split('?')[0]
+        let segments =  currentUrl.split("/")
+        segments.pop()
+        if(currentUrl.endsWith("/")){
+          segments.pop()
+        }
+        let url = segments.join("/")
+        let username = $("#userDisplayName").val()
+        let subject = encodeURIComponent('Password reset request for BrainBox')
+        let emailBody = encodeURIComponent(
+`Hi ${username}, 
+
+
+You recently requested to reset your password for your BrainBox 
+account. Click the link to reset it.
+
+${url}/password?token=${response.data}
+
+If you did not request a password reset, please ignore it or reply to let us know.
+This password reset link is only valid for the next 30 minutes.
+
+Thanks 
+
+
+You Brainbox Administrator
+`)
+        window.open("mailto:"+email+"?subject="+subject+"&body="+emailBody)
+
       })
     })
 
