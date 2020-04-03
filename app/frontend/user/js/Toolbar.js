@@ -48,13 +48,13 @@ export default class Toolbar {
           app.palette.update()
         })
       })
-      .on("click", "#applicationSwitchSimulator", () => {
+      .on("click", ".applicationSwitchSimulator", () => {
         simulatorDialog.show(conf)
       })
-      .on("click", "#applicationSwitchAuthor", () => {
+      .on("click", ".applicationSwitchAuthor", () => {
         authorDialog.show(conf)
       })
-      .on("click", "#applicationSwitchDesigner", () => {
+      .on("click", ".applicationSwitchDesigner", () => {
         designerDialog.show(conf)
       })
 

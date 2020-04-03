@@ -14,7 +14,7 @@ export default class AddonScreen {
       return
     }
 
-    $("#leftTabStrip .addon").click(this.onShow)
+    $("#leftTabStrip .addon").click(()=> this.onShow())
   }
 
   onShow() {
@@ -35,14 +35,14 @@ export default class AddonScreen {
         let html = tmpl.render({
           current_version: conf.shapes.version,
           update: response
-        });
+        })
 
-        $("#addon .content").html(html);
+        $("#addon .content").html(html)
         if(this.permissions.updates.update){
           $("#addon .installButton").click(event =>{
             let element = $(event.target)
             element.append("<i class=\"fa fa-spinner fa-spin\"></i>")
-            screen.onSelect(element.data("url"))
+            this.onSelect(element.data("url"))
           })
         }
         else {
@@ -55,7 +55,7 @@ export default class AddonScreen {
         let html = tmpl.render({
           current_version: conf.shapes.version
         });
-        $("#addon .content").html(html);
+        $("#addon .content").html(html)
     })
   }
 

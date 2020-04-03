@@ -51,20 +51,20 @@ class Application {
 
     this.view.getCommandStack().addEventListener(this)
 
-    $("#applicationSwitchDesigner").on("click", () => {
+    $(".applicationSwitchDesigner").on("click", () => {
       designerDialog.show(conf)
     })
 
-    $("#applicationSwitchAuthor").on("click", () => {
+    $(".applicationSwitchAuthor").on("click", () => {
       authorDialog.show(conf)
     })
     if(permissions.featureset.usermanagement===true) {
-      $(document).on("click", "#applicationSwitchUser", () => {
+      $(document).on("click", ".applicationSwitchUser", () => {
         userAdminDialog.show(conf)
       })
     }
     else{
-      $("#applicationSwitchUser").remove()
+      $(".applicationSwitchUser").remove()
     }
 
     if(permissions.brains.update || permissions.brains.create) {

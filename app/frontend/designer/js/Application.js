@@ -82,7 +82,7 @@ class Application {
 
     this.storage = storage
     this.view = new View(this, "canvas", permissions)
-    this.toolbar = new Toolbar(this, ".toolbar", this.view, permissions)
+    this.toolbar = new Toolbar(this, "#editor .toolbar", this.view, permissions)
     this.layer = new Layer(this, "layer_elements", this.view, permissions)
     this.filter = new FilterPane(this, "#filter .filter_actions", this.view, permissions)
     this.userinfo = new Userinfo(permissions, conf)

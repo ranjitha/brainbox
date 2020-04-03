@@ -64,21 +64,21 @@ export default class Toolbar {
       return false
     })
 
-    $("#applicationSwitchDesigner").on("click", () => {
+    $(".applicationSwitchDesigner").on("click", () => {
       designerDialog.show(conf)
     })
 
-    $("#applicationSwitchSimulator").on("click", () => {
+    $(".applicationSwitchSimulator").on("click", () => {
       simulatorDialog.show(conf)
     })
 
     if(permissions.featureset.usermanagement===true) {
-      $(document).on("click", "#applicationSwitchUser", () => {
+      $(document).on("click", ".applicationSwitchUser", () => {
         userAdminDialog.show(conf)
       })
     }
     else{
-      $("#applicationSwitchUser").remove()
+      $(".applicationSwitchUser").remove()
     }
 
     // enable the tooltip for all buttons

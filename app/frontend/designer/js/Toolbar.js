@@ -265,26 +265,26 @@ export default class Toolbar {
 
     let appSwitchButtons = $(` 
          <span class="group applicationSwitch">
-            <label id="applicationSwitch_toggler" class="dropdown" >
+            <label class="dropdown" >
 
-                <span class="image-button"  id="applicationSwitchButton" data-toggle="dropdown">
+                <span class="image-button"  data-toggle="dropdown">
                   <img  src="../_common/images/toolbar_app_switch.svg"/>
                 </span>
 
                 <ul class="dropdown-menu" role="menu" >
                     <form class="form-horizontal" role="form">
 
-                      <label id="applicationSwitchSimulator" class="image-button">
+                      <label class="applicationSwitchSimulator image-button">
                         <img src="../_common/images/app_simulator.svg"/>
                         <div>Circuit<br>Simulator</div>
                       </label>
 
-                      <label id="applicationSwitchAuthor" class="image-button" >
+                      <label class="applicationSwitchAuthor image-button" >
                         <img src="../_common/images/app_lessons.svg"/>
                         <div>Lesson<br>Author</div>
                       </label>
                       
-                      <label id="applicationSwitchUser" class="image-button" >
+                      <label class="applicationSwitchUser image-button" >
                         <img src="../_common/images/app_user.svg"/>
                         <div>User<br>Management</div>
                       </label>
@@ -292,30 +292,30 @@ export default class Toolbar {
                     </form>
                 </ul>
             </label>
-            <label id="userinfo_toggler" class="dropdown" >
-                  <span class="image-button"  id="userinfoButton" data-toggle="dropdown">
+            <label class="userinfo_toggler dropdown" >
+                  <span class="image-button" data-toggle="dropdown">
                     <img  src="../_common/images/toolbar_user.svg"/>
                   </span>
 
                   <div class="dropdown-menu" role="menu" >
                   </div>
-                </label>
-            </span>
+            </label>
+         </span>
     `)
     buttonGroup.append(appSwitchButtons)
-    $(document).on("click", "#applicationSwitchSimulator", () => {
+    $(document).on("click", ".applicationSwitchSimulator", () => {
       simulatorDialog.show(conf)
     })
-    $(document).on("click", "#applicationSwitchAuthor", () => {
+    $(document).on("click", ".applicationSwitchAuthor", () => {
       authorDialog.show(conf)
     })
     if(permissions.featureset.usermanagement===true) {
-      $(document).on("click", "#applicationSwitchUser", () => {
+      $(document).on("click", ".applicationSwitchUser", () => {
         userAdminDialog.show(conf)
       })
     }
     else{
-      $("#applicationSwitchUser").remove()
+      $(".applicationSwitchUser").remove()
     }
 
 
