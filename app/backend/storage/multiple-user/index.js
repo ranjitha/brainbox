@@ -225,12 +225,12 @@ module.exports = {
 
     // =================================================================
     // endpoints for shared circuits / sheets
-    //
+    // It is even allowed for unknown users
     // =================================================================
-    app.get('/backend/shared/sheet/get',   ensureLoggedIn(), (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
-    app.post('/backend/shared/sheet/save', ensureLoggedIn(), (req, res) => module.exports.writeSheet(sheetsSharedDir,  shortid.generate()+".sheet", req.body.content, res))
-    app.get('/backend/shared/brain/get',   ensureLoggedIn(), (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
-    app.post('/backend/shared/brain/save', ensureLoggedIn(), (req, res) => module.exports.writeBrain(brainsSharedDir,  shortid.generate()+".brain", req.body.content, res))
+    app.get('/backend/shared/sheet/get',   (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
+    app.post('/backend/shared/sheet/save', (req, res) => module.exports.writeSheet(sheetsSharedDir,  shortid.generate()+".sheet", req.body.content, res))
+    app.get('/backend/shared/brain/get',   (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
+    app.post('/backend/shared/brain/save', (req, res) => module.exports.writeBrain(brainsSharedDir,  shortid.generate()+".brain", req.body.content, res))
 
 
     // =================================================================

@@ -18,6 +18,8 @@ import Addons from "./view/AddonScreen"
 import conf from "./Configuration"
 import reader from "./io/Reader"
 import fileSave from "./dialog/FileSave"
+import shareDialog from "../../_common/js/LinkShareDialog";
+import writer from "./io/Writer";
 let storage = require('../../_common/js/BackendStorage')(conf)
 
 
@@ -75,11 +77,24 @@ class Application {
     }
 
 
+    this.shareButton = $("#editorFileShare")
+    if(permissions.featureset.share) {
+      this.shareButton.on("click", () => {
+        this.shareButton.tooltip("hide")
+        app.fileShare()
+      })
+    }
+    else{
+      this.shareButton.remove()
+    }
+
+
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     let user = this.getParam("user")
     let global = this.getParam("global")
+    let shared = this.getParam("shared")
     if (user) {
       $("#leftTabStrip .editor").click()
       this.load(user, "user")
@@ -90,6 +105,10 @@ class Application {
     else if (global) {
       $("#leftTabStrip .editor").click()
       this.load(global, "global")
+    }
+    else if (shared) {
+      $("#leftTabStrip .editor").click()
+      this.load(shared, "shared")
     }
     else {
       this.fileNew()
@@ -157,6 +176,19 @@ class Application {
       }
     }
     return results[1]
+  }
+
+
+  fileShare() {
+    this.view.setCurrentSelection(null)
+    writer.marshal(this.view, json => {
+      storage.saveFile(json, "unused", "shared")
+        .then(( response) => {
+          let data = response.data
+          let file = data.filePath
+          shareDialog.show(file)
+        })
+    })
   }
 
   fileSave(){

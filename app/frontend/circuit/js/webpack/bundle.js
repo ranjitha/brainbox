@@ -718,6 +718,78 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/LinkShareDialog.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/_common/js/LinkShareDialog.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _toast = __webpack_require__(/*! ./toast */ "./app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+
+    $("body").append("\n            <div id=\"linkShareDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n            <div class=\"modal-dialog \">\n              <div class=\"modal-content\">\n                <div class=\"modal-header\">\n                  <h4 class=\"media-heading\">Share with Others</h4>\n                </div>\n                <div class=\"modal-body\">\n                  <div class=\"media\">\n                    <div class=\"promptValueLabel\">Public Link:</div>\n                    <fieldset>\n                      <div class=\"form-group\">\n                        <div class=\"col-lg-12\">\n                          <input id=\"sharedLinkInput\" type=\"text\" class=\"form-control floating-label\" value=\"\" > <button class=\"clipboardButton\" style=\"float:right\">copy</button>\n                        </div>\n                      </div>\n                    </fieldset>\n                  </div>\n                </div>\n                <div class=\"modal-footer\">\n                  <button class=\"btn\" data-dismiss=\"modal\">Close</button>\n                </div>\n              </div>\n            </div>\n          </div>\n    ");
+  }
+
+  /**
+   */
+
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(file) {
+
+      var url = window.location.href.split('?')[0] + '?shared=' + file;
+      $("#sharedLinkInput").val(url);
+
+      $('#linkShareDialog').on('shown.bs.modal', function (event) {
+        $(event.currentTarget).find('input:first').focus();
+      });
+      $("#linkShareDialog").modal("show");
+
+      $("#linkShareDialog .clipboardButton").on("click", function () {
+        var copyText = document.getElementById("sharedLinkInput");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+        $('#linkShareDialog').modal('hide');
+        (0, _toast2.default)("Link copied");
+      });
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/PopConfirm.js":
 /*!***********************************************!*\
   !*** ./app/frontend/_common/js/PopConfirm.js ***!
@@ -1367,6 +1439,14 @@ var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/cir
 
 var _FileSave2 = _interopRequireDefault(_FileSave);
 
+var _LinkShareDialog = __webpack_require__(/*! ../../_common/js/LinkShareDialog */ "./app/frontend/_common/js/LinkShareDialog.js");
+
+var _LinkShareDialog2 = _interopRequireDefault(_LinkShareDialog);
+
+var _Writer = __webpack_require__(/*! ./io/Writer */ "./app/frontend/circuit/js/io/Writer.js");
+
+var _Writer2 = _interopRequireDefault(_Writer);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1429,11 +1509,22 @@ var Application = function () {
         $("#editorFileSave").remove();
       }
 
+      this.shareButton = $("#editorFileShare");
+      if (permissions.featureset.share) {
+        this.shareButton.on("click", function () {
+          _this.shareButton.tooltip("hide");
+          app.fileShare();
+        });
+      } else {
+        this.shareButton.remove();
+      }
+
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
       var user = this.getParam("user");
       var global = this.getParam("global");
+      var shared = this.getParam("shared");
       if (user) {
         $("#leftTabStrip .editor").click();
         this.load(user, "user");
@@ -1444,6 +1535,9 @@ var Application = function () {
       else if (global) {
           $("#leftTabStrip .editor").click();
           this.load(global, "global");
+        } else if (shared) {
+          $("#leftTabStrip .editor").click();
+          this.load(shared, "shared");
         } else {
           this.fileNew();
         }
@@ -1511,6 +1605,18 @@ var Application = function () {
         }
       }
       return results[1];
+    }
+  }, {
+    key: "fileShare",
+    value: function fileShare() {
+      this.view.setCurrentSelection(null);
+      _Writer2.default.marshal(this.view, function (json) {
+        storage.saveFile(json, "unused", "shared").then(function (response) {
+          var data = response.data;
+          var file = data.filePath;
+          _LinkShareDialog2.default.show(file);
+        });
+      });
     }
   }, {
     key: "fileSave",
