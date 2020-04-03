@@ -36,4 +36,5 @@ $(window, document, undefined).ready(function() {
     $(this).removeClass('is-active');
   });
 
+  $("#usernameInput").focus()
 });

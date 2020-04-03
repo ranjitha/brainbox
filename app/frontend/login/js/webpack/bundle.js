@@ -96,6 +96,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
+/***/ "./app/frontend/login/images/background.png":
+/*!**************************************************!*\
+  !*** ./app/frontend/login/images/background.png ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "js/webpack/16df1af03b096dc9d1593b592e8ce3cf.png";
+
+/***/ }),
+
 /***/ "./app/frontend/login/js/index.js":
 /*!****************************************!*\
   !*** ./app/frontend/login/js/index.js ***!
@@ -137,6 +148,8 @@ $(window, document, undefined).ready(function () {
   $ripples.on('animationend webkitAnimationEnd mozAnimationEnd oanimationend MSAnimationEnd', function (e) {
     $(this).removeClass('is-active');
   });
+
+  $("#usernameInput").focus();
 });
 
 /***/ }),
@@ -179,12 +192,13 @@ module.exports = exported;
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
+var escape = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "* {\n  box-sizing: border-box;\n}\nbody {\n  font-family: Helvetica;\n  background: #eee;\n}\nhgroup {\n  text-align: center;\n  margin-top: 4em;\n}\nh1,\nh3 {\n  font-weight: 300;\n}\nh1 {\n  color: #636363;\n}\nh3 {\n  color: #4a89dc;\n}\nform {\n  width: 380px;\n  margin: 4em auto;\n  padding: 3em 2em 2em 2em;\n  background: #fafafa;\n  border: 1px solid #ebebeb;\n  box-shadow: rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px, rgba(0, 0, 0, 0.09804) 0px 1px 2px 0px;\n}\n.group {\n  position: relative;\n  margin-bottom: 45px;\n}\ninput {\n  font-size: 18px;\n  padding: 10px 10px 10px 5px;\n  -webkit-appearance: none;\n  display: block;\n  background: #fafafa;\n  color: #636363;\n  width: 100%;\n  border: none;\n  border-radius: 0;\n  border-bottom: 1px solid #757575;\n}\ninput:focus {\n  outline: none;\n}\n/* Label */\nlabel {\n  color: #999;\n  font-size: 18px;\n  font-weight: normal;\n  position: absolute;\n  pointer-events: none;\n  left: 5px;\n  top: 10px;\n  transition: all 0.2s ease;\n}\n/* active */\ninput:focus ~ label,\ninput.used ~ label {\n  top: -20px;\n  transform: scale(0.75);\n  left: -2px;\n  /* font-size: 14px; */\n  color: rgba(0, 0, 0, 0.2);\n}\n/* Underline */\n.bar {\n  position: relative;\n  display: block;\n  width: 100%;\n}\n.bar:before,\n.bar:after {\n  content: '';\n  height: 2px;\n  width: 0;\n  bottom: 1px;\n  position: absolute;\n  background: #C71D3D;\n  transition: all 0.2s ease;\n}\n.bar:before {\n  left: 50%;\n}\n.bar:after {\n  right: 50%;\n}\n/* active */\ninput:focus ~ .bar:before,\ninput:focus ~ .bar:after {\n  width: 50%;\n}\n/* Highlight */\n.highlight {\n  position: absolute;\n  height: 60%;\n  width: 100px;\n  top: 25%;\n  left: 0;\n  pointer-events: none;\n  opacity: 0.5;\n}\n/* active */\ninput:focus ~ .highlight {\n  animation: inputHighlighter 0.3s ease;\n}\n/* Animations */\n@keyframes inputHighlighter {\n  from {\n    background: #C71D3D;\n  }\n  to {\n    width: 0;\n    background: transparent;\n  }\n}\n/* Button */\n.button {\n  position: relative;\n  display: inline-block;\n  padding: 12px 24px;\n  margin: 0.3em 0 1em 0;\n  width: 100%;\n  vertical-align: middle;\n  color: #fff;\n  font-size: 16px;\n  line-height: 20px;\n  font-weight: 400;\n  text-align: center;\n  letter-spacing: 1px;\n  background: transparent;\n  border: 0;\n  border-bottom: 2px solid #b11a36;\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n.button:focus {\n  outline: 0;\n}\n/* Button modifiers */\n.buttonBlue {\n  background: #C71D3D;\n  text-shadow: 2px 2px 0 #b11a36;\n}\n.buttonBlue:hover {\n  background: #e23556;\n}\n/* Ripples container */\n.ripples {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n  background: transparent;\n}\n/* Ripples circle */\n.ripplesCircle {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  opacity: 0;\n  width: 0;\n  height: 0;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.25);\n}\n.ripples.is-active .ripplesCircle {\n  animation: ripples 0.4s ease-in;\n}\n/* Ripples animation */\n@keyframes ripples {\n  0% {\n    opacity: 0;\n  }\n  25% {\n    opacity: 1;\n  }\n  100% {\n    width: 200%;\n    padding-bottom: 200%;\n    opacity: 0;\n  }\n}\nfooter {\n  text-align: center;\n}\nfooter p {\n  color: #888;\n  font-size: 13px;\n  letter-spacing: 0.4px;\n}\nfooter a {\n  color: #4a89dc;\n  text-decoration: none;\n  transition: all 0.2s ease;\n}\nfooter a:hover {\n  color: #666;\n  text-decoration: underline;\n}\nfooter img {\n  width: 80px;\n  transition: all 0.2s ease;\n}\nfooter img:hover {\n  opacity: 0.83;\n}\nfooter img:focus,\nfooter a:focus {\n  outline: none;\n}\n", ""]);
+exports.push([module.i, "* {\n  box-sizing: border-box;\n}\nbody {\n  font-family: Helvetica;\n  background: #eee;\n  background-image: url(" + escape(__webpack_require__(/*! ../images/background.png */ "./app/frontend/login/images/background.png")) + ");\n  background-size: cover;\n}\nhgroup {\n  text-align: center;\n  margin-top: 4em;\n}\nhgroup h1 {\n  background-color: #C71D3D;\n  display: inline;\n  color: white;\n  font-weight: 100;\n  padding-left: 10px;\n  padding-right: 10px;\n  letter-spacing: 4px;\n}\nhgroup h3 {\n  font-weight: 400;\n  font-size: 14px;\n  letter-spacing: 4px;\n  padding-bottom: 5px;\n  margin-top: 20px;\n}\nform {\n  width: 380px;\n  margin: 4em auto;\n  padding: 3em 2em 2em 2em;\n  background: #fafafa;\n  border: 1px solid #ebebeb;\n  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);\n}\n.group {\n  position: relative;\n  margin-bottom: 45px;\n}\ninput {\n  font-size: 18px;\n  padding: 10px 10px 10px 5px;\n  -webkit-appearance: none;\n  display: block;\n  background: #fafafa;\n  color: #636363;\n  width: 100%;\n  border: none;\n  border-radius: 0;\n  border-bottom: 1px solid #757575;\n}\ninput:focus {\n  outline: none;\n}\n/* Label */\nlabel {\n  color: #999;\n  font-size: 18px;\n  font-weight: normal;\n  position: absolute;\n  pointer-events: none;\n  left: 5px;\n  top: 10px;\n  transition: all 0.2s ease;\n}\n/* active */\ninput:focus ~ label,\ninput.used ~ label {\n  top: -20px;\n  transform: scale(0.75);\n  left: -2px;\n  /* font-size: 14px; */\n  color: rgba(0, 0, 0, 0.2);\n}\n/* Underline */\n.bar {\n  position: relative;\n  display: block;\n  width: 100%;\n}\n.bar:before,\n.bar:after {\n  content: '';\n  height: 2px;\n  width: 0;\n  bottom: 0px;\n  position: absolute;\n  background: #C71D3D;\n  transition: all 0.2s ease;\n}\n.bar:before {\n  left: 50%;\n}\n.bar:after {\n  right: 50%;\n}\n/* active */\ninput:focus ~ .bar:before,\ninput:focus ~ .bar:after {\n  width: 50%;\n}\n/* Highlight */\n.highlight {\n  position: absolute;\n  height: 60%;\n  width: 100px;\n  top: 25%;\n  left: 0;\n  pointer-events: none;\n  opacity: 0.5;\n}\n/* active */\ninput:focus ~ .highlight {\n  animation: inputHighlighter 0.3s ease;\n}\n/* Animations */\n@keyframes inputHighlighter {\n  from {\n    background: #C71D3D;\n  }\n  to {\n    width: 0;\n    background: transparent;\n  }\n}\n/* Button */\n.button {\n  position: relative;\n  display: inline-block;\n  padding: 12px 24px;\n  margin: 0.3em 0 1em 0;\n  width: 100%;\n  vertical-align: middle;\n  color: #fff;\n  font-size: 16px;\n  line-height: 20px;\n  font-weight: 400;\n  text-align: center;\n  letter-spacing: 1px;\n  background: transparent;\n  border: 0;\n  border-bottom: 2px solid #b11a36;\n  cursor: pointer;\n  transition: all 0.15s ease;\n}\n.button:focus {\n  outline: 0;\n}\n/* Button modifiers */\n.buttonBlue {\n  background: #C71D3D;\n  text-shadow: 2px 2px 0 #b11a36;\n}\n.buttonBlue:hover {\n  background: #e23556;\n}\n/* Ripples container */\n.ripples {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  overflow: hidden;\n  background: transparent;\n}\n/* Ripples circle */\n.ripplesCircle {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  opacity: 0;\n  width: 0;\n  height: 0;\n  border-radius: 50%;\n  background: rgba(255, 255, 255, 0.25);\n}\n.ripples.is-active .ripplesCircle {\n  animation: ripples 0.4s ease-in;\n}\n/* Ripples animation */\n@keyframes ripples {\n  0% {\n    opacity: 0;\n  }\n  25% {\n    opacity: 1;\n  }\n  100% {\n    width: 200%;\n    padding-bottom: 200%;\n    opacity: 0;\n  }\n}\nfooter {\n  position: absolute;\n  bottom: 0;\n  left: 50%;\n  transform: translateX(-50%);\n  color: white;\n}\nfooter p {\n  font-size: 13px;\n  letter-spacing: 0.4px;\n}\nfooter a {\n  color: #C71D3D;\n  text-decoration: none;\n  transition: all 0.2s ease;\n}\nfooter a:hover {\n  color: #666;\n  text-decoration: underline;\n}\n", ""]);
 
 // exports
 
@@ -273,6 +287,33 @@ function toComment(sourceMap) {
 	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
 
 	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/lib/url/escape.js":
+/*!***************************************************!*\
+  !*** ./node_modules/css-loader/lib/url/escape.js ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = function escape(url) {
+    if (typeof url !== 'string') {
+        return url
+    }
+    // If url is already wrapped in quotes, remove them
+    if (/^['"].*['"]$/.test(url)) {
+        url = url.slice(1, -1);
+    }
+    // Should url be wrapped?
+    // See https://drafts.csswg.org/css-values-3/#urls
+    if (/["'() \t\n]/.test(url)) {
+        return '"' + url.replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
+    }
+
+    return url
 }
 
 

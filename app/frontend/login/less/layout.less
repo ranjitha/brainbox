@@ -3,18 +3,31 @@
 body {
   font-family: Helvetica;
   background: #eee;
+  background-image: url(../images/background.png);
+  background-size: cover;
 }
 
 hgroup {
   text-align:center;
   margin-top: 4em;
+  h1 {
+    background-color: @tintColor;
+    display: inline;
+    color: white;
+    font-weight: 100;
+    padding-left: 10px;
+    padding-right: 10px;
+    letter-spacing: 4px;
+  }
+  h3 {
+    font-weight: 400;
+    font-size:14px;
+    letter-spacing: 4px;
+    padding-bottom:5px;
+    margin-top:20px;
+  }
 }
 
-h1, h3 { font-weight: 300; }
-
-h1 { color: #636363; }
-
-h3 { color: #4a89dc; }
 
 form {
   width: 380px;
@@ -22,7 +35,7 @@ form {
   padding: 3em 2em 2em 2em;
   background: #fafafa;
   border: 1px solid #ebebeb;
-  box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 }
 
 .group {
@@ -82,7 +95,7 @@ input:focus ~ label, input.used ~ label {
   content: '';
   height: 2px;
   width: 0;
-  bottom: 1px;
+  bottom: 0px;
   position: absolute;
   background: @tintColor;
   transition: all 0.2s ease;
@@ -206,30 +219,23 @@ input:focus ~ .highlight {
   }
 }
 
-footer { text-align: center; }
-
-footer p {
-  color: #888;
-  font-size: 13px;
-  letter-spacing: .4px;
+footer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  color:white;
+  p {
+    font-size: 13px;
+    letter-spacing: .4px;
+  }
+  a {
+    color: @tintColor;
+    text-decoration: none;
+    transition: all .2s ease;
+    &:hover {
+      color: #666;
+      text-decoration: underline;
+    }
+  }
 }
-
-footer a {
-  color: #4a89dc;
-  text-decoration: none;
-  transition: all .2s ease;
-}
-
-footer a:hover {
-  color: #666;
-  text-decoration: underline;
-}
-
-footer img {
-  width: 80px;
-  transition: all .2s ease;
-}
-
-footer img:hover { opacity: .83; }
-
-footer img:focus , footer a:focus { outline: none; }
