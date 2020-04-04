@@ -165,9 +165,17 @@ export default class View {
   }
 
   renderMarkdown(section){
-    let markdown = this.markdownEditor.render(section.content)
+    let errorCSS = ""
+    let markdown = section.content
+    try {
+      markdown = this.markdownEditor.render(section.content)
+    }
+    catch(error){
+      console.log(error)
+      errorCSS = "error"
+    }
     this.html.find(".sections").append(`
-        <div data-id="${section.id}" class='section'>
+        <div data-id="${section.id}" class='section ${errorCSS}'>
            <div class="sectionContent markdownRendering" data-type="markdown">${markdown}</div>
         </div>
       `)

@@ -13,7 +13,6 @@ module.exports = {
     if(!listDir.endsWith(path.sep))
       listDir = listDir+path.sep
 
-    console.log(listDir, baseDir, subDir)
     // check that the normalize path is the same as the concatenated. It is possible that these are not the same
     // if the "subDir" contains dots like "/dir1/dir2/../../". It is a file path attack via API calls
     if (listDir !== path.normalize(listDir)) {

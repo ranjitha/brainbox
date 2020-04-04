@@ -334,10 +334,10 @@
 <script id="shapeTemplate" type="text/x-jsrender">
 {{#shapes}}
     <div  data-name='{{name}}'  data-file='{{filePath}}'  data-path="{{filePath}}" class="mix pallette_item">
-      <div class="glow">
+      <div>
           <img data-shape="{{name}}" data-file='{{filePath}}' data-path="{{filePath}}" class="draw2d_droppable" src="{{shapesUrl}}{{image}}"/>
           <div>{{basename}}</div>
-       </div>
+      </div>
     </div>
 {{/shapes}}
 </script>
