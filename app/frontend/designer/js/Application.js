@@ -1,4 +1,6 @@
 import Files from "../../_common/js/FilesScreen"
+import Userinfo from "../../_common/js/Userinfo";
+import AuthorPage from "../../_common/js/AuthorPage";
 import toast from "../../_common/js/toast"
 
 import View from "./View"
@@ -8,7 +10,6 @@ import FilterPane from "./FilterPane"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import conf from "./Configuration"
 import fileSave from "./dialog/FileSave"
-import Userinfo from "../../_common/js/Userinfo";
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -45,8 +46,6 @@ class Application {
     this.permissions = permissions
     this.hasUnsavedChanges = false
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
-    this.filePane = new Files(this, conf, permissions.shapes)
-
     this.documentConfigurationTempl = {
       baseClass: "draw2d.SetFigure",
       code: $("#shape-edit-template").text().trim()
@@ -86,7 +85,10 @@ class Application {
     this.layer = new Layer(this, "layer_elements", this.view, permissions)
     this.filter = new FilterPane(this, "#filter .filter_actions", this.view, permissions)
     this.userinfo = new Userinfo(permissions, conf)
+    this.filePane = new Files(this, conf, permissions.shapes)
+    this.indexPane = new AuthorPage("#home", "readme/en/designer/Readme.sheet")
 
+    this.indexPane.render()
     this.view.installEditPolicy(new SelectionToolPolicy())
 
     this.view.getCommandStack().addEventListener(this)
