@@ -12,7 +12,7 @@ const bcrypt = require("bcrypt")
 
 const generic = require("../_base_")
 const update = require("../../update")
-const {thumbnail} = require("../../converter/thumbnail")
+const {thumbnail, generateShapeIndex} = require("../../converter/thumbnail")
 const db = require('./db')
 
 let permissionsAnonym = require("./permissions-anonym")
@@ -302,6 +302,7 @@ module.exports = {
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".md"))
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".custom"))
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".png"), res)
+      generateShapeIndex()
     })
     app.post('/backend/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
     app.post('/backend/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))

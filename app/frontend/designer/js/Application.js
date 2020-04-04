@@ -262,6 +262,7 @@ class Application {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
+      this.filePane.refresh(conf, this.permissions.shapes, this.currentFile)
     })
   }
 

@@ -20,6 +20,7 @@ import reader from "./io/Reader"
 import fileSave from "./dialog/FileSave"
 import shareDialog from "../../_common/js/LinkShareDialog";
 import writer from "./io/Writer";
+import AuthorPage from "../../_common/js/AuthorPage";
 let storage = require('../../_common/js/BackendStorage')(conf)
 
 
@@ -42,6 +43,9 @@ class Application {
     this.filePane = new Files(this, conf, permissions.brains)
     this.addonPane = new Addons(permissions)
     this.userinfo = new Userinfo(permissions, conf)
+    this.indexPane = new AuthorPage("#home", "readme/en/circuit/Readme.sheet")
+
+    this.indexPane.render()
 
     // Show the user an alert if there are unsaved changes
     //
@@ -196,6 +200,7 @@ class Application {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
+      this.filePane.refresh(conf, this.permissions.brains, this.currentFile)
     }
     // if the user didn't has the access to write "global" files, the scope of the file is changed
     // // from "global" to "user". In fact the user creates a copy in his/her own repository.

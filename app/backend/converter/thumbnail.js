@@ -49,6 +49,10 @@ function concatFiles(dirname) {
 
 module.exports = {
 
+  generateShapeIndex: async () => {
+    concatFiles(shapeAppDir)
+  },
+
   thumbnail: async (baseDir, subDir) => {
 
     let shapefilePath = path.normalize(baseDir + subDir)

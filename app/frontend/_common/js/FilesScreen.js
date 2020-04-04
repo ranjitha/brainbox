@@ -76,7 +76,7 @@ export default class Files {
         .prop("type", "text/css")
         .html(`
         #userFilesTab.active ~ span.yellow-bar{
-          left: 0px;
+          left: 0;
           width: ${w1}px;
         }
         #globalFilesTab.active ~ span.yellow-bar{
@@ -108,7 +108,7 @@ export default class Files {
     socket.on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
       if (preview.length === 0) {
-        this.render(permissions)
+        this.render(conf, permissions)
       } else {
         $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
       }

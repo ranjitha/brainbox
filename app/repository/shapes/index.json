@@ -343,18 +343,6 @@
     "image": "circuit/timer/Delay.png"
   },
   {
-    "name": "common_NewDocument",
-    "tags": [
-      "common",
-      "NewDocument"
-    ],
-    "version": "local-version",
-    "basename": "NewDocument.js",
-    "basedir": "common",
-    "filePath": "common/NewDocument.shape",
-    "image": "common/NewDocument.png"
-  },
-  {
     "name": "common_Text",
     "tags": [
       "common",

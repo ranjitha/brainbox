@@ -321,7 +321,7 @@ var Files = function () {
       setTimeout(function () {
         var w1 = $("#userFilesTab").outerWidth();
         var w2 = $("#globalFilesTab").outerWidth();
-        $("<style id='materialStyle'>").prop("type", "text/css").html("\n        #userFilesTab.active ~ span.yellow-bar{\n          left: 0px;\n          width: " + w1 + "px;\n        }\n        #globalFilesTab.active ~ span.yellow-bar{\n          left: " + w1 + "px;\n          width: " + w2 + "px;\n        })").appendTo("head");
+        $("<style id='materialStyle'>").prop("type", "text/css").html("\n        #userFilesTab.active ~ span.yellow-bar{\n          left: 0;\n          width: " + w1 + "px;\n        }\n        #globalFilesTab.active ~ span.yellow-bar{\n          left: " + w1 + "px;\n          width: " + w2 + "px;\n        })").appendTo("head");
       }, 100);
     }
   }, {
@@ -348,7 +348,7 @@ var Files = function () {
       socket.on("file:generated", function (msg) {
         var preview = $(".list-group-item[data-name='" + msg.filePath + "'] img");
         if (preview.length === 0) {
-          _this2.render(permissions);
+          _this2.render(conf, permissions);
         } else {
           $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({ src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime() });
         }
@@ -1649,6 +1649,7 @@ var Application = function () {
         _this3.hasUnsavedChanges = false;
         (0, _toast2.default)("Saved");
         $("#editorFileSave div").removeClass("highlight");
+        _this3.filePane.refresh(_Configuration2.default, _this3.permissions.shapes, _this3.currentFile);
       });
     }
   }, {

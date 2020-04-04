@@ -1,5 +1,5 @@
 import shareDialog from "../../_common/js/LinkShareDialog"
-import inputDialog from "../../_common/js/InputPrompt"
+import AuthorPage from "../../_common/js/AuthorPage"
 import Files from "../../_common/js/FilesScreen"
 import Userinfo from "../../_common/js/Userinfo"
 import toast from "../../_common/js/toast";
@@ -35,10 +35,13 @@ class Application {
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
     this.filePane = new Files(this, conf, permissions.sheets)
+    this.indexPane = new AuthorPage("#home", "readme/en/circuit/Readme.sheet")
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
     this.userinfo = new Userinfo(permissions, conf)
 
     this.view.commandStack.on("change", this)
+
+    this.indexPane.render()
 
     // Show the user an alert if there are unsaved changes
     //
@@ -118,7 +121,6 @@ class Application {
       // just save the file with a generated filename. It is a codepen-like modus
       fileSave.save(this.currentFile, this.storage, this.view, callback)
     }
-
   }
 
 
