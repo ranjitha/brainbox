@@ -29,7 +29,7 @@ export default class Page {
               break
           }
         })
-        container.append(` 
+        $(this.containerId).append(` 
             <footer>
             Coded with ♥ and the powerful <a href="http://www.draw2d.org" target="_blank">Draw2D</a> library by Andreas Herz
             </footer>

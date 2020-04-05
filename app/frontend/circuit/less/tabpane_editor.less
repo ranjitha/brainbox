@@ -22,16 +22,6 @@ rect.Raft{
   fill:rgba(28, 155, 171,0.1);
 }
 
-#configMenuIcon{
-  font-size: 25px;
-  cursor:pointer;
-  opacity: 0.3;
-  &:hover{
-    opacity: 1;
-    color:@tintColor;
-  }
-}
-
 
 #paletteElementsOverlay{
     bottom: 0;
@@ -43,50 +33,6 @@ rect.Raft{
     display: none;
 }
 
-
-
-#figureConfigDialog{
-  display:none;
-  background-color:white;
-  border: 1px solid rgba(0,0,0,0.2);
-  padding: 10px;
-  margin-left:30px;
-  border-left: 3px solid @tintColor;
-  border-radius:4px;
-  .header{
-    font-size: 16px;
-    font-weight: 600;
-    padding-bottom: 15px;
-  }
-  .figureAddLabel{
-    font-size:12px;
-    font-weight: 200;
-    cursor:pointer;
-    &:hover{
-      color:@tintColor;
-    }
-  }
-
-  .form-group{
-    textarea{
-      min-width: 300px;
-      min-height: 100px;
-    }
-  }
-  &:after {
-    content: '';
-    display: block;
-    position: absolute;
-    left: -20px;
-    top: 10px;
-    width: 0;
-    height: 0;
-    border-right: 10px solid @tintColor;
-    border-top: 10px solid transparent;
-    border-left: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-  }
-}
 
 
 @keyframes spinner {
@@ -164,7 +110,7 @@ rect.Raft{
         border:1px solid transparent;
         img{
           position: absolute;
-          top: 0px;
+          top: 0;
           bottom: 0;
           margin: auto;
           left: 50%;
@@ -188,23 +134,10 @@ rect.Raft{
       cursor:move;
       max-height:80px;
     }
-
-    .request{
-      font-size:10px;
-      color: @tintColor;
-      .icon{
-        cursor:pointer;
-        font-size:75px;
-        margin-top:10px;
-        margin-bottom:10px;
-
-      }
-    }
   }
 
 
   .content {
-
     .canvas {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
