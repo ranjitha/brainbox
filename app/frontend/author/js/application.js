@@ -8,7 +8,8 @@ import Toolbar from "./toolbar"
 import View from "./view"
 import fileSave from "./dialog/FileSave"
 import conf from "./configuration"
-import Document from "./document"
+import Document from "./model/document"
+import commandStack from "./commands/CommandStack"
 
 let storage = require('../../_common/js/BackendStorage')(conf)
 
@@ -31,6 +32,7 @@ class Application {
       });
 
     this.permissions = permissions
+    this.document = new Document()
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
@@ -38,8 +40,7 @@ class Application {
     this.indexPane = new AuthorPage("#home", "readme/en/circuit/Readme.sheet")
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
     this.userinfo = new Userinfo(permissions, conf)
-
-    this.view.commandStack.on("change", this)
+    commandStack.on("change", this)
 
     this.indexPane.render()
 
@@ -116,10 +117,10 @@ class Application {
 
     if (this.permissions.sheets.create && this.permissions.sheets.update) {
       // allow the user to enter/change the file name....
-      fileSave.show(this.currentFile, this.storage, this.view, callback)
+      fileSave.show(this.currentFile, this.storage, this.document, callback)
     } else if (this.permissions.sheets.create) {
       // just save the file with a generated filename. It is a codepen-like modus
-      fileSave.save(this.currentFile, this.storage, this.view, callback)
+      fileSave.save(this.currentFile, this.storage, this.document, callback)
     }
   }
 
@@ -136,7 +137,8 @@ class Application {
 
   fileNew(name, scope) {
     $("#leftTabStrip .editor").click()
-    this.view.setDocument(new Document())
+    this.document = new Document()
+    this.view.setPage(this.document.get(0))
     this.currentFile = { name, scope }
     let section = this.view.addMarkdown(0)
     this.view.onSelect(section)
@@ -148,14 +150,23 @@ class Application {
     $("#leftTabStrip .editor").click()
     return this.storage.loadUrl(url)
       .then((content) => {
-        this.view.setDocument(new Document(content.json))
+        this.setDocument(new Document(content),0)
         this.currentFile = { name, scope}
         return content
       })
   }
 
-  stackChanged(event) {
+  setDocument(document, pageIndex){
+    this.document = document
+    commandStack.markSaveLocation()
+    this.view.setPage(this.document.get(pageIndex || 0))
+  }
 
+  getDocument(){
+    return this.document
+  }
+
+  stackChanged(event) {
     if (event.getStack().canUndo()){
       $("#editorFileSave div").addClass("highlight")
       this.hasUnsavedChanges = true

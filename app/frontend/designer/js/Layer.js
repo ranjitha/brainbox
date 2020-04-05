@@ -11,7 +11,7 @@ export default class Layer {
     //
     view.getCommandStack().addEventListener(this)
 
-    // Register a Selection listener for the state hnadling
+    // Register a Selection listener for the state handling
     // of the Delete Button
     //
     view.on("select", this.onSelectionChanged.bind(this))
@@ -67,30 +67,30 @@ export default class Layer {
       }
     })
 
-    $(".layerElement .layer_edit").on("click", $.proxy(function (event) {
+    $(".layerElement .layer_edit").on("click", (event) =>{
       let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       Mousetrap.pause()
       bootbox.prompt({
         title: "Layer Name",
         className: "layer-name-prompt",
         value: figure.getUserData().name,
-        callback: $.proxy(function (result) {
+        callback: (result) => {
           Mousetrap.unpause()
           if (result !== null) {
             figure.getUserData().name = result
             this.stackChanged(null)
           }
-        }, this)
+        }
       })
 
       // autoselect text for fast edit
       setTimeout(function () {
         $(".bootbox-input").focus().select()
       }, 200)
-    }, this))
+    })
 
 
-    $(".layerElement .layer_visibility").on("click", $.proxy(function (event) {
+    $(".layerElement .layer_visibility").on("click", (event) =>{
       let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       figure.setVisible(!figure.isVisible())
       this.view.setCurrentSelection(null)
@@ -103,15 +103,15 @@ export default class Layer {
 
       this.ripple(figure)
       return false
-    }, this))
+    })
 
-    $(".layerElement").on("click", $.proxy(function (event) {
+    $(".layerElement").on("click", (event) => {
       let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       if (figure.isVisible()) {
         this.view.setCurrentSelection(figure)
         this.ripple(figure)
       }
-    }, this))
+    })
 
     this._updateSelection()
   }

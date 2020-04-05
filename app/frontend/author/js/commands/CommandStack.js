@@ -1,9 +1,8 @@
-import State from "./State"
 
 /**
  *
  */
-export default class CommandStack {
+class CommandStack {
 
     /**
      * Create a new CommandStack objects which can be execute via the CommandStack.
@@ -44,8 +43,6 @@ export default class CommandStack {
       if (state === null)
         return this//silently
 
-
-      this.notifyListeners(state)
 
       this.undostack.push(state)
 
@@ -172,3 +169,5 @@ export default class CommandStack {
     }
 }
 
+let stack = new CommandStack()
+export default stack

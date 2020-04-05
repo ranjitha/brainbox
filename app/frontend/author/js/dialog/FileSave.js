@@ -76,7 +76,7 @@ class Dialog {
    *
    * @since 4.0.0
    */
-  show(currentFile, storage, view, callback) {
+  show(currentFile, storage, document, callback) {
 
       $("#fileSaveDialog .fileName").val(fs.basename(currentFile.name).replace(conf.fileSuffix, ""))
       $("#fileSaveDialog .commitMessage").val('change reason')
@@ -87,6 +87,13 @@ class Dialog {
       $("#fileSaveDialog").modal("show")
       Mousetrap.pause()
 
+      $('#fileSaveDialog .fileName').on('keypress', function (e) {
+        let key = e.charCode || e.keyCode || 0;
+        if (key === 13) {
+          $("#fileSaveDialog .okButton").click()
+        }
+      })
+
       // Save Button
       //
       $("#fileSaveDialog .okButton").off('click').on("click", () => {
@@ -95,7 +102,7 @@ class Dialog {
         name = name.replace(conf.fileSuffix, "")
         name = fs.basename(name) // remove any directories
         currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
-        this.save(currentFile, storage, view, (response)=>{
+        this.save(currentFile, storage, document, (response)=>{
           $('#fileSaveDialog').modal('hide')
           if(typeof callback === "function"){
             callback(response)
@@ -104,9 +111,8 @@ class Dialog {
       })
   }
 
-  save(currentFile, storage, view, callback){
-    let json = view.document
-    storage.saveFile(json, currentFile.name, currentFile.scope)
+  save(currentFile, storage, document, callback){
+    storage.saveFile(document.toJSON(), currentFile.name, currentFile.scope)
       .then(( response) => {
         let data = response.data
         currentFile.name = data.filePath

@@ -2,19 +2,20 @@
 
 export default class State{
 
-  constructor(view){
+  constructor(app){
     // the data BEFORE any changes happens
-    this.snapshotBefore = view.getDocument().clone()
-    this.snapshotAfter = null
-    this.view = view
+    this.documentBefore = app.getDocument().clone()
+    this.documentAfter = null
+    this.pageIndex = this.documentBefore.index(app.view.getPage())
+    this.app = app
   }
 
   undo(){
-    this.snapshotAfter = this.view.getDocument().clone()
-    this.view.setDocument(this.snapshotBefore)
+    this.documentAfter = this.app.getDocument().clone()
+    this.app.setDocument(this.documentBefore,this.pageIndex)
   }
 
   redo(){
-    this.view.setDocument(this.snapshotAfter)
+    this.app.setDocument(this.documentAfter, this.pageIndex)
   }
 }

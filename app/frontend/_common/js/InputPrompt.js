@@ -36,10 +36,15 @@ class Dialog {
 
   /**
    */
-  show(title, label, callback) {
+  show(title, label, defaultValue, callback) {
+      if(typeof defaultValue === "function"){
+        callback = defaultValue
+        defaultValue = ""
+      }
 
       $("#inputPromptDialog .media-heading").html(title)
       $("#inputPromptDialog .promptValueLabel").html(label)
+      $('#inputPromptDialog .inputPromptValue').val(defaultValue)
 
       $('#inputPromptDialog').on('shown.bs.modal', (event) => {
         $(event.currentTarget).find('input:first').focus()

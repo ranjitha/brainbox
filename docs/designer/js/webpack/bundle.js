@@ -158,15 +158,15 @@ var md = __webpack_require__(/*! markdown-it */ "../../node_modules/markdown-it/
 
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "../../node_modules/markdown-it-asciimath/index.js"));
 
-var Page = function () {
-  function Page(containerId, file) {
-    _classCallCheck(this, Page);
+var AuthorPage = function () {
+  function AuthorPage(containerId, file) {
+    _classCallCheck(this, AuthorPage);
 
     this.file = file;
     this.containerId = containerId;
   }
 
-  _createClass(Page, [{
+  _createClass(AuthorPage, [{
     key: "render",
     value: function render() {
       var _this = this;
@@ -174,8 +174,13 @@ var Page = function () {
       var container = $("<div class='authorPage'></div>");
       $(this.containerId).html(container);
       axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
-        var document = response.data.json;
-        document.forEach(function (section, index) {
+        var document = [];
+        if (response.data.json) {
+          document = response.data.json;
+        } else {
+          document = response.data.pages[0].sections;
+        }
+        document.forEach(function (section) {
           switch (section.type) {
             case "brain":
               _this.renderBrain(container, section);
@@ -184,7 +189,6 @@ var Page = function () {
               _this.renderMarkdown(container, section);
               break;
             default:
-
               break;
           }
         });
@@ -204,10 +208,10 @@ var Page = function () {
     }
   }]);
 
-  return Page;
+  return AuthorPage;
 }();
 
-exports.default = Page;
+exports.default = AuthorPage;
 module.exports = exports["default"];
 
 /***/ }),
@@ -724,10 +728,15 @@ var Dialog = function () {
 
   _createClass(Dialog, [{
     key: "show",
-    value: function show(title, label, callback) {
+    value: function show(title, label, defaultValue, callback) {
+      if (typeof defaultValue === "function") {
+        callback = defaultValue;
+        defaultValue = "";
+      }
 
       $("#inputPromptDialog .media-heading").html(title);
       $("#inputPromptDialog .promptValueLabel").html(label);
+      $('#inputPromptDialog .inputPromptValue').val(defaultValue);
 
       $('#inputPromptDialog').on('shown.bs.modal', function (event) {
         $(event.currentTarget).find('input:first').focus();
@@ -2045,7 +2054,7 @@ var Layer = function () {
     //
     view.getCommandStack().addEventListener(this);
 
-    // Register a Selection listener for the state hnadling
+    // Register a Selection listener for the state handling
     // of the Delete Button
     //
     view.on("select", this.onSelectionChanged.bind(this));
@@ -2105,32 +2114,32 @@ var Layer = function () {
         }
       });
 
-      $(".layerElement .layer_edit").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
+      $(".layerElement .layer_edit").on("click", function (event) {
+        var figure = _this.view.getExtFigure($(event.currentTarget).data("figure"));
         Mousetrap.pause();
         bootbox.prompt({
           title: "Layer Name",
           className: "layer-name-prompt",
           value: figure.getUserData().name,
-          callback: $.proxy(function (result) {
+          callback: function callback(result) {
             Mousetrap.unpause();
             if (result !== null) {
               figure.getUserData().name = result;
-              this.stackChanged(null);
+              _this.stackChanged(null);
             }
-          }, this)
+          }
         });
 
         // autoselect text for fast edit
         setTimeout(function () {
           $(".bootbox-input").focus().select();
         }, 200);
-      }, this));
+      });
 
-      $(".layerElement .layer_visibility").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
+      $(".layerElement .layer_visibility").on("click", function (event) {
+        var figure = _this.view.getExtFigure($(event.currentTarget).data("figure"));
         figure.setVisible(!figure.isVisible());
-        this.view.setCurrentSelection(null);
+        _this.view.setCurrentSelection(null);
         $(event.currentTarget).html('<img class="icon svg" src="' + (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/>');
         inlineSVG.init();
 
@@ -2138,17 +2147,17 @@ var Layer = function () {
         //
         $(event.currentTarget).parent().attr({ "data-visibility": figure.isVisible() });
 
-        this.ripple(figure);
+        _this.ripple(figure);
         return false;
-      }, this));
+      });
 
-      $(".layerElement").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
+      $(".layerElement").on("click", function (event) {
+        var figure = _this.view.getExtFigure($(event.currentTarget).data("figure"));
         if (figure.isVisible()) {
-          this.view.setCurrentSelection(figure);
-          this.ripple(figure);
+          _this.view.setCurrentSelection(figure);
+          _this.ripple(figure);
         }
-      }, this));
+      });
 
       this._updateSelection();
     }

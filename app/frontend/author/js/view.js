@@ -1,10 +1,13 @@
-import CommandStack from "./commands/CommandStack"
+let inputPrompt =require("../../_common/js/InputPrompt")
+
+import commandStack from "./commands/CommandStack"
 import State from "./commands/State"
 
 const shortid = require('shortid')
-const Document = require("./document")
+const Page = require("./model/page")
 const MarkdownEditor = require("./editor/markdown/editor")
 const BrainEditor = require("./editor/brain/editor")
+import Palette from "./palette"
 
 export default class View {
 
@@ -14,24 +17,27 @@ export default class View {
    */
   constructor(app, id, permissions) {
 
-    this.commandStack = new CommandStack()
+    this.app = app
     this.markdownEditor = new MarkdownEditor()
     this.brainEditor = new BrainEditor()
-    this.document = new Document()
+    this.page = new Page()
     this.activeSection = null;
     this.html = $(id)
+    this.palette = new Palette(this, app, "#paletteElements")
+
+    this.palette.render()
 
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"))
 
-    this.commandStack.on("change", this)
+    commandStack.on("change", this)
 
     $(".toolbar")
       .delegate("#editUndo:not(.disabled)", "click", () => {
-        this.commandStack.undo()
+        commandStack.undo()
       })
       .delegate("#editRedo:not(.disabled)", "click", () => {
-        this.commandStack.redo()
+        commandStack.redo()
       })
 
 
@@ -40,48 +46,48 @@ export default class View {
         this.onUnselect()
       })
       .on("click", ".sections .section .sectionContent", event => {
-        let section = this.document.get($(event.target).closest(".section").data("id"))
+        let section = this.page.get($(event.target).closest(".section").data("id"))
         this.onSelect(section)
         return false
       })
       .on("click","#sectionMenuUp", event=>{
         let id = $(event.target).data("id")
-        let index = this.document.index(id)
+        let index = this.page.index(id)
         if(index>0) {
-          this.commandStack.push(new State(this))
+          commandStack.push(new State(this.app))
           let prev = this.activeSection.prev()
           this.activeSection.insertBefore(prev)
-          this.document.move(index, index-1)
+          this.page.move(index, index-1)
         }
         return false
       })
       .on("click","#sectionMenuDown", event=>{
         let id = $(event.target).data("id")
-        let index = this.document.index(id)
-        if(index<this.document.length-1) {
-          this.commandStack.push(new State(this))
+        let index = this.page.index(id)
+        if(index<this.page.length-1) {
+          commandStack.push(new State(this.app))
           let prev = this.activeSection.next()
           this.activeSection.insertAfter(prev)
-          this.document.move(index, index+1)
+          this.page.move(index, index+1)
         }
         return false
       })
       .on("dblclick", ".sections .section .sectionContent", event => {
-        let section = this.document.get($(event.target).closest(".section").data("id"))
+        let section = this.page.get($(event.target).closest(".section").data("id"))
         this.onSelect(section)
         this.onEdit(section)
         return false
       })
       .on("click","#sectionMenuEdit", event=>{
-        this.onEdit(this.document.get($(event.target).data("id")))
+        this.onEdit(this.page.get($(event.target).data("id")))
         return false
       })
       .on("click","#sectionMenuDelete", event=>{
-        this.onDelete(this.document.get($(event.target).data("id")))
+        this.onDelete(this.page.get($(event.target).data("id")))
         return false
       })
       .on("click","#sectionMenuCommitEdit", event=>{
-        this.onCommitEdit(this.document.get($(event.target).data("id")))
+        this.onCommitEdit(this.page.get($(event.target).data("id")))
         return false
       })
       .on("click","#sectionMenuCancelEdit", event=>{
@@ -102,25 +108,40 @@ export default class View {
       })
   }
 
-  setDocument(document){
-    this.document = document
-    this.render(this.document)
+  setPage(page){
+    $(".pageElement").removeClass("selected")
+    $(`.pageElement[data-page='${page.id}']`).addClass("selected")
+    this.page = page
+    this.render(this.page)
   }
 
-  getDocument(){
-    return this.document
+  getPage(){
+    return this.page
+  }
+
+  addPage(){
+    inputPrompt.show("Add Pager", "Page name", value => {
+      commandStack.push(new State(this.app))
+      let page = new Page()
+      page.name = value
+      this.app.getDocument().push(page)
+      this.setPage(page)
+      let section = this.addMarkdown(0)
+      this.onSelect(section)
+      this.onEdit(section)
+    })
   }
 
   addMarkdown(index){
-    this.commandStack.push(new State(this))
+    commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
       type: "markdown",
       content: "## Header"
     }
-    this.document.add(section, index)
+    this.page.add(section, index)
     if(typeof index === "number"){
-      this.render(this.document)
+      this.render(this.page)
     }
     else{
       this.renderMarkdown(section, index)
@@ -129,15 +150,15 @@ export default class View {
   }
 
   addBrain(index){
-    this.commandStack.push(new State(this))
+    commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
       type: "brain",
       content: null
     }
-    this.document.add(section, index)
+    this.page.add(section, index)
     if(typeof index === "number"){
-      this.render(this.document)
+      this.render(this.page)
     }
     else{
       this.renderBrain(section, index)
@@ -145,10 +166,10 @@ export default class View {
     return section
   }
 
-  render(document){
+  render(page){
     this.html.find(".sections").html("")
     this.renderSpacer(0)
-    document.forEach( (section, index) => {
+    page.forEach( (section, index) => {
       switch(section.type){
         case "brain":
           this.renderBrain(section)
@@ -268,22 +289,22 @@ export default class View {
       this.currentEditor = this.brainEditor.inject(section)
       $(".sections").removeClass("activeSection")
     }
-
   }
 
   onDelete(section){
-    this.commandStack.push(new State(this))
-    this.document.remove(section.id)
-    this.render(this.document)
+    commandStack.push(new State(this.app))
+    this.page.remove(section.id)
+    this.render(this.page)
   }
 
   onCommitEdit(){
-    this.commandStack.push(new State(this))
+    commandStack.push(new State(this.app))
     this.currentEditor.commit()
       .then(()=>{
         this.currentEditor = null;
         $(".editorContainerSelector").remove()
-        this.render(this.document)
+        this.render(this.page)
+        this.palette.render()
       })
   }
 
@@ -292,7 +313,8 @@ export default class View {
       .then(() => {
         $(".editorContainerSelector").remove()
         this.currentEditor = null;
-        this.render(this.document)
+        this.render(this.page)
+        this.palette.render()
       })
   }
 

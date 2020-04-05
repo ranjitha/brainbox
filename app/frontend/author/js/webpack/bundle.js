@@ -119,15 +119,15 @@ var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/inde
 
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
-var Page = function () {
-  function Page(containerId, file) {
-    _classCallCheck(this, Page);
+var AuthorPage = function () {
+  function AuthorPage(containerId, file) {
+    _classCallCheck(this, AuthorPage);
 
     this.file = file;
     this.containerId = containerId;
   }
 
-  _createClass(Page, [{
+  _createClass(AuthorPage, [{
     key: "render",
     value: function render() {
       var _this = this;
@@ -135,8 +135,13 @@ var Page = function () {
       var container = $("<div class='authorPage'></div>");
       $(this.containerId).html(container);
       axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
-        var document = response.data.json;
-        document.forEach(function (section, index) {
+        var document = [];
+        if (response.data.json) {
+          document = response.data.json;
+        } else {
+          document = response.data.pages[0].sections;
+        }
+        document.forEach(function (section) {
           switch (section.type) {
             case "brain":
               _this.renderBrain(container, section);
@@ -145,7 +150,6 @@ var Page = function () {
               _this.renderMarkdown(container, section);
               break;
             default:
-
               break;
           }
         });
@@ -165,10 +169,10 @@ var Page = function () {
     }
   }]);
 
-  return Page;
+  return AuthorPage;
 }();
 
-exports.default = Page;
+exports.default = AuthorPage;
 module.exports = exports["default"];
 
 /***/ }),
@@ -733,10 +737,15 @@ var Dialog = function () {
 
   _createClass(Dialog, [{
     key: "show",
-    value: function show(title, label, callback) {
+    value: function show(title, label, defaultValue, callback) {
+      if (typeof defaultValue === "function") {
+        callback = defaultValue;
+        defaultValue = "";
+      }
 
       $("#inputPromptDialog .media-heading").html(title);
       $("#inputPromptDialog .promptValueLabel").html(label);
+      $('#inputPromptDialog .inputPromptValue').val(defaultValue);
 
       $('#inputPromptDialog').on('shown.bs.modal', function (event) {
         $(event.currentTarget).find('input:first').focus();
@@ -1443,9 +1452,13 @@ var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/
 
 var _configuration2 = _interopRequireDefault(_configuration);
 
-var _document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
+var _document = __webpack_require__(/*! ./model/document */ "./app/frontend/author/js/model/document.js");
 
 var _document2 = _interopRequireDefault(_document);
+
+var _CommandStack = __webpack_require__(/*! ./commands/CommandStack */ "./app/frontend/author/js/commands/CommandStack.js");
+
+var _CommandStack2 = _interopRequireDefault(_CommandStack);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1475,6 +1488,7 @@ var Application = function () {
       });
 
       this.permissions = permissions;
+      this.document = new _document2.default();
       this.currentFile = { name: "NewDocument" + _configuration2.default.fileSuffix, scope: "user" };
       this.storage = storage;
       this.view = new _view2.default(this, "#editor .content", permissions);
@@ -1482,8 +1496,7 @@ var Application = function () {
       this.indexPane = new _AuthorPage2.default("#home", "readme/en/circuit/Readme.sheet");
       this.toolbar = new _toolbar2.default(this, this.view, ".toolbar", permissions);
       this.userinfo = new _Userinfo2.default(permissions, _configuration2.default);
-
-      this.view.commandStack.on("change", this);
+      _CommandStack2.default.on("change", this);
 
       this.indexPane.render();
 
@@ -1562,10 +1575,10 @@ var Application = function () {
 
       if (this.permissions.sheets.create && this.permissions.sheets.update) {
         // allow the user to enter/change the file name....
-        _FileSave2.default.show(this.currentFile, this.storage, this.view, callback);
+        _FileSave2.default.show(this.currentFile, this.storage, this.document, callback);
       } else if (this.permissions.sheets.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        _FileSave2.default.save(this.currentFile, this.storage, this.view, callback);
+        _FileSave2.default.save(this.currentFile, this.storage, this.document, callback);
       }
     }
   }, {
@@ -1582,7 +1595,8 @@ var Application = function () {
     key: "fileNew",
     value: function fileNew(name, scope) {
       $("#leftTabStrip .editor").click();
-      this.view.setDocument(new _document2.default());
+      this.document = new _document2.default();
+      this.view.setPage(this.document.get(0));
       this.currentFile = { name: name, scope: scope };
       var section = this.view.addMarkdown(0);
       this.view.onSelect(section);
@@ -1596,15 +1610,26 @@ var Application = function () {
       var url = _configuration2.default.backend[scope].get(name);
       $("#leftTabStrip .editor").click();
       return this.storage.loadUrl(url).then(function (content) {
-        _this3.view.setDocument(new _document2.default(content.json));
+        _this3.setDocument(new _document2.default(content), 0);
         _this3.currentFile = { name: name, scope: scope };
         return content;
       });
     }
   }, {
+    key: "setDocument",
+    value: function setDocument(document, pageIndex) {
+      this.document = document;
+      _CommandStack2.default.markSaveLocation();
+      this.view.setPage(this.document.get(pageIndex || 0));
+    }
+  }, {
+    key: "getDocument",
+    value: function getDocument() {
+      return this.document;
+    }
+  }, {
     key: "stackChanged",
     value: function stackChanged(event) {
-
       if (event.getStack().canUndo()) {
         $("#editorFileSave div").addClass("highlight");
         this.hasUnsavedChanges = true;
@@ -1636,12 +1661,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _State = __webpack_require__(/*! ./State */ "./app/frontend/author/js/commands/State.js");
-
-var _State2 = _interopRequireDefault(_State);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1696,8 +1715,6 @@ var CommandStack = function () {
       // nothing to do
       if (state === null) return this; //silently
 
-
-      this.notifyListeners(state);
 
       this.undostack.push(state);
 
@@ -1850,7 +1867,8 @@ var CommandStack = function () {
   return CommandStack;
 }();
 
-exports.default = CommandStack;
+var stack = new CommandStack();
+exports.default = stack;
 module.exports = exports["default"];
 
 /***/ }),
@@ -1874,25 +1892,26 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var State = function () {
-  function State(view) {
+  function State(app) {
     _classCallCheck(this, State);
 
     // the data BEFORE any changes happens
-    this.snapshotBefore = view.getDocument().clone();
-    this.snapshotAfter = null;
-    this.view = view;
+    this.documentBefore = app.getDocument().clone();
+    this.documentAfter = null;
+    this.pageIndex = this.documentBefore.index(app.view.getPage());
+    this.app = app;
   }
 
   _createClass(State, [{
     key: "undo",
     value: function undo() {
-      this.snapshotAfter = this.view.getDocument().clone();
-      this.view.setDocument(this.snapshotBefore);
+      this.documentAfter = this.app.getDocument().clone();
+      this.app.setDocument(this.documentBefore, this.pageIndex);
     }
   }, {
     key: "redo",
     value: function redo() {
-      this.view.setDocument(this.snapshotAfter);
+      this.app.setDocument(this.documentAfter, this.pageIndex);
     }
   }]);
 
@@ -2043,7 +2062,7 @@ var Dialog = function () {
 
   _createClass(Dialog, [{
     key: "show",
-    value: function show(currentFile, storage, view, callback) {
+    value: function show(currentFile, storage, document, callback) {
       var _this = this;
 
       $("#fileSaveDialog .fileName").val(_path2.default.basename(currentFile.name).replace(_configuration2.default.fileSuffix, ""));
@@ -2055,6 +2074,13 @@ var Dialog = function () {
       $("#fileSaveDialog").modal("show");
       Mousetrap.pause();
 
+      $('#fileSaveDialog .fileName').on('keypress', function (e) {
+        var key = e.charCode || e.keyCode || 0;
+        if (key === 13) {
+          $("#fileSaveDialog .okButton").click();
+        }
+      });
+
       // Save Button
       //
       $("#fileSaveDialog .okButton").off('click').on("click", function () {
@@ -2063,7 +2089,7 @@ var Dialog = function () {
         name = name.replace(_configuration2.default.fileSuffix, "");
         name = _path2.default.basename(name); // remove any directories
         currentFile.name = _path2.default.join(_path2.default.dirname(currentFile.name), name + _configuration2.default.fileSuffix);
-        _this.save(currentFile, storage, view, function (response) {
+        _this.save(currentFile, storage, document, function (response) {
           $('#fileSaveDialog').modal('hide');
           if (typeof callback === "function") {
             callback(response);
@@ -2073,9 +2099,8 @@ var Dialog = function () {
     }
   }, {
     key: "save",
-    value: function save(currentFile, storage, view, callback) {
-      var json = view.document;
-      storage.saveFile(json, currentFile.name, currentFile.scope).then(function (response) {
+    value: function save(currentFile, storage, document, callback) {
+      storage.saveFile(document.toJSON(), currentFile.name, currentFile.scope).then(function (response) {
         var data = response.data;
         currentFile.name = data.filePath;
         history.pushState({
@@ -2095,109 +2120,6 @@ var Dialog = function () {
 
 var dialog = new Dialog();
 exports.default = dialog;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/author/js/document.js":
-/*!********************************************!*\
-  !*** ./app/frontend/author/js/document.js ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Document = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function Document(json) {
-    _classCallCheck(this, Document);
-
-    this.json = json || [];
-  }
-
-  _createClass(Document, [{
-    key: "get",
-    value: function get(id) {
-      return this.json.find(function (value) {
-        return value.id === id;
-      });
-    }
-  }, {
-    key: "set",
-    value: function set(section) {
-      var index = this.json.findIndex(function (obj) {
-        return obj.id == section.id;
-      });
-      if (index >= 0) {
-        this.json[index] = section;
-      } else {
-        console.log("record not found", section);
-      }
-    }
-  }, {
-    key: "index",
-    value: function index(id) {
-      return this.json.findIndex(function (obj) {
-        return obj.id == id;
-      });
-    }
-  }, {
-    key: "remove",
-    value: function remove(id) {
-      var index = this.json.findIndex(function (obj) {
-        return obj.id == id;
-      });
-      return this.json.splice(index, 1);
-    }
-  }, {
-    key: "add",
-    value: function add(section, index) {
-      if (typeof index === "number") {
-        this.json.splice(index, 0, section);
-      } else {
-        this.json.push(section);
-      }
-    }
-  }, {
-    key: "move",
-    value: function move(fromIndex, toIndex) {
-      this.json.splice(toIndex, 0, this.json.splice(fromIndex, 1)[0]);
-    }
-  }, {
-    key: "forEach",
-    value: function forEach(callback) {
-      return this.json.forEach(callback);
-    }
-  }, {
-    key: "clone",
-    value: function clone() {
-      return new Document(JSON.parse(JSON.stringify(this.json)));
-    }
-  }, {
-    key: "length",
-    get: function get() {
-      return this.json.length;
-    }
-  }]);
-
-  return Document;
-}();
-
-exports.default = Document;
 module.exports = exports["default"];
 
 /***/ }),
@@ -4140,6 +4062,9 @@ var Palette = function () {
 
     _classCallCheck(this, Palette);
 
+    // remove all classes from the other editors
+    $("#paletteElementsScroll").removeClass();
+
     this.view = view;
     $.getJSON(_configuration2.default.shapes.url + "index.json", function (data) {
       _configuration2.default.shapes.version = data[0].version;
@@ -5130,6 +5055,342 @@ $(window).load(function () {
 
 /***/ }),
 
+/***/ "./app/frontend/author/js/model/document.js":
+/*!**************************************************!*\
+  !*** ./app/frontend/author/js/model/document.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _page = __webpack_require__(/*! ./page */ "./app/frontend/author/js/model/page.js");
+
+var _page2 = _interopRequireDefault(_page);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Document = function () {
+  function Document(content) {
+    _classCallCheck(this, Document);
+
+    this.pages = content ? content.pages.map(function (page) {
+      return new _page2.default(page);
+    }) : [new _page2.default()];
+  }
+
+  _createClass(Document, [{
+    key: "get",
+    value: function get(index) {
+      return this.pages[index];
+    }
+  }, {
+    key: "index",
+    value: function index(page) {
+      return this.pages.findIndex(function (obj) {
+        return obj.id === page.id;
+      });
+    }
+  }, {
+    key: "getPages",
+    value: function getPages() {
+      return this.pages;
+    }
+  }, {
+    key: "setPages",
+    value: function setPages(pages) {
+      this.pages = pages;
+      return this;
+    }
+  }, {
+    key: "getPage",
+    value: function getPage(id) {
+      return this.pages.find(function (obj) {
+        return obj.id === id;
+      });
+    }
+  }, {
+    key: "push",
+    value: function push(page) {
+      this.pages.push(page);
+      return this;
+    }
+  }, {
+    key: "toJSON",
+    value: function toJSON() {
+      return { pages: this.pages.map(function (page) {
+          return page.clone().toJSON();
+        }) };
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Document(this.toJSON());
+    }
+  }]);
+
+  return Document;
+}();
+
+exports.default = Document;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/model/page.js":
+/*!**********************************************!*\
+  !*** ./app/frontend/author/js/model/page.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
+
+var Page = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function Page(json) {
+    _classCallCheck(this, Page);
+
+    if (json) {
+      this.sections = json.sections || [];
+      this.name = json.name || "First Page";
+      this.id = json.id || shortid.generate();
+    } else {
+      this.sections = [];
+      this.name = "First Page";
+      this.id = shortid.generate();
+    }
+  }
+
+  _createClass(Page, [{
+    key: "get",
+    value: function get(id) {
+      return this.sections.find(function (value) {
+        return value.id === id;
+      });
+    }
+  }, {
+    key: "set",
+    value: function set(section) {
+      var index = this.sections.findIndex(function (obj) {
+        return obj.id === section.id;
+      });
+      if (index >= 0) {
+        this.sections[index] = section;
+      } else {
+        console.log("record not found", section);
+      }
+    }
+  }, {
+    key: "index",
+    value: function index(id) {
+      return this.sections.findIndex(function (obj) {
+        return obj.id === id;
+      });
+    }
+  }, {
+    key: "remove",
+    value: function remove(id) {
+      var index = this.sections.findIndex(function (obj) {
+        return obj.id === id;
+      });
+      return this.sections.splice(index, 1);
+    }
+  }, {
+    key: "add",
+    value: function add(section, index) {
+      if (typeof index === "number") {
+        this.sections.splice(index, 0, section);
+      } else {
+        this.sections.push(section);
+      }
+    }
+  }, {
+    key: "move",
+    value: function move(fromIndex, toIndex) {
+      this.sections.splice(toIndex, 0, this.sections.splice(fromIndex, 1)[0]);
+    }
+  }, {
+    key: "forEach",
+    value: function forEach(callback) {
+      return this.sections.forEach(callback);
+    }
+  }, {
+    key: "toJSON",
+    value: function toJSON() {
+      return {
+        id: this.id,
+        name: this.name,
+        sections: this.sections
+      };
+    }
+  }, {
+    key: "clone",
+    value: function clone() {
+      return new Page(JSON.parse(JSON.stringify(this.toJSON())));
+    }
+  }, {
+    key: "length",
+    get: function get() {
+      return this.sections.length;
+    }
+  }]);
+
+  return Page;
+}();
+
+exports.default = Page;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/author/js/palette.js":
+/*!*******************************************!*\
+  !*** ./app/frontend/author/js/palette.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _CommandStack = __webpack_require__(/*! ./commands/CommandStack */ "./app/frontend/author/js/commands/CommandStack.js");
+
+var _CommandStack2 = _interopRequireDefault(_CommandStack);
+
+var _State = __webpack_require__(/*! ./commands/State */ "./app/frontend/author/js/commands/State.js");
+
+var _State2 = _interopRequireDefault(_State);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var inputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
+
+var Palette = function () {
+  function Palette(view, app, elementId) {
+    var _this = this;
+
+    _classCallCheck(this, Palette);
+
+    this.html = $(elementId);
+    this.app = app;
+    this.view = view;
+    _CommandStack2.default.on("change", this);
+
+    $(document).on("click", "#addDocumentPage", function () {
+      _this.app.view.addPage();
+    });
+  }
+
+  _createClass(Palette, [{
+    key: "render",
+    value: function render() {
+      // remove all classes from the other editors
+      $("#paletteElementsScroll, #paletteFilter").addClass("pages");
+      $("#paletteFilter").html("<button id='addDocumentPage'>+ Page</button>");
+      this.stackChanged(null);
+    }
+
+    /**
+     * @method
+     * Sent when an event occurs on the command stack. draw2d.command.CommandStackEvent.getDetail()
+     * can be used to identify the type of event which has occurred.
+     *
+     * @template
+     *
+     * @param {draw2d.command.CommandStackEvent} event
+     **/
+
+  }, {
+    key: "stackChanged",
+    value: function stackChanged(event) {
+      var _this2 = this;
+
+      this.html.html('');
+      var pages = this.app.getDocument().getPages();
+      var currentPage = this.view.getPage();
+      pages.forEach(function (page) {
+        _this2.html.append("\n        <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n          " + page.name + "\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Layer\" class=\"layer_edit pull-right\" >\n              <span class=\"fa fa-edit\"/>\n          </span>\n        </div>");
+      }, true);
+      $(".pageElement[data-page=" + currentPage.id + "]").addClass("selected");
+
+      this.html.sortable({
+        axis: "y",
+        update: function update(event, dd) {
+          // fetch the state of the new order
+          var pageDivs = $(".pageElement").toArray();
+          var document = _this2.app.getDocument();
+          //
+          var newPageOrder = [];
+          pageDivs.forEach(function (page) {
+            var id = $(page).data("page");
+            newPageOrder.push(document.getPage(id));
+          });
+          document.setPages(newPageOrder);
+        }
+      });
+
+      $(".pageElement .layer_edit").on("click", function (event) {
+        var page = _this2.app.getDocument().getPage($(event.currentTarget).data("page"));
+        inputPrompt.show("Rename Pager", "Page name", page.name, function (value) {
+          _CommandStack2.default.push(new _State2.default(_this2.app));
+          page.name = value;
+          _this2.stackChanged(null);
+        });
+        return false;
+      });
+
+      $(".pageElement").on("click", function (event) {
+        $(".pageElement").removeClass("selected");
+        var element = $(event.target);
+        var id = element.data("page");
+        var page = _this2.app.getDocument().getPage(id);
+        _this2.app.view.setPage(page);
+        element.addClass("selected");
+      });
+    }
+  }]);
+
+  return Palette;
+}();
+
+exports.default = Palette;
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/author/js/toolbar.js":
 /*!*******************************************!*\
   !*** ./app/frontend/author/js/toolbar.js ***!
@@ -5375,12 +5636,18 @@ var _State = __webpack_require__(/*! ./commands/State */ "./app/frontend/author/
 
 var _State2 = _interopRequireDefault(_State);
 
+var _palette = __webpack_require__(/*! ./palette */ "./app/frontend/author/js/palette.js");
+
+var _palette2 = _interopRequireDefault(_palette);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var inputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
+
 var shortid = __webpack_require__(/*! shortid */ "./node_modules/shortid/index.js");
-var Document = __webpack_require__(/*! ./document */ "./app/frontend/author/js/document.js");
+var Page = __webpack_require__(/*! ./model/page */ "./app/frontend/author/js/model/page.js");
 var MarkdownEditor = __webpack_require__(/*! ./editor/markdown/editor */ "./app/frontend/author/js/editor/markdown/editor.js");
 var BrainEditor = __webpack_require__(/*! ./editor/brain/editor */ "./app/frontend/author/js/editor/brain/editor.js");
 
@@ -5395,63 +5662,66 @@ var View = function () {
 
     _classCallCheck(this, View);
 
-    this.commandStack = new _CommandStack2.default();
+    this.app = app;
     this.markdownEditor = new MarkdownEditor();
     this.brainEditor = new BrainEditor();
-    this.document = new Document();
+    this.page = new Page();
     this.activeSection = null;
     this.html = $(id);
+    this.palette = new _palette2.default(this, app, "#paletteElements");
+
+    this.palette.render();
 
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"));
 
-    this.commandStack.on("change", this);
+    _CommandStack2.default.on("change", this);
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
-      _this.commandStack.undo();
+      _CommandStack2.default.undo();
     }).delegate("#editRedo:not(.disabled)", "click", function () {
-      _this.commandStack.redo();
+      _CommandStack2.default.redo();
     });
 
     $(document).on("click", ".content", function () {
       _this.onUnselect();
     }).on("click", ".sections .section .sectionContent", function (event) {
-      var section = _this.document.get($(event.target).closest(".section").data("id"));
+      var section = _this.page.get($(event.target).closest(".section").data("id"));
       _this.onSelect(section);
       return false;
     }).on("click", "#sectionMenuUp", function (event) {
       var id = $(event.target).data("id");
-      var index = _this.document.index(id);
+      var index = _this.page.index(id);
       if (index > 0) {
-        _this.commandStack.push(new _State2.default(_this));
+        _CommandStack2.default.push(new _State2.default(_this.app));
         var prev = _this.activeSection.prev();
         _this.activeSection.insertBefore(prev);
-        _this.document.move(index, index - 1);
+        _this.page.move(index, index - 1);
       }
       return false;
     }).on("click", "#sectionMenuDown", function (event) {
       var id = $(event.target).data("id");
-      var index = _this.document.index(id);
-      if (index < _this.document.length - 1) {
-        _this.commandStack.push(new _State2.default(_this));
+      var index = _this.page.index(id);
+      if (index < _this.page.length - 1) {
+        _CommandStack2.default.push(new _State2.default(_this.app));
         var prev = _this.activeSection.next();
         _this.activeSection.insertAfter(prev);
-        _this.document.move(index, index + 1);
+        _this.page.move(index, index + 1);
       }
       return false;
     }).on("dblclick", ".sections .section .sectionContent", function (event) {
-      var section = _this.document.get($(event.target).closest(".section").data("id"));
+      var section = _this.page.get($(event.target).closest(".section").data("id"));
       _this.onSelect(section);
       _this.onEdit(section);
       return false;
     }).on("click", "#sectionMenuEdit", function (event) {
-      _this.onEdit(_this.document.get($(event.target).data("id")));
+      _this.onEdit(_this.page.get($(event.target).data("id")));
       return false;
     }).on("click", "#sectionMenuDelete", function (event) {
-      _this.onDelete(_this.document.get($(event.target).data("id")));
+      _this.onDelete(_this.page.get($(event.target).data("id")));
       return false;
     }).on("click", "#sectionMenuCommitEdit", function (event) {
-      _this.onCommitEdit(_this.document.get($(event.target).data("id")));
+      _this.onCommitEdit(_this.page.get($(event.target).data("id")));
       return false;
     }).on("click", "#sectionMenuCancelEdit", function (event) {
       _this.onCancelEdit();
@@ -5470,28 +5740,46 @@ var View = function () {
   }
 
   _createClass(View, [{
-    key: "setDocument",
-    value: function setDocument(document) {
-      this.document = document;
-      this.render(this.document);
+    key: "setPage",
+    value: function setPage(page) {
+      $(".pageElement").removeClass("selected");
+      $(".pageElement[data-page='" + page.id + "']").addClass("selected");
+      this.page = page;
+      this.render(this.page);
     }
   }, {
-    key: "getDocument",
-    value: function getDocument() {
-      return this.document;
+    key: "getPage",
+    value: function getPage() {
+      return this.page;
+    }
+  }, {
+    key: "addPage",
+    value: function addPage() {
+      var _this2 = this;
+
+      inputPrompt.show("Add Pager", "Page name", function (value) {
+        _CommandStack2.default.push(new _State2.default(_this2.app));
+        var page = new Page();
+        page.name = value;
+        _this2.app.getDocument().push(page);
+        _this2.setPage(page);
+        var section = _this2.addMarkdown(0);
+        _this2.onSelect(section);
+        _this2.onEdit(section);
+      });
     }
   }, {
     key: "addMarkdown",
     value: function addMarkdown(index) {
-      this.commandStack.push(new _State2.default(this));
+      _CommandStack2.default.push(new _State2.default(this.app));
       var section = {
         id: shortid.generate(),
         type: "markdown",
         content: "## Header"
       };
-      this.document.add(section, index);
+      this.page.add(section, index);
       if (typeof index === "number") {
-        this.render(this.document);
+        this.render(this.page);
       } else {
         this.renderMarkdown(section, index);
       }
@@ -5500,15 +5788,15 @@ var View = function () {
   }, {
     key: "addBrain",
     value: function addBrain(index) {
-      this.commandStack.push(new _State2.default(this));
+      _CommandStack2.default.push(new _State2.default(this.app));
       var section = {
         id: shortid.generate(),
         type: "brain",
         content: null
       };
-      this.document.add(section, index);
+      this.page.add(section, index);
       if (typeof index === "number") {
-        this.render(this.document);
+        this.render(this.page);
       } else {
         this.renderBrain(section, index);
       }
@@ -5516,24 +5804,24 @@ var View = function () {
     }
   }, {
     key: "render",
-    value: function render(document) {
-      var _this2 = this;
+    value: function render(page) {
+      var _this3 = this;
 
       this.html.find(".sections").html("");
       this.renderSpacer(0);
-      document.forEach(function (section, index) {
+      page.forEach(function (section, index) {
         switch (section.type) {
           case "brain":
-            _this2.renderBrain(section);
+            _this3.renderBrain(section);
             break;
           case "markdown":
-            _this2.renderMarkdown(section);
+            _this3.renderMarkdown(section);
             break;
           default:
-            _this2.renderUnknown(section);
+            _this3.renderUnknown(section);
             break;
         }
-        _this2.renderSpacer(index + 1);
+        _this3.renderSpacer(index + 1);
       });
     }
   }, {
@@ -5615,31 +5903,33 @@ var View = function () {
   }, {
     key: "onDelete",
     value: function onDelete(section) {
-      this.commandStack.push(new _State2.default(this));
-      this.document.remove(section.id);
-      this.render(this.document);
+      _CommandStack2.default.push(new _State2.default(this.app));
+      this.page.remove(section.id);
+      this.render(this.page);
     }
   }, {
     key: "onCommitEdit",
     value: function onCommitEdit() {
-      var _this3 = this;
+      var _this4 = this;
 
-      this.commandStack.push(new _State2.default(this));
+      _CommandStack2.default.push(new _State2.default(this.app));
       this.currentEditor.commit().then(function () {
-        _this3.currentEditor = null;
+        _this4.currentEditor = null;
         $(".editorContainerSelector").remove();
-        _this3.render(_this3.document);
+        _this4.render(_this4.page);
+        _this4.palette.render();
       });
     }
   }, {
     key: "onCancelEdit",
     value: function onCancelEdit() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.currentEditor.cancel().then(function () {
         $(".editorContainerSelector").remove();
-        _this4.currentEditor = null;
-        _this4.render(_this4.document);
+        _this5.currentEditor = null;
+        _this5.render(_this5.page);
+        _this5.palette.render();
       });
     }
 
@@ -19249,7 +19539,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: rgba(0, 0, 0, 0.4);\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n.activeSection .tinyFlyoverMenu {\n  position: sticky;\n  float: right;\n  top: 10px;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .toolbar {\n  background-color: transparent;\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n.userinfo_toggler .userContainer {\n  text-align: center;\n}\n.userinfo_toggler .userContainer img {\n  width: 90px;\n}\n.userinfo_toggler .userContainer button {\n  margin-top: 20px;\n  background-color: white;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  color: black;\n}\n.userinfo_toggler .loginButton {\n  top: 3px;\n  position: relative;\n  background-color: #C71D3D;\n  color: white;\n  font-weight: 600;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  cursor: pointer;\n  letter-spacing: 4px;\n  padding-left: 15px;\n  padding-right: 10px;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: #C71D3D;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#home {\n  overflow: scroll;\n}\n#home .authorPage {\n  padding: 40px !important;\n  font-size: calc(12px + 0.5vw);\n  font-weight: 400;\n}\n#home .authorPage h1 {\n  font-weight: 200;\n  font-size: calc(16px + 2.5vw);\n  white-space: nowrap;\n  margin-bottom: 10px;\n  color: #C71D3D;\n}\n#home .authorPage h2 {\n  font-size: calc(14px + 1.5vw);\n  font-weight: 200;\n  color: #C71D3D;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#simulationStartStop {\n  z-index: 1000;\n  display: inline-block;\n  width: 18px;\n  height: 18px;\n  color: #9e9e9e;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n  top: 2px;\n  position: relative;\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 18px;\n  height: 18px;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 0;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 18px;\n  height: 18px;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(9px, 0) scale(1.6, 1);\n  transform: translate(9px, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-9px, -9px) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-12px, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(12px, 0);\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 218px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 110px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.paletteContainer {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.paletteContainer .pallette_item {\n  padding: 0px;\n}\n.paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin-left: 20px;\n  margin-right: 20px;\n  cursor: pointer;\n  border-left: 1px solid transparent;\n  padding-left: 3px;\n}\n.sections .section.error {\n  border: 1px solid red;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .section:hover .sectionContent[data-type='spacer'] .tinyFlyoverMenu {\n  visibility: visible !important;\n}\n.sections .section .sectionContent[data-type='brain'] {\n  left: 50%;\n  position: relative;\n  transform: translateX(-50%);\n  max-width: 100%;\n}\n.sections .section .sectionContent[data-type='spacer'] {\n  position: relative;\n  height: 20px;\n  text-align: center;\n}\n.sections .section .sectionContent[data-type='spacer'] .tinyFlyoverMenu {\n  visibility: hidden;\n  position: initial;\n  display: inline;\n  top: 0;\n  left: 46%;\n  font-size: 15px;\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#draw2dCanvasWrapper {\n  background-color: white;\n  top: 0  !important;\n}\n#draw2dCanvasWrapper .tinyFlyoverMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: rgba(0, 0, 0, 0.4);\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(178, 226, 242, 0.3);\n  border-radius: 5px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n  transition: all 0.5s;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C71D3D;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 35%;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n.activeSection .tinyFlyoverMenu {\n  position: sticky;\n  float: right;\n  top: 10px;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .toolbar {\n  background-color: transparent;\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n.userinfo_toggler .userContainer {\n  text-align: center;\n}\n.userinfo_toggler .userContainer img {\n  width: 90px;\n}\n.userinfo_toggler .userContainer button {\n  margin-top: 20px;\n  background-color: white;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  color: black;\n}\n.userinfo_toggler .loginButton {\n  top: 3px;\n  position: relative;\n  background-color: #C71D3D;\n  color: white;\n  font-weight: 600;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  cursor: pointer;\n  letter-spacing: 4px;\n  padding-left: 15px;\n  padding-right: 10px;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: #C71D3D;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n#home {\n  overflow: scroll;\n}\n#home .authorPage {\n  padding: 40px !important;\n  font-size: calc(12px + 0.5vw);\n  font-weight: 400;\n}\n#home .authorPage h1 {\n  font-weight: 200;\n  font-size: calc(16px + 2.5vw);\n  white-space: nowrap;\n  margin-bottom: 10px;\n  color: #C71D3D;\n}\n#home .authorPage h2 {\n  font-size: calc(14px + 1.5vw);\n  font-weight: 200;\n  color: #C71D3D;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #C71D3D;\n}\n#home footer a {\n  color: #C71D3D;\n  text-decoration: underline;\n}\n#simulationStartStop {\n  z-index: 1000;\n  display: inline-block;\n  width: 18px;\n  height: 18px;\n  color: #9e9e9e;\n  overflow: hidden;\n  transform: translateZ(0);\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n  top: 2px;\n  position: relative;\n}\n#simulationStartStop:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n#simulationStartStop:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n#simulationStartStop > span {\n  display: block;\n  position: relative;\n  width: 18px;\n  height: 18px;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 0;\n}\n#simulationStartStop > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 18px;\n  height: 18px;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n#simulationStartStop.play > span {\n  -webkit-transform: translate(9px, 0) scale(1.6, 1);\n  transform: translate(9px, 0) scale(1.6, 1);\n}\n#simulationStartStop.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-9px, -9px) scale(1, 1);\n  background-color: #C71D3D;\n}\n#simulationStartStop.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-12px, 0);\n}\n#simulationStartStop.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(12px, 0);\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf {\n  font-weight: 200;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando {\n  line-height: 10px;\n  width: 12px;\n  height: 12px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-expando.hidden {\n  display: block !important;\n  visibility: hidden !important;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content {\n  cursor: pointer;\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.tree-child-leaves {\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content:hover {\n  background-color: rgba(243, 245, 246, 0.69);\n  transition: all 0.7s;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter .tree-leaf .tree-leaf-content.selected {\n  transition: all 0.4s;\n  background-color: #f3f5f6;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: relative;\n  width: 218px;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  min-height: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 110px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: scroll;\n}\n#layout .tab-content .active {\n  display: block;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.paletteContainer {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.paletteContainer .pallette_item {\n  padding: 0px;\n}\n.paletteContainer .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.paletteContainer .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.paletteContainer .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.paletteContainer .pallette_item .glowBorder {\n  border: 1px solid #C71D3D;\n}\n.paletteContainer .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#paletteElementsScroll.pages {\n  position: absolute !important;\n  top: 90px !important;\n}\n#paletteFilter.pages {\n  box-shadow: none !important;\n  overflow-x: hidden !important;\n  position: relative !important;\n  top: 64px !important;\n  padding: 0 !important;\n  bottom: 0 !important;\n  left: 0 !important;\n  right: 0 !important;\n  text-align: left !important;\n  overflow: initial !important;\n}\n.pageElement {\n  padding: 10px;\n  text-align: left;\n  cursor: pointer;\n}\n.pageElement.selected {\n  background-color: rgba(0, 0, 0, 0.2);\n}\n.toolbar .applicationSwitch {\n  float: right;\n}\n.toolbar .applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n}\n.toolbar .applicationSwitch .form-horizontal {\n  min-width: 170px;\n}\n.toolbar .applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n.sections {\n  list-style: none;\n  padding: 0;\n  margin: 10px;\n}\n.sections .section {\n  margin-left: 20px;\n  margin-right: 20px;\n  cursor: pointer;\n  border-left: 1px solid transparent;\n  padding-left: 3px;\n}\n.sections .section.error {\n  border: 1px solid red;\n}\n.sections .section:hover {\n  background-color: rgba(0, 0, 0, 0.01);\n  border-left: 1px solid rgba(0, 0, 0, 0.1);\n}\n.sections .section:hover .sectionContent[data-type='spacer'] .tinyFlyoverMenu {\n  visibility: visible !important;\n}\n.sections .section .sectionContent[data-type='brain'] {\n  left: 50%;\n  position: relative;\n  transform: translateX(-50%);\n  max-width: 100%;\n}\n.sections .section .sectionContent[data-type='spacer'] {\n  position: relative;\n  height: 20px;\n  text-align: center;\n}\n.sections .section .sectionContent[data-type='spacer'] .tinyFlyoverMenu {\n  visibility: hidden;\n  position: initial;\n  display: inline;\n  top: 0;\n  left: 46%;\n  font-size: 15px;\n}\n.sections .activeSection {\n  position: relative;\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n}\n.gutter {\n  background-color: #eee;\n  background-repeat: no-repeat;\n  background-position: 50%;\n}\n.gutter.gutter-vertical {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');\n}\n.gutter.gutter-horizontal {\n  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');\n}\n.split {\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.split,\n.gutter.gutter-horizontal {\n  float: left;\n}\n.split {\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n#editor-container {\n  display: flex;\n}\n#editor-container #markdownEditor {\n  height: auto;\n}\n#editor-container .left {\n  flex: 50%;\n  border-right: 1px dotted black;\n}\n#editor-container .right {\n  flex: 50%;\n}\n#editor-container .CodeMirror {\n  height: initial;\n}\n#editor-container .CodeMirror-scroll {\n  height: auto;\n  overflow-y: hidden;\n  overflow-x: auto;\n}\n#draw2dCanvasWrapper {\n  background-color: white;\n  top: 0  !important;\n}\n#draw2dCanvasWrapper .tinyFlyoverMenu {\n  top: 15px;\n  position: fixed;\n  right: 30px;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Author\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
 
 // exports
 

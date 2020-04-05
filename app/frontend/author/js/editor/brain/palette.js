@@ -16,6 +16,9 @@ export default class Palette {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   constructor(view, id, permissions) {
+    // remove all classes from the other editors
+    $("#paletteElementsScroll").removeClass()
+
     this.view = view
     $.getJSON(conf.shapes.url + "index.json", (data) => {
       conf.shapes.version = data[0].version

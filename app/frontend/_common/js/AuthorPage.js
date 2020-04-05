@@ -3,7 +3,7 @@ const md = require('markdown-it')()
 
 md.use(require("markdown-it-asciimath"))
 
-export default class Page {
+export default class AuthorPage {
 
   constructor(containerId, file) {
     this.file = file
@@ -15,8 +15,14 @@ export default class Page {
     $(this.containerId).html(container)
     axios.get(`../backend/global/sheet/get?filePath=${this.file}`)
       .then((response => {
-        let document = response.data.json
-        document.forEach( (section, index) => {
+        let document = []
+        if (response.data.json) {
+          document = response.data.json
+        }
+        else {
+          document = response.data.pages[0].sections
+        }
+        document.forEach( (section) => {
           switch(section.type){
             case "brain":
               this.renderBrain(container, section)
@@ -25,7 +31,6 @@ export default class Page {
               this.renderMarkdown(container, section)
               break
             default:
-
               break
           }
         })
