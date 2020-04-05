@@ -314,6 +314,10 @@ export default draw2d.Canvas.extend({
     $("#simulationStartStop")
       .addClass("pause")
       .removeClass("play")
+
+    $("#paletteElementsOverlay")
+      .fadeIn("fast")
+      .height($("#paletteElements").height())
   },
 
   simulationStop: function () {
@@ -328,7 +332,7 @@ export default draw2d.Canvas.extend({
     $("#simulationStartStop")
       .addClass("play")
       .removeClass("pause")
-
+    $("#paletteElementsOverlay").fadeOut("fast")
   },
 
   _calculate: function () {
@@ -383,14 +387,6 @@ export default draw2d.Canvas.extend({
 
     return new draw2d.geo.Rectangle(minX, minY, width, height)
   },
-
-  reloadFromCache: function () {
-    new draw2d.io.json.Writer().marshal(this, json => {
-      draw2d.Canvas.prototype.clear.call(this)
-      new draw2d.io.json.Reader().unmarshal(this, json)
-    })
-  },
-
 
   centerDocument: function () {
     this.setZoom(1.0)

@@ -18,7 +18,15 @@ export default class Editor {
                <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
           </div>
        `)
-
+    menu.prepend(`
+          <a href="#" class="morph_btn play" id="simulationStartStop">
+            <span>
+              <span class="s1"></span>
+              <span class="s2"></span>
+              <span class="s3"></span>
+            </span>
+          </a>
+    ` )
 
     $("#draw2dCanvasWrapper").append(menu)
 
@@ -35,6 +43,7 @@ export default class Editor {
                     direction: 'vertical'
                   })
 
+    $("#simulationStartStop").on("click", () => { this.view.simulationToggle()})
     return this
   }
 

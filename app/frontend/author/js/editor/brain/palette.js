@@ -26,7 +26,6 @@ export default class Palette {
       })
 
       $(id).html(html)
-
       this.buildTree(data)
 
 
@@ -54,15 +53,6 @@ export default class Palette {
         .on('mouseout', () => {
           $(this).parent().removeClass('glowBorder')
         })
-    })
-
-    socket.on("shape:generating", (msg) => {
-      $("div[data-file='" + msg.filePath + "'] ").addClass("spinner")
-    })
-
-    socket.on("shape:generated", (msg) => {
-      $("div[data-file='" + msg.filePath + "'] ").removeClass("spinner")
-      $("div[data-file='" + msg.filePath + "'] img").attr({src: conf.shapes.url + msg.imagePath + "?timestamp=" + new Date().getTime()})
     })
   }
 

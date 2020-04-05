@@ -255,6 +255,11 @@ export default class View {
     let type = section.type
 
     let menu = $(".activeSection .tinyFlyoverMenu")
+
+    menu.html(`
+          <div data-id="${section.id}" id="sectionMenuCommitEdit" class='fa fa-check-square-o' ></div>
+          <div data-id="${section.id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
+        `)
     if(type==='markdown') {
       this.currentEditor = this.markdownEditor.inject(section)
       $(".sections").removeClass("activeSection")
@@ -263,14 +268,7 @@ export default class View {
       this.currentEditor = this.brainEditor.inject(section)
       $(".sections").removeClass("activeSection")
     }
-    else {
-      return
-    }
 
-    menu.html(`
-          <div data-id="${section.id}" id="sectionMenuCommitEdit" class='fa fa-check-square-o' ></div>
-          <div data-id="${section.id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
-        `)
   }
 
   onDelete(section){
