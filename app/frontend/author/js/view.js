@@ -224,7 +224,7 @@ export default class View {
     this.onUnselect()
     this.activeSection = $(`.section[data-id='${section.id}']`)
     this.activeSection.addClass('activeSection')
-    $(".sections .activeSection").append(`
+    $(".sections .activeSection").prepend(`
         <div class='tinyFlyoverMenu'>
           <div data-id="${section.id}" id="sectionMenuUp"     class='fa fa-caret-square-o-up' ></div>
           <div data-id="${section.id}" id="sectionMenuDown"   class='fa fa-caret-square-o-down' ></div>
