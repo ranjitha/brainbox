@@ -24,7 +24,7 @@ class Dialog {
                             </div>
                             <div class="media-body">
         
-                                <form class="form-horizontal">
+                                <div class="form-horizontal">
                                     <br>
                                     Filename:
                                     <fieldset>
@@ -38,21 +38,9 @@ class Dialog {
                                         </div>
         
                                     </fieldset>
-                                  Change Reason:
-                                  <fieldset>
-                                    <div class="form-group">
-                                      <div class="col-lg-12">
-                                        <input type="text"
-                                               class="form-control floating-label commitMessage"
-                                               value=""
-                                        >
-                                      </div>
-                                    </div>
-        
-                                  </fieldset>
+
                                     <div class="row"></div>
-        
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -79,7 +67,6 @@ class Dialog {
   show(currentFile, storage, document, callback) {
 
       $("#fileSaveDialog .fileName").val(fs.basename(currentFile.name).replace(conf.fileSuffix, ""))
-      $("#fileSaveDialog .commitMessage").val('change reason')
 
       $('#fileSaveDialog').on('shown.bs.modal', (event) => {
         $(event.currentTarget).find('input:first').focus()
