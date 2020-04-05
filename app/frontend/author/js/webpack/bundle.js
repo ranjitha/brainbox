@@ -4607,8 +4607,7 @@ exports.default = draw2d.Canvas.extend({
 
     this._calculate();
 
-    $("#simulationStartStop").addClass("pause");
-    $("#simulationStartStop").removeClass("play");
+    $("#simulationStartStop").addClass("pause").removeClass("play");
   },
 
   simulationStop: function simulationStop() {
@@ -4620,8 +4619,7 @@ exports.default = draw2d.Canvas.extend({
     this.installEditPolicy(this.connectionPolicy);
     this.installEditPolicy(this.coronaFeedback);
 
-    $("#simulationStartStop").addClass("play");
-    $("#simulationStartStop").removeClass("pause");
+    $("#simulationStartStop").addClass("play").removeClass("pause");
   },
 
   _calculate: function _calculate() {
@@ -4665,7 +4663,7 @@ exports.default = draw2d.Canvas.extend({
     var xCoords = [];
     var yCoords = [];
     this.getFigures().each(function (i, f) {
-      var b = f.getBoundingBox();
+      var b = f.getOuterBoundingBox();
       xCoords.push(b.x, b.x + b.w);
       yCoords.push(b.y, b.y + b.h);
     });

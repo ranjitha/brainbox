@@ -311,8 +311,9 @@ export default draw2d.Canvas.extend({
 
     this._calculate()
 
-    $("#simulationStartStop").addClass("pause")
-    $("#simulationStartStop").removeClass("play")
+    $("#simulationStartStop")
+      .addClass("pause")
+      .removeClass("play")
   },
 
   simulationStop: function () {
@@ -324,8 +325,9 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(this.connectionPolicy)
     this.installEditPolicy(this.coronaFeedback)
 
-    $("#simulationStartStop").addClass("play")
-    $("#simulationStartStop").removeClass("pause")
+    $("#simulationStartStop")
+      .addClass("play")
+      .removeClass("pause")
 
   },
 
@@ -370,7 +372,7 @@ export default draw2d.Canvas.extend({
     let xCoords = []
     let yCoords = []
     this.getFigures().each(function (i, f) {
-      let b = f.getBoundingBox()
+      let b = f.getOuterBoundingBox()
       xCoords.push(b.x, b.x + b.w)
       yCoords.push(b.y, b.y + b.h)
     })
