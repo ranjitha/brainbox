@@ -41,7 +41,10 @@ export default class Palette{
       this.html.append(`
         <div class="pageElement"  data-page="${page.id}"  id="layerElement_${page.id}" >
           ${page.name}
-          <span data-page="${page.id}"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" >
+          <span data-page="${page.id}"  data-toggle="tooltip" title="Delete the page" class="page_delete pull-right" >
+              <span class="fa fa-trash"/>
+          </span>
+          <span data-page="${page.id}"  data-toggle="tooltip" title="Edit Name of Page" class="page_edit_nmae pull-right" >
               <span class="fa fa-edit"/>
           </span>
         </div>`)
@@ -64,13 +67,21 @@ export default class Palette{
       }
     })
 
-    $(".pageElement .layer_edit").on("click", (event) =>{
+    $(".pageElement .page_edit_name").on("click", (event) =>{
       let page = this.app.getDocument().getPage($(event.currentTarget).data("page"))
       inputPrompt.show("Rename Pager", "Page name", page.name, value => {
         commandStack.push(new State(this.app))
         page.name = value
         this.stackChanged(null)
       })
+      return false
+    })
+
+    $(".pageElement .page_delete").on("click", (event) =>{
+      commandStack.push(new State(this.app))
+      let page = this.app.getDocument().getPage($(event.currentTarget).data("page"))
+      this.app.getDocument().removePage(page)
+      this.stackChanged(null)
       return false
     })
 

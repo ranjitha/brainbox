@@ -5119,6 +5119,14 @@ var Document = function () {
       });
     }
   }, {
+    key: "removePage",
+    value: function removePage(page) {
+      var index = this.pages.findIndex(function (obj) {
+        return obj.id === page.id;
+      });
+      return this.pages.splice(index, 1);
+    }
+  }, {
     key: "push",
     value: function push(page) {
       this.pages.push(page);
@@ -5342,7 +5350,7 @@ var Palette = function () {
       var pages = this.app.getDocument().getPages();
       var currentPage = this.view.getPage();
       pages.forEach(function (page) {
-        _this2.html.append("\n        <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n          " + page.name + "\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Layer\" class=\"layer_edit pull-right\" >\n              <span class=\"fa fa-edit\"/>\n          </span>\n        </div>");
+        _this2.html.append("\n        <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n          " + page.name + "\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Delete the page\" class=\"page_delete pull-right\" >\n              <span class=\"fa fa-trash\"/>\n          </span>\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Page\" class=\"page_edit_nmae pull-right\" >\n              <span class=\"fa fa-edit\"/>\n          </span>\n        </div>");
       }, true);
       $(".pageElement[data-page=" + currentPage.id + "]").addClass("selected");
 
@@ -5362,13 +5370,21 @@ var Palette = function () {
         }
       });
 
-      $(".pageElement .layer_edit").on("click", function (event) {
+      $(".pageElement .page_edit_name").on("click", function (event) {
         var page = _this2.app.getDocument().getPage($(event.currentTarget).data("page"));
         inputPrompt.show("Rename Pager", "Page name", page.name, function (value) {
           _CommandStack2.default.push(new _State2.default(_this2.app));
           page.name = value;
           _this2.stackChanged(null);
         });
+        return false;
+      });
+
+      $(".pageElement .page_delete").on("click", function (event) {
+        _CommandStack2.default.push(new _State2.default(_this2.app));
+        var page = _this2.app.getDocument().getPage($(event.currentTarget).data("page"));
+        _this2.app.getDocument().removePage(page);
+        _this2.stackChanged(null);
         return false;
       });
 

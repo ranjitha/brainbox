@@ -27,6 +27,11 @@ export default class Document{
     return this.pages.find((obj => obj.id === id))
   }
 
+  removePage(page){
+    let index = this.pages.findIndex((obj => obj.id === page.id))
+    return this.pages.splice(index, 1);
+  }
+
   push( page){
     this.pages.push(page)
     return this
