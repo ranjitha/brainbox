@@ -1614,8 +1614,8 @@ var Application = function () {
       var url = _configuration2.default.backend[scope].get(name);
       $("#leftTabStrip .editor").click();
       return this.storage.loadUrl(url).then(function (content) {
-        _this3.setDocument(new _document2.default(content), 0);
         _this3.currentFile = { name: name, scope: scope };
+        _this3.setDocument(new _document2.default(content), 0);
         return content;
       });
     }
@@ -5316,7 +5316,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var inputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
 
 var Palette = function () {
-  function Palette(view, app, elementId) {
+  function Palette(app, view, permissions, elementId) {
     var _this = this;
 
     _classCallCheck(this, Palette);
@@ -5324,6 +5324,7 @@ var Palette = function () {
     this.html = $(elementId);
     this.app = app;
     this.view = view;
+    this.permissions = permissions;
     _CommandStack2.default.on("change", this);
 
     $(document).on("click", "#documentPageAdd", function () {
@@ -5379,9 +5380,11 @@ var Palette = function () {
       this.html.html('');
       var pages = this.app.getDocument().getPages();
       var currentPage = this.view.getPage();
+
       pages.forEach(function (page) {
         _this2.html.append("\n        <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n          " + page.name + "\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Delete the page\" class=\"page_delete pull-right\" >\n              <span class=\"fa fa-trash\"/>\n          </span>\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Page\" class=\"page_edit_name pull-right\" >\n              <span class=\"fa fa-edit\"/>\n          </span>\n        </div>");
       }, true);
+
       $(".pageElement[data-page=" + currentPage.id + "]").addClass("selected");
 
       this.html.sortable({
@@ -5741,7 +5744,7 @@ var View = function () {
     this.page = new Page();
     this.activeSection = null;
     this.html = $(id);
-    this.palette = new _palette2.default(this, app, "#paletteElements");
+    this.palette = new _palette2.default(app, this, permissions, "#paletteElements");
 
     this.palette.render();
 

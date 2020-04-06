@@ -5,10 +5,11 @@ import State from "./commands/State";
 
 export default class Palette {
 
-  constructor(view, app, elementId) {
+  constructor(app, view, permissions, elementId) {
     this.html = $(elementId)
     this.app = app
     this.view = view
+    this.permissions = permissions
     commandStack.on("change", this)
 
     $(document)
@@ -62,8 +63,9 @@ export default class Palette {
     this.html.html('')
     let pages = this.app.getDocument().getPages()
     let currentPage = this.view.getPage()
-    pages.forEach((page) => {
-      this.html.append(`
+
+      pages.forEach((page) => {
+        this.html.append(`
         <div class="pageElement"  data-page="${page.id}"  id="layerElement_${page.id}" >
           ${page.name}
           <span data-page="${page.id}"  data-toggle="tooltip" title="Delete the page" class="page_delete pull-right" >
@@ -73,7 +75,8 @@ export default class Palette {
               <span class="fa fa-edit"/>
           </span>
         </div>`)
-    }, true)
+      }, true)
+
     $(`.pageElement[data-page=${currentPage.id}]`).addClass("selected")
 
     this.html.sortable({

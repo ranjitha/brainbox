@@ -244,7 +244,7 @@ module.exports = {
   },
 
 
-  writeFile: function (baseDir, subDir, content, res, callback) {
+  writeFile: async function (baseDir, subDir, content, res, callback) {
     let file = path.join(baseDir, subDir)
     let dir = path.dirname(file)+path.sep
 
@@ -268,7 +268,7 @@ module.exports = {
     }
 
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
+      await makeDir(dir)
     }
 
     fs.writeFile(file, content, err => {

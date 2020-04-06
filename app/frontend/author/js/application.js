@@ -151,8 +151,8 @@ class Application {
     $("#leftTabStrip .editor").click()
     return this.storage.loadUrl(url)
       .then((content) => {
-        this.setDocument(new Document(content),0)
         this.currentFile = { name, scope}
+        this.setDocument(new Document(content),0)
         return content
       })
   }

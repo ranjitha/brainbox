@@ -23,7 +23,7 @@ export default class View {
     this.page = new Page()
     this.activeSection = null;
     this.html = $(id)
-    this.palette = new Palette(this, app, "#paletteElements")
+    this.palette = new Palette(app, this, permissions,  "#paletteElements")
 
     this.palette.render()
 
