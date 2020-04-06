@@ -43,11 +43,14 @@ export default class Editor {
                     direction: 'vertical'
                   })
 
+    this.view.centerDocument()
+
     $("#simulationStartStop").on("click", () => { this.view.simulationToggle()})
     return this
   }
 
   commit(){
+    this.view.simulationStop()
     return new Promise((resolve, reject) => {
       this._resetDOM()
       this.view.getSelection().each((index, item)=>{
@@ -61,6 +64,7 @@ export default class Editor {
   }
 
   cancel(){
+    this.view.simulationStop()
     return new Promise((resolve, reject) => {
       this._resetDOM()
       resolve(this.section)
@@ -68,6 +72,7 @@ export default class Editor {
   }
 
   _resetDOM(){
+    this.view.simulationStop()
     this.splitter.destroy()
     $("#paletteElements").html("")
     $("#paletteFilter").html("")

@@ -1491,6 +1491,7 @@ var Application = function () {
         Mousetrap.unpause();
       });
 
+      this.hasUnsavedChanges = false;
       this.permissions = permissions;
       this.document = new _document2.default();
       this.currentFile = { name: "NewDocument" + _configuration2.default.fileSuffix, scope: "user" };
@@ -1514,18 +1515,17 @@ var Application = function () {
       var global = this.getParam("global");
       var shared = this.getParam("shared");
       if (user) {
-        $("#leftTabStrip .editor").click();
         this.load(user, "user");
       }
       // check if the user has added a "file" parameter. In this case we load the shape from
       // the draw2d.shape github repository
       //
       else if (global) {
-          $("#leftTabStrip .editor").click();
           this.load(global, "global");
         } else if (shared) {
-          $("#leftTabStrip .editor").click();
           this.load(shared, "shared");
+        } else {
+          this.fileNew("NewDocument", "user");
         }
 
       // listen on the history object to load files
@@ -1560,14 +1560,15 @@ var Application = function () {
     }
   }, {
     key: "fileSave",
-    value: function fileSave() {
+    value: function fileSave(callback) {
       var _this2 = this;
 
-      var callback = function callback() {
+      var internal_callback = function internal_callback() {
         _this2.hasUnsavedChanges = false;
         (0, _toast2.default)("Saved");
         $("#editorFileSave div").removeClass("highlight");
         _this2.filePane.refresh(_configuration2.default, _this2.permissions.sheets, _this2.currentFile);
+        if (callback) callback();
       };
 
       // if the user didn't has the access to write "global" files, the scope of the file is changed
@@ -1579,10 +1580,10 @@ var Application = function () {
 
       if (this.permissions.sheets.create && this.permissions.sheets.update) {
         // allow the user to enter/change the file name....
-        _FileSave2.default.show(this.currentFile, this.storage, this.document, callback);
+        _FileSave2.default.show(this.currentFile, this.storage, this.document, internal_callback);
       } else if (this.permissions.sheets.create) {
         // just save the file with a generated filename. It is a codepen-like modus
-        _FileSave2.default.save(this.currentFile, this.storage, this.document, callback);
+        _FileSave2.default.save(this.currentFile, this.storage, this.document, internal_callback);
       }
     }
   }, {
@@ -1599,9 +1600,8 @@ var Application = function () {
     key: "fileNew",
     value: function fileNew(name, scope) {
       $("#leftTabStrip .editor").click();
-      this.document = new _document2.default();
-      this.view.setPage(this.document.get(0));
       this.currentFile = { name: name, scope: scope };
+      this.setDocument(new _document2.default(), 0);
       var section = this.view.addMarkdown(0);
       this.view.onSelect(section);
       this.view.onEdit(section);
@@ -2862,6 +2862,8 @@ var Editor = function () {
         direction: 'vertical'
       });
 
+      this.view.centerDocument();
+
       $("#simulationStartStop").on("click", function () {
         _this.view.simulationToggle();
       });
@@ -2872,6 +2874,7 @@ var Editor = function () {
     value: function commit() {
       var _this2 = this;
 
+      this.view.simulationStop();
       return new Promise(function (resolve, reject) {
         _this2._resetDOM();
         _this2.view.getSelection().each(function (index, item) {
@@ -2888,6 +2891,7 @@ var Editor = function () {
     value: function cancel() {
       var _this3 = this;
 
+      this.view.simulationStop();
       return new Promise(function (resolve, reject) {
         _this3._resetDOM();
         resolve(_this3.section);
@@ -2896,6 +2900,7 @@ var Editor = function () {
   }, {
     key: "_resetDOM",
     value: function _resetDOM() {
+      this.view.simulationStop();
       this.splitter.destroy();
       $("#paletteElements").html("");
       $("#paletteFilter").html("");
@@ -4066,7 +4071,7 @@ var Palette = function () {
     _classCallCheck(this, Palette);
 
     // remove all classes from the other editors
-    $("#paletteElementsScroll").removeClass();
+    $("#paletteElementsScroll").removeClass("pages");
 
     this.view = view;
     $.getJSON(_configuration2.default.shapes.url + "index.json", function (data) {
@@ -5418,6 +5423,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
 
 var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
@@ -5425,6 +5432,10 @@ var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
 var _SimulatorDialog = __webpack_require__(/*! ../../_common/js/SimulatorDialog */ "./app/frontend/_common/js/SimulatorDialog.js");
 
 var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
+
+var _CommandStack = __webpack_require__(/*! ./commands/CommandStack */ "./app/frontend/author/js/commands/CommandStack.js");
+
+var _CommandStack2 = _interopRequireDefault(_CommandStack);
 
 var _configuration = __webpack_require__(/*! ./configuration */ "./app/frontend/author/js/configuration.js");
 
@@ -5438,97 +5449,135 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Toolbar = function Toolbar(app, view, elementId, permissions) {
-  var _this = this;
+var Toolbar = function () {
+  function Toolbar(app, view, elementId, permissions) {
+    var _this = this;
 
-  _classCallCheck(this, Toolbar);
+    _classCallCheck(this, Toolbar);
 
-  this.html = $(elementId);
-  this.app = app;
-  this.view = view;
+    this.html = $(elementId);
+    this.app = app;
+    this.view = view;
+    this.permissions = permissions;
 
-  this.saveButton = $("#editorFileSave");
-  if (permissions.sheets.update || permissions.sheets.create) {
-    this.saveButton.on("click", function () {
-      _this.saveButton.tooltip("hide");
-      app.fileSave();
+    _CommandStack2.default.on("change", this);
+
+    this.saveButton = $("#editorFileSave");
+    if (permissions.sheets.update || permissions.sheets.create) {
+      this.saveButton.on("click", function () {
+        _this.saveButton.tooltip("hide");
+        app.fileSave();
+      });
+      Mousetrap.bindGlobal("ctrl+s", function () {
+        _this.saveButton.click();
+        return false;
+      });
+    } else {
+      this.saveButton.remove();
+    }
+
+    this.shareButton = $("#editorFileShare");
+    if (permissions.featureset.share) {
+      this.shareButton.on("click", function () {
+        _this.shareButton.tooltip("hide");
+        if (_this.app.hasUnsavedChanges) {
+          // file must be save before sharing
+          app.fileSave(function () {
+            app.fileShare();
+          });
+        } else {
+          app.fileShare();
+        }
+      });
+    } else {
+      this.shareButton.remove();
+    }
+
+    this.pdfButton = $("#editorFileToPDF");
+    if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
+      this.pdfButton.on("click", function () {
+        var file = app.currentFile;
+        if (_this.app.hasUnsavedChanges) {
+          // file must be save before sharing
+          app.fileSave(function () {
+            window.open("../backend/" + file.scope + "/sheet/pdf?file=" + file.name, "__blank");
+          });
+        } else {
+          window.open("../backend/" + file.scope + "/sheet/pdf?file=" + file.name, "__blank");
+        }
+      });
+    } else {
+      this.pdfButton.remove();
+    }
+
+    /////////////////////////////////////////////
+    // Editor Operations
+    //
+    this.addTextButton = $("#addTextSection");
+    this.addTextButton.on("click", function () {
+      _this.addTextButton.tooltip("hide");
+      _this.view.addMarkdown();
     });
-    Mousetrap.bindGlobal("ctrl+s", function () {
-      _this.saveButton.click();
+    Mousetrap.bindGlobal("ctrl+t", function () {
+      _this.addTextButton.click();
       return false;
     });
-  } else {
-    this.saveButton.remove();
-  }
 
-  this.shareButton = $("#editorFileShare");
-  if (permissions.featureset.share) {
-    this.shareButton.on("click", function () {
-      _this.shareButton.tooltip("hide");
-      app.fileShare();
+    this.addBrainButton = $("#addBrainSection");
+    this.addBrainButton.on("click", function () {
+      _this.addBrainButton.tooltip("hide");
+      _this.view.addBrain();
     });
-  } else {
-    this.shareButton.remove();
-  }
-
-  this.pdfButton = $("#editorFileToPDF");
-  if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
-    this.pdfButton.on("click", function () {
-      var file = app.currentFile;
-      window.open("../backend/" + file.scope + "/sheet/pdf?file=" + file.name, "__blank");
+    Mousetrap.bindGlobal("ctrl+s", function (event) {
+      _this.addBrainButton.click();
+      return false;
     });
-  } else {
-    this.pdfButton.remove();
-  }
 
-  /////////////////////////////////////////////
-  // Editor Operations
-  //
-  this.addTextButton = $("#addTextSection");
-  this.addTextButton.on("click", function () {
-    _this.addTextButton.tooltip("hide");
-    _this.view.addMarkdown();
-  });
-  Mousetrap.bindGlobal("ctrl+t", function () {
-    _this.addTextButton.click();
-    return false;
-  });
-
-  this.addBrainButton = $("#addBrainSection");
-  this.addBrainButton.on("click", function () {
-    _this.addBrainButton.tooltip("hide");
-    _this.view.addBrain();
-  });
-  Mousetrap.bindGlobal("ctrl+s", function (event) {
-    _this.addBrainButton.click();
-    return false;
-  });
-
-  $(".applicationSwitchDesigner").on("click", function () {
-    _DesignerDialog2.default.show(_configuration2.default);
-  });
-
-  $(".applicationSwitchSimulator").on("click", function () {
-    _SimulatorDialog2.default.show(_configuration2.default);
-  });
-
-  if (permissions.featureset.usermanagement === true) {
-    $(document).on("click", ".applicationSwitchUser", function () {
-      _UserAdminDialog2.default.show(_configuration2.default);
+    $(".applicationSwitchDesigner").on("click", function () {
+      _DesignerDialog2.default.show(_configuration2.default);
     });
-  } else {
-    $(".applicationSwitchUser").remove();
+
+    $(".applicationSwitchSimulator").on("click", function () {
+      _SimulatorDialog2.default.show(_configuration2.default);
+    });
+
+    if (permissions.featureset.usermanagement === true) {
+      $(document).on("click", ".applicationSwitchUser", function () {
+        _UserAdminDialog2.default.show(_configuration2.default);
+      });
+    } else {
+      $(".applicationSwitchUser").remove();
+    }
+
+    // enable the tooltip for all buttons
+    //
+    $('*[data-toggle="tooltip"]').tooltip({
+      placement: "bottom",
+      container: "body",
+      delay: { show: 1000, hide: 10 },
+      html: true
+    });
   }
 
-  // enable the tooltip for all buttons
-  //
-  $('*[data-toggle="tooltip"]').tooltip({
-    placement: "bottom",
-    container: "body",
-    delay: { show: 1000, hide: 10 },
-    html: true
-  });
-};
+  _createClass(Toolbar, [{
+    key: "stackChanged",
+    value: function stackChanged(event) {
+      this.pdfButton.hide();
+      // check the permission if the current file is "user" scope
+      if (this.app.currentFile.scope === "user") {
+        if (this.permissions.sheets.pdf === true) {
+          this.pdfButton.show();
+        }
+      } else if (this.app.currentFile.scope === "global") {
+        if (this.permissions.sheets.global.pdf === true) {
+          this.pdfButton.show();
+        }
+      }
+    }
+  }]);
+
+  return Toolbar;
+}();
 
 exports.default = Toolbar;
 module.exports = exports["default"];

@@ -1,7 +1,7 @@
-
 import designerDialog from "../../_common/js/DesignerDialog"
 import simulatorDialog from "../../_common/js/SimulatorDialog"
 
+import commandStack from "./commands/CommandStack"
 import conf from "./configuration"
 import userAdminDialog from "../../_common/js/UserAdminDialog";
 
@@ -12,6 +12,9 @@ export default class Toolbar {
     this.html = $(elementId)
     this.app = app
     this.view = view
+    this.permissions = permissions
+
+    commandStack.on("change", this)
 
     this.saveButton = $("#editorFileSave")
     if(permissions.sheets.update || permissions.sheets.create) {
@@ -32,7 +35,15 @@ export default class Toolbar {
     if(permissions.featureset.share) {
       this.shareButton.on("click", () => {
         this.shareButton.tooltip("hide")
-        app.fileShare()
+        if (this.app.hasUnsavedChanges) {
+          // file must be save before sharing
+          app.fileSave(()=>{
+            app.fileShare()
+          })
+        }
+        else {
+          app.fileShare()
+        }
       })
     }
     else{
@@ -43,7 +54,15 @@ export default class Toolbar {
     if(permissions.sheets.pdf || permissions.sheets.global.pdf) {
       this.pdfButton.on("click", () => {
         let file = app.currentFile
-        window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
+        if (this.app.hasUnsavedChanges) {
+          // file must be save before sharing
+          app.fileSave(()=>{
+            window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
+          })
+        }
+        else {
+          window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
+        }
       })
     }
     else{
@@ -101,6 +120,21 @@ export default class Toolbar {
       html: true
     })
 
+  }
+
+  stackChanged(event) {
+    this.pdfButton.hide()
+    // check the permission if the current file is "user" scope
+    if(this.app.currentFile.scope==="user"){
+      if(this.permissions.sheets.pdf === true){
+        this.pdfButton.show()
+      }
+    }
+    else if(this.app.currentFile.scope==="global"){
+      if(this.permissions.sheets.global.pdf === true){
+        this.pdfButton.show()
+      }
+    }
   }
 
 }

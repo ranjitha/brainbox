@@ -31,6 +31,7 @@ class Application {
         Mousetrap.unpause()
       });
 
+    this.hasUnsavedChanges = false
     this.permissions = permissions
     this.document = new Document()
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
@@ -54,19 +55,19 @@ class Application {
     let global = this.getParam("global")
     let shared = this.getParam("shared")
     if (user) {
-      $("#leftTabStrip .editor").click()
       this.load(user, "user")
     }
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
     else if (global) {
-      $("#leftTabStrip .editor").click()
       this.load(global, "global")
     }
     else if (shared) {
-      $("#leftTabStrip .editor").click()
       this.load(shared, "shared")
+    }
+    else {
+      this.fileNew("NewDocument","user")
     }
 
     // listen on the history object to load files
@@ -100,12 +101,13 @@ class Application {
   }
 
 
-  fileSave() {
-    let callback = () => {
+  fileSave(callback) {
+    let internal_callback = () => {
       this.hasUnsavedChanges = false
       toast("Saved")
       $("#editorFileSave div").removeClass("highlight")
       this.filePane.refresh(conf, this.permissions.sheets, this.currentFile)
+      if(callback) callback()
     }
 
     // if the user didn't has the access to write "global" files, the scope of the file is changed
@@ -117,10 +119,10 @@ class Application {
 
     if (this.permissions.sheets.create && this.permissions.sheets.update) {
       // allow the user to enter/change the file name....
-      fileSave.show(this.currentFile, this.storage, this.document, callback)
+      fileSave.show(this.currentFile, this.storage, this.document, internal_callback)
     } else if (this.permissions.sheets.create) {
       // just save the file with a generated filename. It is a codepen-like modus
-      fileSave.save(this.currentFile, this.storage, this.document, callback)
+      fileSave.save(this.currentFile, this.storage, this.document, internal_callback)
     }
   }
 
@@ -137,9 +139,8 @@ class Application {
 
   fileNew(name, scope) {
     $("#leftTabStrip .editor").click()
-    this.document = new Document()
-    this.view.setPage(this.document.get(0))
     this.currentFile = { name, scope }
+    this.setDocument(new Document(), 0)
     let section = this.view.addMarkdown(0)
     this.view.onSelect(section)
     this.view.onEdit(section)
