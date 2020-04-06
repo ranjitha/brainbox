@@ -54,7 +54,7 @@
         {
           "id": "F2dvg1zmr",
           "type": "markdown",
-          "content": "# Aufgaben\nBei einer Lichtsteuerung soll das Licht in einem Zimmer nachts automatisch eingeschaltet werden,\nwenn ein Bewegungsmelder eine Bewegung anzeigt. Tagsüber soll das Licht nur eingeschaltet\nwerden, wenn der Lichtschalter im Zimmer eingeschaltet wird. Nachts kann man mit dem Schalter\ndas Licht nicht einschalten. \n\n 1. Wieviele Eingangsvariablen und wieviele Ausgangsvariablen hat dieses System?\n 1. Welche Variablen sind es\n 1. Geben Sie eine logische Gleichung für das System an\n \n"
+          "content": "## Aufgaben\nBei einer Lichtsteuerung soll das Licht in einem Zimmer nachts automatisch eingeschaltet werden,\nwenn ein Bewegungsmelder eine Bewegung anzeigt. Tagsüber soll das Licht nur eingeschaltet\nwerden, wenn der Lichtschalter im Zimmer eingeschaltet wird. Nachts kann man mit dem Schalter\ndas Licht nicht einschalten. \n\n 1. Wieviele Eingangsvariablen und wieviele Ausgangsvariablen hat dieses System?\n 1. Welche Variablen sind es\n 1. Geben Sie eine logische Gleichung für das System an\n \n"
         },
         {
           "id": "Objp6y26I",

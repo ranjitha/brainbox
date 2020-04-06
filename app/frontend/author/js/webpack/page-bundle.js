@@ -96,86 +96,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/frontend/_common/js/AuthorPage.js":
-/*!***********************************************!*\
-  !*** ./app/frontend/_common/js/AuthorPage.js ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/index.js")();
-
-md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
-
-var AuthorPage = function () {
-  function AuthorPage(containerId, file) {
-    _classCallCheck(this, AuthorPage);
-
-    this.file = file;
-    this.containerId = containerId;
-  }
-
-  _createClass(AuthorPage, [{
-    key: "render",
-    value: function render() {
-      var _this = this;
-
-      axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
-        $(_this.containerId).html("");
-        var pages = response.data.pages;
-        pages.forEach(function (page, index) {
-          var container = $("<div class='authorPage'></div>");
-          $(_this.containerId).append(container);
-          var sections = page.sections;
-          sections.forEach(function (section) {
-            switch (section.type) {
-              case "brain":
-                _this.renderBrain(container, section);
-                break;
-              case "markdown":
-                _this.renderMarkdown(container, section);
-                break;
-              default:
-                break;
-            }
-          });
-          if (index < pages.length - 1) container.append("<div style='page-break-before: always;'></div>");
-        });
-      });
-    }
-  }, {
-    key: "renderMarkdown",
-    value: function renderMarkdown(container, section) {
-      var markdown = md.render(section.content);
-      container.append("<div class=\"markdownRendering\">" + markdown + "</div>");
-    }
-  }, {
-    key: "renderBrain",
-    value: function renderBrain(container, section) {
-      container.append("<div class=\"imageRendering\"><img src=\"" + section.content.image + "\"></div>");
-    }
-  }]);
-
-  return AuthorPage;
-}();
-
-exports.default = AuthorPage;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "./app/frontend/author/js/index-page.js":
 /*!**********************************************!*\
   !*** ./app/frontend/author/js/index-page.js ***!
@@ -190,11 +110,10 @@ __webpack_require__(/*! font-awesome/css/font-awesome.css */ "./node_modules/fon
 
 __webpack_require__(/*! ../less/index-page.less */ "./app/frontend/author/less/index-page.less");
 
-var _AuthorPage = __webpack_require__(/*! ../../_common/js/AuthorPage */ "./app/frontend/_common/js/AuthorPage.js");
+var axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/index.js")();
 
-var _AuthorPage2 = _interopRequireDefault(_AuthorPage);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
 function getParam(name) {
   name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -216,11 +135,45 @@ function getParam(name) {
   return results[1];
 }
 
-$(window).load(function () {
-  var globalSheet = getParam("global");
-  var authorPage = new _AuthorPage2.default("#authorContent", globalSheet);
+function renderMarkdown(container, section) {
+  var markdown = md.render(section.content);
+  container.append("<div class=\"markdownRendering\">" + markdown + "</div>");
+}
 
-  authorPage.render();
+function renderBrain(container, section) {
+  container.append("<div class=\"imageRendering\"><img src=\"" + section.content.image + "\"></div>");
+}
+
+$(window).load(function () {
+  var containerId = "#authorContent";
+  var token = getParam("token");
+  var globalSheet = getParam("global");
+  var userSheet = getParam("user");
+  var url = userSheet ? "../backend/user/sheet/get?filePath=" + userSheet + "&token=" + token : "../backend/global/sheet/get?filePath=" + globalSheet + "&token=" + token;
+
+  axios.get(url).then(function (response) {
+    $(containerId).html("");
+    var pages = response.data.pages;
+    pages.forEach(function (page, index) {
+      var container = $("<div class='authorPage'></div>");
+      $(containerId).append(container);
+      var sections = page.sections;
+      sections.forEach(function (section) {
+        switch (section.type) {
+          case "brain":
+            renderBrain(container, section);
+            break;
+          case "markdown":
+            renderMarkdown(container, section);
+            break;
+          default:
+            break;
+        }
+      });
+      if (index < pages.length - 1) container.append("<div style='page-break-before:always;'></div>");
+    });
+  });
+
   setTimeout(function () {
     mathMLdone = true;
   }, 2000);

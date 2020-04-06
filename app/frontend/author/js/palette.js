@@ -12,7 +12,7 @@ export default class Palette {
     commandStack.on("change", this)
 
     $(document)
-      .on("click", "#addDocumentPage", () => {
+      .on("click", "#documentPageAdd", () => {
         this.app.view.addPage()
       })
       .on("click", ".pageElement .page_edit_name", (event) => {
@@ -45,7 +45,7 @@ export default class Palette {
   render() {
     // remove all classes from the other editors
     $("#paletteElementsScroll, #paletteFilter").addClass("pages")
-    $("#paletteFilter").html("<button id='addDocumentPage'>+ Page</button>")
+    $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>")
     this.stackChanged(null)
   }
 

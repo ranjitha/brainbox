@@ -159,11 +159,12 @@ var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/inde
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
 var AuthorPage = function () {
-  function AuthorPage(containerId, file) {
+  function AuthorPage(containerId, file, token) {
     _classCallCheck(this, AuthorPage);
 
     this.file = file;
     this.containerId = containerId;
+    this.token = token;
   }
 
   _createClass(AuthorPage, [{
@@ -171,7 +172,11 @@ var AuthorPage = function () {
     value: function render() {
       var _this = this;
 
-      axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
+      var additionalParam = "";
+      if (this.token) {
+        additionalParam = "&token=" + this.token;
+      }
+      axios.get("../backend/global/sheet/get?filePath=" + this.file + additionalParam).then(function (response) {
         $(_this.containerId).html("");
         var pages = response.data.pages;
         pages.forEach(function (page, index) {

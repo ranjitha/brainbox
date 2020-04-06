@@ -5,13 +5,18 @@ md.use(require("markdown-it-asciimath"))
 
 export default class AuthorPage {
 
-  constructor(containerId, file) {
+  constructor(containerId, file, token) {
     this.file = file
     this.containerId = containerId
+    this.token = token
   }
 
   render( ) {
-    axios.get(`../backend/global/sheet/get?filePath=${this.file}`)
+    let additionalParam = ""
+    if(this.token){
+      additionalParam = "&token="+this.token
+    }
+    axios.get(`../backend/global/sheet/get?filePath=${this.file}${additionalParam}`)
       .then((response => {
         $(this.containerId).html("")
         let pages = response.data.pages

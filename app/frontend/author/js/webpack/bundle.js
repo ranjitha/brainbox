@@ -120,11 +120,12 @@ var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/inde
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
 
 var AuthorPage = function () {
-  function AuthorPage(containerId, file) {
+  function AuthorPage(containerId, file, token) {
     _classCallCheck(this, AuthorPage);
 
     this.file = file;
     this.containerId = containerId;
+    this.token = token;
   }
 
   _createClass(AuthorPage, [{
@@ -132,7 +133,11 @@ var AuthorPage = function () {
     value: function render() {
       var _this = this;
 
-      axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
+      var additionalParam = "";
+      if (this.token) {
+        additionalParam = "&token=" + this.token;
+      }
+      axios.get("../backend/global/sheet/get?filePath=" + this.file + additionalParam).then(function (response) {
         $(_this.containerId).html("");
         var pages = response.data.pages;
         pages.forEach(function (page, index) {
@@ -5315,7 +5320,7 @@ var Palette = function () {
     this.view = view;
     _CommandStack2.default.on("change", this);
 
-    $(document).on("click", "#addDocumentPage", function () {
+    $(document).on("click", "#documentPageAdd", function () {
       _this.app.view.addPage();
     }).on("click", ".pageElement .page_edit_name", function (event) {
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
@@ -5346,7 +5351,7 @@ var Palette = function () {
     value: function render() {
       // remove all classes from the other editors
       $("#paletteElementsScroll, #paletteFilter").addClass("pages");
-      $("#paletteFilter").html("<button id='addDocumentPage'>+ Page</button>");
+      $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>");
       this.stackChanged(null);
     }
 
@@ -5466,10 +5471,11 @@ var Toolbar = function Toolbar(app, view, elementId, permissions) {
     this.shareButton.remove();
   }
 
-  this.pdfButton = $("#editorFilePdf");
+  this.pdfButton = $("#editorFileToPDF");
   if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
     this.pdfButton.on("click", function () {
-      window.open("", "__blank");
+      var file = app.currentFile;
+      window.open("../backend/" + file.scope + "/sheet/pdf?file=" + file.name, "__blank");
     });
   } else {
     this.pdfButton.remove();

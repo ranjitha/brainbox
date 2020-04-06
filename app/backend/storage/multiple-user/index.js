@@ -14,6 +14,7 @@ const generic = require("../_base_")
 const update = require("../../update")
 const {thumbnail, generateShapeIndex} = require("../../converter/thumbnail")
 const db = require('./db')
+let {token_set, token_get} = require("./token-user")
 
 let permissionsAnonym = require("./permissions-anonym")
 let permissionsUser   = require("./permissions-user")
@@ -70,6 +71,7 @@ function userFolder(baseFolder, req){
   return baseFolder+ req.user.username+path.sep
 }
 
+
 function ensureLoggedIn(options) {
   if (typeof options == 'string') {
     options = { redirectTo: options }
@@ -78,6 +80,16 @@ function ensureLoggedIn(options) {
   let url = options.redirectTo || '/login';
   let setReturnTo = (options.setReturnTo === undefined) ? true : options.setReturnTo;
   return function(req, res, next) {
+    // token is required for server side rendering with
+    // puppeteer
+    let token = req.query.token
+    if(token){
+      let user = token_get(token)
+      if(!req.user){
+        req.user = user
+      }
+    }
+
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       if (setReturnTo && req.session) {
         req.session.returnTo = req.originalUrl || req.url;
@@ -140,7 +152,6 @@ module.exports = {
     app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
     app.use('/login',  (req, res, next)=>{
       req.session.returnTo = req.query.returnTo
-      console.log()
       next()
     },express.static(__dirname + '/../../../frontend/login'))
 
@@ -250,9 +261,10 @@ module.exports = {
     app.post('/backend/user/sheet/rename',ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req),     req.body.from, req.body.to, res))
     app.post('/backend/user/sheet/save',  ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req),     req.body.filePath, req.body.content, res))
     app.post('/backend/user/sheet/folder',ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(sheetsHomeDir, req),   req.body.filePath, res))
-    app.get('/backend/user/sheet/pdf',   ensureLoggedIn(), (req, res) => {
+    app.get('/backend/user/sheet/pdf',    ensureLoggedIn(), (req, res) => {
         let {render} = require("../../converter/pdf")
-        render("http://localhost:7400/author/page.html?global="+req.query.global).then(pdf => {
+        let id = token_set( req.user)
+        render(`http://localhost:${args.port}/author/page.html?user=${req.query.file}&token=${id}`).then(pdf => {
           res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
           res.send(pdf)
         })
@@ -294,6 +306,13 @@ module.exports = {
     app.post('/backend/global/sheet/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
     app.post('/backend/global/sheet/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))
     app.post('/backend/global/sheet/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(sheetsAppDir, req.body.filePath, res))
+    app.get('/backend/global/sheet/pdf',     (req, res) => {
+      let {render} = require("../../converter/pdf")
+      render(`http://localhost:${args.port}/author/page.html?global=${req.query.file}`).then(pdf => {
+        res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
+        res.send(pdf)
+      })
+    })
 
     // =================================================================
     // Handle system shape files

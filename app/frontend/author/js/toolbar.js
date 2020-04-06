@@ -39,10 +39,11 @@ export default class Toolbar {
       this.shareButton.remove()
     }
 
-    this.pdfButton = $("#editorFilePdf")
+    this.pdfButton = $("#editorFileToPDF")
     if(permissions.sheets.pdf || permissions.sheets.global.pdf) {
       this.pdfButton.on("click", () => {
-        window.open("", "__blank")
+        let file = app.currentFile
+        window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
       })
     }
     else{
