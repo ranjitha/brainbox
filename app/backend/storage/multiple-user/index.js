@@ -250,6 +250,13 @@ module.exports = {
     app.post('/backend/user/sheet/rename',ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req),     req.body.from, req.body.to, res))
     app.post('/backend/user/sheet/save',  ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req),     req.body.filePath, req.body.content, res))
     app.post('/backend/user/sheet/folder',ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(sheetsHomeDir, req),   req.body.filePath, res))
+    app.get('/backend/user/sheet/pdf',   ensureLoggedIn(), (req, res) => {
+        let {render} = require("../../converter/pdf")
+        render("http://localhost:7400/author/page.html?global="+req.query.global).then(pdf => {
+          res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
+          res.send(pdf)
+        })
+    })
 
 
     // =================================================================

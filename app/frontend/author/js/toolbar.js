@@ -39,6 +39,16 @@ export default class Toolbar {
       this.shareButton.remove()
     }
 
+    this.pdfButton = $("#editorFilePdf")
+    if(permissions.sheets.pdf || permissions.sheets.global.pdf) {
+      this.pdfButton.on("click", () => {
+        window.open("", "__blank")
+      })
+    }
+    else{
+      this.pdfButton.remove()
+    }
+
 
     /////////////////////////////////////////////
     // Editor Operations

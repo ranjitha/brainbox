@@ -171,40 +171,39 @@ var AuthorPage = function () {
     value: function render() {
       var _this = this;
 
-      var container = $("<div class='authorPage'></div>");
-      $(this.containerId).html(container);
       axios.get("../backend/global/sheet/get?filePath=" + this.file).then(function (response) {
-        var document = [];
-        if (response.data.json) {
-          document = response.data.json;
-        } else {
-          document = response.data.pages[0].sections;
-        }
-        document.forEach(function (section) {
-          switch (section.type) {
-            case "brain":
-              _this.renderBrain(container, section);
-              break;
-            case "markdown":
-              _this.renderMarkdown(container, section);
-              break;
-            default:
-              break;
-          }
+        $(_this.containerId).html("");
+        var pages = response.data.pages;
+        pages.forEach(function (page, index) {
+          var container = $("<div class='authorPage'></div>");
+          $(_this.containerId).append(container);
+          var sections = page.sections;
+          sections.forEach(function (section) {
+            switch (section.type) {
+              case "brain":
+                _this.renderBrain(container, section);
+                break;
+              case "markdown":
+                _this.renderMarkdown(container, section);
+                break;
+              default:
+                break;
+            }
+          });
+          if (index < pages.length - 1) container.append("<div style='page-break-before: always;'></div>");
         });
-        $(_this.containerId).append(" \n            <footer>\n            Coded with \u2665 and the powerful <a href=\"http://www.draw2d.org\" target=\"_blank\">Draw2D</a> library by Andreas Herz\n            </footer>\n        ");
       });
     }
   }, {
     key: "renderMarkdown",
     value: function renderMarkdown(container, section) {
       var markdown = md.render(section.content);
-      container.append(markdown);
+      container.append("<div class=\"markdownRendering\">" + markdown + "</div>");
     }
   }, {
     key: "renderBrain",
     value: function renderBrain(container, section) {
-      container.append("<img src=\"" + section.content.image + "\">");
+      container.append("<div class=\"imageRendering\"><img src=\"" + section.content.image + "\"></div>");
     }
   }]);
 
