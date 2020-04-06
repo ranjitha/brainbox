@@ -12,7 +12,7 @@ export default class Editor {
 
   inject(section) {
     this.section = section
-    let menu = $(".tinyFlyoverMenu")
+    let menu = $(".activeSection .tinyFlyoverMenu")
     $(".workspace").append(`
           <div class="content editorContainerSelector" " id="draw2dCanvasWrapper">
                <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
@@ -74,6 +74,7 @@ export default class Editor {
   _resetDOM(){
     this.view.simulationStop()
     this.splitter.destroy()
+    $("#paletteElements").shuffle("destroy")
     $("#paletteElements").html("")
     $("#paletteFilter").html("")
   }

@@ -45,7 +45,7 @@ export default class View {
       .on("click", ".content", () => {
         this.onUnselect()
       })
-      .on("click", ".sections .section .sectionContent", event => {
+      .on("click", ".sections .section", event => {
         let section = this.page.get($(event.target).closest(".section").data("id"))
         this.onSelect(section)
         return false
@@ -72,7 +72,7 @@ export default class View {
         }
         return false
       })
-      .on("dblclick", ".sections .section .sectionContent", event => {
+      .on("dblclick", ".sections .section", event => {
         let section = this.page.get($(event.target).closest(".section").data("id"))
         this.onSelect(section)
         this.onEdit(section)
@@ -262,7 +262,7 @@ export default class View {
     if(this.activeSection === null){
       return
     }
-    $(".tinyFlyoverMenu").remove()
+    $(".activeSection .tinyFlyoverMenu").remove()
     this.activeSection.removeClass("activeSection")
     this.activeSection = null
   }
