@@ -239,6 +239,7 @@ module.exports = {
     app.use('/circuit',  express.static(__dirname + '/../../../frontend/circuit'));
     app.use('/author',   express.static(__dirname + '/../../../frontend/author'));
     app.use('/user',     ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
+    app.use('/home', express.static(__dirname + '/../../../frontend/home'));
 
 
     // =================================================================

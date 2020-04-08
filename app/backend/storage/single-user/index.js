@@ -41,6 +41,7 @@ module.exports = {
     app.use('/designer', express.static(__dirname + '/../../../frontend/designer'));
     app.use('/circuit', express.static(__dirname + '/../../../frontend/circuit'));
     app.use('/author', express.static(__dirname + '/../../../frontend/author'));
+    app.use('/home', express.static(__dirname + '/../../../frontend/home'));
 
     app.get('/permissions', (req, res) => res.send(defaultPermissions))
 
