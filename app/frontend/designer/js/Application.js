@@ -232,7 +232,7 @@ class Application {
         this.view.clear()
         this.view.centerDocument()
         let reader = new draw2d.io.json.Reader()
-        reader.unmarshal(this.view, content.draw2d)
+        reader.unmarshal(this.view, content.draw2d || content)
         this.getConfiguration()
         this.view.getCommandStack().markSaveLocation()
         this.view.centerDocument()

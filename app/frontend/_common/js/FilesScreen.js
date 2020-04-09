@@ -25,6 +25,7 @@ export default class Files {
         <ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
         {{#files}}
           <li class="list-group-item"  
+                  data-scope="{{scope}}"  
                   data-type="{{type}}"  
                   data-delete="{{delete}}" 
                   data-update="{{update}}" 
@@ -105,12 +106,13 @@ export default class Files {
     this.initPane("user",   "#userFiles",   conf.backend.user,   permissions       , "")
     this.initPane("global", "#globalFiles", conf.backend.global, permissions.global, "")
 
-    socket.on("file:generated", msg => {
+    socket.off("file:generated").on("file:generated", msg => {
       let preview = $(".list-group-item[data-name='" + msg.filePath + "'] img")
       if (preview.length === 0) {
         this.render(conf, permissions)
       } else {
-        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.user.image(msg.filePath) + "&timestamp=" + new Date().getTime()})
+        let scope =  $(".list-group-item[data-name='" + msg.filePath + "']").data("scope")
+        $(".list-group-item[data-name='" + msg.filePath + "'] img").attr({src: conf.backend[scope].image(msg.filePath) + "&timestamp=" + new Date().getTime()})
       }
     })
 
@@ -201,6 +203,7 @@ export default class Files {
             ...file,
             delete: permissions.delete,
             update: permissions.update,
+            scope: scope,
             title: file.name.replace(_this.conf.fileSuffix,""),
             image: backendConf.image(file.filePath)
           }
@@ -214,6 +217,7 @@ export default class Files {
             dir: true,
             delete: false,
             update: false,
+            scope: scope,
             back:"_back",
             title: ".."
           })

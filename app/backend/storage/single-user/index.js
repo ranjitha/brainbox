@@ -134,17 +134,17 @@ module.exports = {
 
       // create the js/png/md async to avoid a blocked UI
       //
-      thumbnail(baseDir, subDir)
-
-      io.sockets.emit("file:generated", {
-        filePath: subDir,
-        imagePath: subDir.replace(".shape", ".png"),
-        jsPath: subDir.replace(".shape", ".js")
+      thumbnail(baseDir, subDir).then(()=>{
+        io.sockets.emit("file:generated", {
+          filePath: subDir,
+          imagePath: subDir.replace(".shape", ".png"),
+          jsPath: subDir.replace(".shape", ".js")
+        })
       })
 
       // commit the shape to the connected github backend
       // (if configured)
-      update.commitShape(baseDir+subDir, subDir, reason)
+      update.commitShape(path.join(baseDir,subDir), subDir, reason)
     })
   },
 

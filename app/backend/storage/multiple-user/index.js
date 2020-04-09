@@ -381,7 +381,7 @@ module.exports = {
 
       // commit the shape to the connected github backend
       // (if configured)
-      update.commitShape(baseDir+subDir, subDir, reason)
+      update.commitShape(path.join(baseDir,subDir), subDir, reason)
     })
   },
 

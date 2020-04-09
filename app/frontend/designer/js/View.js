@@ -174,7 +174,7 @@ export default draw2d.Canvas.extend({
       if (f instanceof shape_designer.figure.ExtPort) {
         return
       }
-      let b = f.getBoundingBox()
+      let b = f.getOuterBoundingBox()
       xCoords.push(b.x, b.x + b.w)
       yCoords.push(b.y, b.y + b.h)
     })

@@ -1,6 +1,8 @@
 const axios = require('axios')
 const fs = require('fs-extra')
 const unzip = require('unzip')
+const path = require('path')
+
 const { Octokit } = require("@octokit/rest")
 
 let octo = null
@@ -59,13 +61,16 @@ module.exports = {
       return
     }
 
+    commitMessage = commitMessage || "-empty-"
+
     let formattedText =  Buffer.from(fs.readFileSync(localPath, 'utf8'), 'utf8').toString('base64')
     let repoData ={
       owner:GITHUB_ORG,
       repo:GITHUB_REPO,
-      path: 'shapes/'+githubPath
+      path: path.join('shapes',githubPath)
     }
 
+    console.log(repoData)
     octo.repos.getContents(repoData)
       .then(function (res){
         octo.repos.createOrUpdateFile(Object.assign(repoData, {
