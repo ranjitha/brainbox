@@ -45,6 +45,22 @@
       color:#C71D3D;
     }
 
+    .launch_button {
+      margin-top:20px;
+      border-radius: 5px;
+      display: inline-block;
+      padding: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: calc(10px + 1vw);
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+      transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+      text-decoration: none;
+      background-color:#C71D3D;
+      color:white;
+      font-weight: 300;
+    }
 
     .hero {
       position: relative;
@@ -87,21 +103,6 @@
     }
 
     .hero .launch_button {
-      margin-top:20px;
-      border-radius: 10px;
-      border: 1px solid lightgray;
-      display: inline-block;
-      padding: 5px;
-      padding-left: 10px;
-      padding-right: 10px;
-      font-size: calc(10px + 1vw);
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-      transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
-      text-decoration: none;
-      background-color:#C71D3D;
-      color:white;
-      font-weight: 300;
       position: relative;
       left:0;
     }
@@ -167,30 +168,44 @@
     .card {
       position: sticky;
       z-index: 1000;
-      width: 20%;
+      width: 25%;
       height: 50vh;
-      display: -webkit-box;
-      display: -webkit-flex;
-      display: -ms-flexbox;
-      display: flex;
-      padding-right: 20px;
-      padding-left: 20px;
-      -webkit-box-pack: center;
-      -webkit-justify-content: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      -webkit-box-align: center;
-      -webkit-align-items: center;
-      -ms-flex-align: center;
-      align-items: center;
       border-radius: 10px;
       background-color: #fff;
       box-shadow: 0 10px 50px 0 rgba(0, 0, 0, .25);
       top: 0;
     }
+    .card .media{
+      position: absolute;
+      top: 10px;
+      left:50%;
+      transform: translateX(-50%);
+    }
+
+    .card .content{
+      position: absolute;
+      top: 80px;
+      padding: 10px;
+    }
+    .card .content .header{
+      color:#C71D3D;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .card .launch_button{
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      border-radius: 4px;
+      font-size: 14px;
+      padding-top:0;
+      padding-bottom: 0;
+    }
 
     .card_left {
-      left: 10%;
+      left: 5%;
       transform: translateY(50%);
     }
 
@@ -206,27 +221,29 @@
 
     .text {
       position: absolute;
-      top: 90px;
-      width: 20%;
+      top: -40px;
       text-align: center;
+      color: white;
+      font-size: 24px;
+      font-weight: 100;
+      width: 100%;
     }
 
-    .red_bg .text {
-      left: 10%;
-    }
 
-    .pink_bg .text {
-      left: 40%;
-    }
-
-    .orange_bg .text {
-      left: 70%;
+    .section_header {
+      color: white;
+      font-size: calc(16px + 2vw);
+      text-align: center;
+      font-weight: 100;
+      padding-top: 30px;
+      position: sticky;
+      top: 20px;
     }
 
     .intro{
       background-color: white;
       background-image: none;
-      text-align: center;
+      text-align: left;
       position: relative;
       z-index: 20;
       height: 100vh;
@@ -265,21 +282,6 @@
     }
 
     .intro .launch_button {
-      margin-top:20px;
-      border-radius: 10px;
-      border: 1px solid lightgray;
-      display: inline-block;
-      padding: 5px;
-      padding-left: 10px;
-      padding-right: 10px;
-      font-size: calc(10px + 1vw);
-      cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-      transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
-      text-decoration: none;
-      background-color:#C71D3D;
-      color:white;
-      font-weight: 300;
       position: absolute;
       right:50px;
       bottom:100px;
@@ -288,7 +290,7 @@
       box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
     }
 
-    .student {
+    .maker {
       bottom: 10px;
       position: absolute;
       left: 40px;
@@ -296,7 +298,7 @@
       font-weight: 400;
       font-size: 16px;
     }
-    .student img{
+    .maker img{
       height:120px;
     }
 
@@ -306,15 +308,29 @@
       right: 40px;
       text-align: center;
       font-weight: 400;
-      font-size: 16px;;
+      font-size: 16px;
     }
 
     .teacher img{
       height:120px;
     }
 
+
+    .student{
+      bottom: 10px;
+      position: absolute;
+      left: 50%;
+      text-align: center;
+      font-weight: 400;
+      font-size: 16px;
+      transform: translateX(-50%);
+    }
+
+    .student img{
+      height:120px;
+    }
+
     .arrow{
-      left:50%;
       position: absolute;
       bottom: 20px;
       animation: mover 2s infinite  alternate;
@@ -333,6 +349,14 @@
       -webkit-transform: rotate(45deg) translate(3px, -2px);
       transform: rotate(45deg) translate(3px, -2px);
     }
+
+    .arrow.left{
+      left:30%;
+    }
+    .arrow.right{
+      left:70%;
+    }
+
     @keyframes mover {
       0% { transform: translateY(0); }
       100% { transform: translateY(-10px); }
@@ -362,10 +386,21 @@
     <img src="./images/teacher.svg">
   </div>
 
-  <div class="arrow">
+  <div class="maker" >
+    <div>for maker</div>
+    <img src="./images/maker.svg">
+  </div>
+
+  <div class="arrow left">
     <i class="left"></i>
     <i class="right"></i>
   </div>
+
+  <div class="arrow right">
+    <i class="left"></i>
+    <i class="right"></i>
+  </div>
+
 
 </div>
 
@@ -374,36 +409,65 @@
   <div class="header">
     Building your very first circuit it's easy as 1..2..3
     <div>Design circuits quickly and easily with a modern and intuitive user interface with drag-and-drop, copy/paste, zoom and more.</div>
+    <div>One function that makes the Internet of Things the Internet of Things is remote control of devices, being able to trigger action from a remote location. With BrainBox you can edit and run your digital circuit simulation designs online on RPi, PC, Mac, thin clients, tablets within your browser and trigger any physical device.</div>
   </div>
-  <a class="launch_button" href="../circuit/?global=intro.brain" target="_blank">Open in Simulator</a>
+  <a class="launch_button" href="../circuit/?global=guides/intro.brain" target="_blank">Open in Simulator</a>
 </div>
 
 
 <div class="red_bg">
+  <div class="section_header">Visual connect, control, and play with sensors and tools.</div>
 
-  <div class="text">
-    Text Text Text
-  </div>
   <div class="card card_left">
-    left
-  </div>
-  <div class="pink_bg">
-    <div class="text">
-      Text Text Text
+    <div class="text">Simulator</div>
+    <img class="media" src="./../_common/images/app_simulator.svg">
+    <div class="content">
+      <div class="header">Draw | Simulate | Share </div>
+      <div>
+        With BrainBox you can edit and run your simulation designs on RPi,
+        PC or Mac and trigger any physical device
+      </div>
     </div>
+    <a href="../circuit" target="circuit" class="launch_button">Launch</a>
+  </div>
+
+  <div class="pink_bg">
+    <div class="section_header">Designed to be very easy to use in classes</div>
     <div class="card card_center">
-      center
+      <div class="text">Author</div>
+      <img class="media" src="./../_common/images/app_lessons.svg">
+      <div class="content">
+        <div class="header">Write | Assign | Solve </div>
+        <div>
+          BrainBox has been designed to be very easy to use in classes.
+          The platform has features to assist teachers in class and assignments.
+        </div>
+        <div>
+          It is easy to write learning materials or lessons in the build in editor.
+        </div>
+      </div>
+      <a href="../author" target="author" class="launch_button">Launch</a>
     </div>
 
     <div class="orange_bg">
-      <div class="text">
-        Text Text Text
-      </div>
+      <div class="section_header">Build your own Shapes</div>
       <div class="card card_right">
-        right
+        <div class="text"> Designer</div>
+        <img class="media" src="./../_common/images/app_designer.svg">
+        <div class="content">
+          <div class="header">Design | Code | Use </div>
+          <div>
+            BrainBox has been designed to be very easy to use in classes.
+            The platform has features to assist teachers in class and assignments.
+            <br>
+            It is easy to write learning materials or lessons in the build in editor.
+          </div>
+        </div>
+        <a href="../designer" target="designer" class="launch_button">Launch</a>
       </div>
 
       <div class="blue_bg">
+        <div class="section_header">Welcome in the Universe of BrainBox</div>
       </div>
     </div>
 
@@ -418,19 +482,16 @@
   // simple text fade out for the card headers
   //
   function get() {
-    var el = $('.red_bg .text');
+    var el = $('.section_header');
     el.each((index, text) => {
       text = $(text)
       var offset = text.offset().top - $(window).scrollTop();
-      if (offset < 0) {
+      if (offset > 200) {
         text.css("opacity", 0)
-        text.css("transform", "scale(1)")
-      } else if (offset < 50) {
-        text.css("opacity", (offset) / 200)
-        text.css("transform", "scale(" + (1 + (1 - (offset * 2) / 100)) + ")")
+      } else if (offset > 100) {
+        text.css("opacity", (100-(offset-100)) / 100)
       } else {
-        text.css("opacity", 1)
-        text.css("transform", "scale(1)")
+        text.css("opacity",  1)
       }
     })
     return true
