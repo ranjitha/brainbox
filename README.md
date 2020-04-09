@@ -8,8 +8,11 @@ Now you can  edit and run your digital circuit simulation designs online on PCs,
 phones, smart TVs and e-book readers without any installation. You can use **BrainBox** in the office, 
 classroom or at home and connect even your RaspberryPi to drive real physical devices.
 
+Test it in http://www.brainbox-demo.de
+
 (*Extended Demo project for the [draw2d.js](http://www.draw2d.org) library which shows how to connect the browser with 
 a node.js server on raspberry Pi or just your local computer.*)
+
 
 ![image](resources/animation.gif)
 
@@ -48,18 +51,6 @@ server (to store and load the circuit files) on every computer which can run a s
 You have **full access to the `GPIO`** pins on you RaspberryPi with the browser based digital circuit simulator. If 
 node.js already running on your raspi you need just to install the simulator 
 like on your desktop
-
-
-
-### The simulation circuit
-![image](resources/readme_gpio_dts.png?raw=true)
-
-### connect a real LED to your GPIO pin 3
-You find a lot of documentation how to connect a simple LED to your raspi. A good source is always the web page of 
-the original [raspberry pi organisation](https://www.raspberrypi.org/documentation/usage/gpio/)
-
-Now you can start the simulation in your browser and the LED connecte to the GPIO(3) lights up
-if you press the button in your simulator.
 
 
 
