@@ -278,6 +278,32 @@
     "image": "circuit/hardware/raspi/RaspiOUTPUT.png"
   },
   {
+    "name": "circuit_pulse_10hz",
+    "tags": [
+      "circuit",
+      "pulse",
+      "10hz"
+    ],
+    "version": "local-version",
+    "basename": "10hz.js",
+    "basedir": "circuit/pulse",
+    "filePath": "circuit/pulse/10hz.shape",
+    "image": "circuit/pulse/10hz.png"
+  },
+  {
+    "name": "circuit_pulse_1hz",
+    "tags": [
+      "circuit",
+      "pulse",
+      "1hz"
+    ],
+    "version": "local-version",
+    "basename": "1hz.js",
+    "basedir": "circuit/pulse",
+    "filePath": "circuit/pulse/1hz.shape",
+    "image": "circuit/pulse/1hz.png"
+  },
+  {
     "name": "circuit_pulse_50hz",
     "tags": [
       "circuit",

@@ -81,6 +81,7 @@
     "less": "3.7.1",
     "level": "^6.0.1",
     "leveldown": "^5.5.1",
+    "levelgraph": "^2.1.1",
     "levelup": "^4.3.2",
     "lodash": "^4.17.15",
     "lodash.assign": "^4.2.0",

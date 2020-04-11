@@ -4,9 +4,9 @@
 // created with http://www.draw2d.org
 //
 //
-var circuit_pulse_50hz = CircuitFigure.extend({
+var circuit_pulse_1hz = CircuitFigure.extend({
 
-   NAME: "circuit_pulse_50hz",
+   NAME: "circuit_pulse_1hz",
    VERSION: "local-version",
 
    init:function(attr, setter, getter)
@@ -15,11 +15,11 @@ var circuit_pulse_50hz = CircuitFigure.extend({
 
      this._super( $.extend({stroke:0, bgColor:null, width:31.6640625,height:48.60950000000048},attr), setter, getter);
      var port;
-     // circle
+     // outputPort
      port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 103.15815445349125, y: 69.87543587158933 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
-     port.setName("circle");
+     port.setName("outputPort");
      port.setMaxFanOut(20);
    },
 
@@ -40,14 +40,14 @@ var circuit_pulse_50hz = CircuitFigure.extend({
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
-       // circle
+       // Rectangle
        shape = this.canvas.paper.path('M1.6640625 18.60950000000048L31.6640625 18.60950000000048L31.6640625 48.60950000000048L1.6640625 48.60950000000048Z');
        shape.attr({"stroke":"rgba(48,48,48,1)","stroke-width":1,"fill":"rgba(255,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","circle");
+       shape.data("name","Rectangle");
        
        // Label
-       shape = this.canvas.paper.text(0,0,'50Hz');
-       shape.attr({"x":4,"y":10.578125,"text-anchor":"start","text":"50Hz","font-family":"\"Arial\"","font-size":10,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape = this.canvas.paper.text(0,0,'1Hz');
+       shape.attr({"x":4,"y":10.578125,"text-anchor":"start","text":"1Hz","font-family":"\"Arial\"","font-size":10,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
        // Line
@@ -68,7 +68,7 @@ var circuit_pulse_50hz = CircuitFigure.extend({
  *
  *
  */
-circuit_pulse_50hz = circuit_pulse_50hz.extend({
+circuit_pulse_1hz = circuit_pulse_1hz.extend({
 
     init: function(attr, setter, getter){
         this._super(attr, setter, getter);
@@ -81,8 +81,10 @@ circuit_pulse_50hz = circuit_pulse_50hz.extend({
     
     calculate:function()
     {
-      // 2 ticks => 50Hz    
-       this.currentTimer = (this.currentTimer+1)%2; 
+       // 2   ticks => 50Hz   
+       // 10  ticks => 10Hz 
+       // 100 ticks => 1Hz
+       this.currentTimer = (this.currentTimer+1)%100; 
        if(this.currentTimer===0){
            this.value = !this.value;
            this.getOutputPort(0).setValue(this.value);
