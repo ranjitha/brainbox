@@ -8,6 +8,7 @@
     ],
     "version": "local-version",
     "basename": "FullAdder.js",
+    "displayName": "FullAdder",
     "basedir": "circuit/alu",
     "filePath": "circuit/alu/FullAdder.shape",
     "image": "circuit/alu/FullAdder.png"
@@ -21,6 +22,7 @@
     ],
     "version": "local-version",
     "basename": "FullAdder4Bit.js",
+    "displayName": "FullAdder4Bit",
     "basedir": "circuit/alu",
     "filePath": "circuit/alu/FullAdder4Bit.shape",
     "image": "circuit/alu/FullAdder4Bit.png"
@@ -34,6 +36,7 @@
     ],
     "version": "local-version",
     "basename": "BCDCounter.js",
+    "displayName": "BCDCounter",
     "basedir": "circuit/counter",
     "filePath": "circuit/counter/BCDCounter.shape",
     "image": "circuit/counter/BCDCounter.png"
@@ -47,6 +50,7 @@
     ],
     "version": "local-version",
     "basename": "BCDto7Seg.js",
+    "displayName": "BCDto7Seg",
     "basedir": "circuit/decoder",
     "filePath": "circuit/decoder/BCDto7Seg.shape",
     "image": "circuit/decoder/BCDto7Seg.png"
@@ -60,6 +64,7 @@
     ],
     "version": "local-version",
     "basename": "7Segment.js",
+    "displayName": "7Segment",
     "basedir": "circuit/display",
     "filePath": "circuit/display/7Segment.shape",
     "image": "circuit/display/7Segment.png"
@@ -73,6 +78,7 @@
     ],
     "version": "local-version",
     "basename": "Led.js",
+    "displayName": "Led",
     "basedir": "circuit/display",
     "filePath": "circuit/display/Led.shape",
     "image": "circuit/display/Led.png"
@@ -86,6 +92,7 @@
     ],
     "version": "local-version",
     "basename": "DFlipFlop.js",
+    "displayName": "DFlipFlop",
     "basedir": "circuit/flipflop",
     "filePath": "circuit/flipflop/DFlipFlop.shape",
     "image": "circuit/flipflop/DFlipFlop.png"
@@ -99,6 +106,7 @@
     ],
     "version": "local-version",
     "basename": "JKFlipFlop.js",
+    "displayName": "JKFlipFlop",
     "basedir": "circuit/flipflop",
     "filePath": "circuit/flipflop/JKFlipFlop.shape",
     "image": "circuit/flipflop/JKFlipFlop.png"
@@ -112,6 +120,7 @@
     ],
     "version": "local-version",
     "basename": "JKRFlipFlop.js",
+    "displayName": "JKRFlipFlop",
     "basedir": "circuit/flipflop",
     "filePath": "circuit/flipflop/JKRFlipFlop.shape",
     "image": "circuit/flipflop/JKRFlipFlop.png"
@@ -125,6 +134,7 @@
     ],
     "version": "local-version",
     "basename": "SRFlipFlop.js",
+    "displayName": "SRFlipFlop",
     "basedir": "circuit/flipflop",
     "filePath": "circuit/flipflop/SRFlipFlop.shape",
     "image": "circuit/flipflop/SRFlipFlop.png"
@@ -138,6 +148,7 @@
     ],
     "version": "local-version",
     "basename": "TFlipFlop.js",
+    "displayName": "TFlipFlop",
     "basedir": "circuit/flipflop",
     "filePath": "circuit/flipflop/TFlipFlop.shape",
     "image": "circuit/flipflop/TFlipFlop.png"
@@ -151,6 +162,7 @@
     ],
     "version": "local-version",
     "basename": "AND.js",
+    "displayName": "AND",
     "basedir": "circuit/gate",
     "filePath": "circuit/gate/AND.shape",
     "image": "circuit/gate/AND.png"
@@ -164,6 +176,7 @@
     ],
     "version": "local-version",
     "basename": "NAND.js",
+    "displayName": "NAND",
     "basedir": "circuit/gate",
     "filePath": "circuit/gate/NAND.shape",
     "image": "circuit/gate/NAND.png"
@@ -177,6 +190,7 @@
     ],
     "version": "local-version",
     "basename": "NOR.js",
+    "displayName": "NOR",
     "basedir": "circuit/gate",
     "filePath": "circuit/gate/NOR.shape",
     "image": "circuit/gate/NOR.png"
@@ -190,6 +204,7 @@
     ],
     "version": "local-version",
     "basename": "NOT.js",
+    "displayName": "NOT",
     "basedir": "circuit/gate",
     "filePath": "circuit/gate/NOT.shape",
     "image": "circuit/gate/NOT.png"
@@ -203,6 +218,7 @@
     ],
     "version": "local-version",
     "basename": "OR.js",
+    "displayName": "OR",
     "basedir": "circuit/gate",
     "filePath": "circuit/gate/OR.shape",
     "image": "circuit/gate/OR.png"
@@ -217,6 +233,7 @@
     ],
     "version": "local-version",
     "basename": "Arduino.js",
+    "displayName": "Arduino",
     "basedir": "circuit/hardware/arduino",
     "filePath": "circuit/hardware/arduino/Arduino.shape",
     "image": "circuit/hardware/arduino/Arduino.png"
@@ -231,6 +248,7 @@
     ],
     "version": "local-version",
     "basename": "Led.js",
+    "displayName": "Led",
     "basedir": "circuit/hardware/arduino",
     "filePath": "circuit/hardware/arduino/Led.shape",
     "image": "circuit/hardware/arduino/Led.png"
@@ -245,6 +263,7 @@
     ],
     "version": "local-version",
     "basename": "RaspiGPIO.js",
+    "displayName": "RaspiGPIO",
     "basedir": "circuit/hardware/raspi",
     "filePath": "circuit/hardware/raspi/RaspiGPIO.shape",
     "image": "circuit/hardware/raspi/RaspiGPIO.png"
@@ -259,6 +278,7 @@
     ],
     "version": "local-version",
     "basename": "RaspiINPUT.js",
+    "displayName": "RaspiINPUT",
     "basedir": "circuit/hardware/raspi",
     "filePath": "circuit/hardware/raspi/RaspiINPUT.shape",
     "image": "circuit/hardware/raspi/RaspiINPUT.png"
@@ -273,6 +293,7 @@
     ],
     "version": "local-version",
     "basename": "RaspiOUTPUT.js",
+    "displayName": "RaspiOUTPUT",
     "basedir": "circuit/hardware/raspi",
     "filePath": "circuit/hardware/raspi/RaspiOUTPUT.shape",
     "image": "circuit/hardware/raspi/RaspiOUTPUT.png"
@@ -286,6 +307,7 @@
     ],
     "version": "local-version",
     "basename": "10hz.js",
+    "displayName": "10hz",
     "basedir": "circuit/pulse",
     "filePath": "circuit/pulse/10hz.shape",
     "image": "circuit/pulse/10hz.png"
@@ -299,6 +321,7 @@
     ],
     "version": "local-version",
     "basename": "1hz.js",
+    "displayName": "1hz",
     "basedir": "circuit/pulse",
     "filePath": "circuit/pulse/1hz.shape",
     "image": "circuit/pulse/1hz.png"
@@ -312,6 +335,7 @@
     ],
     "version": "local-version",
     "basename": "50hz.js",
+    "displayName": "50hz",
     "basedir": "circuit/pulse",
     "filePath": "circuit/pulse/50hz.shape",
     "image": "circuit/pulse/50hz.png"
@@ -325,6 +349,7 @@
     ],
     "version": "local-version",
     "basename": "HighLow.js",
+    "displayName": "HighLow",
     "basedir": "circuit/switch",
     "filePath": "circuit/switch/HighLow.shape",
     "image": "circuit/switch/HighLow.png"
@@ -338,6 +363,7 @@
     ],
     "version": "local-version",
     "basename": "HighLowArray.js",
+    "displayName": "HighLowArray",
     "basedir": "circuit/switch",
     "filePath": "circuit/switch/HighLowArray.shape",
     "image": "circuit/switch/HighLowArray.png"
@@ -351,6 +377,7 @@
     ],
     "version": "local-version",
     "basename": "PushButton.js",
+    "displayName": "PushButton",
     "basedir": "circuit/switch",
     "filePath": "circuit/switch/PushButton.shape",
     "image": "circuit/switch/PushButton.png"
@@ -364,6 +391,7 @@
     ],
     "version": "local-version",
     "basename": "Delay.js",
+    "displayName": "Delay",
     "basedir": "circuit/timer",
     "filePath": "circuit/timer/Delay.shape",
     "image": "circuit/timer/Delay.png"
@@ -376,6 +404,7 @@
     ],
     "version": "local-version",
     "basename": "Text.js",
+    "displayName": "Text",
     "basedir": "common",
     "filePath": "common/Text.shape",
     "image": "common/Text.png"
@@ -388,6 +417,7 @@
     ],
     "version": "local-version",
     "basename": "HiveMQ.js",
+    "displayName": "HiveMQ",
     "basedir": "messaging",
     "filePath": "messaging/HiveMQ.shape",
     "image": "messaging/HiveMQ.png"

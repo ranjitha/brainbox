@@ -24,7 +24,7 @@ class Dialog {
                             </div>
                             <div class="media-body">
         
-                                <form class="form-horizontal">
+                                <div class="form-horizontal">
                                     <br>
                                     Filename:
                                     <fieldset>
@@ -39,7 +39,7 @@ class Dialog {
         
                                     </fieldset>
                                     <div class="row"></div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -103,6 +103,14 @@ class Dialog {
             });
         })
       })
+
+      $('#fileSaveDialog .githubFileName').off("keypress").on('keypress', function (e) {
+        let key = e.charCode || e.keyCode || 0;
+        if (key === 13) {
+          $("#fileSaveDialog .okButton").click()
+        }
+      })
+
     }, canvas.getBoundingBox().scale(20, 20))
   }
 }

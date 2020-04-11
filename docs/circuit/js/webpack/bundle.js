@@ -2352,7 +2352,7 @@ exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
         height: rh,
         color: "#1c9bab"
       });
-      canvas.add(raftFigure);
+      canvas.getCommandStack().execute(new draw2d.command.CommandAdd(canvas, raftFigure, rx, ry));
       this.boundingBoxFigure1.setCanvas(null);
       this.boundingBoxFigure1 = null;
       this.boundingBoxFigure2.setCanvas(null);
@@ -3963,6 +3963,13 @@ var Dialog = function () {
             callback(response);
           }
         });
+      });
+
+      $('#fileSaveDialog .githubFileName').off("keypress").on('keypress', function (e) {
+        var key = e.charCode || e.keyCode || 0;
+        if (key === 13) {
+          $("#fileSaveDialog .okButton").click();
+        }
       });
     }
   }, {

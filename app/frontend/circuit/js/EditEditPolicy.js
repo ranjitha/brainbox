@@ -58,7 +58,7 @@ export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
         height: rh,
         color: "#1c9bab"
       })
-      canvas.add(raftFigure)
+      canvas.getCommandStack().execute(new draw2d.command.CommandAdd(canvas, raftFigure, rx, ry))
       this.boundingBoxFigure1.setCanvas(null)
       this.boundingBoxFigure1 = null
       this.boundingBoxFigure2.setCanvas(null)

@@ -83,6 +83,14 @@ class Dialog {
         }
       })
     })
+
+    $('#fileSaveDialog .githubFileName').off("keypress").on('keypress', function (e) {
+      let key = e.charCode || e.keyCode || 0;
+      if (key === 13) {
+        $("#fileSaveDialog .okButton").click()
+      }
+    })
+
   }
 
   save(currentFile, canvas, callback){

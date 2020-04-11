@@ -23,17 +23,20 @@ function concatFiles(dirname) {
   glob(dirname+"/**/*.js",  (er, files) => {
     let content = "";
     let list = [];
+    console.log("dddd")
     files.forEach( (filename)=>  {
       let relativePath = filename.replace(dirname, "")
       let basenamePath = relativePath.replace(".js", "")
       let name = basenamePath.replace(/\//g , "_")
       let basename = relativePath.split('/').pop()
+      let displayName = basename.replace(".js", "")
       let tags = name.split("_")
       list.push({
         name: name,
         tags: tags,
         version: version,
         basename: basename,
+        displayName: displayName,
         basedir: relativePath.substring(0, relativePath.lastIndexOf('/')),
         filePath: basenamePath + ".shape",
         image: basenamePath + ".png"
