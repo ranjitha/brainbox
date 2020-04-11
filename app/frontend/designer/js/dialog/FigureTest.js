@@ -101,6 +101,8 @@ export default class FigureTest {
       $("#test_close").on("click", removeDialog)
       splash.addClass("open")
 
+      test.onStart()
+
       _this.simulate = true
       requestAnimationFrame(_this.animationFrameFunc)
     })

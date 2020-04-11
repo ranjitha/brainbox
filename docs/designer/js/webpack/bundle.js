@@ -3410,6 +3410,8 @@ var FigureTest = function () {
         $("#test_close").on("click", removeDialog);
         splash.addClass("open");
 
+        test.onStart();
+
         _this.simulate = true;
         requestAnimationFrame(_this.animationFrameFunc);
       });
@@ -5473,7 +5475,7 @@ exports.default = shape_designer.filter.FontColorFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="' + this.containerId + '" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Font Color' + '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.containerId + '" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Font Color' + '    <span id="button_remove_FontColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="mousetrap-pause form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.containerId + " img.svg" });
 
@@ -5483,7 +5485,7 @@ exports.default = shape_designer.filter.FontColorFilter = function (_Filter) {
         this.setFontColor("#" + picker.toString());
       }, figure);
 
-      $("#button_remove_FillColorFilter").on("click", function () {
+      $("#button_remove_FontColorFilter").on("click", function () {
         figure.removeFilter(_this2);
         figure.setFontColor(null);
         $("#" + _this2.containerId).animate({ "height": "0", "opacity": 0, "margin-bottom": 0 }, 500, function () {

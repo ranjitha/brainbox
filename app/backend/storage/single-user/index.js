@@ -103,6 +103,7 @@ module.exports = {
     app.post('/backend/global/shape/delete', (req, res) => module.exports.deleteFile(shapesAppDir,     req.body.filePath, res))
     app.post('/backend/global/shape/rename', (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
     app.post('/backend/global/shape/save',   (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))
+    app.post('/backend/global/shape/folder', (req, res) => module.exports.createFolder(shapesAppDir,   req.body.filePath, res))
 
 
     // =================================================================

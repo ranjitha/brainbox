@@ -421,5 +421,31 @@
     "basedir": "messaging",
     "filePath": "messaging/HiveMQ.shape",
     "image": "messaging/HiveMQ.png"
+  },
+  {
+    "name": "signals_High",
+    "tags": [
+      "signals",
+      "High"
+    ],
+    "version": "local-version",
+    "basename": "High.js",
+    "displayName": "High",
+    "basedir": "signals",
+    "filePath": "signals/High.shape",
+    "image": "signals/High.png"
+  },
+  {
+    "name": "signals_Low",
+    "tags": [
+      "signals",
+      "Low"
+    ],
+    "version": "local-version",
+    "basename": "Low.js",
+    "displayName": "Low",
+    "basedir": "signals",
+    "filePath": "signals/Low.shape",
+    "image": "signals/Low.png"
   }
 ]

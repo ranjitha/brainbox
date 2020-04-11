@@ -112,6 +112,9 @@ export default draw2d.SetFigure.extend({
   layerAttr: function (name, attributes) {
     if (this.svgNodes === null) return
 
+    // rewrite pure RED to the brainbox "HIGH" color
+    // rewrite pure BLUE to the brainbox "LOW" color
+    // without affecting the original JSON Object
     this.svgNodes.forEach(function (shape) {
       if (shape.data("name") === name) {
         shape.attr(attributes)

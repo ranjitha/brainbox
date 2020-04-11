@@ -331,9 +331,9 @@ module.exports = {
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".png"), res)
       generateShapeIndex()
     })
-    app.post('/backend/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,     req.body.from, req.body.to, res))
-    app.post('/backend/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,     req.body.filePath, req.body.content, req.body.commitMessage, res))
-
+    app.post('/backend/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,   req.body.from, req.body.to, res))
+    app.post('/backend/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,   req.body.filePath, req.body.content, req.body.commitMessage, res))
+    app.post('/backend/global/shape/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(shapesAppDir, req.body.filePath, res))
 
     // =================================================================
     // Handle system update files
