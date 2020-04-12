@@ -5355,6 +5355,9 @@ var _hardware2 = _interopRequireDefault(_hardware);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var markdown = __webpack_require__(/*! markdown-it */ "../../node_modules/markdown-it/index.js")();
+markdown.use(__webpack_require__(/*! markdown-it-asciimath */ "../../node_modules/markdown-it-asciimath/index.js"));
+
 exports.default = {
   ConnectionSelectionFeedbackPolicy: _ConnectionSelectionFeedbackPolicy2.default,
   hardware: _hardware2.default,
@@ -5364,6 +5367,7 @@ exports.default = {
   ProbeFigure: _ProbeFigure2.default,
   Mousetrap: _mousetrap2.default,
   inlineSVG: _inlineSVG2.default,
+  markdown: markdown,
   LabelInplaceEditor: _LabelInplaceEditor2.default,
   ConnectionRouter: _ConnectionRouter2.default,
   CircuitFigure: _CircuitFigure2.default

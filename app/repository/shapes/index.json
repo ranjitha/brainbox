@@ -6,7 +6,7 @@
       "alu",
       "FullAdder"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "FullAdder.js",
     "displayName": "FullAdder",
     "basedir": "circuit/alu",
@@ -20,7 +20,7 @@
       "alu",
       "FullAdder4Bit"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "FullAdder4Bit.js",
     "displayName": "FullAdder4Bit",
     "basedir": "circuit/alu",
@@ -34,7 +34,7 @@
       "counter",
       "BCDCounter"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "BCDCounter.js",
     "displayName": "BCDCounter",
     "basedir": "circuit/counter",
@@ -48,7 +48,7 @@
       "decoder",
       "BCDto7Seg"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "BCDto7Seg.js",
     "displayName": "BCDto7Seg",
     "basedir": "circuit/decoder",
@@ -62,7 +62,7 @@
       "display",
       "7Segment"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "7Segment.js",
     "displayName": "7Segment",
     "basedir": "circuit/display",
@@ -76,7 +76,7 @@
       "display",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/display",
@@ -90,7 +90,7 @@
       "flipflop",
       "DFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "DFlipFlop.js",
     "displayName": "DFlipFlop",
     "basedir": "circuit/flipflop",
@@ -104,7 +104,7 @@
       "flipflop",
       "JKFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "JKFlipFlop.js",
     "displayName": "JKFlipFlop",
     "basedir": "circuit/flipflop",
@@ -118,7 +118,7 @@
       "flipflop",
       "JKRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "JKRFlipFlop.js",
     "displayName": "JKRFlipFlop",
     "basedir": "circuit/flipflop",
@@ -132,7 +132,7 @@
       "flipflop",
       "SRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "SRFlipFlop.js",
     "displayName": "SRFlipFlop",
     "basedir": "circuit/flipflop",
@@ -146,7 +146,7 @@
       "flipflop",
       "TFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "TFlipFlop.js",
     "displayName": "TFlipFlop",
     "basedir": "circuit/flipflop",
@@ -160,7 +160,7 @@
       "gate",
       "AND"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "AND.js",
     "displayName": "AND",
     "basedir": "circuit/gate",
@@ -174,7 +174,7 @@
       "gate",
       "NAND"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "NAND.js",
     "displayName": "NAND",
     "basedir": "circuit/gate",
@@ -188,7 +188,7 @@
       "gate",
       "NOR"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "NOR.js",
     "displayName": "NOR",
     "basedir": "circuit/gate",
@@ -202,7 +202,7 @@
       "gate",
       "NOT"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "NOT.js",
     "displayName": "NOT",
     "basedir": "circuit/gate",
@@ -216,7 +216,7 @@
       "gate",
       "OR"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "OR.js",
     "displayName": "OR",
     "basedir": "circuit/gate",
@@ -231,7 +231,7 @@
       "arduino",
       "Arduino"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Arduino.js",
     "displayName": "Arduino",
     "basedir": "circuit/hardware/arduino",
@@ -246,7 +246,7 @@
       "arduino",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/hardware/arduino",
@@ -261,7 +261,7 @@
       "raspi",
       "RaspiGPIO"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "RaspiGPIO.js",
     "displayName": "RaspiGPIO",
     "basedir": "circuit/hardware/raspi",
@@ -276,7 +276,7 @@
       "raspi",
       "RaspiINPUT"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "RaspiINPUT.js",
     "displayName": "RaspiINPUT",
     "basedir": "circuit/hardware/raspi",
@@ -291,7 +291,7 @@
       "raspi",
       "RaspiOUTPUT"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "RaspiOUTPUT.js",
     "displayName": "RaspiOUTPUT",
     "basedir": "circuit/hardware/raspi",
@@ -305,7 +305,7 @@
       "pulse",
       "10hz"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "10hz.js",
     "displayName": "10hz",
     "basedir": "circuit/pulse",
@@ -319,7 +319,7 @@
       "pulse",
       "1hz"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "1hz.js",
     "displayName": "1hz",
     "basedir": "circuit/pulse",
@@ -333,12 +333,26 @@
       "pulse",
       "50hz"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "50hz.js",
     "displayName": "50hz",
     "basedir": "circuit/pulse",
     "filePath": "circuit/pulse/50hz.shape",
     "image": "circuit/pulse/50hz.png"
+  },
+  {
+    "name": "circuit_pulse_Delay",
+    "tags": [
+      "circuit",
+      "pulse",
+      "Delay"
+    ],
+    "version": "1.0.108_195",
+    "basename": "Delay.js",
+    "displayName": "Delay",
+    "basedir": "circuit/pulse",
+    "filePath": "circuit/pulse/Delay.shape",
+    "image": "circuit/pulse/Delay.png"
   },
   {
     "name": "circuit_switch_HighLow",
@@ -347,7 +361,7 @@
       "switch",
       "HighLow"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "HighLow.js",
     "displayName": "HighLow",
     "basedir": "circuit/switch",
@@ -361,7 +375,7 @@
       "switch",
       "HighLowArray"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "HighLowArray.js",
     "displayName": "HighLowArray",
     "basedir": "circuit/switch",
@@ -375,7 +389,7 @@
       "switch",
       "PushButton"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "PushButton.js",
     "displayName": "PushButton",
     "basedir": "circuit/switch",
@@ -389,7 +403,7 @@
       "timer",
       "Delay"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Delay.js",
     "displayName": "Delay",
     "basedir": "circuit/timer",
@@ -397,17 +411,30 @@
     "image": "circuit/timer/Delay.png"
   },
   {
-    "name": "common_Text",
+    "name": "documentation_Markdown",
     "tags": [
-      "common",
+      "documentation",
+      "Markdown"
+    ],
+    "version": "1.0.108_195",
+    "basename": "Markdown.js",
+    "displayName": "Markdown",
+    "basedir": "documentation",
+    "filePath": "documentation/Markdown.shape",
+    "image": "documentation/Markdown.png"
+  },
+  {
+    "name": "documentation_Text",
+    "tags": [
+      "documentation",
       "Text"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Text.js",
     "displayName": "Text",
-    "basedir": "common",
-    "filePath": "common/Text.shape",
-    "image": "common/Text.png"
+    "basedir": "documentation",
+    "filePath": "documentation/Text.shape",
+    "image": "documentation/Text.png"
   },
   {
     "name": "messaging_HiveMQ",
@@ -415,7 +442,7 @@
       "messaging",
       "HiveMQ"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "HiveMQ.js",
     "displayName": "HiveMQ",
     "basedir": "messaging",
@@ -428,7 +455,7 @@
       "signals",
       "High"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "High.js",
     "displayName": "High",
     "basedir": "signals",
@@ -441,7 +468,7 @@
       "signals",
       "Low"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "Low.js",
     "displayName": "Low",
     "basedir": "signals",
@@ -449,12 +476,25 @@
     "image": "signals/Low.png"
   },
   {
+    "name": "signals_Signal-Source",
+    "tags": [
+      "signals",
+      "Signal-Source"
+    ],
+    "version": "1.0.108_195",
+    "basename": "Signal-Source.js",
+    "displayName": "Signal-Source",
+    "basedir": "signals",
+    "filePath": "signals/Signal-Source.shape",
+    "image": "signals/Signal-Source.png"
+  },
+  {
     "name": "signals_SignalSource",
     "tags": [
       "signals",
       "SignalSource"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "SignalSource.js",
     "displayName": "SignalSource",
     "basedir": "signals",
@@ -467,7 +507,7 @@
       "signals",
       "SignalTarget"
     ],
-    "version": "local-version",
+    "version": "1.0.108_195",
     "basename": "SignalTarget.js",
     "displayName": "SignalTarget",
     "basedir": "signals",

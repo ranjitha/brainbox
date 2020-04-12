@@ -12,6 +12,8 @@ import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
 import inlineSVG from "../../_common/js/inlineSVG"
 import hardware from "./hardware"
+let markdown = require('markdown-it')()
+markdown.use(require("markdown-it-asciimath"))
 
 export default {
   ConnectionSelectionFeedbackPolicy,
@@ -22,6 +24,7 @@ export default {
   ProbeFigure,
   Mousetrap,
   inlineSVG,
+  markdown,
   LabelInplaceEditor,
   ConnectionRouter,
   CircuitFigure
