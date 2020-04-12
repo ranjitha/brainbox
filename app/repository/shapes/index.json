@@ -447,5 +447,31 @@
     "basedir": "signals",
     "filePath": "signals/Low.shape",
     "image": "signals/Low.png"
+  },
+  {
+    "name": "signals_SignalSource",
+    "tags": [
+      "signals",
+      "SignalSource"
+    ],
+    "version": "local-version",
+    "basename": "SignalSource.js",
+    "displayName": "SignalSource",
+    "basedir": "signals",
+    "filePath": "signals/SignalSource.shape",
+    "image": "signals/SignalSource.png"
+  },
+  {
+    "name": "signals_SignalTarget",
+    "tags": [
+      "signals",
+      "SignalTarget"
+    ],
+    "version": "local-version",
+    "basename": "SignalTarget.js",
+    "displayName": "SignalTarget",
+    "basedir": "signals",
+    "filePath": "signals/SignalTarget.shape",
+    "image": "signals/SignalTarget.png"
   }
 ]

@@ -23,7 +23,6 @@ function concatFiles(dirname) {
   glob(dirname+"/**/*.js",  (er, files) => {
     let content = "";
     let list = [];
-    console.log("dddd")
     files.forEach( (filename)=>  {
       let relativePath = filename.replace(dirname, "")
       let basenamePath = relativePath.replace(".js", "")
@@ -43,7 +42,6 @@ function concatFiles(dirname) {
       });
       content += (fs.readFileSync(filename, 'utf8') + "\n\n\n")
     });
-
 
     fs.writeFileSync(jsonFile, JSON.stringify(list, undefined, 2))
     fs.writeFileSync(indexFile, content)

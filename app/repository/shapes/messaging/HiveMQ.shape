@@ -8,17 +8,21 @@
       "width": 97,
       "height": 37,
       "alpha": 1,
+      "selectable": true,
+      "draggable": true,
       "angle": 0,
       "userData": {
         "baseClass": "draw2d.SetFigure",
         "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({\n            resizeable:false,\n            \"userData.elementId\":this.id\n        });\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         this.value = 0;\n         var _this = this;\n         this.callback = function( msg){\n             if(msg.elementId !== _this.attr(\"userData.elementId\")){\n                return;\n             }\n             _this.value = msg.value;\n             _this.getOutputPort(0).setValue(_this.value);\n            if(_this.value === 1){\n                _this.layerAttr(\"circle\",{fill:\"#C21B7A\"});\n            }\n            else{\n                _this.layerAttr(\"circle\",{fill:\"#f0f0f0\"});\n            }\n         }\n    },\n    \n    calculate: function()\n    {\n    },\n    \n    onStart: function()\n    {\n        socket.on(\"mqtt:message\", this.callback);\n        this.callback({value:this.value})\n    },\n\n    onStop:function()\n    {\n        socket.off(\"mqtt:message\", this.callback);\n    },\n\n    getParameterSettings: function()\n    {\n        return [\n        {\n            name:\"elementId\",\n            label:\"Element Id\",\n            property:{\n                type: \"string\"\n        }\n        \n        }];\n    }\n    \n});",
         "name": "circle",
-        "markdown": "# MQTT Message Receiver\n\nThis element can receive public message sent from [HiveMQ](http://www.hivemq.com/demos/websocket-client/).\nHiveMQ is a public available MQTT server. Do not use them for productive or private\nmessage. All messages are public and can be subscribed by anyone and anyone can\nsend you a message.\n\n## Connect\nGo to the [HiveMQ](http://www.hivemq.com/demos/websocket-client/) web socket client and press the `connect` button.\n\n## Topic\nThe topic is a kind of `channel` in MQTT. For this element the topic is always \n`freegroup/brainbox`\n\n## Message\nThe element checks if the message.elementId is related to the element.elementId.\nIf yes take the value and send them to the output port.\n\nSet the `value` to `1` if you want the the output port goes high.\n\n```\n{\n \"value\":0,\n \"elementId\":\"yourElementId\"\n}\n```"
+        "markdown": "# MQTT Message Receiver\n\nThis element can receive public message sent from [HiveMQ](http://www.hivemq.com/demos/websocket-client/).\nHiveMQ is a public available MQTT server. Do not use them for productive or private\nmessage. All messages are public and can be subscribed by anyone and anyone can\nsend you a message.\n\n## Connect\nGo to the [HiveMQ](http://www.hivemq.com/demos/websocket-client/) web socket client and press the `connect` button.\n\n## Topic\nThe topic is a kind of `channel` in MQTT. For this element the topic is always \n`freegroup/brainbox`\n\n## Message\nThe element checks if the message.elementId is related to the element.elementId.\nIf yes take the value and send them to the output port.\n\nSet the `value` to `1` if you want the the output port goes high.\n\n```\n{\n \"value\":0,\n \"elementId\":\"yourElementId\"\n}\n```",
+        "type": "Output",
+        "direction": 1
       },
       "cssClass": "shape_designer_figure_PolyRect",
       "ports": [],
-      "bgColor": "#919191",
-      "color": "#303030",
+      "bgColor": "rgba(145,145,145,1)",
+      "color": "rgba(48,48,48,1)",
       "stroke": 1,
       "radius": 5,
       "dasharray": null,
@@ -67,6 +71,8 @@
       "width": 10,
       "height": 10,
       "alpha": 1,
+      "selectable": true,
+      "draggable": true,
       "angle": 0,
       "userData": {
         "name": "Port",
@@ -75,8 +81,8 @@
       },
       "cssClass": "shape_designer_figure_ExtPort",
       "ports": [],
-      "bgColor": "#1C9BAB",
-      "color": "#1B1B1B",
+      "bgColor": "rgba(28,155,171,1)",
+      "color": "rgba(27,27,27,1)",
       "stroke": 1,
       "dasharray": null,
       "filters": [
@@ -102,25 +108,27 @@
       "id": "dda95266-c917-46e8-cc39-f538d0d43f73",
       "x": 7966.109375,
       "y": 7986,
-      "width": 44.109375,
+      "width": 44.125,
       "height": 21,
       "alpha": 1,
+      "selectable": true,
+      "draggable": true,
       "angle": 0,
       "userData": {
         "name": "Label"
       },
       "cssClass": "shape_designer_figure_ExtLabel",
       "ports": [],
-      "bgColor": "none",
-      "color": "#1B1B1B",
+      "bgColor": "rgba(0,0,0,0)",
+      "color": "rgba(27,27,27,1)",
       "stroke": 0,
       "radius": 0,
       "dasharray": null,
       "text": "HiveMQ",
       "outlineStroke": 0,
-      "outlineColor": "none",
+      "outlineColor": "rgba(0,0,0,0)",
       "fontSize": 16,
-      "fontColor": "#FFF824",
+      "fontColor": "rgba(255,248,36,1)",
       "fontFamily": null,
       "editor": "LabelInplaceEditor",
       "filters": [
@@ -136,5 +144,5 @@
       ]
     }
   ],
-  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHUAAAA5CAYAAAAInmSrAAAA1klEQVR4Xu3TAREAAAiDQNe/tD3+sAHgdh1nYBxRQFdU8AmKWlTQAIjUUosKGgCRWmpRQQMgUkstKmgARGqpRQUNgEgttaigARCppRYVNAAitdSiggZApJZaVNAAiNRSiwoaAJFaalFBAyBSSy0qaABEaqlFBQ2ASC21qKABEKmlFhU0ACK11KKCBkCkllpU0ACI1FKLChoAkVpqUUEDIFJLLSpoAERqqUUFDYBILbWooAEQqaUWFTQAIrXUooIGQKSWWlTQAIjUUosKGgCRWmpRQQMg0gM9egA6OM0FBwAAAABJRU5ErkJggg=="
+  "image": "data:image/png;base64,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"
 }

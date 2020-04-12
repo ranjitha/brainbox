@@ -11821,10 +11821,12 @@ _packages2.default.Figure = Class.extend(
       }
 
       // avoid recursion
-      if (this._inEvent === true) {
-        return;
+      if (this._inEvent) {
+        if (this._inEvent.figure === this && this._inEvent.event === event) {
+          return;
+        }
       }
-      this._inEvent = true;
+      this._inEvent = { figure: this, event: event };
       var subscribers = this.eventSubscriptions[event];
       for (var i = 0; i < subscribers.length; i++) {
         subscribers[i](this, args);
@@ -11833,7 +11835,7 @@ _packages2.default.Figure = Class.extend(
       console.log(exc);
       throw exc;
     } finally {
-      this._inEvent = false;
+      delete this._inEvent;
 
       // fire a generic change event if an attribute has changed
       // required for some DataBinding frameworks or for the Backbone.Model compatibility

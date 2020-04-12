@@ -16,7 +16,7 @@ circuit_gate_OR = circuit_gate_OR.extend({
 
     },
     
-    calculate:function()
+    calculate:function(context)
     {
         var i1 = this.getInputPort(0);
         var i2 = this.getInputPort(1);

@@ -8,16 +8,10 @@ export default draw2d.policy.canvas.ReadOnlySelectionPolicy.extend({
 
 
   onInstall: function (canvas) {
-    canvas.getFigures().each(function (index, shape) {
-      shape.onStart();
-    });
   },
 
 
   onUninstall: function (canvas) {
-    canvas.getFigures().each(function (index, shape) {
-      shape.onStop();
-    });
   },
 
   /**

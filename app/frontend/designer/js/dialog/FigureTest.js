@@ -4,11 +4,14 @@ import toast from "../../../_common/js/toast";
 export default class FigureTest {
 
   constructor() {
+    this.simulationContext = {}
   }
 
   show() {
     let _this = this
     this.animationFrameFunc = this._calculate.bind(this)
+
+    this.simulationContext = {}
 
     let writer = new FigureWriter()
     let testShape = null
@@ -95,13 +98,14 @@ export default class FigureTest {
         splash.removeClass("open")
         setTimeout(function () {
           splash.remove()
+          test.onStop(_this.simulationContext)
         }, 400)
       }
 
       $("#test_close").on("click", removeDialog)
       splash.addClass("open")
 
-      test.onStart()
+      test.onStart(_this.simulationContext)
 
       _this.simulate = true
       requestAnimationFrame(_this.animationFrameFunc)
@@ -110,18 +114,19 @@ export default class FigureTest {
   }
 
   _calculate() {
+    console.log("calculate")
     // call the "calculate" method if given to calculate the output-port values
     //
-    let figures = this.canvas.getFigures().clone().grep(function (f) {
+    let figures = this.canvas.getFigures().clone().grep( (f) => {
       return f.calculate
     })
-    figures.each(function (i, figure) {
-      figure.calculate()
+    figures.each( (i, figure) => {
+      figure.calculate(this.simulationContext)
     })
 
     // transport the value from oututPort to inputPort
     //
-    this.canvas.getLines().each(function (i, line) {
+    this.canvas.getLines().each( (i, line) => {
       let outPort = line.getSource()
       let inPort = line.getTarget()
       inPort.setValue(outPort.getValue())

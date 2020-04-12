@@ -2378,8 +2378,7 @@ exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
     var hit = null;
 
     emitter.getFigures().each(function (index, figure) {
-      if (figure.hitTest(event.x, event.y, 40)) {
-
+      if (figure.getParameterSettings && figure.getParameterSettings().length > 0 && figure.hitTest(event.x, event.y, 40)) {
         hit = figure;
         return false;
       }
@@ -2907,17 +2906,9 @@ exports.default = draw2d.policy.canvas.ReadOnlySelectionPolicy.extend({
     this.mouseDownElement = null;
   },
 
-  onInstall: function onInstall(canvas) {
-    canvas.getFigures().each(function (index, shape) {
-      shape.onStart();
-    });
-  },
+  onInstall: function onInstall(canvas) {},
 
-  onUninstall: function onUninstall(canvas) {
-    canvas.getFigures().each(function (index, shape) {
-      shape.onStop();
-    });
-  },
+  onUninstall: function onUninstall(canvas) {},
 
   /**
    * @method
@@ -3102,6 +3093,10 @@ exports.default = draw2d.Canvas.extend({
 
     this.probeWindow = new _ProbeWindow2.default(this);
 
+    // global context where objects can store data during different simulation steps.
+    // OTHER object can read them. Useful for signal handover
+    this.simulationContext = {};
+
     this.permissions = permissions;
     this.simulate = false;
     this.animationFrameFunc = this._calculate.bind(this);
@@ -3114,7 +3109,7 @@ exports.default = draw2d.Canvas.extend({
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    this.getCommandStack().addEventListener(this);
+    this.getCommandStack().on("change", this);
 
     var router = new _ConnectionRouter2.default();
     router.abortRoutingOnFirstVertexNode = false;
@@ -3515,6 +3510,8 @@ exports.default = draw2d.Canvas.extend({
   },
 
   simulationStart: function simulationStart() {
+    var _this3 = this;
+
     if (this.simulate === true) {
       return; // silently
     }
@@ -3526,6 +3523,10 @@ exports.default = draw2d.Canvas.extend({
     this.uninstallEditPolicy(this.coronaFeedback);
     this.commonPorts.each(function (i, p) {
       p.setVisible(false);
+    });
+
+    this.getFigures().each(function (index, shape) {
+      shape.onStart(_this3.simulationContext);
     });
 
     this._calculate();
@@ -3541,6 +3542,8 @@ exports.default = draw2d.Canvas.extend({
   },
 
   simulationStop: function simulationStop() {
+    var _this4 = this;
+
     this.simulate = false;
     this.commonPorts.each(function (i, p) {
       p.setVisible(true);
@@ -3548,6 +3551,10 @@ exports.default = draw2d.Canvas.extend({
     this.installEditPolicy(new _EditEditPolicy2.default());
     this.installEditPolicy(this.connectionPolicy);
     this.installEditPolicy(this.coronaFeedback);
+
+    this.getFigures().each(function (index, shape) {
+      shape.onStop(_this4.simulationContext);
+    });
 
     $("#simulationStartStop").addClass("play");
     $("#simulationStartStop").removeClass("pause");
@@ -3558,13 +3565,15 @@ exports.default = draw2d.Canvas.extend({
   },
 
   _calculate: function _calculate() {
+    var _this5 = this;
+
     // call the "calculate" method if given to calculate the output-port values
     //
     this.getFigures().each(function (i, figure) {
-      figure.calculate();
+      figure.calculate(_this5.simulationContext);
     });
 
-    // transport the value from oututPort to inputPort
+    // transport the value from outputPort to inputPort
     //
     this.getLines().each(function (i, line) {
       var outPort = line.getSource();
@@ -3669,11 +3678,11 @@ exports.default = draw2d.Canvas.extend({
   },
 
   reloadFromCache: function reloadFromCache() {
-    var _this3 = this;
+    var _this6 = this;
 
     new draw2d.io.json.Writer().marshal(this, function (json) {
-      draw2d.Canvas.prototype.clear.call(_this3);
-      new draw2d.io.json.Reader().unmarshal(_this3, json);
+      draw2d.Canvas.prototype.clear.call(_this6);
+      new draw2d.io.json.Reader().unmarshal(_this6, json);
     });
   },
 
@@ -4290,18 +4299,15 @@ exports.default = draw2d.SetFigure.extend({
 
   applyAlpha: function applyAlpha() {},
 
-  layerGet: function layerGet(name, attributes) {
+  layerGet: function layerGet(name) {
     if (this.svgNodes === null) return null;
-
-    var result = null;
-    this.svgNodes.some(function (shape) {
-      if (shape.data("name") === name) {
-        result = shape;
+    var found = null;
+    this.svgNodes.forEach(function (shape) {
+      if (found === null && shape.data("name") === name) {
+        found = shape;
       }
-      return result !== null;
     });
-
-    return result;
+    return found;
   },
 
   layerAttr: function layerAttr(name, attributes) {
@@ -4345,11 +4351,11 @@ exports.default = draw2d.SetFigure.extend({
     }
   },
 
-  calculate: function calculate() {},
+  calculate: function calculate(context) {},
 
-  onStart: function onStart() {},
+  onStart: function onStart(context) {},
 
-  onStop: function onStop() {},
+  onStop: function onStop(context) {},
 
   getParameterSettings: function getParameterSettings() {
     return [];
@@ -5660,10 +5666,6 @@ if (!jQuery.browser) {
   }
   jQuery.browser = browser;
 }
-
-// need to be global for the "static" version hosted on gh-pages
-//
-window.conf = _Configuration2.default;
 
 $(window).load(function () {
   socket = io({ path: '/socket.io' });

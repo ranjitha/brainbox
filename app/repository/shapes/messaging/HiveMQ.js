@@ -7,7 +7,7 @@
 var messaging_HiveMQ = CircuitFigure.extend({
 
    NAME: "messaging_HiveMQ",
-   VERSION: "1.0.44_80",
+   VERSION: "local-version",
 
    init:function(attr, setter, getter)
    {
@@ -47,7 +47,7 @@ var messaging_HiveMQ = CircuitFigure.extend({
        
        // Label
        shape = this.canvas.paper.text(0,0,'HiveMQ');
-       shape.attr({"x":18.609375,"y":17,"text-anchor":"start","text":"HiveMQ","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#FFF824","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.attr({"x":18.609375,"y":17,"text-anchor":"start","text":"HiveMQ","font-family":"\"Arial\"","font-size":16,"stroke":"#000000","fill":"#FFF824","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
 

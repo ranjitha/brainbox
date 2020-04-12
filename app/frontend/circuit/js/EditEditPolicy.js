@@ -83,8 +83,9 @@ export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
     let hit = null
 
     emitter.getFigures().each( (index, figure) =>{
-      if (figure.hitTest(event.x, event.y, 40)) {
-
+      if (figure.getParameterSettings &&
+          figure.getParameterSettings().length>0 &&
+          figure.hitTest(event.x, event.y, 40)) {
         hit = figure
         return false
       }

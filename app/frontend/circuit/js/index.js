@@ -48,9 +48,6 @@ if (!jQuery.browser) {
 
 import conf from './Configuration'
 
-// need to be global for the "static" version hosted on gh-pages
-//
-window.conf = conf
 
 $(window).load(function () {
   socket = io( { path: '/socket.io'})

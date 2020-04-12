@@ -35,6 +35,10 @@ export default draw2d.Canvas.extend({
 
     this.probeWindow = new ProbeWindow(this)
 
+    // global context where objects can store data during different simulation steps.
+    // OTHER object can read them. Useful for signal handover
+    this.simulationContext = {}
+
     this.permissions = permissions
     this.simulate = false
     this.animationFrameFunc = this._calculate.bind(this)
@@ -47,7 +51,7 @@ export default draw2d.Canvas.extend({
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    this.getCommandStack().addEventListener(this)
+    this.getCommandStack().on("change", this)
 
     let router = new ConnectionRouter()
     router.abortRoutingOnFirstVertexNode = false
@@ -193,7 +197,6 @@ export default draw2d.Canvas.extend({
     } else {
       $('#statusWebUSB').addClass("disabled")
     }
-
 
     this.deleteSelectionCallback = () => {
       let selection = this.getSelection()
@@ -471,6 +474,10 @@ export default draw2d.Canvas.extend({
       p.setVisible(false)
     })
 
+    this.getFigures().each( (index, shape) => {
+      shape.onStart(this.simulationContext);
+    });
+
     this._calculate()
 
     $("#simulationStartStop").addClass("pause")
@@ -492,6 +499,10 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(this.connectionPolicy)
     this.installEditPolicy(this.coronaFeedback)
 
+    this.getFigures().each( (index, shape) =>{
+      shape.onStop(this.simulationContext);
+    });
+
     $("#simulationStartStop").addClass("play")
     $("#simulationStartStop").removeClass("pause")
     $(".simulationBase").fadeOut("slow", () => {
@@ -503,13 +514,13 @@ export default draw2d.Canvas.extend({
   _calculate: function () {
     // call the "calculate" method if given to calculate the output-port values
     //
-    this.getFigures().each(function (i, figure) {
-      figure.calculate()
+    this.getFigures().each((i, figure) => {
+      figure.calculate(this.simulationContext)
     })
 
-    // transport the value from oututPort to inputPort
+    // transport the value from outputPort to inputPort
     //
-    this.getLines().each(function (i, line) {
+    this.getLines().each( (i, line) => {
       let outPort = line.getSource()
       let inPort = line.getTarget()
       inPort.setValue(outPort.getValue())
