@@ -1,5 +1,5 @@
-var documentation_MarkdownFigure = draw2d.shape.basic.Rectangle.extend({
-    NAME: "documentation_MarkdownFigure",
+var documentation_Markdown = draw2d.shape.basic.Rectangle.extend({
+    NAME: "documentation_Markdown",
     VERSION: "1.0.0",
 
     init: function (attr) {

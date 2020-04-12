@@ -7,16 +7,16 @@
 var circuit_switch_PushButton = CircuitFigure.extend({
 
    NAME: "circuit_switch_PushButton",
-   VERSION: "1.0.108_195",
+   VERSION: "1.0.109_196",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
 
-     this._super( $.extend({stroke:0, bgColor:null, width:45.35582499999964,height:27.483999999999924},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:35.04322499999989,height:28.936999999999443},attr), setter, getter);
      var port;
      // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 101.81252904119853, y: 87.26531800320183 }));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 131.77415177969482, y: 82.88350554653346 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");
@@ -26,8 +26,8 @@ var circuit_switch_PushButton = CircuitFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 45.35582499999964;
-      this.originalHeight= 27.483999999999924;
+      this.originalWidth = 35.04322499999989;
+      this.originalHeight= 28.936999999999443;
       return shape;
    },
 
@@ -36,7 +36,7 @@ var circuit_switch_PushButton = CircuitFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L45.35582499999964,0 L45.35582499999964,27.483999999999924 L0,27.483999999999924");
+       shape = this.canvas.paper.path("M0,0 L35.04322499999989,0 L35.04322499999989,28.936999999999443 L0,28.936999999999443");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        

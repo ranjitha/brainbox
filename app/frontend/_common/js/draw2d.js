@@ -7618,7 +7618,7 @@ _packages2.default.Canvas = Class.extend(
     figure.fireEvent("added", { figure: figure, canvas: this });
 
     // ...now we can fire the initial move event
-    figure.fireEvent("move", { figure: figure, dx: 0, dy: 0 });
+    figure.fireEvent("move", { figure: figure, x: figure.getX(), y: figure.getY(), dx: 0, dy: 0 });
 
     // this is only required if the used router requires the crossing information
     // of the connections
@@ -10793,9 +10793,9 @@ _packages2.default.Figure = Class.extend(
       }
     });
 
-    this.fireEvent("move", { figure: this, dx: 0, dy: 0 });
-    this.fireEvent("change:x", { figure: this, dx: 0 });
-    this.fireEvent("change:y", { figure: this, dy: 0 });
+    this.fireEvent("move", { x: this.getX(), y: this.getY(), dx: 0, dy: 0 });
+    this.fireEvent("change:x", { x: this.getX(), dx: 0 });
+    this.fireEvent("change:y", { y: this.getY(), dy: 0 });
 
     // fire an event
     // @since 5.3.3
@@ -11264,8 +11264,6 @@ _packages2.default.Figure = Class.extend(
    */
   setX: function setX(x) {
     this.setPosition(parseFloat(x), this.y);
-    this.fireEvent("change:x", { value: this.x });
-
     return this;
   },
 
@@ -11288,8 +11286,6 @@ _packages2.default.Figure = Class.extend(
    */
   setY: function setY(y) {
     this.setPosition(this.x, parseFloat(y));
-    this.fireEvent("change:y", { value: this.y });
-
     return this;
   },
 
@@ -11399,7 +11395,12 @@ _packages2.default.Figure = Class.extend(
       }
     });
 
-    var event = { figure: this, dx: this.x - oldPos.x, dy: this.y - oldPos.y };
+    var event = {
+      x: this.x,
+      y: this.y,
+      dx: this.x - oldPos.x,
+      dy: this.y - oldPos.y
+    };
     this.fireEvent("move", event);
     this.fireEvent("change:x", event);
     this.fireEvent("change:y", event);
@@ -11494,7 +11495,7 @@ _packages2.default.Figure = Class.extend(
     this.repaint();
 
     this.fireEvent("resize");
-    this.fireEvent("change:dimension", { value: { height: this.height, width: this.width, old: old } });
+    this.fireEvent("change:dimension", { height: this.height, width: this.width, old: old });
 
     // Update the resize handles if the user change the position of the element via an API call.
     //
@@ -44459,7 +44460,7 @@ _packages2.default.shape.basic.Text = _packages2.default.shape.basic.Label.exten
         }
         s.push(w);
       }
-      // set the wrapped text and get the resulted boudning box
+      // set the wrapped text and get the resulted bounding box
       //
       svgText.attr({ text: s.join("") });
       var bbox = svgText.getBBox(true);
@@ -64938,105 +64939,6 @@ global.extend = fn;
 
 "use strict";
 
-
-// hacking RaphaelJS to support groups of elements
-//
-(function () {
-    Raphael.fn.group = function (f, g) {
-        var enabled = document.getElementsByTagName("svg").length > 0;
-        if (!enabled) {
-            // return a stub for VML compatibility
-            return {
-                add: function add() {
-                    // intentionally left blank
-                }
-            };
-        }
-        var i;
-        this.svg = "http://www.w3.org/2000/svg";
-        this.defs = document.getElementsByTagName("defs")[f];
-        this.svgcanv = document.getElementsByTagName("svg")[f];
-        this.group = document.createElementNS(this.svg, "g");
-        for (i = 0; i < g.length; i++) {
-            this.group.appendChild(g[i].node);
-        }
-        this.svgcanv.appendChild(this.group);
-        this.group.translate = function (c, a) {
-            this.setAttribute("transform", "translate(" + c + "," + a + ") scale(" + this.getAttr("scale").x + "," + this.getAttr("scale").y + ")");
-        };
-        this.group.rotate = function (c, a, e) {
-            this.setAttribute("transform", "translate(" + this.getAttr("translate").x + "," + this.getAttr("translate").y + ") scale(" + this.getAttr("scale").x + "," + this.getAttr("scale").y + ") rotate(" + c + "," + a + "," + e + ")");
-        };
-        this.group.scale = function (c, a) {
-            this.setAttribute("transform", "scale(" + c + "," + a + ") translate(" + this.getAttr("translate").x + "," + this.getAttr("translate").y + ")");
-        };
-        this.group.push = function (c) {
-            this.appendChild(c.node);
-        };
-        this.group.getAttr = function (c) {
-            this.previous = this.getAttribute("transform") ? this.getAttribute("transform") : "";
-            var a = [],
-                e,
-                h,
-                j;
-            a = this.previous.split(" ");
-            for (i = 0; i < a.length; i++) {
-                if (a[i].substring(0, 1) == "t") {
-                    var d = a[i],
-                        b = [];
-                    b = d.split("(");
-                    d = b[1].substring(0, b[1].length - 1);
-                    b = [];
-                    b = d.split(",");
-                    e = b.length === 0 ? { x: 0, y: 0 } : { x: b[0], y: b[1] };
-                } else {
-                    if (a[i].substring(0, 1) === "r") {
-                        d = a[i];
-                        b = d.split("(");
-                        d = b[1].substring(0, b[1].length - 1);
-                        b = d.split(",");
-                        h = b.length === 0 ? { x: 0, y: 0, z: 0 } : { x: b[0], y: b[1], z: b[2] };
-                    } else {
-                        if (a[i].substring(0, 1) === "s") {
-                            d = a[i];
-                            b = d.split("(");
-                            d = b[1].substring(0, b[1].length - 1);
-                            b = d.split(",");
-                            j = b.length === 0 ? { x: 1, y: 1 } : { x: b[0], y: b[1] };
-                        }
-                    }
-                }
-            }
-            if (typeof e === "undefined") {
-                e = { x: 0, y: 0 };
-            }
-            if (typeof h === "undefined") {
-                h = { x: 0, y: 0, z: 0 };
-            }
-            if (typeof j === "undefined") {
-                j = { x: 1, y: 1 };
-            }
-
-            if (c == "translate") {
-                var k = e;
-            } else {
-                if (c == "rotate") {
-                    k = h;
-                } else {
-                    if (c == "scale") {
-                        k = j;
-                    }
-                }
-            }
-            return k;
-        };
-        this.group.copy = function (el) {
-            this.copy = el.node.cloneNode(true);
-            this.appendChild(this.copy);
-        };
-        return this.group;
-    };
-})();
 
 /**
  * adding support method to check if the node is already visible
