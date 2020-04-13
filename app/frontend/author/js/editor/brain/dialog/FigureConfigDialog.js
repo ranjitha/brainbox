@@ -3,8 +3,9 @@ import Hogan from "hogan.js"
 
 let currentFigure = null
 
+
 class Dialog {
-  constructor(){
+  constructor() {
     $("body").append(`
           <div id="figureConfigDialog">
              Please configure me
@@ -36,7 +37,7 @@ class Dialog {
       '  {{/settings}}                   ' +
       '<button class="submit">Ok</button> '
     )
-    let output = compiled.render({ settings: settings})
+    let output = compiled.render({settings: settings})
 
     $("#figureConfigDialog").html(output)
     $("#figureConfigDialog").show().css({top: pos.y, left: pos.x, position: 'absolute'})
@@ -47,11 +48,11 @@ class Dialog {
         this.hide()
       }
     })
-    $("#figureConfigDialog .submit").on("click",  () => {
+    $("#figureConfigDialog .submit").on("click", () => {
       this.hide()
     })
 
-    settings.forEach((setting) =>{
+    settings.forEach((setting) => {
       let figureValue = currentFigure.attr("userData." + setting.name)
       $('#figureConfigDialog select[data-name="' + setting.name + '"] option[value="' + figureValue + '"]').attr('selected', 'selected')
     })
@@ -77,4 +78,3 @@ class Dialog {
 
 let dialog = new Dialog()
 export default dialog
-

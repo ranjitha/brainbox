@@ -24,6 +24,10 @@ export default draw2d.Canvas.extend({
 
     this.timerBase = 10 // ms calculate every 10ms all elements
 
+    // global context where objects can store data during different simulation steps.
+    // OTHER object can read them. Useful for signal handover
+    this.simulationContext = {}
+
     this.setScrollArea("#draw2dCanvasWrapper")
 
     // register this class as event listener for the canvas
@@ -305,7 +309,7 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(new SimulationEditPolicy())
     this.uninstallEditPolicy(this.connectionPolicy)
     this.uninstallEditPolicy(this.coronaFeedback)
-    this.commonPorts.each(function (i, p) {
+    this.commonPorts.each( (i, p) =>{
       p.setVisible(false)
     })
 
@@ -346,13 +350,13 @@ export default draw2d.Canvas.extend({
   _calculate: function () {
     // call the "calculate" method if given to calculate the output-port values
     //
-    this.getFigures().each(function (i, figure) {
-      figure.calculate()
+    this.getFigures().each( (i, figure)=> {
+      figure.calculate(this.simulationContext)
     })
 
     // transport the value from outputPort to inputPort
     //
-    this.getLines().each(function (i, line) {
+    this.getLines().each( (i, line) => {
       let outPort = line.getSource()
       let inPort = line.getTarget()
       inPort.setValue(outPort.getValue())

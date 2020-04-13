@@ -1,5 +1,5 @@
 import MarkerFigure from "./figures/MarkerFigure"
-// import FigureConfigDialog from "./dialog/FigureConfigDialog"
+import FigureConfigDialog from "./dialog/FigureConfigDialog"
 
 export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
 
@@ -99,7 +99,7 @@ export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
         this.configIcon = $("<div class='fa fa-cog' id='configMenuIcon'></div>")
         $("body").append(this.configIcon)
         this.configIcon.on("click",  () => {
-          // FigureConfigDialog.show(hit, pos)
+          FigureConfigDialog.show(hit, pos)
           this.configFigure = hit
           if (this.configIcon !== null) {
             this.configIcon.remove()
