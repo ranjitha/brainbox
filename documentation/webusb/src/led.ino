@@ -14,7 +14,6 @@ void setup() {
   Serial.flush();
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
-  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 void loop() {

@@ -22,9 +22,11 @@
 #include <WebUSB.h>
 
 // for local testing
+// 0 = HTTP
 //WebUSB WebUSBSerial(0, "localhost:7400/circuit/?tutorial=pairWebUSB");
 
 // for productive
+// 1 = HTTPS
 WebUSB WebUSBSerial(1, "freegroup.github.io/brainbox/circuit/?tutorial=pairWebUSB");
 #define Serial WebUSBSerial
 
