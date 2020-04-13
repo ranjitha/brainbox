@@ -500,6 +500,7 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(this.coronaFeedback)
 
     this.getFigures().each( (index, shape) =>{
+      console.log(shape)
       shape.onStop(this.simulationContext);
     });
 

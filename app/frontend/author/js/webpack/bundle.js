@@ -691,7 +691,7 @@ var Files = function () {
                 id: 'editor',
                 scope: scope,
                 file: name
-              }, conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
+              }, _this.conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
             });
           });
         });

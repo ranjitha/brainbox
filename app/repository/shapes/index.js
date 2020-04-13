@@ -7,7 +7,7 @@
 var circuit_alu_FullAdder = CircuitFigure.extend({
 
    NAME: "circuit_alu_FullAdder",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -177,7 +177,7 @@ circuit_alu_FullAdder = circuit_alu_FullAdder.extend({
 var circuit_alu_FullAdder4Bit = CircuitFigure.extend({
 
    NAME: "circuit_alu_FullAdder4Bit",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -493,7 +493,7 @@ circuit_alu_FullAdder4Bit = circuit_alu_FullAdder4Bit.extend({
 var circuit_counter_BCDCounter = CircuitFigure.extend({
 
    NAME: "circuit_counter_BCDCounter",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -667,7 +667,7 @@ circuit_counter_BCDCounter = circuit_counter_BCDCounter.extend({
 var circuit_decoder_BCDto7Seg = CircuitFigure.extend({
 
    NAME: "circuit_decoder_BCDto7Seg",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -906,7 +906,7 @@ circuit_decoder_BCDto7Seg = circuit_decoder_BCDto7Seg.extend({
 var circuit_display_7Segment = CircuitFigure.extend({
 
    NAME: "circuit_display_7Segment",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1068,7 +1068,7 @@ circuit_display_7Segment = circuit_display_7Segment.extend({
 var circuit_display_Led = CircuitFigure.extend({
 
    NAME: "circuit_display_Led",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1159,7 +1159,7 @@ circuit_display_Led = circuit_display_Led.extend({
 var circuit_flipflop_DFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_flipflop_DFlipFlop",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1292,7 +1292,7 @@ circuit_flipflop_DFlipFlop = circuit_flipflop_DFlipFlop.extend({
 var circuit_flipflop_JKFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_flipflop_JKFlipFlop",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1455,7 +1455,7 @@ circuit_flipflop_JKFlipFlop = circuit_flipflop_JKFlipFlop.extend({
 var circuit_flipflop_JKRFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_flipflop_JKRFlipFlop",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1636,7 +1636,7 @@ circuit_flipflop_JKRFlipFlop = circuit_flipflop_JKRFlipFlop.extend({
 var circuit_flipflop_SRFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_flipflop_SRFlipFlop",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1779,7 +1779,7 @@ circuit_flipflop_SRFlipFlop = circuit_flipflop_SRFlipFlop.extend({
 var circuit_flipflop_TFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_flipflop_TFlipFlop",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1901,7 +1901,7 @@ circuit_flipflop_TFlipFlop = circuit_flipflop_TFlipFlop.extend({
 var circuit_gate_AND = CircuitFigure.extend({
 
    NAME: "circuit_gate_AND",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -1999,7 +1999,7 @@ circuit_gate_AND = circuit_gate_AND.extend({
 var circuit_gate_NAND = CircuitFigure.extend({
 
    NAME: "circuit_gate_NAND",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -2102,7 +2102,7 @@ circuit_gate_NAND = circuit_gate_NAND.extend({
 var circuit_gate_NOR = CircuitFigure.extend({
 
    NAME: "circuit_gate_NOR",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -2210,7 +2210,7 @@ circuit_gate_NOR = circuit_gate_NOR.extend({
 var circuit_gate_NOT = CircuitFigure.extend({
 
    NAME: "circuit_gate_NOT",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -2307,7 +2307,7 @@ circuit_gate_NOT = circuit_gate_NOT.extend({
 var circuit_gate_OR = CircuitFigure.extend({
 
    NAME: "circuit_gate_OR",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -2410,7 +2410,7 @@ circuit_gate_OR = circuit_gate_OR.extend({
 var circuit_hardware_arduino_Arduino = CircuitFigure.extend({
 
    NAME: "circuit_hardware_arduino_Arduino",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -2911,7 +2911,7 @@ circuit_hardware_arduino_Arduino = circuit_hardware_arduino_Arduino.extend({
 var circuit_hardware_arduino_Led = CircuitFigure.extend({
 
    NAME: "circuit_hardware_arduino_Led",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -3023,7 +3023,7 @@ circuit_hardware_arduino_Led = circuit_hardware_arduino_Led.extend({
 var circuit_hardware_raspi_RaspiGPIO = CircuitFigure.extend({
 
    NAME: "circuit_hardware_raspi_RaspiGPIO",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -3382,7 +3382,7 @@ circuit_hardware_raspi_RaspiGPIO = circuit_hardware_raspi_RaspiGPIO.extend({
 var circuit_hardware_raspi_RaspiINPUT = CircuitFigure.extend({
 
    NAME: "circuit_hardware_raspi_RaspiINPUT",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -3656,7 +3656,7 @@ circuit_hardware_raspi_RaspiINPUT = circuit_hardware_raspi_RaspiINPUT.extend({
 var circuit_hardware_raspi_RaspiOUTPUT = CircuitFigure.extend({
 
    NAME: "circuit_hardware_raspi_RaspiOUTPUT",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -3936,7 +3936,7 @@ circuit_hardware_raspi_RaspiOUTPUT = circuit_hardware_raspi_RaspiOUTPUT.extend({
 var circuit_pulse_10hz = CircuitFigure.extend({
 
    NAME: "circuit_pulse_10hz",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4040,7 +4040,7 @@ circuit_pulse_10hz = circuit_pulse_10hz.extend({
 var circuit_pulse_1hz = CircuitFigure.extend({
 
    NAME: "circuit_pulse_1hz",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4145,7 +4145,7 @@ circuit_pulse_1hz = circuit_pulse_1hz.extend({
 var circuit_pulse_50hz = CircuitFigure.extend({
 
    NAME: "circuit_pulse_50hz",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4248,7 +4248,7 @@ circuit_pulse_50hz = circuit_pulse_50hz.extend({
 var circuit_pulse_Delay = CircuitFigure.extend({
 
    NAME: "circuit_pulse_Delay",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4420,7 +4420,7 @@ circuit_pulse_Delay = circuit_pulse_Delay.extend({
 var circuit_switch_HighLow = CircuitFigure.extend({
 
    NAME: "circuit_switch_HighLow",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4533,7 +4533,7 @@ circuit_switch_HighLow = circuit_switch_HighLow.extend({
 var circuit_switch_HighLowArray = CircuitFigure.extend({
 
    NAME: "circuit_switch_HighLowArray",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4698,7 +4698,7 @@ circuit_switch_HighLowArray = circuit_switch_HighLowArray.extend({
 var circuit_switch_PushButton = CircuitFigure.extend({
 
    NAME: "circuit_switch_PushButton",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4817,7 +4817,7 @@ circuit_switch_PushButton = circuit_switch_PushButton.extend({
 var circuit_timer_Delay = CircuitFigure.extend({
 
    NAME: "circuit_timer_Delay",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -4979,27 +4979,26 @@ circuit_timer_Delay = circuit_timer_Delay.extend({
 });
 
 
+
 var documentation_Markdown = draw2d.shape.basic.Rectangle.extend({
     NAME: "documentation_Markdown",
     VERSION: "1.0.0",
 
     init: function (attr) {
-        this._super($.extend({bgColor: "#00a3f6", color: "#1B1B1B"}, attr));
+        this._super($.extend({bgColor: "#FDFDFD", color: "#1B1B1B"}, attr));
 
         this
             .on("change:userData.text", (figure, event) => {
-              let rendered = markdown.render(this.attr("userData.text"))
-              console.log("change",this.overlay, rendered)
-              if(this.overlay) {
+                let rendered = markdown.render(this.attr("userData.text"))
+                if(this.overlay) {
                     this.overlay.html(rendered)
                 }
             })
             .on("added", (emitter, event) => {
                 let rendered = markdown.render(this.attr("userData.text"))
-                this.overlay = $(`<div id="${this.id}" style="overflow:hidden;border:1px solid black;position:absolute; top:${this.getY()}px;left:${this.getY()}px">
+                this.overlay = $(`<div id="${this.id}" style="padding:5px;font-size:80%;overflow:hidden;position:absolute; top:${this.getY()}px;left:${this.getY()}px">
                         ${rendered}
                         </div>`)
-              console.log("added",this.overlay)
                 event.canvas.html.append(this.overlay)
                 this.overlay.css({
                     width: this.getWidth(),
@@ -5009,20 +5008,17 @@ var documentation_Markdown = draw2d.shape.basic.Rectangle.extend({
                 })
             })
             .on("removed", (emitter, event) => {
-              console.log("removed",this.overlay)
                 this.overlay.remove()
             })
             .on("change:dimension", (emitter, event) => {
-              if(this.overlay) {
-              console.log("dimension",this.overlay, event)
-                this.overlay.css({width: event.width, height: event.height})
-              }
+                if(this.overlay) {
+                    this.overlay.css({width: event.width, height: event.height})
+                }
             })
             .on("move", (emitter, event) => {
-              console.log("move",this.overlay)
-              if(this.overlay) {
-                this.overlay.css({top: event.y, left: event.x})
-              }
+                if(this.overlay) {
+                    this.overlay.css({top: event.y, left: event.x})
+                }
             })
 
         this.attr("userData.text", "The quick brown fox $ **jumps** over the *lazy* dog")
@@ -5041,6 +5037,7 @@ var documentation_Markdown = draw2d.shape.basic.Rectangle.extend({
     }
 
 });
+
 
 
 
@@ -5086,7 +5083,7 @@ var documentation_Text = draw2d.shape.basic.Text.extend({
 var messaging_HiveMQ = CircuitFigure.extend({
 
    NAME: "messaging_HiveMQ",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -5210,7 +5207,7 @@ messaging_HiveMQ = messaging_HiveMQ.extend({
 var signals_High = CircuitFigure.extend({
 
    NAME: "signals_High",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -5331,7 +5328,7 @@ signals_High = signals_High.extend({
 var signals_Low = CircuitFigure.extend({
 
    NAME: "signals_Low",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -5452,7 +5449,7 @@ signals_Low = signals_Low.extend({
 var signals_SignalSource = CircuitFigure.extend({
 
    NAME: "signals_SignalSource",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {
@@ -5641,7 +5638,7 @@ signals_SignalSource = signals_SignalSource.extend({
 var signals_SignalTarget = CircuitFigure.extend({
 
    NAME: "signals_SignalTarget",
-   VERSION: "1.0.109_196",
+   VERSION: "1.0.111_198",
 
    init:function(attr, setter, getter)
    {

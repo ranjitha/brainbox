@@ -730,7 +730,7 @@ var Files = function () {
                 id: 'editor',
                 scope: scope,
                 file: name
-              }, conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
+              }, _this.conf.appName + ' | ' + name, window.location.href.split('?')[0] + '?' + scope + '=' + name);
             });
           });
         });
@@ -3553,6 +3553,7 @@ exports.default = draw2d.Canvas.extend({
     this.installEditPolicy(this.coronaFeedback);
 
     this.getFigures().each(function (index, shape) {
+      console.log(shape);
       shape.onStop(_this4.simulationContext);
     });
 
