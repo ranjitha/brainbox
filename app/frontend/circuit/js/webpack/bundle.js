@@ -3553,7 +3553,6 @@ exports.default = draw2d.Canvas.extend({
     this.installEditPolicy(this.coronaFeedback);
 
     this.getFigures().each(function (index, shape) {
-      console.log(shape);
       shape.onStop(_this4.simulationContext);
     });
 

@@ -1,35 +1,43 @@
-
 export default draw2d.SetFigure.extend({
 
   NAME: "CircuitFigure",
 
   init: function (attr, setter, getter) {
+    this.tooltip = null
+    this.tooltipTimer = -1
 
     this._super(attr, setter, getter)
 
     this.persistPorts = false
+    this.zoomCallback = $.proxy(this.positionTooltip, this)
+  },
+
+  setCanvas: function (canvas) {
+    if (this.canvas !== null) this.canvas.off(this.zoomCallback)
+    this._super(canvas)
+    if (this.canvas !== null) this.canvas.on("zoom", this.zoomCallback)
   },
 
   applyAlpha: function () {
   },
 
-  layerGet: function (name, attributes) {
+  layerGet: function (name) {
     if (this.svgNodes === null) return null
-
-    let result = null
-    this.svgNodes.some(function (shape) {
-      if (shape.data("name") === name) {
-        result = shape
+    let found = null
+    this.svgNodes.forEach(function (shape) {
+      if (found ===null && shape.data("name") === name) {
+        found = shape
       }
-      return result !== null
     })
-
-    return result
+    return found
   },
 
   layerAttr: function (name, attributes) {
     if (this.svgNodes === null) return
 
+    // rewrite pure RED to the brainbox "HIGH" color
+    // rewrite pure BLUE to the brainbox "LOW" color
+    // without affecting the original JSON Object
     this.svgNodes.forEach(function (shape) {
       if (shape.data("name") === name) {
         shape.attr(attributes)
@@ -68,13 +76,13 @@ export default draw2d.SetFigure.extend({
     }
   },
 
-  calculate: function () {
+  calculate: function ( context ) {
   },
 
-  onStart: function () {
+  onStart: function (context) {
   },
 
-  onStop: function () {
+  onStop: function (context) {
   },
 
   getParameterSettings: function () {

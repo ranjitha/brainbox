@@ -475,8 +475,8 @@ export default draw2d.Canvas.extend({
     })
 
     this.getFigures().each( (index, shape) => {
-      shape.onStart(this.simulationContext);
-    });
+      shape.onStart(this.simulationContext)
+    })
 
     this._calculate()
 
@@ -500,9 +500,8 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(this.coronaFeedback)
 
     this.getFigures().each( (index, shape) =>{
-      console.log(shape)
-      shape.onStop(this.simulationContext);
-    });
+      shape.onStop(this.simulationContext)
+    })
 
     $("#simulationStartStop").addClass("play")
     $("#simulationStartStop").removeClass("pause")
