@@ -43,6 +43,18 @@ var documentation_Markdown = draw2d.shape.basic.Rectangle.extend({
         this.attr("userData.text", "The quick brown fox $ **jumps** over the *lazy* dog")
     },
 
+    calculate: function( context )
+    {
+    },
+
+    onStart: function(context)
+    {
+    },
+
+    onStop:function(context)
+    {
+    },
+
     getParameterSettings: function () {
         return [
             {

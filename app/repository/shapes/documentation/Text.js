@@ -14,6 +14,18 @@ var documentation_Text = draw2d.shape.basic.Text.extend({
         this.attr("userData.text", "The quick brown fox $ jumps over the lazy dog")
     },
 
+    calculate: function( context )
+    {
+    },
+
+    onStart: function(context)
+    {
+    },
+
+    onStop:function(context)
+    {
+    },
+
     getParameterSettings: function () {
         return [
             {
