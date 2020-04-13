@@ -55,6 +55,13 @@ module.exports = {
     app.post('/backend/user/sheet/rename', (req, res) => module.exports.renameFile(sheetsHomeDir,     req.body.from, req.body.to, res))
     app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,     req.body.filePath, req.body.content, res))
     app.post('/backend/user/sheet/folder', (req, res) => module.exports.createFolder(sheetsHomeDir,   req.body.filePath, res))
+    app.get('/backend/user/sheet/pdf',     (req, res) => {
+      let {render} = require("../../converter/pdf")
+      render(`http://localhost:${args.port}/author/page.html?user=${req.query.file}`).then(pdf => {
+        res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
+        res.send(pdf)
+      })
+    })
 
     // =================================================================
     // Handle user brain files
@@ -91,6 +98,13 @@ module.exports = {
     app.post('/backend/global/sheet/rename', (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
     app.post('/backend/global/sheet/save',   (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))
     app.post('/backend/global/sheet/folder', (req, res) => module.exports.createFolder(sheetsAppDir, req.body.filePath, res))
+    app.get('/backend/global/sheet/pdf',     (req, res) => {
+      let {render} = require("../../converter/pdf")
+      render(`http://localhost:${args.port}/author/page.html?global=${req.query.file}`).then(pdf => {
+        res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
+        res.send(pdf)
+      })
+    })
 
     // =================================================================
     // Handle system shape files

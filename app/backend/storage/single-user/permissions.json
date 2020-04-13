@@ -45,14 +45,14 @@
     "delete": true,
     "read": true,
     "list": true,
-    "pdf": false,
+    "pdf": true,
     "global": {
       "create": true,
       "update": true,
       "delete": true,
       "read": true,
       "list": true,
-      "pdf": false
+      "pdf": true
     }
   }
 }
