@@ -7,7 +7,7 @@
 var signals_SignalSource = CircuitFigure.extend({
 
    NAME: "signals_SignalSource",
-   VERSION: "1.0.112_199",
+   VERSION: "local-version",
 
    init:function(attr, setter, getter)
    {
@@ -114,7 +114,12 @@ signals_SignalSource = signals_SignalSource.extend({
         var signalId = this.attr("userData.signalId")
         if(context.signalPorts && context.signalPorts[signalId]){
             this.getOutputPort(0).getValue = function(){ 
-                return context.signalPorts[signalId].getValue()
+                if(context.signalPorts[signalId] instanceof draw2d.Port){
+                    return context.signalPorts[signalId].getValue()
+                }
+                else {
+                    return false
+                }
             }
         }
     },

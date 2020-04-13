@@ -611,6 +611,11 @@ export default draw2d.Canvas.extend({
       xCoords.push(b.x, b.x + b.w)
       yCoords.push(b.y, b.y + b.h)
     })
+    this.getLines().each(function (i, f) {
+      let b = f.getBoundingBox()
+      xCoords.push(b.x, b.x + b.w)
+      yCoords.push(b.y, b.y + b.h)
+    })
     let minX = Math.min.apply(Math, xCoords)
     let minY = Math.min.apply(Math, yCoords)
     let width = Math.max(100, Math.max.apply(Math, xCoords) - minX)

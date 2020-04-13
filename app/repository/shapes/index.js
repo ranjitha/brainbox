@@ -5473,7 +5473,7 @@ signals_Low = signals_Low.extend({
 var signals_SignalSource = CircuitFigure.extend({
 
    NAME: "signals_SignalSource",
-   VERSION: "1.0.112_199",
+   VERSION: "local-version",
 
    init:function(attr, setter, getter)
    {
@@ -5580,7 +5580,12 @@ signals_SignalSource = signals_SignalSource.extend({
         var signalId = this.attr("userData.signalId")
         if(context.signalPorts && context.signalPorts[signalId]){
             this.getOutputPort(0).getValue = function(){ 
-                return context.signalPorts[signalId].getValue()
+                if(context.signalPorts[signalId] instanceof draw2d.Port){
+                    return context.signalPorts[signalId].getValue()
+                }
+                else {
+                    return false
+                }
             }
         }
     },
@@ -5662,16 +5667,16 @@ signals_SignalSource = signals_SignalSource.extend({
 var signals_SignalTarget = CircuitFigure.extend({
 
    NAME: "signals_SignalTarget",
-   VERSION: "1.0.112_199",
+   VERSION: "local-version",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
 
-     this._super( $.extend({stroke:0, bgColor:null, width:69.55780000000595,height:22},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:69.21405000000595,height:22},attr), setter, getter);
      var port;
      // Port
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -1.8643487861801238, y: 48.86363636363637 }));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -1.8736080318860082, y: 48.86363636363637 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");
@@ -5681,7 +5686,7 @@ var signals_SignalTarget = CircuitFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 69.55780000000595;
+      this.originalWidth = 69.21405000000595;
       this.originalHeight= 22;
       return shape;
    },
@@ -5691,7 +5696,7 @@ var signals_SignalTarget = CircuitFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L69.55780000000595,0 L69.55780000000595,22 L0,22");
+       shape = this.canvas.paper.path("M0,0 L69.21405000000595,0 L69.21405000000595,22 L0,22");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
