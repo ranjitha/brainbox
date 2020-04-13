@@ -54,7 +54,10 @@ export default class Toolbar {
     if(permissions.sheets.pdf || permissions.sheets.global.pdf) {
       this.pdfButton.on("click", () => {
         let file = app.currentFile
-        if (this.app.hasUnsavedChanges) {
+        if (this.app.hasUnsavedChanges
+          && ((file.scope==="global" && permissions.sheets.global.update===true)
+             ||
+              (file.scope==="user" && permissions.sheets.update===true))) {
           // file must be save before sharing
           app.fileSave(()=>{
             window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")

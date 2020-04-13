@@ -5635,7 +5635,7 @@ var Toolbar = function () {
     if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
       this.pdfButton.on("click", function () {
         var file = app.currentFile;
-        if (_this.app.hasUnsavedChanges) {
+        if (_this.app.hasUnsavedChanges && (file.scope === "global" && permissions.sheets.global.update === true || file.scope === "user" && permissions.sheets.update === true)) {
           // file must be save before sharing
           app.fileSave(function () {
             window.open("../backend/" + file.scope + "/sheet/pdf?file=" + file.name, "__blank");
