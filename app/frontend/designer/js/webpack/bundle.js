@@ -3448,7 +3448,6 @@ var FigureTest = function () {
     value: function _calculate() {
       var _this2 = this;
 
-      console.log("calculate");
       // call the "calculate" method if given to calculate the output-port values
       //
       var figures = this.canvas.getFigures().clone().grep(function (f) {
@@ -6969,12 +6968,10 @@ exports.default = shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     var template = $("#shape-base-template").text().trim();
 
-    console.log();
     var tags = className.split("_");
     var compiled = _hogan2.default.compile(template);
     var tooltip = tags.length > 0 ? tags.slice(-1)[0] : name;
     tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ");
-    console.log(ports);
     var output = compiled.render({
       tooltip: tooltip,
       className: className,

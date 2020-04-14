@@ -114,7 +114,6 @@ export default class FigureTest {
   }
 
   _calculate() {
-    console.log("calculate")
     // call the "calculate" method if given to calculate the output-port values
     //
     let figures = this.canvas.getFigures().clone().grep( (f) => {

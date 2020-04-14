@@ -112,12 +112,10 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     let template = $("#shape-base-template").text().trim()
 
-    console.log()
     let tags = className.split("_")
     let compiled = Hogan.compile(template)
     let tooltip= tags.length>0?tags.slice(-1)[0]:name;
     tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ")
-    console.log(ports)
     let output = compiled.render({
       tooltip: tooltip,
       className: className,
