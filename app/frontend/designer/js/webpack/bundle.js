@@ -3879,6 +3879,29 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/designer/js/figure/DecoratedOutputPort.js":
+/*!****************************************************************!*\
+  !*** ./app/frontend/designer/js/figure/DecoratedOutputPort.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = shape_designer.figure.DecoratedOutputPort = draw2d.OutputPort.extend({
+
+  init: function init(attr, setter, getter) {
+    this._super(attr, setter, getter);
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/designer/js/figure/ExtLabel.js":
 /*!*****************************************************!*\
   !*** ./app/frontend/designer/js/figure/ExtLabel.js ***!
@@ -6703,6 +6726,10 @@ var _DecoratedInputPort = __webpack_require__(/*! ./figure/DecoratedInputPort */
 
 var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
 
+var _DecoratedOutputPort = __webpack_require__(/*! ./figure/DecoratedOutputPort */ "./app/frontend/designer/js/figure/DecoratedOutputPort.js");
+
+var _DecoratedOutputPort2 = _interopRequireDefault(_DecoratedOutputPort);
+
 var _CircuitFigure = __webpack_require__(/*! ./figure/CircuitFigure */ "./app/frontend/designer/js/figure/CircuitFigure.js");
 
 var _CircuitFigure2 = _interopRequireDefault(_CircuitFigure);
@@ -6732,6 +6759,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = {
   hardware: _Hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
+  DecoratedOutputPort: _DecoratedOutputPort2.default,
   LabelInplaceEditor: _LabelInplaceEditor2.default,
   Mousetrap: _mousetrap2.default,
   CircuitFigure: _CircuitFigure2.default,
