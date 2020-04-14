@@ -6,10 +6,16 @@ export default shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.extend(
   init: function () {
     this.isExtFigure = true
     this.decoration = null
-    this._super({
+    this.normalStyle = {
       bgColor: "#37B1DE",
       diameter: 10
-    })
+    }
+    this.hiddenStyle = {
+      bgColor: "#000000",
+      diameter: 3
+    }
+
+    this._super(this.normalStyle)
 
 
     this.setUserData({
@@ -88,12 +94,14 @@ export default shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.extend(
   },
 
   hideDecoration: function () {
+    this.attr(this.hiddenStyle)
     if( this.decoration ){
       this.decoration.setVisible(false)
     }
   },
 
   showDecoration: function () {
+    this.attr(this.normalStyle)
     if( this.decoration ){
       this.decoration.setVisible(true)
     }

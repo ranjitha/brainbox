@@ -22,18 +22,18 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
    * @param {Function} resultCallback the method to call on success. The first argument is the result object, the second the base64 representation of the file content
    */
   marshal: function (canvas, className, resultCallback) {
-    var baseClass = shape_designer.app.getConfiguration("baseClass")
-    var customCode =  shape_designer.app.getConfiguration("code")
+    let baseClass = shape_designer.app.getConfiguration("baseClass")
+    let customCode =  shape_designer.app.getConfiguration("code")
     customCode = customCode.replace(/testShape/g, className);
 
-    var figures = canvas.getExtFigures()
-    var b = canvas.getBoundingBox()
+    let figures = canvas.getExtFigures()
+    let b = canvas.getBoundingBox()
 
-    var x = b.x
-    var y = b.y
+    let x = b.x
+    let y = b.y
 
-    var ports = []
-    var shapes = []
+    let ports = []
+    let shapes = []
 
     shapes.push({
       constructor: 'this.canvas.paper.path("M0,0 L' + (b.w) + ',0 L' + (b.w) + ',' + (b.h) + ' L0,' + (b.h) + '")',
@@ -43,7 +43,7 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     figures.each(function (i, figure) {
       figure.uninstallEditPolicy("draw2d.policy.figure.RegionEditPolicy")
-      var attr = {}
+      let attr = {}
       figure.svgPathString = null
       figure.translate(-x, -y)
       // paint the element and fill the "attr" object with the current
@@ -86,9 +86,19 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
           name: figure.getUserData().name
         })
       } else if (figure instanceof shape_designer.figure.ExtPort) {
+        let typeMapping ={
+          "Input": "new DecoratedInputPort()",
+          "Output": "new DecoratedOutputPort()",
+          "Hybrid": "\"hybrid\""
+        }
+        let methodMapping = {
+          "Input": "addPort",
+          "Output": "addPort",
+          "Hybrid": "createPort"
+        }
         ports.push({
-          type: figure.getInputType() === "Input" ? "new DecoratedInputPort()" : '"' + figure.getInputType().toLowerCase() + '"',
-          method: figure.getInputType() === "Input" ? "addPort" : 'createPort',
+          type: typeMapping[figure.getInputType()],
+          method: methodMapping[figure.getInputType()],
           direction: figure.getConnectionDirection(),
           x: 100 / b.w * figure.getCenter().x,
           y: 100 / b.h * figure.getCenter().y,
@@ -100,13 +110,15 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
       figure.translate(x, y)
     })
 
-    var template = $("#shape-base-template").text().trim()
+    let template = $("#shape-base-template").text().trim()
 
-    var tags = className.split("_")
-    var compiled = Hogan.compile(template)
-    var tooltip= tags.length>0?tags.slice(-1)[0]:name;
+    console.log()
+    let tags = className.split("_")
+    let compiled = Hogan.compile(template)
+    let tooltip= tags.length>0?tags.slice(-1)[0]:name;
     tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ")
-    var output = compiled.render({
+    console.log(ports)
+    let output = compiled.render({
       tooltip: tooltip,
       className: className,
       baseClass: baseClass,

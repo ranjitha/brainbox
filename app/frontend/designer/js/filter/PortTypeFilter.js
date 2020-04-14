@@ -7,8 +7,8 @@ export default shape_designer.filter.PortTypeFilter = class PortTypeFilter exten
   }
 
   insertPane(figure, $parent) {
-    var _this = this
-    var type = figure.getInputType()
+    let _this = this
+    let type = figure.getInputType()
     $parent.append('<div id="' + this.containerId + '" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' +
       '     Port Type' +
@@ -50,15 +50,12 @@ export default shape_designer.filter.PortTypeFilter = class PortTypeFilter exten
   }
 
   getPersistentAttributes(relatedFigure) {
-    var memento = super.getPersistentAttributes(relatedFigure)
+    return super.getPersistentAttributes(relatedFigure)
 
-    return memento
   }
 
   setPersistentAttributes(relatedFigure, memento) {
-    super.setPersistentAttributes(relatedFigure, memento)
-
-    return memento
+    return super.setPersistentAttributes(relatedFigure, memento)
   }
 }
 

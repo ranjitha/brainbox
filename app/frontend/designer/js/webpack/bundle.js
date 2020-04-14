@@ -4355,10 +4355,16 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
   init: function init() {
     this.isExtFigure = true;
     this.decoration = null;
-    this._super({
+    this.normalStyle = {
       bgColor: "#37B1DE",
       diameter: 10
-    });
+    };
+    this.hiddenStyle = {
+      bgColor: "#000000",
+      diameter: 3
+    };
+
+    this._super(this.normalStyle);
 
     this.setUserData({
       name: "Port",
@@ -4433,12 +4439,14 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
   },
 
   hideDecoration: function hideDecoration() {
+    this.attr(this.hiddenStyle);
     if (this.decoration) {
       this.decoration.setVisible(false);
     }
   },
 
   showDecoration: function showDecoration() {
+    this.attr(this.normalStyle);
     if (this.decoration) {
       this.decoration.setVisible(true);
     }
@@ -6111,16 +6119,12 @@ exports.default = shape_designer.filter.PortTypeFilter = function (_Filter) {
   }, {
     key: "getPersistentAttributes",
     value: function getPersistentAttributes(relatedFigure) {
-      var memento = _get(PortTypeFilter.prototype.__proto__ || Object.getPrototypeOf(PortTypeFilter.prototype), "getPersistentAttributes", this).call(this, relatedFigure);
-
-      return memento;
+      return _get(PortTypeFilter.prototype.__proto__ || Object.getPrototypeOf(PortTypeFilter.prototype), "getPersistentAttributes", this).call(this, relatedFigure);
     }
   }, {
     key: "setPersistentAttributes",
     value: function setPersistentAttributes(relatedFigure, memento) {
-      _get(PortTypeFilter.prototype.__proto__ || Object.getPrototypeOf(PortTypeFilter.prototype), "setPersistentAttributes", this).call(this, relatedFigure, memento);
-
-      return memento;
+      return _get(PortTypeFilter.prototype.__proto__ || Object.getPrototypeOf(PortTypeFilter.prototype), "setPersistentAttributes", this).call(this, relatedFigure, memento);
     }
   }]);
 
@@ -6939,9 +6943,19 @@ exports.default = shape_designer.FigureWriter = draw2d.io.Writer.extend({
           name: figure.getUserData().name
         });
       } else if (figure instanceof shape_designer.figure.ExtPort) {
+        var typeMapping = {
+          "Input": "new DecoratedInputPort()",
+          "Output": "new DecoratedOutputPort()",
+          "Hybrid": "\"hybrid\""
+        };
+        var methodMapping = {
+          "Input": "addPort",
+          "Output": "addPort",
+          "Hybrid": "createPort"
+        };
         ports.push({
-          type: figure.getInputType() === "Input" ? "new DecoratedInputPort()" : '"' + figure.getInputType().toLowerCase() + '"',
-          method: figure.getInputType() === "Input" ? "addPort" : 'createPort',
+          type: typeMapping[figure.getInputType()],
+          method: methodMapping[figure.getInputType()],
           direction: figure.getConnectionDirection(),
           x: 100 / b.w * figure.getCenter().x,
           y: 100 / b.h * figure.getCenter().y,
@@ -6955,10 +6969,12 @@ exports.default = shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     var template = $("#shape-base-template").text().trim();
 
+    console.log();
     var tags = className.split("_");
     var compiled = _hogan2.default.compile(template);
     var tooltip = tags.length > 0 ? tags.slice(-1)[0] : name;
     tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ");
+    console.log(ports);
     var output = compiled.render({
       tooltip: tooltip,
       className: className,

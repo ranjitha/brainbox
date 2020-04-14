@@ -11,7 +11,7 @@
  */
 import MarkerStateAFigure from "./MarkerStateAFigure"
 import MarkerStateBFigure from "./MarkerStateBFigure"
-import conf from "../Configuration"
+import colors from "./Colors"
 
 export default draw2d.shape.layout.VerticalLayout.extend({
 
@@ -160,7 +160,7 @@ export default draw2d.shape.layout.VerticalLayout.extend({
         this.defaultValue = value;
 
         this.setText((this.defaultValue===true)?"High":"Low ");
-        this.stateB.setTintColor((this.defaultValue===true)?conf.color.high:conf.color.low);
+        this.stateB.setTintColor((this.defaultValue===true)?colors.high:colors.low);
 
         // only propagate the value to the parent if the decoration permanent visible
         //

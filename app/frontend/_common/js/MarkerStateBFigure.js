@@ -1,4 +1,4 @@
-import conf from "../Configuration"
+import colors from "./Colors"
 
 export default draw2d.shape.layout.HorizontalLayout.extend({
 
@@ -9,12 +9,12 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
      */
     init : function(attr, setter, getter)
     {
-        this.tintColor = conf.color.low;
+        this.tintColor = colors.low;
 
         this._super($.extend({
             bgColor:"#FFFFFF",
             stroke:1,
-            color:conf.color.low,
+            color:colors.low,
             radius:2,
             padding:{left:3, top:2, bottom:0, right:8},
             gap:5

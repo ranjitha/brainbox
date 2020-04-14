@@ -341,6 +341,140 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/_common/js/Colors.js":
+/*!*******************************************!*\
+  !*** ./app/frontend/_common/js/Colors.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+//
+exports.default = {
+    high: "#C21B7A",
+    low: "#0078F2"
+};
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/DecoratedInputPort.js":
+/*!*******************************************************!*\
+  !*** ./app/frontend/_common/js/DecoratedInputPort.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _MarkerFigure = __webpack_require__(/*! ./MarkerFigure */ "./app/frontend/_common/js/MarkerFigure.js");
+
+var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.InputPort.extend({
+
+  NAME: "DecoratedInputPort",
+
+  init: function init(attr, setter, getter) {
+    var _this = this;
+
+    this.hasChanged = false;
+
+    this._super(attr, setter, getter);
+
+    this.decoration = new _MarkerFigure2.default();
+
+    this.add(this.decoration, new draw2d.layout.locator.LeftLocator({ margin: 8 }));
+
+    this.on("disconnect", function (emitter, event) {
+      _this.decoration.setVisible(_this.getConnections().getSize() === 0);
+
+      // default value of a not connected port is always HIGH
+      //
+      if (_this.getConnections().getSize() === 0) {
+        _this.setValue(true);
+      }
+    });
+
+    this.on("connect", function (emitter, event) {
+      _this.decoration.setVisible(false);
+    });
+
+    this.on("dragend", function (emitter, event) {
+      _this.decoration.setVisible(_this.getConnections().getSize() === 0);
+    });
+
+    this.on("drag", function (emitter, event) {
+      _this.decoration.setVisible(false);
+    });
+
+    // a port can have a value. Useful for workflow engines or circuit diagrams
+    this.setValue(true);
+  },
+
+  useDefaultValue: function useDefaultValue() {
+    this.decoration.setStick(true);
+  },
+
+  setValue: function setValue(value) {
+    this.hasChanged = this.value !== value;
+    this._super(value);
+  },
+
+  hasChangedValue: function hasChangedValue() {
+    return this.hasChanged;
+  },
+
+  hasRisingEdge: function hasRisingEdge() {
+    return this.hasChangedValue() && this.getValue();
+  },
+
+  hasFallingEdge: function hasFallingEdge() {
+    return this.hasChangedValue() && !this.getValue();
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/DecoratedOutputPort.js":
+/*!********************************************************!*\
+  !*** ./app/frontend/_common/js/DecoratedOutputPort.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.OutputPort.extend({
+
+  NAME: "DecoratedOutputPort",
+
+  init: function init(attr, setter, getter) {
+    this._super(attr, setter, getter);
+  }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/_common/js/DesignerDialog.js":
 /*!***************************************************!*\
   !*** ./app/frontend/_common/js/DesignerDialog.js ***!
@@ -894,6 +1028,424 @@ var Dialog = function () {
 
 var dialog = new Dialog();
 exports.default = dialog;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/MarkerFigure.js":
+/*!*************************************************!*\
+  !*** ./app/frontend/_common/js/MarkerFigure.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _MarkerStateAFigure = __webpack_require__(/*! ./MarkerStateAFigure */ "./app/frontend/_common/js/MarkerStateAFigure.js");
+
+var _MarkerStateAFigure2 = _interopRequireDefault(_MarkerStateAFigure);
+
+var _MarkerStateBFigure = __webpack_require__(/*! ./MarkerStateBFigure */ "./app/frontend/_common/js/MarkerStateBFigure.js");
+
+var _MarkerStateBFigure2 = _interopRequireDefault(_MarkerStateBFigure);
+
+var _Colors = __webpack_require__(/*! ./Colors */ "./app/frontend/_common/js/Colors.js");
+
+var _Colors2 = _interopRequireDefault(_Colors);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.shape.layout.VerticalLayout.extend({
+
+    NAME: "MarkerFigure",
+
+    init: function init(attr, setter, getter) {
+        var _this = this;
+
+        this.isMouseOver = false; // indicator if the mouse is over the element
+        this.stick = false; // indicator if the stateBFigure should always be visible
+        this.defaultValue = true; // current selected default value for the decoration
+
+        this._super($.extend({
+            stroke: 0
+        }, attr), setter, getter);
+
+        // figure if the decoration is not permanent visible (sticky note)
+        this.add(this.stateA = new _MarkerStateAFigure2.default({ text: "X" }));
+        // figure if the decoration permanent visible
+        this.add(this.stateB = new _MarkerStateBFigure2.default({ text: "X" }));
+
+        this.on("mouseenter", function (emitter, event) {
+            _this.onMouseOver(true);
+        });
+
+        this.on("mouseleave", function (emitter, event) {
+            _this.onMouseOver(false);
+        });
+
+        this.on("click", function (emitter, event) {
+            if (_this.isVisible() === false) {
+                return; //silently
+            }
+
+            if (_this.stateB.getStickTickFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
+                _this.setStick(!_this.getStick());
+            } else if (_this.stateB.getLabelFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
+                $.contextMenu({
+                    selector: 'body',
+                    trigger: "left",
+                    events: {
+                        hide: function hide() {
+                            $.contextMenu('destroy');
+                        }
+                    },
+                    callback: $.proxy(function (key, options) {
+                        // propagate the default value to the port
+                        //
+                        switch (key) {
+                            case "high":
+                                _this.setDefaultValue(true);
+                                _this.setStick(true);
+                                break;
+                            case "low":
+                                _this.setDefaultValue(false);
+                                _this.setStick(true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }, this),
+                    x: event.x,
+                    y: event.y,
+                    items: {
+                        "high": { name: "High" },
+                        "low": { name: "Low" }
+                    }
+                });
+            }
+        });
+
+        this.setDefaultValue(true);
+        this.onMouseOver(false);
+    },
+
+    onMouseOver: function onMouseOver(flag) {
+        this.isMouseOver = flag;
+
+        if (this.visible === false) {
+            return; // silently
+        }
+
+        if (this.stick === true) {
+            this.stateA.setVisible(false);
+            this.stateB.setVisible(true);
+        } else {
+            this.stateA.setVisible(!this.isMouseOver);
+            this.stateB.setVisible(this.isMouseOver);
+        }
+
+        return this;
+    },
+
+    setVisible: function setVisible(flag) {
+        this._super(flag);
+
+        // update the hover/stick state of the figure
+        this.onMouseOver(this.isMouseOver);
+
+        return this;
+    },
+
+    setStick: function setStick(flag) {
+        this.stick = flag;
+        this.onMouseOver(this.isMouseOver);
+
+        // the port has only a default value if the decoration is visible
+        this.parent.setValue(flag ? this.defaultValue : null);
+
+        this.stateB.setTick(this.getStick());
+
+        return this;
+    },
+
+    getStick: function getStick() {
+        return this.stick;
+    },
+
+    setText: function setText(text) {
+        this.stateB.setText(text);
+
+        return this;
+    },
+
+    setDefaultValue: function setDefaultValue(value) {
+        this.defaultValue = value;
+
+        this.setText(this.defaultValue === true ? "High" : "Low ");
+        this.stateB.setTintColor(this.defaultValue === true ? _Colors2.default.high : _Colors2.default.low);
+
+        // only propagate the value to the parent if the decoration permanent visible
+        //
+        if (this.stick === true) {
+            this.parent.setValue(this.defaultValue);
+        }
+    }
+}); /**
+     * The markerFigure is the left hand side annotation for a DecoratedPort.
+     *
+     * It contains two children
+     *
+     * StateAFigure: if the mouse hover and the figure isn't permanent visible
+     * StateBFigure: either the mouse is over or the user pressed the checkbox to stick the figure on the port
+     *
+     * This kind of decoration is usefull for defualt values on workflwos enginges or circuit diagrams
+     *
+     */
+
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/MarkerStateAFigure.js":
+/*!*******************************************************!*\
+  !*** ./app/frontend/_common/js/MarkerStateAFigure.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+/**
+ * This is only the mouseover reactive shape. A little bit smaller than the visible shape
+ *
+ * Or you can display this shape with opacity of 0.2 to indicate that this is a reactive area.
+ */
+exports.default = draw2d.shape.basic.Label.extend({
+
+    NAME: "MarkerStateAFigure",
+
+    /**
+     * @param attr
+     */
+    init: function init(attr, setter, getter) {
+        this._super($.extend({
+            padding: { left: 5, top: 2, bottom: 2, right: 10 },
+            bgColor: null,
+            stroke: 1,
+            color: null,
+            fontColor: null,
+            fontSize: 8
+        }, attr), setter, getter);
+
+        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
+        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
+        //
+        // now this shape is "dead" for any mouse events and the parent must/can handle this.
+        this.hitTest = function () {
+            return false;
+        };
+    }
+
+});
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/MarkerStateBFigure.js":
+/*!*******************************************************!*\
+  !*** ./app/frontend/_common/js/MarkerStateBFigure.js ***!
+  \*******************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _Colors = __webpack_require__(/*! ./Colors */ "./app/frontend/_common/js/Colors.js");
+
+var _Colors2 = _interopRequireDefault(_Colors);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = draw2d.shape.layout.HorizontalLayout.extend({
+
+    NAME: "MarkerStateBFigure",
+
+    /**
+     * @param attr
+     */
+    init: function init(attr, setter, getter) {
+        this.tintColor = _Colors2.default.low;
+
+        this._super($.extend({
+            bgColor: "#FFFFFF",
+            stroke: 1,
+            color: _Colors2.default.low,
+            radius: 2,
+            padding: { left: 3, top: 2, bottom: 0, right: 8 },
+            gap: 5
+        }, attr), setter, getter);
+
+        this.stickTick = new draw2d.shape.basic.Circle({
+            diameter: 8,
+            bgColor: "#f0f0f0",
+            stroke: 1,
+            resizeable: false
+        });
+        this.add(this.stickTick);
+        this.stickTick.hitTest = function () {
+            return false;
+        };
+        this.stickTick.addCssClass("highlightOnHover");
+
+        this.label = new draw2d.shape.basic.Label({
+            text: attr.text,
+            resizeable: false,
+            stroke: 0,
+            padding: 0,
+            fontSize: 8,
+            fontColor: "#303030"
+        });
+        this.add(this.label);
+        this.label.hitTest = function () {
+            return false;
+        };
+        this.label.addCssClass("highlightOnHover");
+
+        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
+        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
+        //
+        // now this shape is "dead" for any mouse events and the parent must/can handle this.
+        this.hitTest = function () {
+            return false;
+        };
+    },
+
+    setText: function setText(text) {
+        this.label.setText(text);
+    },
+
+    setTintColor: function setTintColor(color) {
+        this.tintColor = color;
+        this.attr({ color: color });
+        this.label.attr({ fontColor: color });
+    },
+
+    setTick: function setTick(flag) {
+        this.stickTick.attr({ bgColor: flag ? this.tintColor : "#f0f0f0" });
+    },
+
+    getStickTickFigure: function getStickTickFigure() {
+        return this.stickTick;
+    },
+
+    getLabelFigure: function getLabelFigure() {
+        return this.label;
+    },
+
+    /**
+     * @method
+     *
+     *
+     * @template
+     **/
+    repaint: function repaint(attributes) {
+        if (this.repaintBlocked === true || this.shape === null) {
+            return;
+        }
+
+        attributes = attributes || {};
+
+        attributes.path = this.calculatePath();
+
+        this._super(attributes);
+    },
+
+    /**
+     * @method
+     *
+     * Override the default rendering of the HorizontalLayout, which is a simple
+     * rectangle. We want an arrow.
+     */
+    createShapeElement: function createShapeElement() {
+        return this.canvas.paper.path(this.calculatePath());
+    },
+
+    /**
+     * stupid copy&paste the code from the Polygon shape...unfortunately the LayoutFigure isn't a polygon.
+     *
+     * @returns {string}
+     */
+    calculatePath: function calculatePath() {
+        var arrowLength = 8;
+
+        this.vertices = new draw2d.util.ArrayList();
+
+        var w = this.width;
+        var h = this.height;
+        var pos = this.getAbsolutePosition();
+        var i = 0;
+        var length = 0;
+        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y));
+        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y));
+
+        this.vertices.add(new draw2d.geo.Point(pos.x + w, pos.y + h / 2));
+
+        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y + h));
+        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y + h));
+
+        var radius = this.getRadius();
+        var path = [];
+        // hard corners
+        //
+        if (radius === 0) {
+            length = this.vertices.getSize();
+            var p = this.vertices.get(0);
+            path.push("M", p.x, " ", p.y);
+            for (i = 1; i < length; i++) {
+                p = this.vertices.get(i);
+                path.push("L", p.x, " ", p.y);
+            }
+            path.push("Z");
+        }
+        // soften/round corners
+        //
+        else {
+                length = this.vertices.getSize();
+                var start = this.vertices.first();
+                var end = this.vertices.last();
+                if (start.equals(end)) {
+                    length = length - 1;
+                    end = this.vertices.get(length - 1);
+                }
+                var begin = draw2d.geo.Util.insetPoint(start, end, radius);
+                path.push("M", begin.x, ",", begin.y);
+                for (i = 0; i < length; i++) {
+                    start = this.vertices.get(i);
+                    end = this.vertices.get((i + 1) % length);
+                    var modStart = draw2d.geo.Util.insetPoint(start, end, radius);
+                    var modEnd = draw2d.geo.Util.insetPoint(end, start, radius);
+                    path.push("Q", start.x, ",", start.y, " ", modStart.x, ", ", modStart.y);
+                    path.push("L", modEnd.x, ",", modEnd.y);
+                }
+            }
+        return path.join("");
+    }
+
+});
 module.exports = exports["default"];
 
 /***/ }),
@@ -2285,7 +2837,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _MarkerFigure = __webpack_require__(/*! ./figures/MarkerFigure */ "./app/frontend/circuit/js/figures/MarkerFigure.js");
+var _MarkerFigure = __webpack_require__(/*! ../../_common/js/MarkerFigure */ "./app/frontend/_common/js/MarkerFigure.js");
 
 var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
 
@@ -4612,508 +5164,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/circuit/js/figures/DecoratedInputPort.js":
-/*!***************************************************************!*\
-  !*** ./app/frontend/circuit/js/figures/DecoratedInputPort.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _MarkerFigure = __webpack_require__(/*! ./MarkerFigure */ "./app/frontend/circuit/js/figures/MarkerFigure.js");
-
-var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = draw2d.InputPort.extend({
-
-    NAME: "DecoratedInputPort",
-
-    init: function init(attr, setter, getter) {
-        this.hasChanged = false;
-
-        this._super(attr, setter, getter);
-
-        this.decoration = new _MarkerFigure2.default();
-
-        this.add(this.decoration, new draw2d.layout.locator.LeftLocator({ margin: 8 }));
-
-        this.on("disconnect", function (emitter, event) {
-            this.decoration.setVisible(this.getConnections().getSize() === 0);
-
-            // default value of a not connected port is always HIGH
-            //
-            if (this.getConnections().getSize() === 0) {
-                this.setValue(true);
-            }
-        }.bind(this));
-
-        this.on("connect", function (emitter, event) {
-            this.decoration.setVisible(false);
-        }.bind(this));
-
-        this.on("dragend", function (emitter, event) {
-            this.decoration.setVisible(this.getConnections().getSize() === 0);
-        }.bind(this));
-
-        this.on("drag", function (emitter, event) {
-            this.decoration.setVisible(false);
-        }.bind(this));
-
-        // a port can have a value. Usefull for workflow engines or circuit diagrams
-        this.setValue(true);
-    },
-
-    useDefaultValue: function useDefaultValue() {
-        this.decoration.setStick(true);
-    },
-
-    setValue: function setValue(value) {
-        this.hasChanged = this.value !== value;
-        this._super(value);
-    },
-
-    hasChangedValue: function hasChangedValue() {
-        return this.hasChanged;
-    },
-
-    hasRisingEdge: function hasRisingEdge() {
-        return this.hasChangedValue() && this.getValue();
-    },
-
-    hasFallingEdge: function hasFallingEdge() {
-        return this.hasChangedValue() && !this.getValue();
-    }
-});
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/figures/MarkerFigure.js":
-/*!*********************************************************!*\
-  !*** ./app/frontend/circuit/js/figures/MarkerFigure.js ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _MarkerStateAFigure = __webpack_require__(/*! ./MarkerStateAFigure */ "./app/frontend/circuit/js/figures/MarkerStateAFigure.js");
-
-var _MarkerStateAFigure2 = _interopRequireDefault(_MarkerStateAFigure);
-
-var _MarkerStateBFigure = __webpack_require__(/*! ./MarkerStateBFigure */ "./app/frontend/circuit/js/figures/MarkerStateBFigure.js");
-
-var _MarkerStateBFigure2 = _interopRequireDefault(_MarkerStateBFigure);
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = draw2d.shape.layout.VerticalLayout.extend({
-
-    NAME: "MarkerFigure",
-
-    init: function init(attr, setter, getter) {
-        var _this = this;
-
-        this.isMouseOver = false; // indicator if the mouse is over the element
-        this.stick = false; // indicator if the stateBFigure should always be visible
-        this.defaultValue = true; // current selected default value for the decoration
-
-        this._super($.extend({
-            stroke: 0
-        }, attr), setter, getter);
-
-        // figure if the decoration is not permanent visible (sticky note)
-        this.add(this.stateA = new _MarkerStateAFigure2.default({ text: "X" }));
-        // figure if the decoration permanent visible
-        this.add(this.stateB = new _MarkerStateBFigure2.default({ text: "X" }));
-
-        this.on("mouseenter", function (emitter, event) {
-            _this.onMouseOver(true);
-        });
-
-        this.on("mouseleave", function (emitter, event) {
-            _this.onMouseOver(false);
-        });
-
-        this.on("click", function (emitter, event) {
-            if (_this.isVisible() === false) {
-                return; //silently
-            }
-
-            if (_this.stateB.getStickTickFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
-                _this.setStick(!_this.getStick());
-            } else if (_this.stateB.getLabelFigure().getBoundingBox().hitTest(event.x, event.y) === true) {
-                $.contextMenu({
-                    selector: 'body',
-                    trigger: "left",
-                    events: {
-                        hide: function hide() {
-                            $.contextMenu('destroy');
-                        }
-                    },
-                    callback: $.proxy(function (key, options) {
-                        // propagate the default value to the port
-                        //
-                        switch (key) {
-                            case "high":
-                                _this.setDefaultValue(true);
-                                _this.setStick(true);
-                                break;
-                            case "low":
-                                _this.setDefaultValue(false);
-                                _this.setStick(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    }, this),
-                    x: event.x,
-                    y: event.y,
-                    items: {
-                        "high": { name: "High" },
-                        "low": { name: "Low" }
-                    }
-                });
-            }
-        });
-
-        this.setDefaultValue(true);
-        this.onMouseOver(false);
-    },
-
-    onMouseOver: function onMouseOver(flag) {
-        this.isMouseOver = flag;
-
-        if (this.visible === false) {
-            return; // silently
-        }
-
-        if (this.stick === true) {
-            this.stateA.setVisible(false);
-            this.stateB.setVisible(true);
-        } else {
-            this.stateA.setVisible(!this.isMouseOver);
-            this.stateB.setVisible(this.isMouseOver);
-        }
-
-        return this;
-    },
-
-    setVisible: function setVisible(flag) {
-        this._super(flag);
-
-        // update the hover/stick state of the figure
-        this.onMouseOver(this.isMouseOver);
-
-        return this;
-    },
-
-    setStick: function setStick(flag) {
-        this.stick = flag;
-        this.onMouseOver(this.isMouseOver);
-
-        // the port has only a default value if the decoration is visible
-        this.parent.setValue(flag ? this.defaultValue : null);
-
-        this.stateB.setTick(this.getStick());
-
-        return this;
-    },
-
-    getStick: function getStick() {
-        return this.stick;
-    },
-
-    setText: function setText(text) {
-        this.stateB.setText(text);
-
-        return this;
-    },
-
-    setDefaultValue: function setDefaultValue(value) {
-        this.defaultValue = value;
-
-        this.setText(this.defaultValue === true ? "High" : "Low ");
-        this.stateB.setTintColor(this.defaultValue === true ? _Configuration2.default.color.high : _Configuration2.default.color.low);
-
-        // only propagate the value to the parent if the decoration permanent visible
-        //
-        if (this.stick === true) {
-            this.parent.setValue(this.defaultValue);
-        }
-    }
-}); /**
-     * The markerFigure is the left hand side annotation for a DecoratedPort.
-     *
-     * It contains two children
-     *
-     * StateAFigure: if the mouse hover and the figure isn't permanent visible
-     * StateBFigure: either the mouse is over or the user pressed the checkbox to stick the figure on the port
-     *
-     * This kind of decoration is usefull for defualt values on workflwos enginges or circuit diagrams
-     *
-     */
-
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/figures/MarkerStateAFigure.js":
-/*!***************************************************************!*\
-  !*** ./app/frontend/circuit/js/figures/MarkerStateAFigure.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-/**
- * This is only the mouseover reactive shape. A little bit smaller than the visible shape
- *
- * Or you can display this shape with opacity of 0.2 to indicate that this is a reactive area.
- */
-exports.default = draw2d.shape.basic.Label.extend({
-
-    NAME: "MarkerStateAFigure",
-
-    /**
-     * @param attr
-     */
-    init: function init(attr, setter, getter) {
-        this._super($.extend({
-            padding: { left: 5, top: 2, bottom: 2, right: 10 },
-            bgColor: null,
-            stroke: 1,
-            color: null,
-            fontColor: null,
-            fontSize: 8
-        }, attr), setter, getter);
-
-        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
-        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
-        //
-        // now this shape is "dead" for any mouse events and the parent must/can handle this.
-        this.hitTest = function () {
-            return false;
-        };
-    }
-
-});
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/circuit/js/figures/MarkerStateBFigure.js":
-/*!***************************************************************!*\
-  !*** ./app/frontend/circuit/js/figures/MarkerStateBFigure.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = draw2d.shape.layout.HorizontalLayout.extend({
-
-    NAME: "MarkerStateBFigure",
-
-    /**
-     * @param attr
-     */
-    init: function init(attr, setter, getter) {
-        this.tintColor = _Configuration2.default.color.low;
-
-        this._super($.extend({
-            bgColor: "#FFFFFF",
-            stroke: 1,
-            color: _Configuration2.default.color.low,
-            radius: 2,
-            padding: { left: 3, top: 2, bottom: 0, right: 8 },
-            gap: 5
-        }, attr), setter, getter);
-
-        this.stickTick = new draw2d.shape.basic.Circle({
-            diameter: 8,
-            bgColor: "#f0f0f0",
-            stroke: 1,
-            resizeable: false
-        });
-        this.add(this.stickTick);
-        this.stickTick.hitTest = function () {
-            return false;
-        };
-        this.stickTick.addCssClass("highlightOnHover");
-
-        this.label = new draw2d.shape.basic.Label({
-            text: attr.text,
-            resizeable: false,
-            stroke: 0,
-            padding: 0,
-            fontSize: 8,
-            fontColor: "#303030"
-        });
-        this.add(this.label);
-        this.label.hitTest = function () {
-            return false;
-        };
-        this.label.addCssClass("highlightOnHover");
-
-        // we must override the hitTest method to ensure that the parent can receive the mouseenter/mouseleave events.
-        // Unfortunately draw2D didn't provide event bubbling like HTML. The first shape in queue consumes the event.
-        //
-        // now this shape is "dead" for any mouse events and the parent must/can handle this.
-        this.hitTest = function () {
-            return false;
-        };
-    },
-
-    setText: function setText(text) {
-        this.label.setText(text);
-    },
-
-    setTintColor: function setTintColor(color) {
-        this.tintColor = color;
-        this.attr({ color: color });
-        this.label.attr({ fontColor: color });
-    },
-
-    setTick: function setTick(flag) {
-        this.stickTick.attr({ bgColor: flag ? this.tintColor : "#f0f0f0" });
-    },
-
-    getStickTickFigure: function getStickTickFigure() {
-        return this.stickTick;
-    },
-
-    getLabelFigure: function getLabelFigure() {
-        return this.label;
-    },
-
-    /**
-     * @method
-     *
-     *
-     * @template
-     **/
-    repaint: function repaint(attributes) {
-        if (this.repaintBlocked === true || this.shape === null) {
-            return;
-        }
-
-        attributes = attributes || {};
-
-        attributes.path = this.calculatePath();
-
-        this._super(attributes);
-    },
-
-    /**
-     * @method
-     *
-     * Override the default rendering of the HorizontalLayout, which is a simple
-     * rectangle. We want an arrow.
-     */
-    createShapeElement: function createShapeElement() {
-        return this.canvas.paper.path(this.calculatePath());
-    },
-
-    /**
-     * stupid copy&paste the code from the Polygon shape...unfortunately the LayoutFigure isn't a polygon.
-     *
-     * @returns {string}
-     */
-    calculatePath: function calculatePath() {
-        var arrowLength = 8;
-
-        this.vertices = new draw2d.util.ArrayList();
-
-        var w = this.width;
-        var h = this.height;
-        var pos = this.getAbsolutePosition();
-        var i = 0;
-        var length = 0;
-        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y));
-        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y));
-
-        this.vertices.add(new draw2d.geo.Point(pos.x + w, pos.y + h / 2));
-
-        this.vertices.add(new draw2d.geo.Point(pos.x + w - arrowLength, pos.y + h));
-        this.vertices.add(new draw2d.geo.Point(pos.x, pos.y + h));
-
-        var radius = this.getRadius();
-        var path = [];
-        // hard corners
-        //
-        if (radius === 0) {
-            length = this.vertices.getSize();
-            var p = this.vertices.get(0);
-            path.push("M", p.x, " ", p.y);
-            for (i = 1; i < length; i++) {
-                p = this.vertices.get(i);
-                path.push("L", p.x, " ", p.y);
-            }
-            path.push("Z");
-        }
-        // soften/round corners
-        //
-        else {
-                length = this.vertices.getSize();
-                var start = this.vertices.first();
-                var end = this.vertices.last();
-                if (start.equals(end)) {
-                    length = length - 1;
-                    end = this.vertices.get(length - 1);
-                }
-                var begin = draw2d.geo.Util.insetPoint(start, end, radius);
-                path.push("M", begin.x, ",", begin.y);
-                for (i = 0; i < length; i++) {
-                    start = this.vertices.get(i);
-                    end = this.vertices.get((i + 1) % length);
-                    var modStart = draw2d.geo.Util.insetPoint(start, end, radius);
-                    var modEnd = draw2d.geo.Util.insetPoint(end, start, radius);
-                    path.push("Q", start.x, ",", start.y, " ", modStart.x, ", ", modStart.y);
-                    path.push("L", modEnd.x, ",", modEnd.y);
-                }
-            }
-        return path.join("");
-    }
-
-});
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "./app/frontend/circuit/js/figures/ProbeFigure.js":
 /*!********************************************************!*\
   !*** ./app/frontend/circuit/js/figures/ProbeFigure.js ***!
@@ -5310,13 +5360,21 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _inlineSVG = __webpack_require__(/*! ../../_common/js/inlineSVG */ "./app/frontend/_common/js/inlineSVG.js");
+
+var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
+
+var _DecoratedInputPort = __webpack_require__(/*! ../../_common/js/DecoratedInputPort */ "./app/frontend/_common/js/DecoratedInputPort.js");
+
+var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
+
+var _DecoratedOutputPort = __webpack_require__(/*! ../../_common/js/DecoratedOutputPort */ "./app/frontend/_common/js/DecoratedOutputPort.js");
+
+var _DecoratedOutputPort2 = _interopRequireDefault(_DecoratedOutputPort);
+
 var _ConnectionSelectionFeedbackPolicy = __webpack_require__(/*! ./ConnectionSelectionFeedbackPolicy */ "./app/frontend/circuit/js/ConnectionSelectionFeedbackPolicy.js");
 
 var _ConnectionSelectionFeedbackPolicy2 = _interopRequireDefault(_ConnectionSelectionFeedbackPolicy);
-
-var _DecoratedInputPort = __webpack_require__(/*! ./figures/DecoratedInputPort */ "./app/frontend/circuit/js/figures/DecoratedInputPort.js");
-
-var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
 
 var _Connection = __webpack_require__(/*! ./figures/Connection */ "./app/frontend/circuit/js/figures/Connection.js");
 
@@ -5350,10 +5408,6 @@ __webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/circuit/js/ut
 
 __webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/circuit/js/util/mousetrap-pause.js");
 
-var _inlineSVG = __webpack_require__(/*! ../../_common/js/inlineSVG */ "./app/frontend/_common/js/inlineSVG.js");
-
-var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
-
 var _hardware = __webpack_require__(/*! ./hardware */ "./app/frontend/circuit/js/hardware.js");
 
 var _hardware2 = _interopRequireDefault(_hardware);
@@ -5382,6 +5436,7 @@ exports.default = {
   ConnectionSelectionFeedbackPolicy: _ConnectionSelectionFeedbackPolicy2.default,
   hardware: _hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
+  DecoratedOutputPort: _DecoratedOutputPort2.default,
   Connection: _Connection2.default,
   Raft: _Raft2.default,
   ProbeFigure: _ProbeFigure2.default,
