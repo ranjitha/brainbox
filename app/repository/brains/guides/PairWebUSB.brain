@@ -19,7 +19,7 @@
       "labels": []
     },
     {
-      "type": "draw2d_circuit_pulse_10hz",
+      "type": "circuit_digital_pulse_10hz",
       "id": "ad7b5f40-7c44-13d2-0111-8384547f874a",
       "x": 369,
       "y": 451,
@@ -28,7 +28,7 @@
       "alpha": 1,
       "angle": 0,
       "userData": {},
-      "cssClass": "draw2d_circuit_pulse_10hz",
+      "cssClass": "circuit_digital_pulse_10hz",
       "bgColor": "none",
       "color": "#1B1B1B",
       "stroke": 0,

@@ -57,22 +57,24 @@ export default AbstractToolPolicy.extend({
   },
 
   executeGeometryOperation: function (canvas, figure1, figure2, operationFunc) {
+    // must be "var" and not "let"....see the eval method.
     var p1 = this.getGeometry(figure1)
     var p2 = this.getGeometry(figure2)
-    var union = eval("p1." + operationFunc + "(p2)")
-    var geo = new jsts.io.GeoJSONWriter().write(union)
-    var memento = figure1.getPersistentAttributes()
-    var cmd = new draw2d.command.CommandCollection()
+    let union = eval("p1." + operationFunc + "(p2)")
+
+    let geo = new jsts.io.GeoJSONWriter().write(union)
+    let memento = figure1.getPersistentAttributes()
+    let cmd = new draw2d.command.CommandCollection()
     cmd.add(new draw2d.command.CommandDelete(figure1))
     cmd.add(new draw2d.command.CommandDelete(figure2))
     $.each(geo.coordinates, $.proxy(function (i, poly) {
-      var figure = new shape_designer.figure.ExtPolygon()
+      let figure = new shape_designer.figure.ExtPolygon()
       figure.setPersistentAttributes(memento)
       figure.vertices = new draw2d.util.ArrayList()
       $.each(poly, function (i, vertex) {
         figure.addVertex(vertex[0], vertex[1])
       })
-      var command = new draw2d.command.CommandAdd(canvas, figure, figure.getX(), figure.getY())
+      let command = new draw2d.command.CommandAdd(canvas, figure, figure.getX(), figure.getY())
       cmd.add(command)
     }, this))
     canvas.getCommandStack().execute(cmd)
@@ -80,8 +82,8 @@ export default AbstractToolPolicy.extend({
   },
 
   getGeometry: function (figure) {
-    var reader = new jsts.io.WKTReader()
-    var v = figure.getVertices().clone().asArray()
+    let reader = new jsts.io.WKTReader()
+    let v = figure.getVertices().clone().asArray()
     v.push(v[0])
     return reader.read("POLYGON((" + $.map(v, function (e) {
       return e.x + " " + e.y

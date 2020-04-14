@@ -1,227 +1,439 @@
 [
   {
-    "name": "circuit_alu_FullAdder",
+    "name": "circuit_digital_alu_FullAdder",
     "tags": [
       "circuit",
+      "digital",
       "alu",
       "FullAdder"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "FullAdder.js",
     "displayName": "FullAdder",
-    "basedir": "circuit/alu",
-    "filePath": "circuit/alu/FullAdder.shape",
-    "image": "circuit/alu/FullAdder.png"
+    "basedir": "circuit/digital/alu",
+    "filePath": "circuit/digital/alu/FullAdder.shape",
+    "image": "circuit/digital/alu/FullAdder.png"
   },
   {
-    "name": "circuit_alu_FullAdder4Bit",
+    "name": "circuit_digital_alu_FullAdder4Bit",
     "tags": [
       "circuit",
+      "digital",
       "alu",
       "FullAdder4Bit"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "FullAdder4Bit.js",
     "displayName": "FullAdder4Bit",
-    "basedir": "circuit/alu",
-    "filePath": "circuit/alu/FullAdder4Bit.shape",
-    "image": "circuit/alu/FullAdder4Bit.png"
+    "basedir": "circuit/digital/alu",
+    "filePath": "circuit/digital/alu/FullAdder4Bit.shape",
+    "image": "circuit/digital/alu/FullAdder4Bit.png"
   },
   {
-    "name": "circuit_counter_BCDCounter",
+    "name": "circuit_digital_buttons_HighLow",
     "tags": [
       "circuit",
+      "digital",
+      "buttons",
+      "HighLow"
+    ],
+    "version": "1.0.114_202",
+    "basename": "HighLow.js",
+    "displayName": "HighLow",
+    "basedir": "circuit/digital/buttons",
+    "filePath": "circuit/digital/buttons/HighLow.shape",
+    "image": "circuit/digital/buttons/HighLow.png"
+  },
+  {
+    "name": "circuit_digital_buttons_HighLowArray",
+    "tags": [
+      "circuit",
+      "digital",
+      "buttons",
+      "HighLowArray"
+    ],
+    "version": "1.0.114_202",
+    "basename": "HighLowArray.js",
+    "displayName": "HighLowArray",
+    "basedir": "circuit/digital/buttons",
+    "filePath": "circuit/digital/buttons/HighLowArray.shape",
+    "image": "circuit/digital/buttons/HighLowArray.png"
+  },
+  {
+    "name": "circuit_digital_buttons_PushButton",
+    "tags": [
+      "circuit",
+      "digital",
+      "buttons",
+      "PushButton"
+    ],
+    "version": "1.0.114_202",
+    "basename": "PushButton.js",
+    "displayName": "PushButton",
+    "basedir": "circuit/digital/buttons",
+    "filePath": "circuit/digital/buttons/PushButton.shape",
+    "image": "circuit/digital/buttons/PushButton.png"
+  },
+  {
+    "name": "circuit_digital_counter_BCDCounter",
+    "tags": [
+      "circuit",
+      "digital",
       "counter",
       "BCDCounter"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "BCDCounter.js",
     "displayName": "BCDCounter",
-    "basedir": "circuit/counter",
-    "filePath": "circuit/counter/BCDCounter.shape",
-    "image": "circuit/counter/BCDCounter.png"
+    "basedir": "circuit/digital/counter",
+    "filePath": "circuit/digital/counter/BCDCounter.shape",
+    "image": "circuit/digital/counter/BCDCounter.png"
   },
   {
-    "name": "circuit_decoder_BCDto7Seg",
+    "name": "circuit_digital_decoder_BCDto7Seg",
     "tags": [
       "circuit",
+      "digital",
       "decoder",
       "BCDto7Seg"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "BCDto7Seg.js",
     "displayName": "BCDto7Seg",
-    "basedir": "circuit/decoder",
-    "filePath": "circuit/decoder/BCDto7Seg.shape",
-    "image": "circuit/decoder/BCDto7Seg.png"
+    "basedir": "circuit/digital/decoder",
+    "filePath": "circuit/digital/decoder/BCDto7Seg.shape",
+    "image": "circuit/digital/decoder/BCDto7Seg.png"
   },
   {
-    "name": "circuit_display_7Segment",
+    "name": "circuit_digital_display_7Segment",
     "tags": [
       "circuit",
+      "digital",
       "display",
       "7Segment"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "7Segment.js",
     "displayName": "7Segment",
-    "basedir": "circuit/display",
-    "filePath": "circuit/display/7Segment.shape",
-    "image": "circuit/display/7Segment.png"
+    "basedir": "circuit/digital/display",
+    "filePath": "circuit/digital/display/7Segment.shape",
+    "image": "circuit/digital/display/7Segment.png"
   },
   {
-    "name": "circuit_display_Led",
+    "name": "circuit_digital_display_Led",
     "tags": [
       "circuit",
+      "digital",
       "display",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "Led.js",
     "displayName": "Led",
-    "basedir": "circuit/display",
-    "filePath": "circuit/display/Led.shape",
-    "image": "circuit/display/Led.png"
+    "basedir": "circuit/digital/display",
+    "filePath": "circuit/digital/display/Led.shape",
+    "image": "circuit/digital/display/Led.png"
   },
   {
-    "name": "circuit_flipflop_DFlipFlop",
+    "name": "circuit_digital_flipflop_DFlipFlop",
     "tags": [
       "circuit",
+      "digital",
       "flipflop",
       "DFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "DFlipFlop.js",
     "displayName": "DFlipFlop",
-    "basedir": "circuit/flipflop",
-    "filePath": "circuit/flipflop/DFlipFlop.shape",
-    "image": "circuit/flipflop/DFlipFlop.png"
+    "basedir": "circuit/digital/flipflop",
+    "filePath": "circuit/digital/flipflop/DFlipFlop.shape",
+    "image": "circuit/digital/flipflop/DFlipFlop.png"
   },
   {
-    "name": "circuit_flipflop_JKFlipFlop",
+    "name": "circuit_digital_flipflop_JKFlipFlop",
     "tags": [
       "circuit",
+      "digital",
       "flipflop",
       "JKFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "JKFlipFlop.js",
     "displayName": "JKFlipFlop",
-    "basedir": "circuit/flipflop",
-    "filePath": "circuit/flipflop/JKFlipFlop.shape",
-    "image": "circuit/flipflop/JKFlipFlop.png"
+    "basedir": "circuit/digital/flipflop",
+    "filePath": "circuit/digital/flipflop/JKFlipFlop.shape",
+    "image": "circuit/digital/flipflop/JKFlipFlop.png"
   },
   {
-    "name": "circuit_flipflop_JKRFlipFlop",
+    "name": "circuit_digital_flipflop_JKRFlipFlop",
     "tags": [
       "circuit",
+      "digital",
       "flipflop",
       "JKRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "JKRFlipFlop.js",
     "displayName": "JKRFlipFlop",
-    "basedir": "circuit/flipflop",
-    "filePath": "circuit/flipflop/JKRFlipFlop.shape",
-    "image": "circuit/flipflop/JKRFlipFlop.png"
+    "basedir": "circuit/digital/flipflop",
+    "filePath": "circuit/digital/flipflop/JKRFlipFlop.shape",
+    "image": "circuit/digital/flipflop/JKRFlipFlop.png"
   },
   {
-    "name": "circuit_flipflop_SRFlipFlop",
+    "name": "circuit_digital_flipflop_SRFlipFlop",
     "tags": [
       "circuit",
+      "digital",
       "flipflop",
       "SRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "SRFlipFlop.js",
     "displayName": "SRFlipFlop",
-    "basedir": "circuit/flipflop",
-    "filePath": "circuit/flipflop/SRFlipFlop.shape",
-    "image": "circuit/flipflop/SRFlipFlop.png"
+    "basedir": "circuit/digital/flipflop",
+    "filePath": "circuit/digital/flipflop/SRFlipFlop.shape",
+    "image": "circuit/digital/flipflop/SRFlipFlop.png"
   },
   {
-    "name": "circuit_flipflop_TFlipFlop",
+    "name": "circuit_digital_flipflop_TFlipFlop",
     "tags": [
       "circuit",
+      "digital",
       "flipflop",
       "TFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "TFlipFlop.js",
     "displayName": "TFlipFlop",
-    "basedir": "circuit/flipflop",
-    "filePath": "circuit/flipflop/TFlipFlop.shape",
-    "image": "circuit/flipflop/TFlipFlop.png"
+    "basedir": "circuit/digital/flipflop",
+    "filePath": "circuit/digital/flipflop/TFlipFlop.shape",
+    "image": "circuit/digital/flipflop/TFlipFlop.png"
   },
   {
-    "name": "circuit_gate_AND",
+    "name": "circuit_digital_gate_AND",
     "tags": [
       "circuit",
+      "digital",
       "gate",
       "AND"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "AND.js",
     "displayName": "AND",
-    "basedir": "circuit/gate",
-    "filePath": "circuit/gate/AND.shape",
-    "image": "circuit/gate/AND.png"
+    "basedir": "circuit/digital/gate",
+    "filePath": "circuit/digital/gate/AND.shape",
+    "image": "circuit/digital/gate/AND.png"
   },
   {
-    "name": "circuit_gate_NAND",
+    "name": "circuit_digital_gate_DIN40700_AND",
     "tags": [
       "circuit",
+      "digital",
+      "gate",
+      "DIN40700",
+      "AND"
+    ],
+    "version": "1.0.114_202",
+    "basename": "AND.js",
+    "displayName": "AND",
+    "basedir": "circuit/digital/gate/DIN40700",
+    "filePath": "circuit/digital/gate/DIN40700/AND.shape",
+    "image": "circuit/digital/gate/DIN40700/AND.png"
+  },
+  {
+    "name": "circuit_digital_gate_NAND",
+    "tags": [
+      "circuit",
+      "digital",
       "gate",
       "NAND"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "NAND.js",
     "displayName": "NAND",
-    "basedir": "circuit/gate",
-    "filePath": "circuit/gate/NAND.shape",
-    "image": "circuit/gate/NAND.png"
+    "basedir": "circuit/digital/gate",
+    "filePath": "circuit/digital/gate/NAND.shape",
+    "image": "circuit/digital/gate/NAND.png"
   },
   {
-    "name": "circuit_gate_NOR",
+    "name": "circuit_digital_gate_NOR",
     "tags": [
       "circuit",
+      "digital",
       "gate",
       "NOR"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "NOR.js",
     "displayName": "NOR",
-    "basedir": "circuit/gate",
-    "filePath": "circuit/gate/NOR.shape",
-    "image": "circuit/gate/NOR.png"
+    "basedir": "circuit/digital/gate",
+    "filePath": "circuit/digital/gate/NOR.shape",
+    "image": "circuit/digital/gate/NOR.png"
   },
   {
-    "name": "circuit_gate_NOT",
+    "name": "circuit_digital_gate_NOT",
     "tags": [
       "circuit",
+      "digital",
       "gate",
       "NOT"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "NOT.js",
     "displayName": "NOT",
-    "basedir": "circuit/gate",
-    "filePath": "circuit/gate/NOT.shape",
-    "image": "circuit/gate/NOT.png"
+    "basedir": "circuit/digital/gate",
+    "filePath": "circuit/digital/gate/NOT.shape",
+    "image": "circuit/digital/gate/NOT.png"
   },
   {
-    "name": "circuit_gate_OR",
+    "name": "circuit_digital_gate_OR",
     "tags": [
       "circuit",
+      "digital",
       "gate",
       "OR"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "OR.js",
     "displayName": "OR",
-    "basedir": "circuit/gate",
-    "filePath": "circuit/gate/OR.shape",
-    "image": "circuit/gate/OR.png"
+    "basedir": "circuit/digital/gate",
+    "filePath": "circuit/digital/gate/OR.shape",
+    "image": "circuit/digital/gate/OR.png"
+  },
+  {
+    "name": "circuit_digital_pulse_10hz",
+    "tags": [
+      "circuit",
+      "digital",
+      "pulse",
+      "10hz"
+    ],
+    "version": "1.0.114_202",
+    "basename": "10hz.js",
+    "displayName": "10hz",
+    "basedir": "circuit/digital/pulse",
+    "filePath": "circuit/digital/pulse/10hz.shape",
+    "image": "circuit/digital/pulse/10hz.png"
+  },
+  {
+    "name": "circuit_digital_pulse_1hz",
+    "tags": [
+      "circuit",
+      "digital",
+      "pulse",
+      "1hz"
+    ],
+    "version": "1.0.114_202",
+    "basename": "1hz.js",
+    "displayName": "1hz",
+    "basedir": "circuit/digital/pulse",
+    "filePath": "circuit/digital/pulse/1hz.shape",
+    "image": "circuit/digital/pulse/1hz.png"
+  },
+  {
+    "name": "circuit_digital_pulse_50hz",
+    "tags": [
+      "circuit",
+      "digital",
+      "pulse",
+      "50hz"
+    ],
+    "version": "1.0.114_202",
+    "basename": "50hz.js",
+    "displayName": "50hz",
+    "basedir": "circuit/digital/pulse",
+    "filePath": "circuit/digital/pulse/50hz.shape",
+    "image": "circuit/digital/pulse/50hz.png"
+  },
+  {
+    "name": "circuit_digital_pulse_Delay",
+    "tags": [
+      "circuit",
+      "digital",
+      "pulse",
+      "Delay"
+    ],
+    "version": "1.0.114_202",
+    "basename": "Delay.js",
+    "displayName": "Delay",
+    "basedir": "circuit/digital/pulse",
+    "filePath": "circuit/digital/pulse/Delay.shape",
+    "image": "circuit/digital/pulse/Delay.png"
+  },
+  {
+    "name": "circuit_digital_signals_High",
+    "tags": [
+      "circuit",
+      "digital",
+      "signals",
+      "High"
+    ],
+    "version": "1.0.114_202",
+    "basename": "High.js",
+    "displayName": "High",
+    "basedir": "circuit/digital/signals",
+    "filePath": "circuit/digital/signals/High.shape",
+    "image": "circuit/digital/signals/High.png"
+  },
+  {
+    "name": "circuit_digital_signals_Low",
+    "tags": [
+      "circuit",
+      "digital",
+      "signals",
+      "Low"
+    ],
+    "version": "1.0.114_202",
+    "basename": "Low.js",
+    "displayName": "Low",
+    "basedir": "circuit/digital/signals",
+    "filePath": "circuit/digital/signals/Low.shape",
+    "image": "circuit/digital/signals/Low.png"
+  },
+  {
+    "name": "circuit_digital_signals_SignalSource",
+    "tags": [
+      "circuit",
+      "digital",
+      "signals",
+      "SignalSource"
+    ],
+    "version": "1.0.114_202",
+    "basename": "SignalSource.js",
+    "displayName": "SignalSource",
+    "basedir": "circuit/digital/signals",
+    "filePath": "circuit/digital/signals/SignalSource.shape",
+    "image": "circuit/digital/signals/SignalSource.png"
+  },
+  {
+    "name": "circuit_digital_signals_SignalTarget",
+    "tags": [
+      "circuit",
+      "digital",
+      "signals",
+      "SignalTarget"
+    ],
+    "version": "1.0.114_202",
+    "basename": "SignalTarget.js",
+    "displayName": "SignalTarget",
+    "basedir": "circuit/digital/signals",
+    "filePath": "circuit/digital/signals/SignalTarget.shape",
+    "image": "circuit/digital/signals/SignalTarget.png"
+  },
+  {
+    "name": "circuit_digital_timer_Delay",
+    "tags": [
+      "circuit",
+      "digital",
+      "timer",
+      "Delay"
+    ],
+    "version": "1.0.114_202",
+    "basename": "Delay.js",
+    "displayName": "Delay",
+    "basedir": "circuit/digital/timer",
+    "filePath": "circuit/digital/timer/Delay.shape",
+    "image": "circuit/digital/timer/Delay.png"
   },
   {
     "name": "circuit_hardware_arduino_Arduino",
@@ -231,7 +443,7 @@
       "arduino",
       "Arduino"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "Arduino.js",
     "displayName": "Arduino",
     "basedir": "circuit/hardware/arduino",
@@ -246,7 +458,7 @@
       "arduino",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/hardware/arduino",
@@ -261,7 +473,7 @@
       "raspi",
       "RaspiGPIO"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "RaspiGPIO.js",
     "displayName": "RaspiGPIO",
     "basedir": "circuit/hardware/raspi",
@@ -276,7 +488,7 @@
       "raspi",
       "RaspiINPUT"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "RaspiINPUT.js",
     "displayName": "RaspiINPUT",
     "basedir": "circuit/hardware/raspi",
@@ -291,7 +503,7 @@
       "raspi",
       "RaspiOUTPUT"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "RaspiOUTPUT.js",
     "displayName": "RaspiOUTPUT",
     "basedir": "circuit/hardware/raspi",
@@ -299,124 +511,12 @@
     "image": "circuit/hardware/raspi/RaspiOUTPUT.png"
   },
   {
-    "name": "circuit_pulse_10hz",
-    "tags": [
-      "circuit",
-      "pulse",
-      "10hz"
-    ],
-    "version": "local-version",
-    "basename": "10hz.js",
-    "displayName": "10hz",
-    "basedir": "circuit/pulse",
-    "filePath": "circuit/pulse/10hz.shape",
-    "image": "circuit/pulse/10hz.png"
-  },
-  {
-    "name": "circuit_pulse_1hz",
-    "tags": [
-      "circuit",
-      "pulse",
-      "1hz"
-    ],
-    "version": "local-version",
-    "basename": "1hz.js",
-    "displayName": "1hz",
-    "basedir": "circuit/pulse",
-    "filePath": "circuit/pulse/1hz.shape",
-    "image": "circuit/pulse/1hz.png"
-  },
-  {
-    "name": "circuit_pulse_50hz",
-    "tags": [
-      "circuit",
-      "pulse",
-      "50hz"
-    ],
-    "version": "local-version",
-    "basename": "50hz.js",
-    "displayName": "50hz",
-    "basedir": "circuit/pulse",
-    "filePath": "circuit/pulse/50hz.shape",
-    "image": "circuit/pulse/50hz.png"
-  },
-  {
-    "name": "circuit_pulse_Delay",
-    "tags": [
-      "circuit",
-      "pulse",
-      "Delay"
-    ],
-    "version": "local-version",
-    "basename": "Delay.js",
-    "displayName": "Delay",
-    "basedir": "circuit/pulse",
-    "filePath": "circuit/pulse/Delay.shape",
-    "image": "circuit/pulse/Delay.png"
-  },
-  {
-    "name": "circuit_switch_HighLow",
-    "tags": [
-      "circuit",
-      "switch",
-      "HighLow"
-    ],
-    "version": "local-version",
-    "basename": "HighLow.js",
-    "displayName": "HighLow",
-    "basedir": "circuit/switch",
-    "filePath": "circuit/switch/HighLow.shape",
-    "image": "circuit/switch/HighLow.png"
-  },
-  {
-    "name": "circuit_switch_HighLowArray",
-    "tags": [
-      "circuit",
-      "switch",
-      "HighLowArray"
-    ],
-    "version": "local-version",
-    "basename": "HighLowArray.js",
-    "displayName": "HighLowArray",
-    "basedir": "circuit/switch",
-    "filePath": "circuit/switch/HighLowArray.shape",
-    "image": "circuit/switch/HighLowArray.png"
-  },
-  {
-    "name": "circuit_switch_PushButton",
-    "tags": [
-      "circuit",
-      "switch",
-      "PushButton"
-    ],
-    "version": "local-version",
-    "basename": "PushButton.js",
-    "displayName": "PushButton",
-    "basedir": "circuit/switch",
-    "filePath": "circuit/switch/PushButton.shape",
-    "image": "circuit/switch/PushButton.png"
-  },
-  {
-    "name": "circuit_timer_Delay",
-    "tags": [
-      "circuit",
-      "timer",
-      "Delay"
-    ],
-    "version": "local-version",
-    "basename": "Delay.js",
-    "displayName": "Delay",
-    "basedir": "circuit/timer",
-    "filePath": "circuit/timer/Delay.shape",
-    "image": "circuit/timer/Delay.png"
-  },
-  {
     "name": "documentation_Markdown",
     "tags": [
       "documentation",
       "Markdown"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "Markdown.js",
     "displayName": "Markdown",
     "basedir": "documentation",
@@ -429,7 +529,7 @@
       "documentation",
       "Text"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "Text.js",
     "displayName": "Text",
     "basedir": "documentation",
@@ -442,63 +542,11 @@
       "messaging",
       "HiveMQ"
     ],
-    "version": "local-version",
+    "version": "1.0.114_202",
     "basename": "HiveMQ.js",
     "displayName": "HiveMQ",
     "basedir": "messaging",
     "filePath": "messaging/HiveMQ.shape",
     "image": "messaging/HiveMQ.png"
-  },
-  {
-    "name": "signals_High",
-    "tags": [
-      "signals",
-      "High"
-    ],
-    "version": "local-version",
-    "basename": "High.js",
-    "displayName": "High",
-    "basedir": "signals",
-    "filePath": "signals/High.shape",
-    "image": "signals/High.png"
-  },
-  {
-    "name": "signals_Low",
-    "tags": [
-      "signals",
-      "Low"
-    ],
-    "version": "local-version",
-    "basename": "Low.js",
-    "displayName": "Low",
-    "basedir": "signals",
-    "filePath": "signals/Low.shape",
-    "image": "signals/Low.png"
-  },
-  {
-    "name": "signals_SignalSource",
-    "tags": [
-      "signals",
-      "SignalSource"
-    ],
-    "version": "local-version",
-    "basename": "SignalSource.js",
-    "displayName": "SignalSource",
-    "basedir": "signals",
-    "filePath": "signals/SignalSource.shape",
-    "image": "signals/SignalSource.png"
-  },
-  {
-    "name": "signals_SignalTarget",
-    "tags": [
-      "signals",
-      "SignalTarget"
-    ],
-    "version": "local-version",
-    "basename": "SignalTarget.js",
-    "displayName": "SignalTarget",
-    "basedir": "signals",
-    "filePath": "signals/SignalTarget.shape",
-    "image": "signals/SignalTarget.png"
   }
 ]

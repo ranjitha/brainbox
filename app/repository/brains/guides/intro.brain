@@ -1,7 +1,7 @@
 {
   "draw2d": [
     {
-      "type": "circuit_gate_AND",
+      "type": "circuit_digital_gate_AND",
       "id": "5f6de876-f9cd-c366-4a6b-d05431ee8660",
       "x": 2940,
       "y": 2966,
@@ -14,7 +14,7 @@
       "userData": {
         "file": "circuit/gate/AND.shape"
       },
-      "cssClass": "circuit_gate_AND",
+      "cssClass": "circuit_digital_gate_AND",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,
@@ -23,7 +23,7 @@
       "labels": []
     },
     {
-      "type": "circuit_display_Led",
+      "type": "circuit_digital_display_Led",
       "id": "0c73072c-21d0-f6a7-d133-36f00b29b89f",
       "x": 3099,
       "y": 2970,
@@ -36,7 +36,7 @@
       "userData": {
         "file": "circuit/display/Led.shape"
       },
-      "cssClass": "circuit_display_Led",
+      "cssClass": "circuit_digital_display_Led",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,
@@ -45,7 +45,7 @@
       "labels": []
     },
     {
-      "type": "circuit_switch_PushButton",
+      "type": "circuit_digital_switch_PushButton",
       "id": "f78ce91f-1dae-9298-805f-ed86fa46150b",
       "x": 2785,
       "y": 3069,
@@ -58,7 +58,7 @@
       "userData": {
         "file": "circuit/switch/PushButton.shape"
       },
-      "cssClass": "circuit_switch_PushButton",
+      "cssClass": "circuit_digital_switch_PushButton",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,
@@ -68,7 +68,7 @@
       "labels": []
     },
     {
-      "type": "circuit_pulse_50hz",
+      "type": "circuit_digital_pulse_50hz",
       "id": "166f91e7-69d3-fc20-a100-3ce33682e56d",
       "x": 2785,
       "y": 2878,
@@ -81,7 +81,7 @@
       "userData": {
         "file": "circuit/pulse/50hz.shape"
       },
-      "cssClass": "circuit_pulse_50hz",
+      "cssClass": "circuit_digital_pulse_50hz",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,

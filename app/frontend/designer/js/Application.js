@@ -125,6 +125,8 @@ class Application {
     if(tutorial) {
       this.checkForTutorialMode()
     }
+
+    inlineSVG.init()
   }
 
   checkForTutorialMode() {

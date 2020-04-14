@@ -15,7 +15,7 @@
           "content": {
             "draw2d": [
               {
-                "type": "circuit_flipflop_JKFlipFlop",
+                "type": "circuit_digital_flipflop_JKFlipFlop",
                 "id": "8959a2d7-8bb2-00ef-5b30-94fded36cdac",
                 "x": 2798,
                 "y": 3017,
@@ -28,7 +28,7 @@
                 "userData": {
                   "file": "circuit/flipflop/JKFlipFlop.shape"
                 },
-                "cssClass": "circuit_flipflop_JKFlipFlop",
+                "cssClass": "circuit_digital_flipflop_JKFlipFlop",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -66,7 +66,7 @@
                 ]
               },
               {
-                "type": "circuit_flipflop_JKFlipFlop",
+                "type": "circuit_digital_flipflop_JKFlipFlop",
                 "id": "98163e80-daa9-69d1-f2df-a3d377c59041",
                 "x": 2929.5,
                 "y": 3017,
@@ -79,7 +79,7 @@
                 "userData": {
                   "file": "circuit/flipflop/JKFlipFlop.shape"
                 },
-                "cssClass": "circuit_flipflop_JKFlipFlop",
+                "cssClass": "circuit_digital_flipflop_JKFlipFlop",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -117,7 +117,7 @@
                 ]
               },
               {
-                "type": "circuit_flipflop_JKFlipFlop",
+                "type": "circuit_digital_flipflop_JKFlipFlop",
                 "id": "5e77ecf4-1958-fa75-70de-058d97d23919",
                 "x": 3127.5,
                 "y": 3017,
@@ -130,7 +130,7 @@
                 "userData": {
                   "file": "circuit/flipflop/JKFlipFlop.shape"
                 },
-                "cssClass": "circuit_flipflop_JKFlipFlop",
+                "cssClass": "circuit_digital_flipflop_JKFlipFlop",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -168,7 +168,7 @@
                 ]
               },
               {
-                "type": "circuit_flipflop_JKFlipFlop",
+                "type": "circuit_digital_flipflop_JKFlipFlop",
                 "id": "9276cd79-2502-66e3-db8d-d3f99fc26772",
                 "x": 3299,
                 "y": 3017,
@@ -181,7 +181,7 @@
                 "userData": {
                   "file": "circuit/flipflop/JKFlipFlop.shape"
                 },
-                "cssClass": "circuit_flipflop_JKFlipFlop",
+                "cssClass": "circuit_digital_flipflop_JKFlipFlop",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -219,7 +219,7 @@
                 ]
               },
               {
-                "type": "signals_High",
+                "type": "circuit_digital_signals_High",
                 "id": "05b87f73-ca72-4ea8-4f9c-fe97e531d109",
                 "x": 2682,
                 "y": 3017,
@@ -232,7 +232,7 @@
                 "userData": {
                   "file": "signals/High.shape"
                 },
-                "cssClass": "signals_High",
+                "cssClass": "circuit_digital_signals_High",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -241,7 +241,7 @@
                 "labels": []
               },
               {
-                "type": "circuit_pulse_10hz",
+                "type": "circuit_digital_pulse_10hz",
                 "id": "b92a2042-a356-7bf4-d434-beeb5d53c04a",
                 "x": 2710,
                 "y": 3173,
@@ -254,7 +254,7 @@
                 "userData": {
                   "file": "circuit/pulse/10hz.shape"
                 },
-                "cssClass": "circuit_pulse_10hz",
+                "cssClass": "circuit_digital_pulse_10hz",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -264,7 +264,7 @@
                 "labels": []
               },
               {
-                "type": "circuit_gate_AND",
+                "type": "circuit_digital_gate_AND",
                 "id": "e8471d35-56ac-562e-4f01-3098ea5cd1bf",
                 "x": 3040.015625,
                 "y": 2934,
@@ -277,7 +277,7 @@
                 "userData": {
                   "file": "circuit/gate/AND.shape"
                 },
-                "cssClass": "circuit_gate_AND",
+                "cssClass": "circuit_digital_gate_AND",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -286,7 +286,7 @@
                 "labels": []
               },
               {
-                "type": "circuit_gate_AND",
+                "type": "circuit_digital_gate_AND",
                 "id": "ca7ef2b3-9071-56df-61c5-bb0b2f6ccb96",
                 "x": 3224,
                 "y": 2945,
@@ -299,7 +299,7 @@
                 "userData": {
                   "file": "circuit/gate/AND.shape"
                 },
-                "cssClass": "circuit_gate_AND",
+                "cssClass": "circuit_digital_gate_AND",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -308,7 +308,7 @@
                 "labels": []
               },
               {
-                "type": "signals_SignalTarget",
+                "type": "circuit_digital_signals_SignalTarget",
                 "id": "10be29c7-e183-247b-7db5-c5dac45e30a8",
                 "x": 2855,
                 "y": 2860,
@@ -322,7 +322,7 @@
                   "file": "signals/SignalTarget.shape",
                   "signalId": "Bit 0"
                 },
-                "cssClass": "signals_SignalTarget",
+                "cssClass": "circuit_digital_signals_SignalTarget",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -331,7 +331,7 @@
                 "labels": []
               },
               {
-                "type": "signals_SignalTarget",
+                "type": "circuit_digital_signals_SignalTarget",
                 "id": "847de79c-1a8f-a3b7-2220-15dab7e45bf6",
                 "x": 3025.984375,
                 "y": 2860,
@@ -345,7 +345,7 @@
                   "file": "signals/SignalTarget.shape",
                   "signalId": "Bit 1"
                 },
-                "cssClass": "signals_SignalTarget",
+                "cssClass": "circuit_digital_signals_SignalTarget",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -354,7 +354,7 @@
                 "labels": []
               },
               {
-                "type": "signals_SignalTarget",
+                "type": "circuit_digital_signals_SignalTarget",
                 "id": "1471be0a-32d1-423f-b51c-28c60e0f7708",
                 "x": 3201,
                 "y": 2860,
@@ -368,7 +368,7 @@
                   "file": "signals/SignalTarget.shape",
                   "signalId": "Bit 2"
                 },
-                "cssClass": "signals_SignalTarget",
+                "cssClass": "circuit_digital_signals_SignalTarget",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -377,7 +377,7 @@
                 "labels": []
               },
               {
-                "type": "signals_SignalTarget",
+                "type": "circuit_digital_signals_SignalTarget",
                 "id": "2c577ec5-aeb8-d71d-f8c6-9671f6698ed3",
                 "x": 3424.8125,
                 "y": 2860,
@@ -391,7 +391,7 @@
                   "file": "signals/SignalTarget.shape",
                   "signalId": "Bit 3"
                 },
-                "cssClass": "signals_SignalTarget",
+                "cssClass": "circuit_digital_signals_SignalTarget",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,

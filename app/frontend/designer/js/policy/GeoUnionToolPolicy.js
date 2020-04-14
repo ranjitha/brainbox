@@ -23,7 +23,6 @@ export default AbstractGeoToolPolicy.extend({
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseDown: function (canvas, x, y, shiftKey, ctrlKey) {
-
     var figure = canvas.getBestFigure(x, y)
 
     // check if the user click on a child shape. DragDrop and movement must redirect

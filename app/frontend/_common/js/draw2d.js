@@ -6782,8 +6782,9 @@ _packages2.default.Canvas = Class.extend(
       },
       drop: function drop(event, ui) {
         event = _this._getEvent(event);
+        var helperPos = $(ui.helper).position();
         var pos = _this.fromDocumentToCanvasCoordinate(event.clientX, event.clientY);
-        _this.onDrop(ui.draggable, pos.getX(), pos.getY(), event.shiftKey, event.ctrlKey);
+        _this.onDrop(ui.draggable, pos.getX() - (event.clientX - helperPos.left) + 5, pos.getY() - (event.clientY - helperPos.top) + 5, event.shiftKey, event.ctrlKey);
       }
     });
 
@@ -7349,6 +7350,7 @@ _packages2.default.Canvas = Class.extend(
    *
    * @since 4.4.0
    * @param {draw2d.geo.Rectangle} [dim] the dimension to set or null for autodetect
+   * @param {Number} [height] the height of the canvas if the first argument is a number and not a Rectangle
    */
   setDimension: function setDimension(dim, height) {
     if (typeof dim === "undefined") {

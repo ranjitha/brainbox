@@ -1613,6 +1613,8 @@ var Application = function () {
       if (tutorial) {
         this.checkForTutorialMode();
       }
+
+      inlineSVG.init();
     }
   }, {
     key: "checkForTutorialMode",
@@ -2103,8 +2105,6 @@ var Layer = function () {
         _this.html.append('<div class="layerElement ' + _this.figureToCSS(figure) + '" data-figure="' + figure.id + '"  data-visibility="' + figure.isVisible() + '" id="layerElement_' + figure.id + '" >' + figure.getUserData().name + '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Toggle Visibility of the Layer"  class="layer_visibility pull-right"><img class="icon svg" src="' + (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' + '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" ><img class="icon svg" src="./images/layer_edit.svg"/></span>' + '</div>');
       }, true);
 
-      inlineSVG.init();
-
       $('*[data-toggle="tooltip"]').tooltip({
         placement: "bottom",
         container: "body",
@@ -2472,7 +2472,13 @@ var Toolbar = function () {
     this.differenceButton = $('<div class="image-button disabled" id="toolDifference" data-toggle="tooltip"  title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" ><img src="./images/toolbar_geo_subtract.svg"/><div>Subtract</div></div>');
     buttonGroup.append(this.differenceButton);
     this.html.delegate("#toolDifference:not(.disabled)", "click", function () {
-      _this.view.installEditPolicy(new _GeoDifferenceToolPolicy2.default());
+      var selection = _this.view.getSelection().getAll();
+      var p = new _GeoDifferenceToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
+      p.execute(_this.view, selection);
     });
     Mousetrap.bindGlobal(["D", "d"], function () {
       _this.differenceButton.click();
@@ -2482,7 +2488,13 @@ var Toolbar = function () {
     this.intersectionButton = $('<div class="image-button disabled" id="toolIntersection" data-toggle="tooltip" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" ><img src="./images/toolbar_geo_intersect.svg"/><div>Intersect</div></div>');
     buttonGroup.append(this.intersectionButton);
     this.html.delegate("#toolIntersection:not(.disabled)", "click", function () {
-      _this.view.installEditPolicy(new _GeoIntersectionToolPolicy2.default());
+      var selection = _this.view.getSelection().getAll();
+      var p = new _GeoIntersectionToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
+      p.execute(_this.view, selection);
     });
     Mousetrap.bindGlobal(["I", "i"], function () {
       _this.intersectionButton.click();
@@ -7013,9 +7025,11 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   executeGeometryOperation: function executeGeometryOperation(canvas, figure1, figure2, operationFunc) {
+    // must be "var" and not "let"....see the eval method.
     var p1 = this.getGeometry(figure1);
     var p2 = this.getGeometry(figure2);
     var union = eval("p1." + operationFunc + "(p2)");
+
     var geo = new jsts.io.GeoJSONWriter().write(union);
     var memento = figure1.getPersistentAttributes();
     var cmd = new draw2d.command.CommandCollection();
@@ -7385,7 +7399,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
-
     var figure = canvas.getBestFigure(x, y);
 
     // check if the user click on a child shape. DragDrop and movement must redirect

@@ -2612,13 +2612,11 @@ var Palette = function () {
           $(".tree-leaf-content").removeClass("selected");
           var target = $(event.currentTarget);
           target.addClass("selected");
-          var path = target.data("item").path;
+          var path = target.data("item").path.toLowerCase();
           var $grid = $("#paletteElements");
 
           $grid.shuffle('shuffle', function ($el, shuffle) {
             var text = $.trim($el.data("path")).toLowerCase();
-            if (text === "_request_") return true;
-
             return text.startsWith(path);
           });
 

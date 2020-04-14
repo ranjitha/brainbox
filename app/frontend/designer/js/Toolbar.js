@@ -206,7 +206,13 @@ export default class Toolbar {
     this.differenceButton = $('<div class="image-button disabled" id="toolDifference" data-toggle="tooltip"  title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" ><img src="./images/toolbar_geo_subtract.svg"/><div>Subtract</div></div>')
     buttonGroup.append(this.differenceButton)
     this.html.delegate("#toolDifference:not(.disabled)", "click", () => {
-      this.view.installEditPolicy(new GeoDifferenceToolPolicy())
+      let selection = this.view.getSelection().getAll()
+      let p = new GeoDifferenceToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
+      this.view.installEditPolicy(p)
+      p.execute(this.view, selection)
     })
     Mousetrap.bindGlobal(["D", "d"], () => {
       this.differenceButton.click()
@@ -216,7 +222,13 @@ export default class Toolbar {
     this.intersectionButton = $('<div class="image-button disabled" id="toolIntersection" data-toggle="tooltip" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" ><img src="./images/toolbar_geo_intersect.svg"/><div>Intersect</div></div>')
     buttonGroup.append(this.intersectionButton)
     this.html.delegate("#toolIntersection:not(.disabled)", "click", () => {
-      this.view.installEditPolicy(new GeoIntersectionToolPolicy())
+      let selection = this.view.getSelection().getAll()
+      let p = new GeoIntersectionToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
+      this.view.installEditPolicy(p)
+      p.execute(this.view, selection)
     })
     Mousetrap.bindGlobal(["I", "i"], () => {
       this.intersectionButton.click()

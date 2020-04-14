@@ -125,14 +125,11 @@ export default class Palette {
         $(".tree-leaf-content").removeClass("selected")
         let target = $(event.currentTarget)
         target.addClass("selected")
-        let path = target.data("item").path
+        let path = target.data("item").path.toLowerCase()
         let $grid = $("#paletteElements");
 
         $grid.shuffle('shuffle', function ($el, shuffle) {
           let text = $.trim($el.data("path")).toLowerCase();
-          if (text === "_request_")
-            return true
-
           return text.startsWith(path)
         });
 

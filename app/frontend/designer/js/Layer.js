@@ -49,7 +49,6 @@ export default class Layer {
         '</div>')
     }, true)
 
-    inlineSVG.init()
 
     $('*[data-toggle="tooltip"]').tooltip({
       placement: "bottom",
