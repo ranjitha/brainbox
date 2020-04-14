@@ -190,11 +190,21 @@ export default draw2d.Canvas.extend({
     this.uninstallEditPolicy(this.grid)
     this.getFigures().each((index, figure) => {
       figure.unselect()
+      // hide unwanted decorations for the screenshots
+      if(figure.hideDecoration){
+        figure.hideDecoration()
+      }
     })
   },
 
   showDecoration: function () {
     this.installEditPolicy(this.grid)
+    this.getFigures().each((index, figure) => {
+      // show decorations again
+      if(figure.showDecoration){
+        figure.showDecoration()
+      }
+    })
   },
 
   /**

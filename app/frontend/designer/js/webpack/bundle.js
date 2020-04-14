@@ -2821,11 +2821,21 @@ exports.default = draw2d.Canvas.extend({
     this.uninstallEditPolicy(this.grid);
     this.getFigures().each(function (index, figure) {
       figure.unselect();
+      // hide unwanted decorations for the screenshots
+      if (figure.hideDecoration) {
+        figure.hideDecoration();
+      }
     });
   },
 
   showDecoration: function showDecoration() {
     this.installEditPolicy(this.grid);
+    this.getFigures().each(function (index, figure) {
+      // show decorations again
+      if (figure.showDecoration) {
+        figure.showDecoration();
+      }
+    });
   },
 
   /**
@@ -4422,6 +4432,18 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
     }
   },
 
+  hideDecoration: function hideDecoration() {
+    if (this.decoration) {
+      this.decoration.setVisible(false);
+    }
+  },
+
+  showDecoration: function showDecoration() {
+    if (this.decoration) {
+      this.decoration.setVisible(true);
+    }
+  },
+
   getPotentialFilters: function getPotentialFilters() {
     return [{ label: "Port Type", impl: "shape_designer.filter.PortTypeFilter" }, { label: "Port Direction", impl: "shape_designer.filter.PortDirectionFilter" }, { label: "Color", impl: "shape_designer.filter.FillColorFilter" }];
   },
@@ -4433,9 +4455,9 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
   addFilter: function addFilter(filter) {
     var alreadyIn = false;
 
-    this.filters.each($.proxy(function (i, e) {
+    this.filters.each(function (i, e) {
       alreadyIn = alreadyIn || e.NAME === filter.NAME;
-    }, this));
+    });
     if (alreadyIn === true) {
       return; // silently
     }
@@ -4451,6 +4473,8 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
    *
    */
   repaint: function repaint(attributes) {
+    var _this = this;
+
     if (this.shape === null) {
       return;
     }
@@ -4459,39 +4483,42 @@ exports.default = shape_designer.figure.ExtPort = draw2d.shape.basic.Circle.exte
       attributes = {};
     }
 
-    this.filters.each($.proxy(function (i, filter) {
-      filter.apply(this, attributes);
-    }, this));
+    this.filters.each(function (i, filter) {
+      filter.apply(_this, attributes);
+    });
 
     this._super(attributes);
   },
 
   getPersistentAttributes: function getPersistentAttributes() {
+    var _this2 = this;
+
     var memento = this._super();
 
     memento.filters = [];
-    this.filters.each($.proxy(function (i, e) {
-      var filterMemento = e.getPersistentAttributes(this);
+    this.filters.each(function (i, e) {
+      var filterMemento = e.getPersistentAttributes(_this2);
       memento.filters.push(filterMemento);
-    }, this));
-
+    });
     return memento;
   },
 
   setPersistentAttributes: function setPersistentAttributes(memento) {
+    var _this3 = this;
+
     this._super(memento);
 
     if (typeof memento.filters !== "undefined") {
       this.filters = new draw2d.util.ArrayList();
       var fanoutFilterAdded = false;
-      $.each(memento.filters, $.proxy(function (i, e) {
+      $.each(memento.filters, function (i, e) {
         var filter = eval("new " + e.name + "()");
         if (filter instanceof shape_designer.filter.FanoutFilter) {
           fanoutFilterAdded = true;
         }
-        filter.setPersistentAttributes(this, e);
-        this.filters.add(filter);
-      }, this));
+        filter.setPersistentAttributes(_this3, e);
+        _this3.filters.add(filter);
+      });
       if (!fanoutFilterAdded) {
         this.filters.insertElementAt(new shape_designer.filter.FanoutFilter(), 1);
       }
