@@ -24,6 +24,7 @@ export default class FigureMarkdownEdit {
     this.mdHtml = new Remarkable('full', this.defaults)
     this.mdHtml.inline.validateLink = this.validateLink
 
+
     let markdown = shape_designer.app.getConfiguration("markdown")
     markdown = markdown ? markdown : "# Header \n## Subheader \nbe nice and write a help file for your new \ncreated ***Brainbox*** shape. \n\n  - point 1\n  - point 2\n  - point 3"
     let splash = $(`

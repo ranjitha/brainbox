@@ -286,12 +286,11 @@ class Application {
       }
       return out
     }
-    this.documentConfiguration = pick(this.documentConfiguration, "baseClass", "code", "markdown")
 
     if (key) {
       return this.documentConfiguration[key]
     }
-    return this.documentConfiguration
+    return pick(this.documentConfiguration, "baseClass", "code", "markdown")
   }
 
   setConfiguration(conf) {
