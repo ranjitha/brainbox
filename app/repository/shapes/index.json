@@ -7,7 +7,7 @@
       "alu",
       "FullAdder"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "FullAdder.js",
     "displayName": "FullAdder",
     "basedir": "circuit/digital/alu",
@@ -22,7 +22,7 @@
       "alu",
       "FullAdder4Bit"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "FullAdder4Bit.js",
     "displayName": "FullAdder4Bit",
     "basedir": "circuit/digital/alu",
@@ -37,7 +37,7 @@
       "buttons",
       "HighLow"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "HighLow.js",
     "displayName": "HighLow",
     "basedir": "circuit/digital/buttons",
@@ -52,7 +52,7 @@
       "buttons",
       "HighLowArray"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "HighLowArray.js",
     "displayName": "HighLowArray",
     "basedir": "circuit/digital/buttons",
@@ -67,7 +67,7 @@
       "buttons",
       "PushButton"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "PushButton.js",
     "displayName": "PushButton",
     "basedir": "circuit/digital/buttons",
@@ -82,7 +82,7 @@
       "counter",
       "BCDCounter"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "BCDCounter.js",
     "displayName": "BCDCounter",
     "basedir": "circuit/digital/counter",
@@ -97,7 +97,7 @@
       "decoder",
       "BCDto7Seg"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "BCDto7Seg.js",
     "displayName": "BCDto7Seg",
     "basedir": "circuit/digital/decoder",
@@ -112,7 +112,7 @@
       "display",
       "7Segment"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "7Segment.js",
     "displayName": "7Segment",
     "basedir": "circuit/digital/display",
@@ -127,7 +127,7 @@
       "display",
       "Led"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/digital/display",
@@ -142,7 +142,7 @@
       "flipflop",
       "DFlipFlop"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "DFlipFlop.js",
     "displayName": "DFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -157,7 +157,7 @@
       "flipflop",
       "JKFlipFlop"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "JKFlipFlop.js",
     "displayName": "JKFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -172,7 +172,7 @@
       "flipflop",
       "JKRFlipFlop"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "JKRFlipFlop.js",
     "displayName": "JKRFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -187,7 +187,7 @@
       "flipflop",
       "SRFlipFlop"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "SRFlipFlop.js",
     "displayName": "SRFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -202,7 +202,7 @@
       "flipflop",
       "TFlipFlop"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "TFlipFlop.js",
     "displayName": "TFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -218,7 +218,7 @@
       "DIN40700",
       "AND"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "AND.js",
     "displayName": "AND",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -234,7 +234,7 @@
       "DIN40700",
       "NAND"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "NAND.js",
     "displayName": "NAND",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -250,7 +250,7 @@
       "DIN40700",
       "NOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "NOR.js",
     "displayName": "NOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -266,7 +266,7 @@
       "DIN40700",
       "OR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "OR.js",
     "displayName": "OR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -282,7 +282,7 @@
       "DIN40700",
       "XNOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "XNOR.js",
     "displayName": "XNOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -298,7 +298,7 @@
       "DIN40700",
       "XOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "XOR.js",
     "displayName": "XOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -306,15 +306,16 @@
     "image": "circuit/digital/gate/DIN40700/XOR.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_AND",
+    "name": "circuit_digital_gate_IEC60617_12_AND",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "AND"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "AND.js",
     "displayName": "AND",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -322,15 +323,16 @@
     "image": "circuit/digital/gate/IEC60617-12/AND.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_NAND",
+    "name": "circuit_digital_gate_IEC60617_12_NAND",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "NAND"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "NAND.js",
     "displayName": "NAND",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -338,15 +340,16 @@
     "image": "circuit/digital/gate/IEC60617-12/NAND.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_NOR",
+    "name": "circuit_digital_gate_IEC60617_12_NOR",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "NOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "NOR.js",
     "displayName": "NOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -354,15 +357,16 @@
     "image": "circuit/digital/gate/IEC60617-12/NOR.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_NOT",
+    "name": "circuit_digital_gate_IEC60617_12_NOT",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "NOT"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "NOT.js",
     "displayName": "NOT",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -370,15 +374,16 @@
     "image": "circuit/digital/gate/IEC60617-12/NOT.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_OR",
+    "name": "circuit_digital_gate_IEC60617_12_OR",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "OR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "OR.js",
     "displayName": "OR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -386,15 +391,16 @@
     "image": "circuit/digital/gate/IEC60617-12/OR.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_XNOR",
+    "name": "circuit_digital_gate_IEC60617_12_XNOR",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "XNOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "XNOR.js",
     "displayName": "XNOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -402,15 +408,16 @@
     "image": "circuit/digital/gate/IEC60617-12/XNOR.png"
   },
   {
-    "name": "circuit_digital_gate_IEC60617-12_XOR",
+    "name": "circuit_digital_gate_IEC60617_12_XOR",
     "tags": [
       "circuit",
       "digital",
       "gate",
-      "IEC60617-12",
+      "IEC60617",
+      "12",
       "XOR"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "XOR.js",
     "displayName": "XOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -425,7 +432,7 @@
       "pulse",
       "10hz"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "10hz.js",
     "displayName": "10hz",
     "basedir": "circuit/digital/pulse",
@@ -440,7 +447,7 @@
       "pulse",
       "1hz"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "1hz.js",
     "displayName": "1hz",
     "basedir": "circuit/digital/pulse",
@@ -455,7 +462,7 @@
       "pulse",
       "50hz"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "50hz.js",
     "displayName": "50hz",
     "basedir": "circuit/digital/pulse",
@@ -470,7 +477,7 @@
       "pulse",
       "Delay"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Delay.js",
     "displayName": "Delay",
     "basedir": "circuit/digital/pulse",
@@ -485,7 +492,7 @@
       "signals",
       "High"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "High.js",
     "displayName": "High",
     "basedir": "circuit/digital/signals",
@@ -500,7 +507,7 @@
       "signals",
       "Low"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Low.js",
     "displayName": "Low",
     "basedir": "circuit/digital/signals",
@@ -515,7 +522,7 @@
       "signals",
       "SignalSource"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "SignalSource.js",
     "displayName": "SignalSource",
     "basedir": "circuit/digital/signals",
@@ -530,7 +537,7 @@
       "signals",
       "SignalTarget"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "SignalTarget.js",
     "displayName": "SignalTarget",
     "basedir": "circuit/digital/signals",
@@ -545,7 +552,7 @@
       "timer",
       "Delay"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Delay.js",
     "displayName": "Delay",
     "basedir": "circuit/digital/timer",
@@ -560,7 +567,7 @@
       "arduino",
       "Arduino"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Arduino.js",
     "displayName": "Arduino",
     "basedir": "circuit/hardware/arduino",
@@ -575,7 +582,7 @@
       "arduino",
       "Led"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/hardware/arduino",
@@ -590,7 +597,7 @@
       "raspi",
       "RaspiGPIO"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "RaspiGPIO.js",
     "displayName": "RaspiGPIO",
     "basedir": "circuit/hardware/raspi",
@@ -605,7 +612,7 @@
       "raspi",
       "RaspiINPUT"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "RaspiINPUT.js",
     "displayName": "RaspiINPUT",
     "basedir": "circuit/hardware/raspi",
@@ -620,7 +627,7 @@
       "raspi",
       "RaspiOUTPUT"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "RaspiOUTPUT.js",
     "displayName": "RaspiOUTPUT",
     "basedir": "circuit/hardware/raspi",
@@ -633,7 +640,7 @@
       "documentation",
       "Markdown"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Markdown.js",
     "displayName": "Markdown",
     "basedir": "documentation",
@@ -646,7 +653,7 @@
       "documentation",
       "Text"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "Text.js",
     "displayName": "Text",
     "basedir": "documentation",
@@ -659,7 +666,7 @@
       "messaging",
       "HiveMQ"
     ],
-    "version": "1.0.142_260",
+    "version": "1.0.143_261",
     "basename": "HiveMQ.js",
     "displayName": "HiveMQ",
     "basedir": "messaging",
