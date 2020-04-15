@@ -6,7 +6,7 @@
  *
  *
  */
-circuit_digital_gate_NAND = circuit_digital_gate_NAND.extend({
+circuit_digital_gate_IEC60617_12_XOR = circuit_digital_gate_IEC60617_12_XOR.extend({
 
     init: function(attr, setter, getter){
         this._super(attr, setter, getter);
@@ -16,12 +16,12 @@ circuit_digital_gate_NAND = circuit_digital_gate_NAND.extend({
 
     },
     
-    calculate:function()
+    calculate:function(context)
     {
         var i1 = this.getInputPort(0);
         var i2 = this.getInputPort(1);
         var o1 = this.getOutputPort(0);
         
-        o1.setValue(!(i1.getValue() && i2.getValue()));
+        o1.setValue( (i1.getValue() && !i2.getValue() ) || ( !i1.getValue() && i2.getValue() ));
     }
 });

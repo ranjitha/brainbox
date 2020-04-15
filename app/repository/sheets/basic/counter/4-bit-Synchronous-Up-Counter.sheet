@@ -264,7 +264,7 @@
                 "labels": []
               },
               {
-                "type": "circuit_digital_gate_AND",
+                "type": "circuit_digital_gate_IEC60617_12_AND",
                 "id": "e8471d35-56ac-562e-4f01-3098ea5cd1bf",
                 "x": 3040.015625,
                 "y": 2934,
@@ -277,7 +277,7 @@
                 "userData": {
                   "file": "circuit/gate/AND.shape"
                 },
-                "cssClass": "circuit_digital_gate_AND",
+                "cssClass": "circuit_digital_gate_IEC60617_12_AND",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,
@@ -286,7 +286,7 @@
                 "labels": []
               },
               {
-                "type": "circuit_digital_gate_AND",
+                "type": "circuit_digital_gate_IEC60617_12_AND",
                 "id": "ca7ef2b3-9071-56df-61c5-bb0b2f6ccb96",
                 "x": 3224,
                 "y": 2945,
@@ -299,7 +299,7 @@
                 "userData": {
                   "file": "circuit/gate/AND.shape"
                 },
-                "cssClass": "circuit_digital_gate_AND",
+                "cssClass": "circuit_digital_gate_IEC60617_12_AND",
                 "bgColor": "rgba(0,0,0,0)",
                 "color": "rgba(27,27,27,1)",
                 "stroke": 0,

@@ -2815,6 +2815,40 @@ exports.default = draw2d.Canvas.extend({
     return this;
   },
 
+  remove: function remove(figure) {
+    var _this2 = this;
+
+    // don't fire events of calll callbacks if the fire isn'T part of this canvas
+    //
+    if (figure.getCanvas() !== this) {
+      return this;
+    }
+
+    // remove the figure from a selection handler as well and cleanup the
+    // selection feedback
+    if (this.getSelection().contains(figure)) {
+      this.editPolicy.each(function (i, policy) {
+        if (typeof policy.unselect === "function") {
+          policy.unselect(_this2, figure);
+        }
+      });
+    }
+
+    this.figures.remove(figure);
+
+    figure.setCanvas(null);
+
+    if (figure instanceof draw2d.Connection) {
+      figure.disconnect();
+    }
+
+    this.fireEvent("figure:remove", { figure: figure });
+
+    figure.fireEvent("removed", { figure: figure, canvas: this });
+
+    return this;
+  },
+
   setZoom: function setZoom(newZoom) {
     $("#canvas_zoom_normal").text(parseInt(1.0 / newZoom * 100) + "%");
     this._super(newZoom);

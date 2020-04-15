@@ -1,7 +1,7 @@
 {
   "draw2d": [
     {
-      "type": "circuit_digital_gate_AND",
+      "type": "circuit_digital_gate_IEC60617_12_AND",
       "id": "5f6de876-f9cd-c366-4a6b-d05431ee8660",
       "x": 2940,
       "y": 2966,
@@ -14,7 +14,7 @@
       "userData": {
         "file": "circuit/gate/AND.shape"
       },
-      "cssClass": "circuit_digital_gate_AND",
+      "cssClass": "circuit_digital_gate_IEC60617_12_AND",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,
@@ -45,7 +45,7 @@
       "labels": []
     },
     {
-      "type": "circuit_digital_switch_PushButton",
+      "type": "circuit_digital_buttons_PushButton",
       "id": "f78ce91f-1dae-9298-805f-ed86fa46150b",
       "x": 2785,
       "y": 3069,
@@ -58,7 +58,7 @@
       "userData": {
         "file": "circuit/switch/PushButton.shape"
       },
-      "cssClass": "circuit_digital_switch_PushButton",
+      "cssClass": "circuit_digital_buttons_PushButton",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,

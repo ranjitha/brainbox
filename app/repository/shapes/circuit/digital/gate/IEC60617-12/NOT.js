@@ -4,31 +4,25 @@
 // created with http://www.draw2d.org
 //
 //
-var circuit_digital_gate_NAND = CircuitFigure.extend({
+var circuit_digital_gate_IEC60617_12_NOT = CircuitFigure.extend({
 
-   NAME: "circuit_digital_gate_NAND",
-   VERSION: "1.0.130_229",
+   NAME: "circuit_digital_gate_IEC60617_12_NOT",
+   VERSION: "1.0.142_260",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
 
-     this._super( $.extend({stroke:0, bgColor:null, width:35,height:40},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:36,height:40},attr), setter, getter);
      var port;
      // input01
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 20 }));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 51.25 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("input01");
      port.setMaxFanOut(20);
-     // input02
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 80 }));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#37B1DE");
-     port.setName("input02");
-     port.setMaxFanOut(20);
      // output
-     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 101.42857142857143, y: 48.75 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 100, y: 47.5 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("output");
@@ -38,7 +32,7 @@ var circuit_digital_gate_NAND = CircuitFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 35;
+      this.originalWidth = 36;
       this.originalHeight= 40;
       return shape;
    },
@@ -48,7 +42,7 @@ var circuit_digital_gate_NAND = CircuitFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L35,0 L35,40 L0,40");
+       shape = this.canvas.paper.path("M0,0 L36,0 L36,40 L0,40");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
@@ -58,13 +52,13 @@ var circuit_digital_gate_NAND = CircuitFigure.extend({
        shape.data("name","Rectangle");
        
        // Label
-       shape = this.canvas.paper.text(0,0,'&');
-       shape.attr({"x":9,"y":20,"text-anchor":"start","text":"&","font-family":"\"Arial\"","font-size":20,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape = this.canvas.paper.text(0,0,'1');
+       shape.attr({"x":9.9453125,"y":19.8107200000004,"text-anchor":"start","text":"1","font-family":"\"Arial\"","font-size":20,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
        // Circle
        shape = this.canvas.paper.ellipse();
-       shape.attr({"rx":4,"ry":4,"cx":31,"cy":19.5,"stroke":"rgba(27,27,27,1)","stroke-width":1,"fill":"rgba(255,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
+       shape.attr({"rx":4,"ry":4,"cx":32,"cy":19,"stroke":"rgba(27,27,27,1)","stroke-width":1,"fill":"rgba(252,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
        shape.data("name","Circle");
        
 
@@ -80,7 +74,7 @@ var circuit_digital_gate_NAND = CircuitFigure.extend({
  *
  *
  */
-circuit_digital_gate_NAND = circuit_digital_gate_NAND.extend({
+circuit_digital_gate_IEC60617_12_NOT = circuit_digital_gate_IEC60617_12_NOT.extend({
 
     init: function(attr, setter, getter){
         this._super(attr, setter, getter);
@@ -93,9 +87,9 @@ circuit_digital_gate_NAND = circuit_digital_gate_NAND.extend({
     calculate:function()
     {
         var i1 = this.getInputPort(0);
-        var i2 = this.getInputPort(1);
         var o1 = this.getOutputPort(0);
         
-        o1.setValue(!(i1.getValue() && i2.getValue()));
+        o1.setValue(!i1.getValue());
     }
+
 });

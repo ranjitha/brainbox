@@ -171,6 +171,39 @@ export default draw2d.Canvas.extend({
     return this
   },
 
+  remove: function (figure) {
+    // don't fire events of calll callbacks if the fire isn'T part of this canvas
+    //
+    if (figure.getCanvas() !== this) {
+      return this
+    }
+
+    // remove the figure from a selection handler as well and cleanup the
+    // selection feedback
+    if (this.getSelection().contains(figure)) {
+      this.editPolicy.each((i, policy) => {
+        if (typeof policy.unselect === "function") {
+          policy.unselect(this, figure)
+        }
+      })
+    }
+
+    this.figures.remove(figure)
+
+    figure.setCanvas(null)
+
+    if (figure instanceof draw2d.Connection) {
+      figure.disconnect()
+    }
+
+    this.fireEvent("figure:remove", {figure: figure})
+
+    figure.fireEvent("removed", {figure: figure, canvas: this})
+
+    return this
+  },
+
+
   setZoom: function (newZoom) {
     $("#canvas_zoom_normal").text((parseInt((1.0 / newZoom) * 100)) + "%")
     this._super(newZoom)

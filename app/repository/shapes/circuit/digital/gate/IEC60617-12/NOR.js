@@ -4,31 +4,31 @@
 // created with http://www.draw2d.org
 //
 //
-var circuit_digital_gate_OR = CircuitFigure.extend({
+var circuit_digital_gate_IEC60617_12_NOR = CircuitFigure.extend({
 
-   NAME: "circuit_digital_gate_OR",
-   VERSION: "1.0.130_229",
+   NAME: "circuit_digital_gate_IEC60617_12_NOR",
+   VERSION: "1.0.142_260",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
 
-     this._super( $.extend({stroke:0, bgColor:null, width:30.8125,height:40},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:34.5,height:40},attr), setter, getter);
      var port;
      // input01
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -3.2454361054766734, y: 22.5 }));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -1.4492753623188406, y: 20 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("input01");
      port.setMaxFanOut(20);
      // input02
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -3.2454361054766734, y: 78.75 }));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -2.898550724637681, y: 80 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("input02");
      port.setMaxFanOut(20);
      // output
-     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 98.6815415821501, y: 50 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 98.55072463768116, y: 50 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("output");
@@ -38,7 +38,7 @@ var circuit_digital_gate_OR = CircuitFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 30.8125;
+      this.originalWidth = 34.5;
       this.originalHeight= 40;
       return shape;
    },
@@ -48,7 +48,7 @@ var circuit_digital_gate_OR = CircuitFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L30.8125,0 L30.8125,40 L0,40");
+       shape = this.canvas.paper.path("M0,0 L34.5,0 L34.5,40 L0,40");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
@@ -59,11 +59,16 @@ var circuit_digital_gate_OR = CircuitFigure.extend({
        
        // Label
        shape = this.canvas.paper.text(0,0,'>1');
-       shape.attr({"x":4,"y":18.5,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.attr({"x":4,"y":20,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"#000000","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4,"ry":4,"cx":30.5,"cy":20,"stroke":"rgba(27,27,27,1)","stroke-width":1,"fill":"rgba(252,255,255,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
        // Line
-       shape = this.canvas.paper.path('M14.99265000000014 25.16859999999997L10.291849999999613,25.31550000000061L5.591049999999996,25.462400000000343');
+       shape = this.canvas.paper.path('M5.158499999999549 26.21140000000014L9.793649999999616,26.09254999999939L14.428799999999683,25.973699999999553');
        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"rgba(0,0,0,1)","stroke-width":2,"stroke-dasharray":null,"opacity":1});
        shape.data("name","Line");
        
@@ -80,7 +85,7 @@ var circuit_digital_gate_OR = CircuitFigure.extend({
  *
  *
  */
-circuit_digital_gate_OR = circuit_digital_gate_OR.extend({
+circuit_digital_gate_IEC60617_12_NOR = circuit_digital_gate_IEC60617_12_NOR.extend({
 
     init: function(attr, setter, getter){
         this._super(attr, setter, getter);
@@ -90,12 +95,12 @@ circuit_digital_gate_OR = circuit_digital_gate_OR.extend({
 
     },
     
-    calculate:function(context)
+    calculate:function()
     {
         var i1 = this.getInputPort(0);
         var i2 = this.getInputPort(1);
         var o1 = this.getOutputPort(0);
         
-        o1.setValue(i1.getValue() || i2.getValue());
+        o1.setValue(!(i1.getValue() || i2.getValue()));
     }
 });

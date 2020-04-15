@@ -23,7 +23,7 @@
       "labels": []
     },
     {
-      "type": "circuit_digital_switch_PushButton",
+      "type": "circuit_digital_buttons_PushButton",
       "id": "15b09c86-55d7-2ed8-b7a5-6d2d06c41ea0",
       "x": 2106.98615,
       "y": 2737.516,
@@ -36,7 +36,7 @@
       "userData": {
         "file": "circuit/switch/PushButton.shape"
       },
-      "cssClass": "circuit_digital_switch_PushButton",
+      "cssClass": "circuit_digital_buttons_PushButton",
       "bgColor": "rgba(0,0,0,0)",
       "color": "rgba(27,27,27,1)",
       "stroke": 0,
