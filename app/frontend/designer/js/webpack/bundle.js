@@ -1760,6 +1760,17 @@ var Application = function () {
         this.documentConfiguration = $.extend({}, this.documentConfiguration, figures.first().getUserData());
       }
 
+      function pick(obj, var_keys) {
+        var keys = typeof arguments[1] !== 'string' ? arguments[1] : Array.prototype.slice.call(arguments, 1);
+        var out = {},
+            key = void 0;
+        for (key in keys) {
+          if (typeof obj[key] !== "undefined") out[key] = obj[key];
+        }
+        return out;
+      }
+      this.documentConfiguration = pick(this.documentConfiguration, "baseClass", "code", "markdown");
+
       if (key) {
         return this.documentConfiguration[key];
       }
@@ -1771,7 +1782,8 @@ var Application = function () {
       this.documentConfiguration = $.extend({}, this.documentConfiguration, conf);
       var figures = this.view.getExtFigures();
       if (figures.getSize() > 0) {
-        figures.first().setUserData(this.documentConfiguration);
+        var userData = figures.first().attr("userData");
+        figures.first().attr("userData", $.extend(userData, this.documentConfiguration));
       }
     }
   }, {
@@ -2061,7 +2073,7 @@ var Layer = function () {
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    view.getCommandStack().addEventListener(this);
+    view.getCommandStack().on("change", this);
 
     // Register a Selection listener for the state handling
     // of the Delete Button
@@ -2127,12 +2139,12 @@ var Layer = function () {
         bootbox.prompt({
           title: "Layer Name",
           className: "layer-name-prompt",
-          value: figure.getUserData().name,
+          value: figure.attr("userData.name"),
           callback: function callback(result) {
             Mousetrap.unpause();
             if (result !== null) {
-              figure.getUserData().name = result;
-              _this.stackChanged(null);
+              var cmd = new draw2d.command.CommandAttr(figure, { "userData.name": result });
+              _this.view.getCommandStack().execute(cmd);
             }
           }
         });
@@ -2308,7 +2320,7 @@ var Toolbar = function () {
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    view.getCommandStack().addEventListener(this);
+    view.getCommandStack().on("change", this);
 
     // Register a Selection listener for the state handling
     // of the Delete Button
@@ -2760,6 +2772,48 @@ exports.default = draw2d.Canvas.extend({
    */
   reset: function reset() {
     this.clear();
+  },
+
+  /**
+   * Override the "add" method of the normal canvas. In the Designer "lines" and normal "figures" are handled
+   * in the very same way. Without that it is impossible to sort line in between of normal figures.
+   * In the normal canvas LINE stays always on top. The reason for that is, that lines are in its own collection
+   * to calculate crossing behaviour and other special gimicks.
+   * NOT USED IN THE DESIGNER and in the designer the z-order of the elements are very important.
+   * @param figure
+   * @param x
+   * @param y
+   */
+  add: function add(figure, x, y) {
+    if (figure.getCanvas() === this) {
+      return;
+    }
+
+    this.figures.add(figure);
+    figure.setCanvas(this);
+
+    // to avoid drag&drop outside of this canvas
+    figure.installEditPolicy(this.regionDragDropConstraint);
+
+    // important initial call
+    figure.getShapeElement();
+
+    // init a repaint of the figure. This enforce that all properties
+    // ( color, dim, stroke,...) will be set and pushed to SVG node.
+    figure.repaint();
+
+    // fire the figure:add event before the "move" event and after the figure.repaint() call!
+    //   - the move event can only be fired if the figure part of the canvas.
+    //     and in this case the notification event should be fired to the listener before
+    this.fireEvent("figure:add", { figure: figure, canvas: this });
+
+    // fire the event that the figure is part of the canvas
+    figure.fireEvent("added", { figure: figure, canvas: this });
+
+    // ...now we can fire the initial move event
+    figure.fireEvent("move", { figure: figure, x: figure.getX(), y: figure.getY(), dx: 0, dy: 0 });
+
+    return this;
   },
 
   setZoom: function setZoom(newZoom) {
@@ -7597,7 +7651,7 @@ exports.default = _AbstractToolPolicy2.default.extend({
     //
 
     // don't use the shortcut and assign the this.lineFigure.vertices to a local var.
-    // the vertices are recreated in the "calculatePath" mnethod of the polygon and
+    // The vertices are recreated in the "calculatePath" method of the polygon and
     // the reference is in this case invalid...design flaw!
     //
     var last = this.lineFigure.vertices.last();

@@ -7,7 +7,7 @@
 var circuit_digital_buttons_PushButton = CircuitFigure.extend({
 
    NAME: "circuit_digital_buttons_PushButton",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -16,7 +16,7 @@ var circuit_digital_buttons_PushButton = CircuitFigure.extend({
      this._super( $.extend({stroke:0, bgColor:null, width:35.04322499999989,height:28.936999999999443},attr), setter, getter);
      var port;
      // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 131.77415177969482, y: 82.88350554653346 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 131.77415177969482, y: 82.88350554653346 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");

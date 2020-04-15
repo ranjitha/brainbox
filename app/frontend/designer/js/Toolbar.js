@@ -27,7 +27,7 @@ export default class Toolbar {
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    view.getCommandStack().addEventListener(this)
+    view.getCommandStack().on("change", this)
 
     // Register a Selection listener for the state handling
     // of the Delete Button

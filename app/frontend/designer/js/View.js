@@ -129,6 +129,48 @@ export default draw2d.Canvas.extend({
     this.clear()
   },
 
+  /**
+   * Override the "add" method of the normal canvas. In the Designer "lines" and normal "figures" are handled
+   * in the very same way. Without that it is impossible to sort line in between of normal figures.
+   * In the normal canvas LINE stays always on top. The reason for that is, that lines are in its own collection
+   * to calculate crossing behaviour and other special gimicks.
+   * NOT USED IN THE DESIGNER and in the designer the z-order of the elements are very important.
+   * @param figure
+   * @param x
+   * @param y
+   */
+  add: function (figure, x, y) {
+    if (figure.getCanvas() === this) {
+      return
+    }
+
+    this.figures.add(figure)
+    figure.setCanvas(this)
+
+    // to avoid drag&drop outside of this canvas
+    figure.installEditPolicy(this.regionDragDropConstraint)
+
+    // important initial call
+    figure.getShapeElement()
+
+    // init a repaint of the figure. This enforce that all properties
+    // ( color, dim, stroke,...) will be set and pushed to SVG node.
+    figure.repaint()
+
+    // fire the figure:add event before the "move" event and after the figure.repaint() call!
+    //   - the move event can only be fired if the figure part of the canvas.
+    //     and in this case the notification event should be fired to the listener before
+    this.fireEvent("figure:add", {figure: figure, canvas: this})
+
+    // fire the event that the figure is part of the canvas
+    figure.fireEvent("added", {figure: figure, canvas: this})
+
+    // ...now we can fire the initial move event
+    figure.fireEvent("move", {figure: figure, x: figure.getX(), y: figure.getY(), dx: 0, dy: 0})
+
+    return this
+  },
+
   setZoom: function (newZoom) {
     $("#canvas_zoom_normal").text((parseInt((1.0 / newZoom) * 100)) + "%")
     this._super(newZoom)

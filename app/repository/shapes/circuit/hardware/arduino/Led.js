@@ -7,7 +7,7 @@
 var circuit_hardware_arduino_Led = CircuitFigure.extend({
 
    NAME: "circuit_hardware_arduino_Led",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -18,7 +18,7 @@ var circuit_hardware_arduino_Led = CircuitFigure.extend({
      // Port
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 1.063333333334716, y: 50 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("Port");
      port.setMaxFanOut(20);
    },

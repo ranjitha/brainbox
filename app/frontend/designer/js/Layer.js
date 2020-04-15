@@ -9,7 +9,7 @@ export default class Layer {
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
     //
-    view.getCommandStack().addEventListener(this)
+    view.getCommandStack().on("change", this)
 
     // Register a Selection listener for the state handling
     // of the Delete Button
@@ -72,12 +72,12 @@ export default class Layer {
       bootbox.prompt({
         title: "Layer Name",
         className: "layer-name-prompt",
-        value: figure.getUserData().name,
+        value: figure.attr("userData.name"),
         callback: (result) => {
           Mousetrap.unpause()
           if (result !== null) {
-            figure.getUserData().name = result
-            this.stackChanged(null)
+            let cmd = new draw2d.command.CommandAttr(figure, {"userData.name": result})
+            this.view.getCommandStack().execute(cmd)
           }
         }
       })

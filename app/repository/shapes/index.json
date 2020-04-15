@@ -241,6 +241,22 @@
     "image": "circuit/digital/gate/DIN40700/AND.png"
   },
   {
+    "name": "circuit_digital_gate_DIN40700_OR",
+    "tags": [
+      "circuit",
+      "digital",
+      "gate",
+      "DIN40700",
+      "OR"
+    ],
+    "version": "local-version",
+    "basename": "OR.js",
+    "displayName": "OR",
+    "basedir": "circuit/digital/gate/DIN40700",
+    "filePath": "circuit/digital/gate/DIN40700/OR.shape",
+    "image": "circuit/digital/gate/DIN40700/OR.png"
+  },
+  {
     "name": "circuit_digital_gate_NAND",
     "tags": [
       "circuit",

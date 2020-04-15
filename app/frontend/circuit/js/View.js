@@ -14,6 +14,7 @@ import Connection from "./figures/Connection"
 import SimulationEditPolicy from "./SimulationEditPolicy"
 import markdownDialog from "./dialog/MarkdownDialog"
 import designerDialog from "../../_common/js/DesignerDialog"
+import colors from "../../_common/js/Colors"
 import CodeDialog from "./dialog/CodeDialog"
 import WebUSBHelpDialog from "./dialog/WebUSBHelpDialog"
 
@@ -480,14 +481,15 @@ export default draw2d.Canvas.extend({
 
     this._calculate()
 
-    $("#simulationStartStop").addClass("pause")
-    $("#simulationStartStop").removeClass("play")
+    $("#simulationStartStop")
+      .addClass("pause")
+      .removeClass("play")
     $(".editBase").fadeOut("slow", () => {
       $(".simulationBase").fadeIn("slow")
     })
-    $("#paletteElementsOverlay").fadeIn("fast")
-    $("#paletteElementsOverlay").height($("#paletteElements").height())
-    //this.slider.slider("setValue", 100)
+    $("#paletteElementsOverlay")
+      .fadeIn("fast")
+      .height($("#paletteElements").height())
   },
 
   simulationStop: function () {
@@ -503,8 +505,9 @@ export default draw2d.Canvas.extend({
       shape.onStop(this.simulationContext)
     })
 
-    $("#simulationStartStop").addClass("play")
-    $("#simulationStartStop").removeClass("pause")
+    $("#simulationStartStop")
+      .addClass("play")
+      .removeClass("pause")
     $(".simulationBase").fadeOut("slow", () => {
       $(".editBase").fadeIn("slow")
     })
@@ -524,7 +527,7 @@ export default draw2d.Canvas.extend({
       let outPort = line.getSource()
       let inPort = line.getTarget()
       inPort.setValue(outPort.getValue())
-      line.setColor(outPort.getValue() ? conf.color.high : conf.color.low)
+      line.setColor(outPort.getValue() ? colors.high : colors.low)
     })
 
     if (this.simulate === true) {

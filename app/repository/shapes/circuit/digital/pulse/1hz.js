@@ -7,7 +7,7 @@
 var circuit_digital_pulse_1hz = CircuitFigure.extend({
 
    NAME: "circuit_digital_pulse_1hz",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -16,9 +16,9 @@ var circuit_digital_pulse_1hz = CircuitFigure.extend({
      this._super( $.extend({stroke:0, bgColor:null, width:31.6640625,height:48.60950000000048},attr), setter, getter);
      var port;
      // outputPort
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 103.15815445349125, y: 69.87543587158933 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 103.15815445349125, y: 69.87543587158933 }));
      port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("outputPort");
      port.setMaxFanOut(20);
    },

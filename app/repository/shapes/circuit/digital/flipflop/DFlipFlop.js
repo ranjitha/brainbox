@@ -7,7 +7,7 @@
 var circuit_digital_flipflop_DFlipFlop = CircuitFigure.extend({
 
    NAME: "circuit_digital_flipflop_DFlipFlop",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -16,27 +16,27 @@ var circuit_digital_flipflop_DFlipFlop = CircuitFigure.extend({
      this._super( $.extend({stroke:0, bgColor:null, width:41.5,height:53.052974999999606},attr), setter, getter);
      var port;
      // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 102.42921686747059, y: 20.526652840864077 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 102.42921686747059, y: 20.526652840864077 }));
      port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("output_q");
      port.setMaxFanOut(20);
      // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 102.42921686747059, y: 79.98738525030996 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 102.42921686747059, y: 79.98738525030996 }));
      port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("output_q_not");
      port.setMaxFanOut(20);
      // input_d
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 20.526652840864077 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("input_d");
      port.setMaxFanOut(20);
      // input_t
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 79.98738525030996 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("input_t");
      port.setMaxFanOut(20);
    },

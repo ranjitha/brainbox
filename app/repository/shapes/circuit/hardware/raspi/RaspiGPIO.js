@@ -7,7 +7,7 @@
 var circuit_hardware_raspi_RaspiGPIO = CircuitFigure.extend({
 
    NAME: "circuit_hardware_raspi_RaspiGPIO",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -64,49 +64,49 @@ var circuit_hardware_raspi_RaspiGPIO = CircuitFigure.extend({
      port.setName("gpi_8");
      port.setMaxFanOut(1);
      // gpo_9
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 27.799614643545407 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 27.799614643545407 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_9");
      port.setMaxFanOut(20);
      // gpo_10
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 37.57225433526012 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 37.57225433526012 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_10");
      port.setMaxFanOut(20);
      // gpo_11
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 46.73619460500961 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 46.73619460500961 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_11");
      port.setMaxFanOut(20);
      // gpo_12
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 55.97347784200363 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 55.97347784200363 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_12");
      port.setMaxFanOut(20);
      // gpo_13
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 64.76873795761088 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 64.76873795761088 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_13");
      port.setMaxFanOut(20);
      // gpo_14
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 74.373795761079 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 74.373795761079 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_14");
      port.setMaxFanOut(20);
      // gpo_15
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 83.77943159922923 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 83.77943159922923 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_15");
      port.setMaxFanOut(20);
      // gpo_16
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 92.67526974951802 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 88.32380952381018, y: 92.67526974951802 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_16");

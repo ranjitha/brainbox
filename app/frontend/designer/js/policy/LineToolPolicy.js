@@ -89,7 +89,7 @@ export default AbstractToolPolicy.extend({
     //
 
     // don't use the shortcut and assign the this.lineFigure.vertices to a local var.
-    // the vertices are recreated in the "calculatePath" mnethod of the polygon and
+    // The vertices are recreated in the "calculatePath" method of the polygon and
     // the reference is in this case invalid...design flaw!
     //
     let last = this.lineFigure.vertices.last()

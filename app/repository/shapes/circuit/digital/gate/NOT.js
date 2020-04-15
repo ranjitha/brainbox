@@ -7,7 +7,7 @@
 var circuit_digital_gate_NOT = CircuitFigure.extend({
 
    NAME: "circuit_digital_gate_NOT",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -18,13 +18,13 @@ var circuit_digital_gate_NOT = CircuitFigure.extend({
      // input01
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 51.25 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("input01");
      port.setMaxFanOut(20);
      // output
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 100, y: 47.5 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 100, y: 47.5 }));
      port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("output");
      port.setMaxFanOut(20);
    },

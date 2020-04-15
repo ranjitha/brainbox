@@ -7,7 +7,7 @@
 var circuit_digital_gate_NAND = CircuitFigure.extend({
 
    NAME: "circuit_digital_gate_NAND",
-   VERSION: "1.0.114_202",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
@@ -18,19 +18,19 @@ var circuit_digital_gate_NAND = CircuitFigure.extend({
      // input01
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 20 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("input01");
      port.setMaxFanOut(20);
      // input02
      port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 0, y: 80 }));
      port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("input02");
      port.setMaxFanOut(20);
      // output
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 101.42857142857143, y: 48.75 }));
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 101.42857142857143, y: 48.75 }));
      port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
+     port.setBackgroundColor("#37B1DE");
      port.setName("output");
      port.setMaxFanOut(20);
    },

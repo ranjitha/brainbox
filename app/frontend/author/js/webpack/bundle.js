@@ -344,6 +344,11 @@ var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var locator = __webpack_require__(/*! ./PortDecorationCenterLocator */ "./app/frontend/_common/js/PortDecorationCenterLocator.js");
+
+var growPolicy = new draw2d.policy.port.IntrusivePortsFeedbackPolicy();
+growPolicy.growFactor = 1.5;
+
 exports.default = draw2d.InputPort.extend({
 
   NAME: "DecoratedInputPort",
@@ -353,7 +358,7 @@ exports.default = draw2d.InputPort.extend({
 
     this.hasChanged = false;
 
-    this._super(attr, setter, getter);
+    this._super($.extend(attr, { coronaWidth: 2 }), setter, getter);
 
     this.decoration = new _MarkerFigure2.default();
 
@@ -383,6 +388,14 @@ exports.default = draw2d.InputPort.extend({
 
     // a port can have a value. Useful for workflow engines or circuit diagrams
     this.setValue(true);
+
+    this.installEditPolicy(growPolicy);
+
+    var circle = new draw2d.shape.basic.Circle({ radius: 2, stroke: 0, bgColor: "#909090" });
+    circle.hitTest = function () {
+      return false;
+    };
+    this.add(circle, locator);
   },
 
   useDefaultValue: function useDefaultValue() {
@@ -404,7 +417,53 @@ exports.default = draw2d.InputPort.extend({
 
   hasFallingEdge: function hasFallingEdge() {
     return this.hasChangedValue() && !this.getValue();
+  },
+
+  /**
+   *
+   * Set Canvas must be overridden because all "children" must be painted BEHIND the main figures.
+   * This behaviour is different to the base implementation.
+   *
+   * If the port fades out - the little circle stays visible. This is the wanted effect.
+   *
+   * @param {draw2d.Canvas} canvas the new parent of the figure or null
+   */
+  setCanvas: function setCanvas(canvas) {
+    // remove the shape if we reset the canvas and the element
+    // was already drawn
+    if (canvas === null && this.shape !== null) {
+      if (this.isSelected()) {
+        this.unselect();
+      }
+      this.shape.remove();
+      this.shape = null;
+    }
+
+    this.children.each(function (i, e) {
+      e.figure.setCanvas(canvas);
+    });
+
+    this.canvas = canvas;
+
+    if (this.canvas !== null) {
+      this.getShapeElement();
+    }
+
+    // reset the attribute cache. We must start by paint all attributes
+    //
+    this.lastAppliedAttributes = {};
+
+    if (canvas === null) {
+      this.stopTimer();
+    } else {
+      if (this.timerInterval >= this.MIN_TIMER_INTERVAL) {
+        this.startTimer(this.timerInterval);
+      }
+    }
+
+    return this;
   }
+
 });
 module.exports = exports["default"];
 
@@ -423,12 +482,72 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var locator = __webpack_require__(/*! ./PortDecorationCenterLocator */ "./app/frontend/_common/js/PortDecorationCenterLocator.js");
+var growPolicy = new draw2d.policy.port.IntrusivePortsFeedbackPolicy();
+growPolicy.growFactor = 1.5;
+
 exports.default = draw2d.OutputPort.extend({
 
   NAME: "DecoratedOutputPort",
 
   init: function init(attr, setter, getter) {
-    this._super(attr, setter, getter);
+    this._super($.extend(attr, { coronaWidth: 2 }), setter, getter);
+
+    this.installEditPolicy(growPolicy);
+
+    var circle = new draw2d.shape.basic.Circle({ radius: 2, stroke: 0, bgColor: "#909090" });
+    circle.hitTest = function () {
+      return false;
+    };
+    this.add(circle, locator);
+  },
+
+  /**
+   *
+   * Set Canvas must be overridden because all "children" must be painted BEHIND the main figures.
+   * This behaviour is different to the base implementation.
+   *
+   * If the port fades out - the little circle stays visible. This is the wanted effect.
+   *
+   * @param {draw2d.Canvas} canvas the new parent of the figure or null
+   */
+  setCanvas: function setCanvas(canvas) {
+    // remove the shape if we reset the canvas and the element
+    // was already drawn
+    if (canvas === null && this.shape !== null) {
+      if (this.isSelected()) {
+        this.unselect();
+      }
+      this.shape.remove();
+      this.shape = null;
+    }
+
+    // child must be init BEFORE the main shape. Now the child is behind the main shape and
+    // this is exact the behaviour we want.
+    //
+    this.children.each(function (i, e) {
+      e.figure.setCanvas(canvas);
+    });
+
+    this.canvas = canvas;
+
+    if (this.canvas !== null) {
+      this.getShapeElement();
+    }
+
+    // reset the attribute cache. We must start by paint all attributes
+    //
+    this.lastAppliedAttributes = {};
+
+    if (canvas === null) {
+      this.stopTimer();
+    } else {
+      if (this.timerInterval >= this.MIN_TIMER_INTERVAL) {
+        this.startTimer(this.timerInterval);
+      }
+    }
+    return this;
   }
 
 });
@@ -1558,6 +1677,76 @@ $.fn.extend({
     });
   }
 });
+
+/***/ }),
+
+/***/ "./app/frontend/_common/js/PortDecorationCenterLocator.js":
+/*!****************************************************************!*\
+  !*** ./app/frontend/_common/js/PortDecorationCenterLocator.js ***!
+  \****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+
+/**
+ * @class
+ *
+ * A CenterLocator is used to place figures in the center of a parent shape.
+ *
+ *
+ *
+ * @example
+ *
+ *
+ *    // create a basic figure and add a Label/child via API call
+ *    //
+ *    let circle = new draw2d.shape.basic.Circle({diameter:120});
+ *    circle.setStroke(3);
+ *    circle.setColor("#A63343");
+ *    circle.setBackgroundColor("#E65159");
+ *    circle.add(new draw2d.shape.basic.Label({text:"Center Label"}), new draw2d.layout.locator.CenterLocator());
+ *    canvas.add( circle, 100,50);
+ *
+ *
+ * @author Andreas Herz
+ * @extend draw2d.layout.locator.Locator
+ */
+var Locator = draw2d.layout.locator.Locator.extend(
+/** @lends draw2d.layout.locator.CenterLocator.prototype */
+{
+
+  NAME: "draw2d.layout.locator.CenterLocator",
+
+  /**
+   * Constructs a locator with associated parent.
+   *
+   */
+  init: function init(attr, setter, getter) {
+    this._super(attr, setter, getter);
+  },
+
+  /**
+   * 
+   * Relocates the given Figure.
+   *
+   * @param {Number} index child index of the target
+   * @param {draw2d.Figure} target The figure to relocate
+   **/
+  relocate: function relocate(index, target) {
+    target.setCenter(0, 0);
+  }
+});
+
+var locator = new Locator();
+exports.default = locator;
+module.exports = exports["default"];
 
 /***/ }),
 

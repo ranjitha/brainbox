@@ -13,8 +13,7 @@
       "angle": 0,
       "userData": {
         "baseClass": "draw2d.SetFigure",
-        "code": "/**\n * Generated Code for the Draw2D touch HTML5 lib.\n * File will be generated if you save the *.shape file.\n *\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custom code and event handler here.\n *\n * Looks disconcerting - extending my own class. But this is a good method to\n * merge basic code and override them with custom methods.\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @param {Object} context context where objects can store or handover global variables to other objects.\n     *  @required\n     **/\n    calculate:function( context)\n    {\n        var i1 = this.getInputPort(0);\n        var i2 = this.getInputPort(1);\n        var o1 = this.getOutputPort(0);\n        \n        o1.setValue(i1.getValue() && i2.getValue());\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function(context)\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function(context)\n    {\n    },\n\n    /**\n     * Get the simulator a hint which kind of hardware the shapes requires or supports\n     * This helps the simulator to bring up some dialogs and messages if any new hardware is connected/get lost\n     * and your are running a circuit which needs this kind of hardware...\n     **/\n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: false\n      }\n    }\n\n});",
-        "markdown": "# AND Gate\n\nThe **AND** gate is a basic digital logic gate that implements logical conjunction - it behaves according to the truth table on the bottom.\n\nA HIGH output results only if both the inputs to the AND gate are HIGH. If neither or only one input to the AND gate is HIGH, a LOW output results. In another sense, the function of AND effectively finds the minimum between two binary digits, just as the OR function finds the maximum.\n\n\n**Therefore, the output is always 0 except when all the inputs are 1.**\n\n## Logic table\n\n| INPUT A   | INPUT B |  OUTPUT    |\n|:---------:|:-------:|:----------:|\n| Low       | Low     |  Low       |\n| `High`    | Low     |  Low       |\n| Low       | `High`  |  Low       |\n| `High`    | `High`  |  `High`    |\n"
+        "code": "/**\n * Generated Code for the Draw2D touch HTML5 lib.\n * File will be generated if you save the *.shape file.\n *\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custom code and event handler here.\n *\n * Looks disconcerting - extending my own class. But this is a good method to\n * merge basic code and override them with custom methods.\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @param {Object} context context where objects can store or handover global variables to other objects.\n     *  @required\n     **/\n    calculate:function( context)\n    {\n        var i1 = this.getInputPort(0);\n        var i2 = this.getInputPort(1);\n        var o1 = this.getOutputPort(0);\n        \n        o1.setValue(i1.getValue() && i2.getValue());\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function(context)\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function(context)\n    {\n    },\n\n    /**\n     * Get the simulator a hint which kind of hardware the shapes requires or supports\n     * This helps the simulator to bring up some dialogs and messages if any new hardware is connected/get lost\n     * and your are running a circuit which needs this kind of hardware...\n     **/\n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: false\n      }\n    }\n\n});"
       },
       "cssClass": "shape_designer_figure_PolyCircle",
       "ports": [],
@@ -130,108 +129,6 @@
       ]
     },
     {
-      "type": "shape_designer.figure.PolyCircle",
-      "id": "703a41fb-e20a-e648-6ae0-3befe005ca9b",
-      "x": 7985.1772,
-      "y": 8009.5,
-      "width": 5,
-      "height": 5,
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Circle"
-      },
-      "cssClass": "shape_designer_figure_PolyCircle",
-      "ports": [],
-      "bgColor": "rgba(0,0,0,1)",
-      "color": "rgba(27,27,27,1)",
-      "stroke": 0,
-      "radius": 0,
-      "dasharray": null,
-      "blur": 0,
-      "filters": [
-        {
-          "name": "shape_designer.filter.PositionFilter"
-        },
-        {
-          "name": "shape_designer.filter.SizeFilter"
-        },
-        {
-          "name": "shape_designer.filter.FillColorFilter"
-        }
-      ]
-    },
-    {
-      "type": "shape_designer.figure.PolyCircle",
-      "id": "9ac41981-11f1-34f6-fffd-039870142cc7",
-      "x": 7985.1772,
-      "y": 7986,
-      "width": 5,
-      "height": 5,
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Circle"
-      },
-      "cssClass": "shape_designer_figure_PolyCircle",
-      "ports": [],
-      "bgColor": "rgba(0,0,0,1)",
-      "color": "rgba(27,27,27,1)",
-      "stroke": 0,
-      "radius": 0,
-      "dasharray": null,
-      "blur": 0,
-      "filters": [
-        {
-          "name": "shape_designer.filter.PositionFilter"
-        },
-        {
-          "name": "shape_designer.filter.SizeFilter"
-        },
-        {
-          "name": "shape_designer.filter.FillColorFilter"
-        }
-      ]
-    },
-    {
-      "type": "shape_designer.figure.PolyCircle",
-      "id": "3ac267ce-9aa8-f1be-0374-2c2ece01daf0",
-      "x": 8009.822800000001,
-      "y": 7997.5,
-      "width": 5,
-      "height": 5,
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Circle"
-      },
-      "cssClass": "shape_designer_figure_PolyCircle",
-      "ports": [],
-      "bgColor": "rgba(0,0,0,1)",
-      "color": "rgba(27,27,27,1)",
-      "stroke": 0,
-      "radius": 0,
-      "dasharray": null,
-      "blur": 0,
-      "filters": [
-        {
-          "name": "shape_designer.filter.PositionFilter"
-        },
-        {
-          "name": "shape_designer.filter.SizeFilter"
-        },
-        {
-          "name": "shape_designer.filter.FillColorFilter"
-        }
-      ]
-    },
-    {
       "type": "shape_designer.figure.ExtPort",
       "id": "19fd1dcb-f9e4-190d-a717-7444122d9964",
       "x": 8007.322800000001,
@@ -243,7 +140,7 @@
       "draggable": true,
       "angle": 0,
       "userData": {
-        "name": "Port",
+        "name": "output",
         "type": "Output",
         "direction": 1,
         "fanout": 20
@@ -281,7 +178,7 @@
       "draggable": true,
       "angle": 0,
       "userData": {
-        "name": "Port",
+        "name": "input0",
         "type": "Input",
         "direction": 3,
         "fanout": 20
@@ -319,7 +216,7 @@
       "draggable": true,
       "angle": 0,
       "userData": {
-        "name": "Port",
+        "name": "input1",
         "type": "Input",
         "direction": 3,
         "fanout": 20
@@ -346,5 +243,5 @@
       ]
     }
   ],
-  "image": "data:image/png;base64,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"
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAA8CAYAAADykDOkAAAFY0lEQVRoQ+2ZX0hbdxTHz72pkTRrY1ygNYn6MkGKeSkb3ejT3jb/IMNCuxfryzZQVwbi5kthTCV16lJoA63bmGu0Q4yUog9JGe2mtFtr4pyoieYmaP7NGJOYXM3Nn5t7xw21iBCTmz9qIPc153d+n98353d+v985COThh+QhMxSgj+pfKyhdUPoQBQrhcaLCQyQSlXG53I9pmi5CUdQLAF4EQbgoiv5ttVp9RwW7N09K4XHhwoVRmUzWUFpaysFxnPT5fNTm5ibq9/vRU6dOmYLB4B+RSMSPIMjPDofDnutFpARdU1PzU1dX19Xa2tq3zp49+4bJ4/HA8vIyzM/PU8+ePSPMZnMkFApNRqPRByRJ/uV0OoO5WEBG0AeB1tfXQavVxsbGxsJer3eNIIhBiqImLBaLP5vwWYXeD/bkyRO4e/du0GazzRIEIQ+FQtN2u53IBnzOoPfg1Go13LlzJ2Kz2YZjsVh3NmI+KfS5c+cu8fn8/vr6+ksdHR1ciUTCWiwMw0ChUOB6vf7lzs5Om9FoXGXtZN+AQ6GlUumXJEl+EQ6H3yktLS2uqKiAgYEBkMlkgKIo63mVSmVIrVY7HQ7HAEVRv62trW2zdgKQ+GoqlUqraJp+4Ha734tEIhzGeVVVFVy5cgXa2trg/Pnz6cwHt27dgqmpqQ2/33/VYDC8AACSraNDlS4rK5vZ2tq6HI1G43Z8Ph+GhoagoaEBTp8+zXauN/YqlYoaHR1d3tzc/HRhYWGRraOE0ImUbmpqgvb29rSV3gNUKBTEo0ePdB6P57OVlZUVNuCsYrq8vBwGBwfTjumDYK2trTvT09O9OI7/6HA4PKmCJ80eEonk/eLi4u/r6uri2UMqlabqO6mdTqeD7u5ut8Vi+chgMMwlHfDaICk0Y5foGE91ksPs5HL57uPHj39xuVxym83mTMXnsUPr9Xq4efPmDoZhH1osFl1eQDOQN27cYGL762Aw+DCVe8qxK81AT0xMwPDw8CSGYV+ZTCZLMrVPBPTS0hL09fWtYxjW+OrVq39PPLRWq4V79+7B4uIiRCKRWZqmewDg98Pu4seq9OzsLPT09MDMzAzgOA48Hs9/5syZbQ6H84nT6fwnkeLHCq1QKECpVILVagWKouKMQqHQy+PxvuVyuapEF6oCdLINdPD3vAwPZhEajQbu378f34jRaFRHUVT3id6Ie8ozwP39/esmkyk/Ul7eHi55d4zPzc3FL0wmkyl/Lkyvr6bDGxsbcrvd7kglAx1rns7JI4B5J1IU9Q2CIE0lJSUlzc3NcP36dRCJRKkIktSmtbV19/Vzayhbzy1UIpGM7+7ufhAIBEQcDqeosrISOjs742UEgUCQFOowg9u3b8cftm63+/PV1VUjG2cJw0MsFl8mSbLf6/W+S5JkEeOUx+NBY2Mj9Pb2ArOAdL+RkRFKpVIZ3G73tayWEHIF3dfXB5OTkxvb29vXjEbj82wXa1CxWKxmwgPH8bezER5KpTKsVqv/s9vtA7FY7GG6XYRkdY8qAOiiabpJIBAImI3Y0tLCeiOazeZ4AVKn073EcbydbXHmYBjmPOXtK/X+GovFvjuSUm+6dQ+mqK5UKoNWq1UXDAbl4XD4zxNZVGdeIBqNhhofHw9tbW0x7YsfKIpSp1IWYJOJMgoPn88HzEuaaRQ9ffqUaRRFCYKYIkmSaRQ9P9ZGUXV19ejFixcbhEIhJxAIxFtyLpcr3pIrKirCCIJgWnIBmqaZQuLJaMmJRCIx0/xEEIQ5ZLw0TTPNz2IOh/Mi3bTFJhzSyh6ZTJCLsSnFdC4mzsRnAToT9diMLSjNRq1MbAtKZ6Iem7F5qfT/LONjasP7NkcAAAAASUVORK5CYII="
 }

@@ -58,7 +58,6 @@ export default {
     shapes: "../backend/updates/shapes"
   },
 
-
   useradmin: {
     url: "../user"
   },
@@ -66,10 +65,5 @@ export default {
   shapes: {
     url: "../shapes/global/",
     version: "0.0.0" // updated during after loading from the index.json file
-  },
-
-  color: {
-    high: "#C21B7A",
-    low:  "#0078F2"
   }
 };

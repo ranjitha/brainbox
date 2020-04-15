@@ -37,7 +37,7 @@ class Dialog {
         let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
         let pathToDesign = conf.designer.url
           + "?timestamp=" + new Date().getTime()
-          + "&file=" + baseName + ".shape"
+          + "&global=" + baseName + ".shape"
         window.open(pathToDesign, "designer")
       })
 
@@ -45,7 +45,7 @@ class Dialog {
         let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
         let pathToDesign = conf.designer.url
           + "?timestamp=" + new Date().getTime()
-          + "&file=" + baseName + ".shape"
+          + "&global=" + baseName + ".shape"
           + "&tutorial=markdown"
         window.open(pathToDesign, "designer")
       })

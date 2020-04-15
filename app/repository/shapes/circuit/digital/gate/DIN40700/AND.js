@@ -7,38 +7,38 @@
 var circuit_digital_gate_DIN40700_AND = CircuitFigure.extend({
 
    NAME: "circuit_digital_gate_DIN40700_AND",
-   VERSION: "local-version",
+   VERSION: "1.0.120_211",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
 
-     this._super( $.extend({stroke:0, bgColor:null, width:29.64560000000074,height:40},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:25,height:40},attr), setter, getter);
      var port;
-     // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator({x: 91.5670453625498, y: 50 }));
+     // output
+     port = this.addPort(new DecoratedOutputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 98.16960000000108, y: 50 }));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
-     port.setName("Port");
+     port.setName("output");
      port.setMaxFanOut(20);
-     // Port
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 8.432954637450203, y: 21.25 }));
+     // input0
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -0.4128000000018801, y: 21.25 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
-     port.setName("Port");
+     port.setName("input0");
      port.setMaxFanOut(20);
-     // Port
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: 8.432954637450203, y: 80 }));
+     // input1
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator({x: -0.4128000000018801, y: 80 }));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
-     port.setName("Port");
+     port.setName("input1");
      port.setMaxFanOut(20);
    },
 
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 29.64560000000074;
+      this.originalWidth = 25;
       this.originalHeight= 40;
       return shape;
    },
@@ -48,29 +48,14 @@ var circuit_digital_gate_DIN40700_AND = CircuitFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L29.64560000000074,0 L29.64560000000074,40 L0,40");
+       shape = this.canvas.paper.path("M0,0 L25,0 L25,40 L0,40");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
        // 
-       shape = this.canvas.paper.path('M2.60320000000047 39.99286614625362L2.704711537635376 40L7.02828868578581 39.696155060244564L11.220496130125866 38.79385241571799L15.153955768817468 37.32050807568885L18.709151421167007 35.320888862379434L21.778060266292414 32.85575219373095L24.267435061877222 30L26.10163741444285 26.840402866513614L27.224936013657498 23.47296355333856L27.60320000000047 20L27.224936013657498 16.52703644666144L26.10163741444285 13.159597133486386L24.267435061877222 10L21.778060266292414 7.14424780626905L18.709151421167007 4.679111137620566L15.153955768817468 2.679491924311151L11.220496130125866 1.2061475842820073L7.02828868578581 0.3038449397554359L2.704711537635376 0L2.60320000000047 0.0071338537463816465L2.60320000000047 39.99286614625362Z');
+       shape = this.canvas.paper.path('M0 39.99286614625362L0.10151153763490584 40L4.42508868578534 39.696155060244564L8.617296130125396 38.79385241571799L12.550755768816998 37.32050807568885L16.105951421166537 35.320888862379434L19.174860266291944 32.85575219373095L21.664235061876752 30L23.498437414442378 26.840402866513614L24.621736013657028 23.47296355333856L25 20L24.621736013657028 16.52703644666144L23.498437414442378 13.159597133486386L21.664235061876752 10L19.174860266291944 7.14424780626905L16.105951421166537 4.679111137620566L12.550755768816998 2.679491924311151L8.617296130125396 1.2061475842820073L4.42508868578534 0.3038449397554359L0.10151153763490584 0L0 0.0071338537463816465L0 39.99286614625362Z');
        shape.attr({"stroke":"rgba(27,27,27,1)","stroke-width":1,"fill":"rgba(252,252,252,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
        shape.data("name","");
-       
-       // Circle
-       shape = this.canvas.paper.ellipse();
-       shape.attr({"rx":2.5,"ry":2.5,"cx":2.5,"cy":32,"stroke":"none","stroke-width":0,"fill":"rgba(0,0,0,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Circle");
-       
-       // Circle
-       shape = this.canvas.paper.ellipse();
-       shape.attr({"rx":2.5,"ry":2.5,"cx":2.5,"cy":8.5,"stroke":"none","stroke-width":0,"fill":"rgba(0,0,0,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Circle");
-       
-       // Circle
-       shape = this.canvas.paper.ellipse();
-       shape.attr({"rx":2.5,"ry":2.5,"cx":27.14560000000074,"cy":20,"stroke":"none","stroke-width":0,"fill":"rgba(0,0,0,1)","dasharray":null,"stroke-dasharray":null,"opacity":1});
-       shape.data("name","Circle");
        
 
        return this.canvas.paper.setFinish();

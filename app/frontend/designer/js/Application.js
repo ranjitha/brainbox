@@ -277,6 +277,17 @@ class Application {
       this.documentConfiguration = $.extend({}, this.documentConfiguration, figures.first().getUserData())
     }
 
+    function pick (obj, var_keys) {
+      let keys = typeof arguments[1] !== 'string' ? arguments[1] : Array.prototype.slice.call(arguments, 1)
+      let out = {}, key
+      for (key in keys) {
+        if (typeof obj[key] !== "undefined")
+          out[key] = obj[key]
+      }
+      return out
+    }
+    this.documentConfiguration = pick(this.documentConfiguration, "baseClass", "code", "markdown")
+
     if (key) {
       return this.documentConfiguration[key]
     }
@@ -287,7 +298,8 @@ class Application {
     this.documentConfiguration = $.extend({}, this.documentConfiguration, conf)
     let figures = this.view.getExtFigures()
     if (figures.getSize() > 0) {
-      figures.first().setUserData(this.documentConfiguration)
+      let userData = figures.first().attr("userData")
+      figures.first().attr("userData",$.extend(userData, this.documentConfiguration))
     }
   }
 
