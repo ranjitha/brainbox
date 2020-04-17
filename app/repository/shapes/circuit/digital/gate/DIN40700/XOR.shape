@@ -3,9 +3,9 @@
     {
       "type": "shape_designer.figure.ExtPolygon",
       "id": "6e834d54-6700-ad9b-ab50-0faefeaea483",
-      "x": 7993.476150000002,
+      "x": 7987.5,
       "y": 7980,
-      "width": 26.300000000002,
+      "width": 25,
       "height": 40,
       "alpha": 1,
       "selectable": true,
@@ -13,7 +13,7 @@
       "angle": 0,
       "userData": {
         "baseClass": "draw2d.SetFigure",
-        "code": "/**\n * Generated Code for the Draw2D touch HTML5 lib.\n * File will be generated if you save the *.shape file.\n *\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custom code and event handler here.\n *\n * Looks disconcerting - extending my own class. But this is a good method to\n * merge basic code and override them with custom methods.\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @param {Object} context context where objects can store or handover global variables to other objects.\n     *  @required\n     **/\n    calculate:function( context)\n    {\n        var i1 = this.getInputPort(0);\n        var i2 = this.getInputPort(1);\n        var o1 = this.getOutputPort(0);\n        \n         o1.setValue( (i1.getValue() && !i2.getValue() ) || ( !i1.getValue() && i2.getValue() ));\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function(context)\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function(context)\n    {\n    },\n\n    /**\n     * Get the simulator a hint which kind of hardware the shapes requires or supports\n     * This helps the simulator to bring up some dialogs and messages if any new hardware is connected/get lost\n     * and your are running a circuit which needs this kind of hardware...\n     **/\n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: false\n      }\n    }\n\n});",
+        "code": "/**\n * Generated Code for the Draw2D touch HTML5 lib.\n * File will be generated if you save the *.shape file.\n *\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custom code and event handler here.\n *\n * Looks disconcerting - extending my own class. But this is a good method to\n * merge basic code and override them with custom methods.\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @param {Object} context context where objects can store or handover global variables to other objects.\n     *  @required\n     **/\n    calculate:function( context)\n    {\n        var i1 = this.getInputPort(0);\n        var i2 = this.getInputPort(1);\n        var o1 = this.getOutputPort(0);\n        \n       o1.setValue( (i1.getValue() && !i2.getValue() ) || ( !i1.getValue() && i2.getValue() ));\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function(context)\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function(context)\n    {\n    },\n\n    /**\n     * Get the simulator a hint which kind of hardware the shapes requires or supports\n     * This helps the simulator to bring up some dialogs and messages if any new hardware is connected/get lost\n     * and your are running a circuit which needs this kind of hardware...\n     **/\n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: false\n      }\n    }\n\n});",
         "markdown": "# XOR Gate\n\n## Description\n`XOR gate` (sometimes EOR, or EXOR and pronounced as Exclusive OR) is \na digital logic gate that gives a true (1 or HIGH) output when the \nnumber of true inputs is odd. An XOR gate implements an exclusive \nor; that is, a true output results if one, and only one, of the \ninputs to the gate is true. If both inputs are false (0/LOW) or \nboth are true, a false output results.\n \n\n\n## Logic table\n\n| INPUT 1   | INPUT   |  OUTPUT    |\n|:---------:|:-------:|:----------:|\n| Low       | Low     |  Low       |\n| `High`      | Low     |  `High`       |\n| Low       | `High`    |  `High`       |\n| `High`      | `High`    |  Low    |\n\n",
         "name": "shape"
       },
@@ -26,135 +26,91 @@
       "dasharray": null,
       "vertices": [
         {
-          "x": 7993.476150000002,
+          "x": 7987.5,
           "y": 8019.992866146254
         },
         {
-          "x": 7993.577661537637,
+          "x": 7987.601511537635,
           "y": 8020
         },
         {
-          "x": 7997.901238685788,
+          "x": 7991.925088685785,
           "y": 8019.696155060245
         },
         {
-          "x": 8002.093446130128,
+          "x": 7996.117296130125,
           "y": 8018.793852415718
         },
         {
-          "x": 8006.026905768819,
+          "x": 8000.050755768817,
           "y": 8017.320508075689
         },
         {
-          "x": 8009.582101421169,
+          "x": 8003.6059514211665,
           "y": 8015.320888862379
         },
         {
-          "x": 8012.651010266294,
+          "x": 8006.674860266292,
           "y": 8012.855752193731
         },
         {
-          "x": 8015.140385061879,
+          "x": 8009.164235061877,
           "y": 8010
         },
         {
-          "x": 8016.974587414445,
+          "x": 8010.998437414442,
           "y": 8006.840402866514
         },
         {
-          "x": 8018.697886013661,
-          "y": 8003.572963553339
+          "x": 8012.121736013657,
+          "y": 8003.472963553339
         },
         {
-          "x": 8019.776150000004,
+          "x": 8012.5,
           "y": 8000
         },
         {
-          "x": 8018.597886013661,
-          "y": 7996.327036446661
+          "x": 8012.121736013657,
+          "y": 7996.527036446661
         },
         {
-          "x": 8016.974587414445,
+          "x": 8010.998437414442,
           "y": 7993.159597133486
         },
         {
-          "x": 8015.140385061879,
+          "x": 8009.164235061877,
           "y": 7990
         },
         {
-          "x": 8012.651010266294,
+          "x": 8006.674860266292,
           "y": 7987.144247806269
         },
         {
-          "x": 8009.582101421169,
+          "x": 8003.6059514211665,
           "y": 7984.679111137621
         },
         {
-          "x": 8006.026905768819,
+          "x": 8000.050755768817,
           "y": 7982.679491924311
         },
         {
-          "x": 8002.093446130128,
+          "x": 7996.117296130125,
           "y": 7981.206147584282
         },
         {
-          "x": 7997.901238685788,
+          "x": 7991.925088685785,
           "y": 7980.303844939755
         },
         {
-          "x": 7993.577661537637,
+          "x": 7987.601511537635,
           "y": 7980
         },
         {
-          "x": 7993.476150000002,
+          "x": 7987.5,
           "y": 7980.007133853746
         },
         {
-          "x": 7993.476150000002,
-          "y": 7980.99137500378
-        },
-        {
-          "x": 7994.270170798214,
-          "y": 7982.001946928777
-        },
-        {
-          "x": 7996.469751932855,
-          "y": 7986
-        },
-        {
-          "x": 7998.090430706887,
-          "y": 7990.4234359868815
-        },
-        {
-          "x": 7999.082963615865,
-          "y": 7995.137851025326
-        },
-        {
-          "x": 7999.417193049597,
-          "y": 8000
-        },
-        {
-          "x": 7999.082963615865,
-          "y": 8004.862148974674
-        },
-        {
-          "x": 7998.090430706887,
-          "y": 8009.5765640131185
-        },
-        {
-          "x": 7996.469751932855,
-          "y": 8014
-        },
-        {
-          "x": 7994.270170798214,
-          "y": 8017.998053071223
-        },
-        {
-          "x": 7993.476150000002,
-          "y": 8019.00862499622
-        },
-        {
-          "x": 7993.476150000002,
+          "x": 7987.5,
           "y": 8019.992866146254
         }
       ],
@@ -175,135 +131,10 @@
       ]
     },
     {
-      "type": "shape_designer.figure.ExtLine",
-      "id": "dc931c7c-d97b-b36d-8120-96376bfdf0bb",
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Line"
-      },
-      "cssClass": "shape_designer_figure_ExtLine",
-      "stroke": 1,
-      "color": "rgba(0,0,0,1)",
-      "outlineStroke": 0,
-      "outlineColor": "rgba(0,0,0,0)",
-      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
-      "vertex": [
-        {
-          "x": 7986.001850000002,
-          "y": 7980
-        },
-        {
-          "x": 7989.144200000004,
-          "y": 7985.366349999997
-        },
-        {
-          "x": 7991.2865500000025,
-          "y": 7991.332699999996
-        },
-        {
-          "x": 7992.476150000002,
-          "y": 7999.070299999994
-        },
-        {
-          "x": 7991.555049999999,
-          "y": 8005.955000000002
-        },
-        {
-          "x": 7989.4021500000035,
-          "y": 8013.387399999998
-        },
-        {
-          "x": 7986.175550000003,
-          "y": 8019.7773
-        }
-      ],
-      "router": "draw2d.layout.connection.VertexRouter",
-      "radius": 5,
-      "filters": [
-        {
-          "name": "shape_designer.filter.StrokeFilter"
-        },
-        {
-          "name": "shape_designer.filter.RadiusFilter"
-        }
-      ]
-    },
-    {
-      "type": "shape_designer.figure.ExtLine",
-      "id": "8ae8e990-3869-dd20-45db-a73320d3a51a",
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Line"
-      },
-      "cssClass": "shape_designer_figure_ExtLine",
-      "stroke": 1,
-      "color": "rgba(0,0,0,1)",
-      "outlineStroke": 0,
-      "outlineColor": "rgba(0,0,0,0)",
-      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
-      "vertex": [
-        {
-          "x": 7996.323849999996,
-          "y": 7986.3483
-        },
-        {
-          "x": 7980.223849999996,
-          "y": 7986.3483
-        }
-      ],
-      "router": "draw2d.layout.connection.VertexRouter",
-      "radius": "",
-      "filters": [
-        {
-          "name": "shape_designer.filter.StrokeFilter"
-        }
-      ]
-    },
-    {
-      "type": "shape_designer.figure.ExtLine",
-      "id": "51d1a73e-4752-56bd-78fe-8d2dd4e3af3d",
-      "alpha": 1,
-      "selectable": true,
-      "draggable": true,
-      "angle": 0,
-      "userData": {
-        "name": "Line"
-      },
-      "cssClass": "shape_designer_figure_ExtLine",
-      "stroke": 1,
-      "color": "rgba(0,0,0,1)",
-      "outlineStroke": 0,
-      "outlineColor": "rgba(0,0,0,0)",
-      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
-      "vertex": [
-        {
-          "x": 7997.023849999996,
-          "y": 8011.6483
-        },
-        {
-          "x": 7980.423849999996,
-          "y": 8011.6483
-        }
-      ],
-      "router": "draw2d.layout.connection.VertexRouter",
-      "radius": "",
-      "filters": [
-        {
-          "name": "shape_designer.filter.StrokeFilter"
-        }
-      ]
-    },
-    {
       "type": "shape_designer.figure.ExtPort",
       "id": "19fd1dcb-f9e4-190d-a717-7444122d9964",
-      "x": 8015.776150000004,
-      "y": 7995.0482999999995,
+      "x": 8007.0424,
+      "y": 7995,
       "width": 10,
       "height": 10,
       "alpha": 1,
@@ -340,8 +171,8 @@
     {
       "type": "shape_designer.figure.ExtPort",
       "id": "7297563e-896e-648c-d774-7e1a662d65a4",
-      "x": 7974.223849999996,
-      "y": 7981.5,
+      "x": 7982.3967999999995,
+      "y": 7983.5,
       "width": 10,
       "height": 10,
       "alpha": 1,
@@ -378,8 +209,8 @@
     {
       "type": "shape_designer.figure.ExtPort",
       "id": "31c229c7-f64e-5b82-2349-767cb9cd57be",
-      "x": 7973.723849999996,
-      "y": 8006.5482999999995,
+      "x": 7982.3967999999995,
+      "y": 8007,
       "width": 10,
       "height": 10,
       "alpha": 1,
@@ -412,7 +243,155 @@
           "name": "shape_designer.filter.PortTypeFilter"
         }
       ]
+    },
+    {
+      "type": "shape_designer.figure.ExtLine",
+      "id": "b77b5db1-d31c-2f1b-838b-92a1c9dd221d",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "name": "Line"
+      },
+      "cssClass": "shape_designer_figure_ExtLine",
+      "stroke": 1,
+      "color": "rgba(0,0,0,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 7990.428599999999,
+          "y": 7995.418200000003
+        },
+        {
+          "x": 8006.0211,
+          "y": 7995.210300000003
+        },
+        {
+          "x": 8005.8132,
+          "y": 7995.210300000003
+        }
+      ],
+      "router": "draw2d.layout.connection.VertexRouter",
+      "radius": "",
+      "filters": [
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.ExtLine",
+      "id": "02d3b02a-8676-2ad4-ed9f-dd7ab14e8be4",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "name": "Line"
+      },
+      "cssClass": "shape_designer_figure_ExtLine",
+      "stroke": 1,
+      "color": "rgba(0,0,0,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 7990.438999999995,
+          "y": 8000.002400000002
+        },
+        {
+          "x": 8006.0314999999955,
+          "y": 7999.794500000003
+        },
+        {
+          "x": 8005.823599999995,
+          "y": 7999.794500000003
+        }
+      ],
+      "router": "draw2d.layout.connection.VertexRouter",
+      "radius": "",
+      "filters": [
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.ExtLine",
+      "id": "32f7617b-9783-f46a-0606-1503a9f247c2",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "name": "Line"
+      },
+      "cssClass": "shape_designer_figure_ExtLine",
+      "stroke": 1,
+      "color": "rgba(0,0,0,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 7990.449399999993,
+          "y": 8004.794500000002
+        },
+        {
+          "x": 8006.041899999994,
+          "y": 8004.586600000002
+        },
+        {
+          "x": 8005.8339999999935,
+          "y": 8004.586600000002
+        }
+      ],
+      "router": "draw2d.layout.connection.VertexRouter",
+      "radius": "",
+      "filters": [
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.ExtLine",
+      "id": "043a0e75-c693-9a27-2256-87beea17af54",
+      "alpha": 1,
+      "selectable": true,
+      "draggable": true,
+      "angle": 0,
+      "userData": {
+        "name": "Line"
+      },
+      "cssClass": "shape_designer_figure_ExtLine",
+      "stroke": 1,
+      "color": "rgba(0,0,0,1)",
+      "outlineStroke": 0,
+      "outlineColor": "rgba(0,0,0,0)",
+      "policy": "draw2d.policy.line.VertexSelectionFeedbackPolicy",
+      "vertex": [
+        {
+          "x": 7997.2893,
+          "y": 7990.2207
+        },
+        {
+          "x": 7997.0814,
+          "y": 8008.1001
+        }
+      ],
+      "router": "draw2d.layout.connection.VertexRouter",
+      "radius": "",
+      "filters": [
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        }
+      ]
     }
   ],
-  "image": "data:image/png;base64,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"
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAA8CAYAAADykDOkAAAHEElEQVRoQ+2Zf0xTVxTHT3+oaGi3xB9JfyhERaMGZ4gu25/GZAnGBJhRo4nRaeKvbIks/rFlRlEg02TzD7RIiUpHQkEdYhatyhIDdBGGIE4MhVoolLyHtfSBlFcer699y3mhpoilr/BgM+EmTZvee8/9vO875/44VwYfYZF9hMwwBz1bb21O6TmlJ1Fgzj3+V+6h0WjSZDLZFzKZjAOAAQCgeJ4ngsFgr9vtpmcLNjyOKPfQ6/VnU1NTT6ekpLAURQU8Hg+43W4lTdMBpVLZxXHcX36/3wYADQRBPJ/phxAFrdVqc7Kzs89mZ2eP4/F6vdDW1gbPnj3jrFYr29XVNcgwzGOapks4jvt7pt7CtKDfV7SnpwcsFgtbVVUVcjqdLoVCUdDf3182ODg4KKX6kkKHwUZHR6GhoYE3GAzQ2NholcvluS6X6zEAhKSAnxHoMNjQ0BA8evSIraiooBwOR+Xg4GABQRD26YLHhNbr9RtDoVBOZmZm1smTJ2HlypVxj9nS0gKFhYVcbW1t9ejoaB5BEPVxG4noMCm0Tqc7wHFcNsuyySqV6pPNmzfD0aNHYdu2bXGPiW5dXl7OmM3m1oGBgQvt7e134jYy1iEqtF6v/zwQCJz0+Xzpfr//U2y/dOlSOHz4MBw7dgz0ev2UxjSbzVxRUVErRVH57e3tlVMxMpnSarVafZZl2e8ZhhFsq9VqOHPmDKCbTKfcunWLMRgMdd3d3RcJgsAAjavMutJINzIyAiaTadRoNNZTFPUzSZLV8VBL5tMEQUBJSQlotVo4dOhQTAaHwwEFBQVBi8XyC03TeR6PZzhmp1g+HTag0+k+43n+bEZGhjB7rFq16oO2e3t7BWj0dTHQaMRqtQZNJtM/jY2NuTab7a5k0Ggo2jIeOYjL5cJXDitWrICDBw+KGj8QCIDRaAwUFhb+NjQ0lP/69etuMR1jztNiobu7u6G0tBSSkpLgwIEDYsYW2lgsFrhx44bNbrfntLW13RLTMW5omqZheHgYgsGg8OE4TvjGfcfdu3dBo9FAenr6uLpwO5yFli9fDuvWrQOlUinwoa0rV65w169fz3E6nfkzAv3w4UO4dOkS2Gw2UCgUwuD4HQqFwOfzwcKFC2HJkiXCf5H14TZ79uwR3Gf+/Pnv+HAKNBqNFa9evbpIkmR7LPC4lY5mEGcDs9kMq1evhn379sUad1z9gwcPoLi42NnR0XHObrf/FquzZNB2ux0qKiogJSUF9u7dG2vcd/W1tbXoHrgn5zmOawKA8wRB3JvMgGTQHR0dcPPmTVi7di2gC4gpVqsVrl27BghOkiQkJCRQiYmJz5RK5WWSJP+IZiNuaBygpqZmQiDiEQzVVqlUkJycPKEegxFXwoyMDNi/fz8sWLAAioqKIDc3F968eQM8zwuMKpUqqFarcwiCyJMMGoHr6ureBWA42BD6xYsXoNPpYMuWLRPqw4GID7RhwwYhYGcNOtrTv3z5Eu7cuSMA7dy5U4x34IoouAcK0dfXF3aPFqVSWSCpe0SjaW1thaqqKkhNTYWsrCxR0NgI3e3y5cvQ0tLCBwKBZplMdm7WAhFdAxeXjRs3QmZmpmhobDjjU151dTWUlZUJwRO5IuLC0t/fLwQYBmNkXfg37jWOHDkCp06dgkWLFo1bXIqLiyvsdvvMLC44Q3R2dk5Y8fC/J0+ewPr162Hr1q0fXBHlcjnMmzdPOExgIL63jJ9zOp1RZ4zIVxf3lBftvTc3N8P9+/chLS0NduzYIdo9ZmXDFI2mqalJ2LHh4Xf79u2ioHGzhVtTg8FQ+vbt23y32+0U01EypXG3hnmOxMRE4fWLKXV1dSGTyfTi6dOn5202W5WYPthmUuixnMe3APC1TqdbjMvz7t27hSPVdEv4uHXv3r1fR0ZGciU5bmk0miS5XP4jTdMHfT7fAoz2ZcuWwYkTJ4QUAs4SUy2RB1uv13uhr6/vUTy2oiqt1Wq/Yhjm9PDw8Jcsywo7dsx77Nq1C44fPy5s5Kdabt++jSkEa29v74Wenh7pUggzBV1eXs5dvXr1JUVReZIna8bc4weapr8JuwcqHXaPhISEuIR+Ly12carAYgPxOwDI0mq1izEIMRhxJxdPef78OSYgAzU1NX8yDJNPkuSTePq/31ayKe9DEDgFVldXY6p3oLOz83eKomYn1YswYvIekdAsy0J9fT2qy2NSXSaT5Y0l1YPTUTjcV1KlMY2ASfTKykrh+gKPTQzDlLlcLrwRk6xMC5qiqHEXRQ6H4y1eFPn9frwoavjPL4o2bdr005o1a1iv18t5PB5+7EqOUygUwpUcTdOYr6gnSbJFMkmjGBKldMTlJ/rkAM/zwuUnx3G98Sy/Uj2MKGipBpPKzhy0VErGsjOndCyFpKqfU1oqJWPZmVM6lkJS1f8LbyB1eR7s7nAAAAAASUVORK5CYII="
 }

@@ -160,6 +160,7 @@ class Application {
   setDocument(document, pageIndex){
     this.document = document
     commandStack.markSaveLocation()
+    this.view.onCancelEdit()
     this.view.setPage(this.document.get(pageIndex || 0))
   }
 

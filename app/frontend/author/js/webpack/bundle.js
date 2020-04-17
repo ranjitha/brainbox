@@ -2368,6 +2368,7 @@ var Application = function () {
     value: function setDocument(document, pageIndex) {
       this.document = document;
       _CommandStack2.default.markSaveLocation();
+      this.view.onCancelEdit();
       this.view.setPage(this.document.get(pageIndex || 0));
     }
   }, {
@@ -6121,6 +6122,7 @@ var View = function () {
     this.brainEditor = new BrainEditor();
     this.page = new Page();
     this.activeSection = null;
+    this.currentEditor = null;
     this.html = $(id);
     this.palette = new _palette2.default(app, this, permissions, "#paletteElements");
 
@@ -6378,6 +6380,10 @@ var View = function () {
     key: "onCancelEdit",
     value: function onCancelEdit() {
       var _this5 = this;
+
+      if (this.currentEditor === null) {
+        return;
+      }
 
       this.currentEditor.cancel().then(function () {
         $(".editorContainerSelector").remove();

@@ -21,7 +21,8 @@ export default class View {
     this.markdownEditor = new MarkdownEditor()
     this.brainEditor = new BrainEditor()
     this.page = new Page()
-    this.activeSection = null;
+    this.activeSection = null
+    this.currentEditor = null
     this.html = $(id)
     this.palette = new Palette(app, this, permissions,  "#paletteElements")
 
@@ -309,6 +310,10 @@ export default class View {
   }
 
   onCancelEdit(){
+    if(this.currentEditor === null){
+      return
+    }
+
     this.currentEditor.cancel()
       .then(() => {
         $(".editorContainerSelector").remove()
