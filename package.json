@@ -109,6 +109,7 @@
     "socket.io": "2.1.1",
     "split.js": "^1.5.11",
     "system": "2.0.1",
+    "truncate-utf8-bytes": "^1.0.2",
     "tslib": "^1.11.1",
     "unzip": "^0.1.11",
     "webpage": "0.3.0"

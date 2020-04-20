@@ -2,6 +2,7 @@ const fs = require('fs-extra')
 const glob = require("glob")
 const path = require('path')
 const makeDir = require('make-dir');
+const sanitize = require("../../util/sanitize-filename")
 
 // Generic file operations for "brains" and "shapes"
 //
@@ -122,6 +123,8 @@ module.exports = {
    * @param res
    */
   renameFile: function (baseDir, from, to, res) {
+    to = sanitize(to)
+
     let fromDir = path.join(baseDir, from)
     let toDir = path.join(baseDir, to)
     let fromDirParent = path.dirname(fromDir)
@@ -211,6 +214,8 @@ module.exports = {
 
 
   createFolder: function (baseDir, subDir, res) {
+    subDir = sanitize(subDir)
+
     let directory = path.join(baseDir, subDir)
 
     // check that the normalize path is the same as the concatenated. It is possible that these are not the same
@@ -245,6 +250,8 @@ module.exports = {
 
 
   writeFile: async function (baseDir, subDir, content, res, callback) {
+    subDir =  sanitize(subDir)
+
     let file = path.join(baseDir, subDir)
     let dir = path.dirname(file)+path.sep
 

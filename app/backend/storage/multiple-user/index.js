@@ -9,7 +9,7 @@ const Strategy = require('passport-local').Strategy
 const Session = require('express-session')
 const FileStore = require('session-file-store')(Session)
 const bcrypt = require("bcrypt")
-
+const sanitize = require("../../util/sanitize-filename")
 const generic = require("../_base_")
 const update = require("../../update")
 const {thumbnail, generateShapeIndex} = require("../../converter/thumbnail")
@@ -386,6 +386,9 @@ module.exports = {
   },
 
   writeBrain: function (baseDir, subDir, content, res ) {
+    // "sanitize" is done in the base implementation as well. But we new the 'sanitize' in this method
+    // as well for the socket.emit method.
+    subDir = sanitize(subDir)
     module.exports.writeFile(baseDir, subDir, content, res, (err) => {
       const io = require('../../comm/websocket').io
       io.sockets.emit("brain:generated", {
