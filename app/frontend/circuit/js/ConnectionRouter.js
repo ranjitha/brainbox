@@ -56,13 +56,13 @@ export default draw2d.layout.connection.InteractiveManhattanConnectionRouter.ext
      */
     x_paint: function(conn)
     {
-        var _this = this;
+        let _this = this;
         // get the intersections to the other connections
         //
-        var intersectionsASC = conn.getCanvas().getIntersection(conn).sort("x");
-        var intersectionsDESC= intersectionsASC.clone().reverse();
+        let intersectionsASC = conn.getCanvas().getIntersection(conn).sort("x");
+        let intersectionsDESC= intersectionsASC.clone().reverse();
 
-        var intersectionForCalc = intersectionsASC;
+        let intersectionForCalc = intersectionsASC;
 
         // add a ArrayList of all added vertex nodes to the connection
         //
@@ -74,24 +74,24 @@ export default draw2d.layout.connection.InteractiveManhattanConnectionRouter.ext
         // ATTENTION: we cast all x/y coordinates to integer and add 0.5 to avoid subpixel rendering of
         //            the connection. The 1px or 2px lines look much clearer than before.
         //
-        var ps = conn.getVertices();
-        var p = ps.get(0);
-        var path = [ "M", p.x, " ", p.y];
+        let ps = conn.getVertices();
+        let p = ps.get(0);
+        let path = [ "M", p.x, " ", p.y];
 
-        var oldP = p;
-        var bridgeWidth =  this.bridgeRadius;
-        var bridgeCode  = null;
+        let oldP = p;
+        let bridgeWidth =  this.bridgeRadius;
+        let bridgeCode  = null;
 
-        var calc = function(ii, interP) {
+        let calc = function(ii, interP) {
             if (draw2d.shape.basic.Line.hit(5, oldP.x, oldP.y, p.x, p.y, interP.x, interP.y) === true) {
                 // It is a vertex node..
                 //
                 if(conn.sharingPorts(interP.other)){
-                    var other = interP.other;
-                    var otherZ = other.getZOrder();
-                    var connZ = conn.getZOrder();
+                    let other = interP.other;
+                    let otherZ = other.getZOrder();
+                    let connZ = conn.getZOrder();
                     if(connZ<otherZ){
-                        var vertexNode=conn.canvas.paper.ellipse(interP.x,interP.y, _this.vertexRadius, _this.vertexRadius).attr({fill:conn.lineColor.hash()});
+                        let vertexNode=conn.canvas.paper.ellipse(interP.x,interP.y, _this.vertexRadius, _this.vertexRadius).attr({fill:conn.lineColor.hash()});
                         conn.vertexNodes.push(vertexNode);
                     }
                 }
@@ -104,7 +104,7 @@ export default draw2d.layout.connection.InteractiveManhattanConnectionRouter.ext
             }
         };
 
-        for (var i = 1; i < ps.getSize(); i++) {
+        for (let i = 1; i < ps.getSize(); i++) {
             p = ps.get(i);
 
             // line goes from right->left.

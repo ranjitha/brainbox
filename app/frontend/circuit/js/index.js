@@ -82,7 +82,7 @@ $(window).load(function () {
 
       $(".loader").fadeOut(500, function() { $(this).remove(); })
     }).fail(function () {
-      if (arguments[0].readyState == 0) {
+      if (arguments[0].readyState === 0) {
         //script failed to load
       } else {
         //script loaded but failed to parse

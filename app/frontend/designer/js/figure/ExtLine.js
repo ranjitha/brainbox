@@ -3,8 +3,8 @@ export default shape_designer.figure.ExtLine = draw2d.shape.basic.PolyLine.exten
   NAME: "shape_designer.figure.ExtLine",
 
 
-  init: function () {
-    this._super()
+  init: function (attr, setter, getter) {
+    this._super(attr, setter, getter)
 
     this.blur = 0
     this.isExtFigure = true

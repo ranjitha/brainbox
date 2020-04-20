@@ -1,6 +1,9 @@
 import inlineSVG from "../../_common/js/inlineSVG"
 import DecoratedInputPort from "../../_common/js/DecoratedInputPort"
 import DecoratedOutputPort from "../../_common/js/DecoratedOutputPort"
+import MarkerFigure from "../../_common/js/MarkerFigure"
+import MarkerStateAFigure from "../../_common/js/MarkerStateAFigure"
+import MarkerStateBFigure from "../../_common/js/MarkerStateBFigure"
 
 import ConnectionSelectionFeedbackPolicy from "./ConnectionSelectionFeedbackPolicy"
 import Connection from "./figures/Connection"
@@ -37,6 +40,9 @@ export default {
   hardware,
   DecoratedInputPort,
   DecoratedOutputPort,
+  MarkerFigure,
+  MarkerStateAFigure,
+  MarkerStateBFigure,
   Connection,
   Raft,
   ProbeFigure,

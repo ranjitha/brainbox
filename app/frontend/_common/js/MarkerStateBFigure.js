@@ -31,9 +31,9 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
         this.add(this.stickTick);
         this.stickTick.hitTest = function(){return false;};
         this.stickTick.addCssClass("highlightOnHover");
-
+        
         this.label = new draw2d.shape.basic.Label({
-            text:attr.text,
+            text:attr? attr.text: "X",
             resizeable:false,
             stroke:0,
             padding:0,
@@ -91,9 +91,7 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
         }
 
         attributes= attributes || {};
-
         attributes.path = this.calculatePath();
-
         this._super(attributes);
     },
 
@@ -116,15 +114,15 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
      */
     calculatePath: function()
     {
-        var arrowLength=8;
+        let arrowLength=8;
 
         this.vertices   = new draw2d.util.ArrayList();
 
-        var w  = this.width;
-        var h  = this.height;
-        var pos= this.getAbsolutePosition();
-        var i  = 0;
-        var length=0;
+        let w  = this.width;
+        let h  = this.height;
+        let pos= this.getAbsolutePosition();
+        let i  = 0;
+        let length=0;
         this.vertices.add(new draw2d.geo.Point(pos.x,  pos.y)  );
         this.vertices.add(new draw2d.geo.Point(pos.x+w-arrowLength,pos.y)  );
 
@@ -133,13 +131,13 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
         this.vertices.add(new draw2d.geo.Point(pos.x+w-arrowLength,pos.y+h));
         this.vertices.add(new draw2d.geo.Point(pos.x  ,pos.y+h));
 
-        var radius = this.getRadius();
-        var path = [];
+        let radius = this.getRadius();
+        let path = [];
         // hard corners
         //
         if(radius === 0){
             length = this.vertices.getSize();
-            var p = this.vertices.get(0);
+            let p = this.vertices.get(0);
             path.push("M",p.x," ",p.y);
             for(i=1;i<length;i++){
                 p = this.vertices.get(i);
@@ -151,13 +149,13 @@ export default draw2d.shape.layout.HorizontalLayout.extend({
         //
         else{
             length = this.vertices.getSize();
-            var start = this.vertices.first();
-            var end   = this.vertices.last();
+            let start = this.vertices.first();
+            let end   = this.vertices.last();
             if(start.equals(end)){
                 length = length-1;
                 end = this.vertices.get(length-1);
             }
-            var begin   = draw2d.geo.Util.insetPoint(start,end, radius);
+            let begin   = draw2d.geo.Util.insetPoint(start,end, radius);
             path.push("M", begin.x, ",", begin.y);
             for( i=0 ;i<length;i++){
                 start = this.vertices.get(i);

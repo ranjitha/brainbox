@@ -111,11 +111,15 @@ export default draw2d.Canvas.extend({
     // Enable Copy&Paste for figures
     //
     Mousetrap.bindGlobal(['ctrl+c', 'command+c'], () => {
-      let primarySelection = this.getSelection().getPrimary()
-      if (primarySelection !== null) {
-        this.clippboardFigure = primarySelection.clone({excludePorts: true})
-        this.clippboardFigure.translate(5, 5)
-      }
+      // ctrl+c and ctrl+v works just for normal figures and not connections
+      //
+      this.getSelection().each( (i, figure)=>{
+        if (figure instanceof CircuitFigure) {
+          this.clippboardFigure = figure.clone({excludePorts: true})
+          this.clippboardFigure.translate(5, 5)
+          return false
+        }
+      })
       return false
     })
     Mousetrap.bindGlobal(['ctrl+v', 'command+v'], () => {

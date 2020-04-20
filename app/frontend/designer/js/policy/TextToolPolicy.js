@@ -11,7 +11,6 @@ export default AbstractToolPolicy.extend({
   init: function () {
     this._super()
 
-    this.topLeft = null
     this.newFigure = null
   },
 
@@ -73,17 +72,18 @@ export default AbstractToolPolicy.extend({
    * @template
    */
   onMouseUp: function (canvas, x, y) {
-    if (this.topLeft === null) {
-      this.topLeft = new draw2d.geo.Point(x, y)
-      this.setToolText(this.MESSAGE_STEP2)
+       this.setToolText(this.MESSAGE_STEP2)
 
-      this.newFigure = new shape_designer.figure.ExtLabel()
-      this.newFigure.setText("Text")
-      this.newFigure.setStroke(0)
-      this.newFigure.setPadding(5)
-      this.newFigure.setFontSize(16)
+      this.newFigure = new shape_designer.figure.ExtLabel({
+        text :"Text",
+        stroke: 0,
+        padding: 5,
+        fontSize: 16,
+        x:parseInt(x),
+        y: parseInt(y)
+      })
 
-      var command = new draw2d.command.CommandAdd(canvas, this.newFigure, parseInt(x), parseInt(y))
+      let command = new draw2d.command.CommandAdd(canvas, this.newFigure, parseInt(x), parseInt(y))
       canvas.getCommandStack().execute(command)
       canvas.setCurrentSelection(this.newFigure)
 
@@ -94,10 +94,6 @@ export default AbstractToolPolicy.extend({
       }, this), 100)
 
       this.executed()
-    }
-    else {
-      this.topLeft = null
-    }
   }
 })
 

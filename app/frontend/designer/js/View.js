@@ -45,6 +45,8 @@ export default draw2d.Canvas.extend({
     })
 
     Mousetrap.bindGlobal(['ctrl+c', 'command+c'], () => {
+      // ctrl+c and ctrl+v works just for normal figures and not connections
+      //
       let primarySelection = this.getSelection().getPrimary()
       if (primarySelection !== null) {
         this.clippboardFigure = primarySelection.clone()

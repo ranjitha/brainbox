@@ -1431,7 +1431,7 @@ exports.default = draw2d.shape.layout.HorizontalLayout.extend({
         this.stickTick.addCssClass("highlightOnHover");
 
         this.label = new draw2d.shape.basic.Label({
-            text: attr.text,
+            text: attr ? attr.text : "X",
             resizeable: false,
             stroke: 0,
             padding: 0,
@@ -1487,9 +1487,7 @@ exports.default = draw2d.shape.layout.HorizontalLayout.extend({
         }
 
         attributes = attributes || {};
-
         attributes.path = this.calculatePath();
-
         this._super(attributes);
     },
 
@@ -3904,11 +3902,15 @@ exports.default = draw2d.Canvas.extend({
     // Enable Copy&Paste for figures
     //
     Mousetrap.bindGlobal(['ctrl+c', 'command+c'], function () {
-      var primarySelection = _this2.getSelection().getPrimary();
-      if (primarySelection !== null) {
-        _this2.clippboardFigure = primarySelection.clone({ excludePorts: true });
-        _this2.clippboardFigure.translate(5, 5);
-      }
+      // ctrl+c and ctrl+v works just for normal figures and not connections
+      //
+      _this2.getSelection().each(function (i, figure) {
+        if (figure instanceof CircuitFigure) {
+          _this2.clippboardFigure = figure.clone({ excludePorts: true });
+          _this2.clippboardFigure.translate(5, 5);
+          return false;
+        }
+      });
       return false;
     });
     Mousetrap.bindGlobal(['ctrl+v', 'command+v'], function () {
@@ -5212,7 +5214,14 @@ var _ProbeFigure = __webpack_require__(/*! ./ProbeFigure */ "./app/frontend/circ
 
 var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
 
+var _ConnectionRouter = __webpack_require__(/*! ../ConnectionRouter */ "./app/frontend/circuit/js/ConnectionRouter.js");
+
+var _ConnectionRouter2 = _interopRequireDefault(_ConnectionRouter);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/*jshint evil:true */
+var router = new _ConnectionRouter2.default();
 
 exports.default = draw2d.Connection.extend({
 
@@ -5221,7 +5230,10 @@ exports.default = draw2d.Connection.extend({
   init: function init(attr, setter, getter) {
     var _this = this;
 
-    this._super(attr, setter, getter);
+    this._super($.extend({
+      router: router,
+      corona: 4
+    }, attr), setter, getter);
 
     // since version 3.5.6
     //
@@ -5342,8 +5354,7 @@ exports.default = draw2d.Connection.extend({
     }
   }
 
-}); /*jshint evil:true */
-
+});
 module.exports = exports["default"];
 
 /***/ }),
@@ -5556,6 +5567,18 @@ var _DecoratedOutputPort = __webpack_require__(/*! ../../_common/js/DecoratedOut
 
 var _DecoratedOutputPort2 = _interopRequireDefault(_DecoratedOutputPort);
 
+var _MarkerFigure = __webpack_require__(/*! ../../_common/js/MarkerFigure */ "./app/frontend/_common/js/MarkerFigure.js");
+
+var _MarkerFigure2 = _interopRequireDefault(_MarkerFigure);
+
+var _MarkerStateAFigure = __webpack_require__(/*! ../../_common/js/MarkerStateAFigure */ "./app/frontend/_common/js/MarkerStateAFigure.js");
+
+var _MarkerStateAFigure2 = _interopRequireDefault(_MarkerStateAFigure);
+
+var _MarkerStateBFigure = __webpack_require__(/*! ../../_common/js/MarkerStateBFigure */ "./app/frontend/_common/js/MarkerStateBFigure.js");
+
+var _MarkerStateBFigure2 = _interopRequireDefault(_MarkerStateBFigure);
+
 var _ConnectionSelectionFeedbackPolicy = __webpack_require__(/*! ./ConnectionSelectionFeedbackPolicy */ "./app/frontend/circuit/js/ConnectionSelectionFeedbackPolicy.js");
 
 var _ConnectionSelectionFeedbackPolicy2 = _interopRequireDefault(_ConnectionSelectionFeedbackPolicy);
@@ -5621,6 +5644,9 @@ exports.default = {
   hardware: _hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
   DecoratedOutputPort: _DecoratedOutputPort2.default,
+  MarkerFigure: _MarkerFigure2.default,
+  MarkerStateAFigure: _MarkerStateAFigure2.default,
+  MarkerStateBFigure: _MarkerStateBFigure2.default,
   Connection: _Connection2.default,
   Raft: _Raft2.default,
   ProbeFigure: _ProbeFigure2.default,
@@ -5965,7 +5991,7 @@ $(window).load(function () {
         $(this).remove();
       });
     }).fail(function () {
-      if (arguments[0].readyState == 0) {
+      if (arguments[0].readyState === 0) {
         //script failed to load
       } else {
         //script loaded but failed to parse

@@ -1392,7 +1392,7 @@ exports.default = draw2d.shape.layout.HorizontalLayout.extend({
         this.stickTick.addCssClass("highlightOnHover");
 
         this.label = new draw2d.shape.basic.Label({
-            text: attr.text,
+            text: attr ? attr.text : "X",
             resizeable: false,
             stroke: 0,
             padding: 0,
@@ -1448,9 +1448,7 @@ exports.default = draw2d.shape.layout.HorizontalLayout.extend({
         }
 
         attributes = attributes || {};
-
         attributes.path = this.calculatePath();
-
         this._super(attributes);
     },
 

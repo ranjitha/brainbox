@@ -16,7 +16,6 @@ export default class View {
    *
    */
   constructor(app, id, permissions) {
-
     this.app = app
     this.markdownEditor = new MarkdownEditor()
     this.brainEditor = new BrainEditor()

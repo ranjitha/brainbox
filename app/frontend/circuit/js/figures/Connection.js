@@ -1,25 +1,33 @@
 /*jshint evil:true */
 import ProbeFigure from "./ProbeFigure"
+import ConnectionRouter from "../ConnectionRouter"
+
+let router = new ConnectionRouter();
 
 export default draw2d.Connection.extend({
 
   NAME: "Connection",
 
   init: function (attr, setter, getter) {
-    this._super(attr, setter, getter)
+    this._super($.extend({
+        router: router,
+        corona: 4,
+      }, attr),
+      setter,
+      getter)
 
     // since version 3.5.6
     //
-    this.on("dragEnter", (emitter, event)=>{
+    this.on("dragEnter", (emitter, event) => {
       this.attr({
-        outlineStroke:2,
-        outlineColor:"#30ff30"
+        outlineStroke: 2,
+        outlineColor: "#30ff30"
       });
     });
-    this.on("dragLeave", (emitter, event)=>{
+    this.on("dragLeave", (emitter, event) => {
       this.attr({
-        outlineStroke:0,
-        outlineColor:"#303030"
+        outlineStroke: 0,
+        outlineColor: "#303030"
       });
     });
   },

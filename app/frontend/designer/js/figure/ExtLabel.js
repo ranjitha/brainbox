@@ -4,11 +4,11 @@ export default shape_designer.figure.ExtLabel = draw2d.shape.basic.Label.extend(
   NAME: "shape_designer.figure.ExtLabel",
 
 
-  init: function () {
+  init: function (attr, setter, getter) {
     this.blur = 0
     this.isExtFigure = true
 
-    this._super()
+    this._super(attr, setter, getter)
 
 
     this.setUserData({name: "Label"})

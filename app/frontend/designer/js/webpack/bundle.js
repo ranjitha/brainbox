@@ -2692,6 +2692,8 @@ exports.default = draw2d.Canvas.extend({
     });
 
     Mousetrap.bindGlobal(['ctrl+c', 'command+c'], function () {
+      // ctrl+c and ctrl+v works just for normal figures and not connections
+      //
       var primarySelection = _this.getSelection().getPrimary();
       if (primarySelection !== null) {
         _this.clippboardFigure = primarySelection.clone();
@@ -4006,11 +4008,11 @@ exports.default = shape_designer.figure.ExtLabel = draw2d.shape.basic.Label.exte
 
   NAME: "shape_designer.figure.ExtLabel",
 
-  init: function init() {
+  init: function init(attr, setter, getter) {
     this.blur = 0;
     this.isExtFigure = true;
 
-    this._super();
+    this._super(attr, setter, getter);
 
     this.setUserData({ name: "Label" });
 
@@ -4160,8 +4162,8 @@ exports.default = shape_designer.figure.ExtLine = draw2d.shape.basic.PolyLine.ex
 
   NAME: "shape_designer.figure.ExtLine",
 
-  init: function init() {
-    this._super();
+  init: function init(attr, setter, getter) {
+    this._super(attr, setter, getter);
 
     this.blur = 0;
     this.isExtFigure = true;
@@ -8065,7 +8067,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   init: function init() {
     this._super();
 
-    this.topLeft = null;
     this.newFigure = null;
   },
 
@@ -8120,30 +8121,28 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @template
    */
   onMouseUp: function onMouseUp(canvas, x, y) {
-    if (this.topLeft === null) {
-      this.topLeft = new draw2d.geo.Point(x, y);
-      this.setToolText(this.MESSAGE_STEP2);
+    this.setToolText(this.MESSAGE_STEP2);
 
-      this.newFigure = new shape_designer.figure.ExtLabel();
-      this.newFigure.setText("Text");
-      this.newFigure.setStroke(0);
-      this.newFigure.setPadding(5);
-      this.newFigure.setFontSize(16);
+    this.newFigure = new shape_designer.figure.ExtLabel({
+      text: "Text",
+      stroke: 0,
+      padding: 5,
+      fontSize: 16,
+      x: parseInt(x),
+      y: parseInt(y)
+    });
 
-      var command = new draw2d.command.CommandAdd(canvas, this.newFigure, parseInt(x), parseInt(y));
-      canvas.getCommandStack().execute(command);
-      canvas.setCurrentSelection(this.newFigure);
+    var command = new draw2d.command.CommandAdd(canvas, this.newFigure, parseInt(x), parseInt(y));
+    canvas.getCommandStack().execute(command);
+    canvas.setCurrentSelection(this.newFigure);
 
-      // start inplace editing
-      //
-      setTimeout($.proxy(function () {
-        this.newFigure.onDoubleClick();
-      }, this), 100);
+    // start inplace editing
+    //
+    setTimeout($.proxy(function () {
+      this.newFigure.onDoubleClick();
+    }, this), 100);
 
-      this.executed();
-    } else {
-      this.topLeft = null;
-    }
+    this.executed();
   }
 });
 module.exports = exports["default"];
