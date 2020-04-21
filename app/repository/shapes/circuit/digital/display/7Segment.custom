@@ -23,7 +23,7 @@ circuit_digital_display_7Segment = circuit_digital_display_7Segment.extend({
         this.portLockup.push({ p:this.getPort("port_g"), s:"seg_g"});
     },
     
-    calculate:function()
+    calculate:function(context)
     {
         var _this = this;
         this.portLockup.forEach(function(element, index){

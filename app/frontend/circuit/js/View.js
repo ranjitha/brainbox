@@ -413,7 +413,7 @@ export default draw2d.Canvas.extend({
    */
   clear: function () {
     this.simulationStop()
-
+    this.probeWindow.resetProbes()
     this._super()
 
     this.centerDocument()

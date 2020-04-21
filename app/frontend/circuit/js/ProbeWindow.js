@@ -128,6 +128,15 @@ export default class ProbeWindow {
     this.probes.forEach(this.leftShiftTick)
   }
 
+  resetProbes() {
+    this.probes.forEach( (item) => {
+      $("#" + item.probe.id).remove()
+    })
+    this.resize()
+    $("#probe_hint").fadeOut()
+    this.hide()
+  }
+
   removeProbe(probeFigure) {
     this.probes = $.grep(this.probes, entry => entry.probe !== probeFigure)
     $("#" + probeFigure.id).remove()

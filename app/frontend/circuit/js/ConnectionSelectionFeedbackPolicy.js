@@ -42,10 +42,11 @@ export default draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
     let probeFigure = conn.getProbeFigure()
     if (probeFigure === null) {
       items.probe = {name: "Add Probe"}
-    }
-    else {
+    } else {
       items.unprobe = {name: "Remove Probe"}
     }
+
+    items["delete"] = {name: "Delete"}
 
     $.contextMenu({
       selector: 'body',
@@ -67,6 +68,9 @@ export default draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
             conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices))
             break
 
+          case "delete":
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandDelete(conn))
+            break
           case "split":
             // deep copy of the vertices of the connection for the command stack to avoid side effects
             originalVertices = conn.getVertices().clone(true)

@@ -20,14 +20,14 @@ export default class CodeDialog {
         let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
         let pathToDesign = conf.designer.url
           + "?timestamp=" + new Date().getTime()
-          + "&file=" + baseName + ".shape"
+          + "&global=" + baseName + ".shape"
         window.open(pathToDesign, "designer")
       })
       $("#codePreviewDialog .editButtonGuided").off("click").on("click", () => {
         let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
         let pathToDesign = conf.designer.url
           + "?timestamp=" + new Date().getTime()
-          + "&file=" + baseName + ".shape"
+          + "&global=" + baseName + ".shape"
           + "&tutorial=code"
         window.open(pathToDesign, "designer")
       })

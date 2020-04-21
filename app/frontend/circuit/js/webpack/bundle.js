@@ -2424,13 +2424,13 @@ var Application = function () {
 
           // check if a tutorial exists for the named file and load/activate them
           //
-        };storage.loadUrl(url.replace(_Configuration2.default.fileSuffix, ".guide")).then(function (content) {
-          if (typeof content === "string") {
-            content = JSON.parse(content);
+        };storage.loadUrl(url.replace(_Configuration2.default.fileSuffix, ".guide")).then(function (guide) {
+          if (typeof guide === "string") {
+            guide = JSON.parse(guide);
           }
-          $(content.screen).click();
+          $(guide.screen).click();
           (0, _checkElement2.default)("#paletteElementsScroll").then(function () {
-            var anno = new Anno(content.steps);
+            var anno = new Anno(guide.steps);
             anno.show();
           });
         }).catch(function (error) {
@@ -2849,6 +2849,8 @@ exports.default = draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
       items.unprobe = { name: "Remove Probe" };
     }
 
+    items["delete"] = { name: "Delete" };
+
     $.contextMenu({
       selector: 'body',
       events: {
@@ -2869,6 +2871,9 @@ exports.default = draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
             conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
             break;
 
+          case "delete":
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandDelete(conn));
+            break;
           case "split":
             // deep copy of the vertices of the connection for the command stack to avoid side effects
             originalVertices = conn.getVertices().clone(true);
@@ -3534,6 +3539,16 @@ var ProbeWindow = function () {
       this.probes.forEach(this.leftShiftTick);
     }
   }, {
+    key: "resetProbes",
+    value: function resetProbes() {
+      this.probes.forEach(function (item) {
+        $("#" + item.probe.id).remove();
+      });
+      this.resize();
+      $("#probe_hint").fadeOut();
+      this.hide();
+    }
+  }, {
     key: "removeProbe",
     value: function removeProbe(probeFigure) {
       this.probes = $.grep(this.probes, function (entry) {
@@ -4197,7 +4212,7 @@ exports.default = draw2d.Canvas.extend({
    */
   clear: function clear() {
     this.simulationStop();
-
+    this.probeWindow.resetProbes();
     this._super();
 
     this.centerDocument();
@@ -4521,12 +4536,12 @@ var CodeDialog = function () {
         $('#codePreviewDialog').modal('show');
         $("#codePreviewDialog .editButton").off("click").on("click", function () {
           var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape";
+          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&global=" + baseName + ".shape";
           window.open(pathToDesign, "designer");
         });
         $("#codePreviewDialog .editButtonGuided").off("click").on("click", function () {
           var baseName = figure.attr("userData.file").replace(/\.shape$/, "");
-          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + baseName + ".shape" + "&tutorial=code";
+          var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&global=" + baseName + ".shape" + "&tutorial=code";
           window.open(pathToDesign, "designer");
         });
       });
@@ -6092,6 +6107,7 @@ var Writer = draw2d.io.json.Writer.extend({
   marshal: function marshal(canvas, callback) {
     new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
       var writer = new draw2d.io.json.Writer();
+      console.log(imageDataUrl);
       writer.marshal(canvas, function (json) {
         var data = {
           draw2d: json,

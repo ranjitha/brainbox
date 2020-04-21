@@ -1617,7 +1617,7 @@ circuit_digital_decoder_BCDto7Seg = circuit_digital_decoder_BCDto7Seg.extend({
 var circuit_digital_display_7Segment = CircuitFigure.extend({
 
    NAME: "circuit_digital_display_7Segment",
-   VERSION: "1.0.146_268",
+   VERSION: "local-version",
 
    init:function(attr, setter, getter)
    {
@@ -1756,7 +1756,7 @@ circuit_digital_display_7Segment = circuit_digital_display_7Segment.extend({
         this.portLockup.push({ p:this.getPort("port_g"), s:"seg_g"});
     },
     
-    calculate:function()
+    calculate:function(context)
     {
         var _this = this;
         this.portLockup.forEach(function(element, index){

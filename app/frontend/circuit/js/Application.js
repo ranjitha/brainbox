@@ -145,13 +145,13 @@ class Application {
         // check if a tutorial exists for the named file and load/activate them
         //
         storage.loadUrl(url.replace(conf.fileSuffix, ".guide"))
-          .then(content => {
-            if (typeof content === "string") {
-              content = JSON.parse(content)
+          .then(guide => {
+            if (typeof guide === "string") {
+              guide = JSON.parse(guide)
             }
-            $(content.screen).click()
+            $(guide.screen).click()
             checkElement("#paletteElementsScroll").then(() => {
-              let anno = new Anno(content.steps)
+              let anno = new Anno(guide.steps)
               anno.show()
             })
           })

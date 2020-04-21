@@ -2,7 +2,7 @@ const fs = require('fs-extra')
 const glob = require("glob")
 const path = require('path')
 const makeDir = require('make-dir');
-const sanitize = require("../../util/sanitize-filename")
+const sanitize = require("../../util/sanitize-filepath")
 
 // Generic file operations for "brains" and "shapes"
 //
