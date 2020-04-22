@@ -17,7 +17,7 @@ export default class Palette {
    */
   constructor(view, id, permissions) {
     // remove all classes from the other editors
-    $("#paletteElementsScroll").removeClass("pages")
+    $("#paletteElementsScroll, #paletteFilter").removeClass("pages")
 
     this.view = view
     $.getJSON(conf.shapes.url + "index.json", (data) => {
@@ -136,5 +136,4 @@ export default class Palette {
       }
     })
   }
-
 }

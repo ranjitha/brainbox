@@ -44,7 +44,7 @@ export default class Palette {
 
 
   render() {
-    // remove all classes from the other editors
+    // restore all classes from the other editors
     $("#paletteElementsScroll, #paletteFilter").addClass("pages")
     $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>")
     this.stackChanged(null)
