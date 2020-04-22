@@ -1,4 +1,4 @@
-# Raspberry Pi GPIO 
+# GPIO Write 
 `Brainbox must run on an Raspberry Pi to use this functionality`
 
 ## About GPIO

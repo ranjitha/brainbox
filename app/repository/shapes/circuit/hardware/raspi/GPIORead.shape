@@ -15,7 +15,7 @@
         "baseClass": "draw2d.SetFigure",
         "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         // your special code here\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @required\n     **/\n    calculate:function()\n    {\n        this.getOutputPorts().each(function(index,port){\n            port.setValue(hardware.raspi.get(port.getName()));\n        });\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    },\n    \n    getRequiredHardware: function(){\n      return {\n        raspi: true,\n        arduino: false\n      }\n    }\n    \n});",
         "name": "Rectangle",
-        "markdown": "# Raspberry Pi Read \n`Brainbox must run on an Raspberry Pi to use this functionality`\n\n## About the GPIO \nA powerful feature of the Raspberry Pi is the row of GPIO (general-purpose \ninput/output) pins along the top edge of the board. A 40-pin GPIO header is \nfound on all current Raspberry Pi boards (unpopulated on Pi Zero and Pi Zero W). \nPrior to the Pi 1 Model B+ (2014), boards comprised a shorter 26-pin header.\n\nAny of the GPIO pins can be designated (in software) as an input or output pin \nand used for a wide range of purposes.\n\nIt is possible to `read` from the GPIO pins using Brainbox as shown below. Of \ncourse it is necessary that brainbox is started on a Raspberry Pi in order to \naccess the GPIOS pins. After that you can connect to brainbox with your browser \nas usual and access the pins.\n",
+        "markdown": "# GPIO Read \n`Brainbox must run on an Raspberry Pi to use this functionality`\n\n## About the GPIO \nA powerful feature of the Raspberry Pi is the row of GPIO (general-purpose \ninput/output) pins along the top edge of the board. A 40-pin GPIO header is \nfound on all current Raspberry Pi boards (unpopulated on Pi Zero and Pi Zero W). \nPrior to the Pi 1 Model B+ (2014), boards comprised a shorter 26-pin header.\n\nAny of the GPIO pins can be designated (in software) as an input or output pin \nand used for a wide range of purposes.\n\nIt is possible to `read` from the GPIO pins using Brainbox as shown below. Of \ncourse it is necessary that brainbox is started on a Raspberry Pi in order to \naccess the GPIOS pins. After that you can connect to brainbox with your browser \nas usual and access the pins.\n",
         "type": "Output",
         "direction": 1
       },
@@ -1559,7 +1559,7 @@
       "id": "bb6288f8-25aa-e53b-0457-e8c1135fe7bf",
       "x": 7951.3036,
       "y": 7876.25,
-      "width": 58.03125,
+      "width": 59.71875,
       "height": 21.015625,
       "alpha": 1,
       "selectable": true,

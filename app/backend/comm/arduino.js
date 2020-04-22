@@ -63,7 +63,6 @@ module.exports = {
 
                 socketio.on('connection', socket => {
                   socket.on('arduino:set',  msg => {
-                    console.log(msg)
                     arduinoOnSerial.write(msg.cmd)
                    // let pin = pins[msg.pin];
                    // pin.set(1 - msg.value);
@@ -73,7 +72,6 @@ module.exports = {
                 arduinoOnSerial.on('open', function () {
                   console.log("Serial Port '" + serialPortCandidates[index].comName + "' to Arduino opend successfully")
                   arduinoOnSerial.on('data', function (data) {
-                    console.log(data)
                     socketio.sockets.emit("arduino:value", {data} );
                   })
                 })

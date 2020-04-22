@@ -1,4 +1,4 @@
-# Raspberry Pi Read 
+# GPIO Read 
 `Brainbox must run on an Raspberry Pi to use this functionality`
 
 ## About the GPIO 
