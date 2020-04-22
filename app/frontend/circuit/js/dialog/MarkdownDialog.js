@@ -17,10 +17,10 @@ class Dialog {
   show(conf, figure) {
     let baseName = figure.attr("userData.file").replace(/\.shape$/, "")
     let pathToMD = conf.shapes.url + baseName + ".md"
-    $.get(pathToMD, function (content) {
+    $.get(pathToMD,  (content) => {
       let version = figure.VERSION
       let markdownParser = new Remarkable('full', this.defaults)
-      markdownParser.inline.validateLink = this.validateLink
+      markdownParser.inline.validateLink = (url)=> this.validateLink(url)
       $('#markdownDialog .markdownRendering').html(markdownParser.render(content))
       $('#markdownDialog .version').html(version)
       if(figure instanceof CircuitFigure){

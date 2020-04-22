@@ -604,6 +604,36 @@
     "image": "circuit/hardware/arduino/Led.png"
   },
   {
+    "name": "circuit_hardware_raspi_GPIORead",
+    "tags": [
+      "circuit",
+      "hardware",
+      "raspi",
+      "GPIORead"
+    ],
+    "version": "local-version",
+    "basename": "GPIORead.js",
+    "displayName": "GPIORead",
+    "basedir": "circuit/hardware/raspi",
+    "filePath": "circuit/hardware/raspi/GPIORead.shape",
+    "image": "circuit/hardware/raspi/GPIORead.png"
+  },
+  {
+    "name": "circuit_hardware_raspi_GPIOWrite",
+    "tags": [
+      "circuit",
+      "hardware",
+      "raspi",
+      "GPIOWrite"
+    ],
+    "version": "local-version",
+    "basename": "GPIOWrite.js",
+    "displayName": "GPIOWrite",
+    "basedir": "circuit/hardware/raspi",
+    "filePath": "circuit/hardware/raspi/GPIOWrite.shape",
+    "image": "circuit/hardware/raspi/GPIOWrite.png"
+  },
+  {
     "name": "circuit_hardware_raspi_RaspiGPIO",
     "tags": [
       "circuit",

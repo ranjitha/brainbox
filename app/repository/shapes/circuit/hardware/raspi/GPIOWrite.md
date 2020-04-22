@@ -11,7 +11,7 @@ and Pi Zero W). Prior to the Pi 1 Model B+ (2014), boards comprised a shorter
 Any of the GPIO pins can be designated (in software) as an input or output pin 
 and used for a wide range of purposes.
 
-It is possible to control GPIO pins using Brainbox as shown below. Of course it 
+It is possible to `write` to the  GPIO pins using Brainbox as shown below. Of course it 
 is necessary that brainbox is started on a Raspberry Pi in order 
 to access the GPIOS pins. After that you can connect to brainbox with your 
 browser as usual and access the pins.
