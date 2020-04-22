@@ -93,21 +93,28 @@ module.exports = {
       return
     }
     try {
-      let contents = fs.readFileSync(file)
-      let json = JSON.parse(contents)
+      let pngFile = file.replace(".shape",".png")
+      if(fs.existsSync(pngFile)) {
+        let contents = fs.readFileSync(file)
+        res.contentType('image/jpeg');
+        res.end(contents,"binary")
+      }else {
+        let contents = fs.readFileSync(file)
+        let json = JSON.parse(contents)
 
-      if (!json.image) {
-        res.status(404).send('Not found')
-        return
+        if (!json.image) {
+          res.status(404).send('Not found')
+          return
+        }
+
+        let base64data = json.image.replace(/^data:image\/png;base64,/, '')
+        let img = Buffer.from(base64data, 'base64')
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': img.length
+        })
+        res.end(img)
       }
-
-      let base64data = json.image.replace(/^data:image\/png;base64,/, '')
-      let img = Buffer.from(base64data, 'base64')
-      res.writeHead(200, {
-        'Content-Type': 'image/png',
-        'Content-Length': img.length
-      })
-      res.end(img)
     } catch (exc) {
       res.status(404).send('Not found')
     }

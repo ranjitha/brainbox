@@ -86,7 +86,7 @@ class Dialog {
           name = name.replace(conf.fileSuffix, "")
           name = fs.basename(name) // remove any directories
           currentFile.name = fs.join(fs.dirname(currentFile.name), name + conf.fileSuffix)
-          storage.saveFile({draw2d: json, image: imageDataUrl}, currentFile.name , currentFile.scope)
+          storage.saveFile( { draw2d: json }, currentFile.name , currentFile.scope)
             .then((response) => {
               $('#fileSaveDialog').modal('hide')
               let data = response.data

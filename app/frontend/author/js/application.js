@@ -38,7 +38,7 @@ class Application {
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
     this.filePane = new Files(this, conf, permissions.sheets)
-    this.indexPane = new AuthorPage("#home", "readme/en/circuit/Readme.sheet")
+    this.indexPane = new AuthorPage("#home", "/readme/en/author/README.sheet")
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
     this.userinfo = new Userinfo(permissions, conf)
     commandStack.on("change", this)

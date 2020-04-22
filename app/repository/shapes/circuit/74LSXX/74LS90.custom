@@ -15,7 +15,16 @@ circuit_74LSXX_74LS90 = circuit_74LSXX_74LS90.extend({
     init: function(attr, setter, getter){
          this._super(attr, setter, getter);
 
-         // your special code here
+        this.attr({resizeable:false});
+        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
+
+        // internal the 74ls90 is build with two seperated counter
+        // A Mod2 and a Mod5 counter. Cascading them is a BCD Counter (Mod10)
+        //
+        this.last_t1=true;
+        this.last_t2=true;
+        this.counter1=0; // mod 2 counter
+        this.counter2=0; // mod 5 counter
     },
 
     /**
@@ -26,6 +35,29 @@ circuit_74LSXX_74LS90 = circuit_74LSXX_74LS90.extend({
      **/
     calculate:function( context)
     {
+        var t1 = this.getInputPort("pin_cka").getValue();
+        var t2 = this.getInputPort("pin_ckb").getValue();
+
+        var falling1 = this.last_t1===true && t1===false; 
+        var falling2 = this.last_t2===true && t2===false; 
+        
+        if(falling1===true){
+            var a = this.getOutputPort("pin_qa");
+            a.setValue(!!(this.counter1 & 1));
+            this.counter1= (this.counter1+1)%2;
+        }
+        
+        if(falling2===true){
+            var b = this.getOutputPort("pin_qb");
+            var c = this.getOutputPort("pin_qc");
+            var d = this.getOutputPort("pin_qd");
+            b.setValue(!!(this.counter2 & 1));
+            c.setValue(!!(this.counter2 & 2));
+            d.setValue(!!(this.counter2 & 4));
+            this.counter2= (this.counter2+1)%5;
+        }
+        this.last_t1 = t1;
+        this.last_t2 = t2;
     },
 
 
