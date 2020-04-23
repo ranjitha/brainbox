@@ -5704,9 +5704,9 @@ var Palette = function () {
     this.permissions = permissions;
     _CommandStack2.default.on("change", this);
 
-    $(document).on("click", "#documentPageAdd", function () {
+    $(document).off("click", "#documentPageAdd").on("click", "#documentPageAdd", function () {
       _this.app.view.addPage();
-    }).on("click", ".pageElement .page_edit_name", function (event) {
+    }).off("click", ".pageElement .page_edit_name").on("click", ".pageElement .page_edit_name", function (event) {
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
       inputPrompt.show("Rename Pager", "Page name", page.name, function (value) {
         _CommandStack2.default.push(new _State2.default(_this.app));
@@ -5714,13 +5714,13 @@ var Palette = function () {
         _this.stackChanged(null);
       });
       return false;
-    }).on("click", ".pageElement .page_delete", function (event) {
+    }).off("click", ".pageElement .page_delete").on("click", ".pageElement .page_delete", function (event) {
       _CommandStack2.default.push(new _State2.default(_this.app));
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
       _this.app.getDocument().removePage(page);
       _this.stackChanged(null);
       return false;
-    }).on("click", ".pageElement", function (event) {
+    }).off("click", ".pageElement").on("click", ".pageElement", function (event) {
       $(".pageElement").removeClass("selected");
       var element = $(event.target);
       var id = element.data("page");

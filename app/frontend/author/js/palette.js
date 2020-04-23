@@ -13,10 +13,10 @@ export default class Palette {
     commandStack.on("change", this)
 
     $(document)
-      .on("click", "#documentPageAdd", () => {
+      .off("click", "#documentPageAdd").on("click", "#documentPageAdd", () => {
         this.app.view.addPage()
       })
-      .on("click", ".pageElement .page_edit_name", (event) => {
+      .off("click", ".pageElement .page_edit_name").on("click", ".pageElement .page_edit_name", (event) => {
         let page = this.app.getDocument().getPage($(event.currentTarget).data("page"))
         inputPrompt.show("Rename Pager", "Page name", page.name, value => {
           commandStack.push(new State(this.app))
@@ -25,14 +25,14 @@ export default class Palette {
         })
         return false
       })
-      .on("click", ".pageElement .page_delete", (event) => {
+      .off("click", ".pageElement .page_delete").on("click", ".pageElement .page_delete", (event) => {
         commandStack.push(new State(this.app))
         let page = this.app.getDocument().getPage($(event.currentTarget).data("page"))
         this.app.getDocument().removePage(page)
         this.stackChanged(null)
         return false
       })
-      .on("click", ".pageElement", (event) => {
+      .off("click", ".pageElement").on("click", ".pageElement", (event) => {
         $(".pageElement").removeClass("selected")
         let element = $(event.target)
         let id = element.data("page")
