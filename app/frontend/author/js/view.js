@@ -30,15 +30,7 @@ export default class View {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"))
 
-    commandStack.on("change", this)
-
-    $(".toolbar")
-      .delegate("#editUndo:not(.disabled)", "click", () => {
-        commandStack.undo()
-      })
-      .delegate("#editRedo:not(.disabled)", "click", () => {
-        commandStack.redo()
-      })
+    commandStack.off(this).on("change", this)
 
 
     $(document)

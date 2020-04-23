@@ -141,6 +141,7 @@ class Application {
     $("#leftTabStrip .editor").click()
     this.currentFile = { name, scope }
     this.setDocument(new Document(), 0)
+    commandStack.markSaveLocation()
     let section = this.view.addMarkdown(0)
     this.view.onSelect(section)
     this.view.onEdit(section)
@@ -153,13 +154,16 @@ class Application {
       .then((content) => {
         this.currentFile = { name, scope}
         this.setDocument(new Document(content),0)
+        commandStack.markSaveLocation()
         return content
       })
   }
 
   setDocument(document, pageIndex){
     this.document = document
-    commandStack.markSaveLocation()
+    // the "setDocument" is used by the CommandStack for undo/redo
+    // therefore a "markSaveLocation" is a bad idea in this method
+    // commandStack.markSaveLocation()
     this.view.onCancelEdit()
     this.view.setPage(this.document.get(pageIndex || 0))
   }
@@ -173,6 +177,13 @@ class Application {
       $("#editorFileSave div").addClass("highlight")
       this.hasUnsavedChanges = true
     }
+  }
+
+  hasModifyPermissionForCurrentFile(){
+    let scope = this.currentFile.scope
+
+    return ((scope === "global" && (this.permissions.sheets.global.update || this.permissions.sheets.global.create))
+      || (scope === "user" && (this.permissions.sheets.update || this.permissions.sheets.create)))
   }
 }
 

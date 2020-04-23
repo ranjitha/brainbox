@@ -2344,6 +2344,7 @@ var Application = function () {
       $("#leftTabStrip .editor").click();
       this.currentFile = { name: name, scope: scope };
       this.setDocument(new _document2.default(), 0);
+      _CommandStack2.default.markSaveLocation();
       var section = this.view.addMarkdown(0);
       this.view.onSelect(section);
       this.view.onEdit(section);
@@ -2358,6 +2359,7 @@ var Application = function () {
       return this.storage.loadUrl(url).then(function (content) {
         _this3.currentFile = { name: name, scope: scope };
         _this3.setDocument(new _document2.default(content), 0);
+        _CommandStack2.default.markSaveLocation();
         return content;
       });
     }
@@ -2365,7 +2367,9 @@ var Application = function () {
     key: "setDocument",
     value: function setDocument(document, pageIndex) {
       this.document = document;
-      _CommandStack2.default.markSaveLocation();
+      // the "setDocument" is used by the CommandStack for undo/redo
+      // therefore a "markSaveLocation" is a bad idea in this method
+      // commandStack.markSaveLocation()
       this.view.onCancelEdit();
       this.view.setPage(this.document.get(pageIndex || 0));
     }
@@ -2381,6 +2385,13 @@ var Application = function () {
         $("#editorFileSave div").addClass("highlight");
         this.hasUnsavedChanges = true;
       }
+    }
+  }, {
+    key: "hasModifyPermissionForCurrentFile",
+    value: function hasModifyPermissionForCurrentFile() {
+      var scope = this.currentFile.scope;
+
+      return scope === "global" && (this.permissions.sheets.global.update || this.permissions.sheets.global.create) || scope === "user" && (this.permissions.sheets.update || this.permissions.sheets.create);
     }
   }]);
 
@@ -2579,7 +2590,7 @@ var CommandStack = function () {
   }, {
     key: "off",
     value: function off(listener) {
-      this.eventListeners.grep(function (entry) {
+      this.eventListeners.filter(function (entry) {
         return entry === listener || entry.stackChanged === listener;
       });
       return this;
@@ -5702,7 +5713,7 @@ var Palette = function () {
     this.app = app;
     this.view = view;
     this.permissions = permissions;
-    _CommandStack2.default.on("change", this);
+    _CommandStack2.default.off(this).on("change", this);
 
     $(document).off("click", "#documentPageAdd").on("click", "#documentPageAdd", function () {
       _this.app.view.addPage();
@@ -5735,7 +5746,9 @@ var Palette = function () {
     value: function render() {
       // restore all classes from the other editors
       $("#paletteElementsScroll, #paletteFilter").addClass("pages");
-      $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>");
+      if (this.app.hasModifyPermissionForCurrentFile()) {
+        $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>");
+      }
       this.stackChanged(null);
     }
 
@@ -5754,31 +5767,51 @@ var Palette = function () {
     value: function stackChanged(event) {
       var _this2 = this;
 
+      if (this.sourceIsSortEvent) {
+        return; // silently}
+      }
+
       this.html.html('');
       var pages = this.app.getDocument().getPages();
       var currentPage = this.view.getPage();
 
-      pages.forEach(function (page) {
-        _this2.html.append("\n        <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n          " + page.name + "\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Delete the page\" class=\"page_delete pull-right\" >\n              <span class=\"fa fa-trash\"/>\n          </span>\n          <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Page\" class=\"page_edit_name pull-right\" >\n              <span class=\"fa fa-edit\"/>\n          </span>\n        </div>");
-      }, true);
+      if (this.app.hasModifyPermissionForCurrentFile()) {
+        pages.forEach(function (page) {
+          _this2.html.append("\n          <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n            " + page.name + "\n            <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Delete the page\" class=\"page_delete pull-right\" >\n                <span class=\"fa fa-trash\"/>\n            </span>\n            <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Page\" class=\"page_edit_name pull-right\" >\n                <span class=\"fa fa-edit\"/>\n            </span>\n          </div>");
+        }, true);
+      } else {
+        pages.forEach(function (page) {
+          _this2.html.append("\n          <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n            " + page.name + "\n          </div>");
+        }, true);
+      }
 
       $(".pageElement[data-page=" + currentPage.id + "]").addClass("selected");
 
-      this.html.sortable({
-        axis: "y",
-        update: function update(event, dd) {
-          // fetch the state of the new order
-          var pageDivs = $(".pageElement").toArray();
-          var document = _this2.app.getDocument();
-          //
-          var newPageOrder = [];
-          pageDivs.forEach(function (page) {
-            var id = $(page).data("page");
-            newPageOrder.push(document.getPage(id));
-          });
-          document.setPages(newPageOrder);
-        }
-      });
+      // Allow only the drag&drop of the pages if the user has the permission
+      //
+      if (this.app.hasModifyPermissionForCurrentFile()) {
+        this.html.sortable({
+          axis: "y",
+          update: function update(event, dd) {
+            _this2.sourceIsSortEvent = true;
+            try {
+              _CommandStack2.default.push(new _State2.default(_this2.app));
+              // fetch the state of the new order
+              var pageDivs = $(".pageElement").toArray();
+              var _document = _this2.app.getDocument();
+              //
+              var newPageOrder = [];
+              pageDivs.forEach(function (page) {
+                var id = $(page).data("page");
+                newPageOrder.push(_document.getPage(id));
+              });
+              _document.setPages(newPageOrder);
+            } finally {
+              _this2.sourceIsSortEvent = false;
+            }
+          }
+        });
+      }
     }
   }]);
 
@@ -5841,11 +5874,11 @@ var Toolbar = function () {
     this.view = view;
     this.permissions = permissions;
 
-    _CommandStack2.default.on("change", this);
+    _CommandStack2.default.off(this).on("change", this);
 
     this.saveButton = $("#editorFileSave");
-    if (permissions.sheets.update || permissions.sheets.create) {
-      this.saveButton.on("click", function () {
+    if (this.app.hasModifyPermissionForCurrentFile()) {
+      this.saveButton.off("click").on("click", function () {
         _this.saveButton.tooltip("hide");
         app.fileSave();
       });
@@ -5859,7 +5892,7 @@ var Toolbar = function () {
 
     this.shareButton = $("#editorFileShare");
     if (permissions.featureset.share) {
-      this.shareButton.on("click", function () {
+      this.shareButton.off("click").on("click", function () {
         _this.shareButton.tooltip("hide");
         if (_this.app.hasUnsavedChanges) {
           // file must be save before sharing
@@ -5876,7 +5909,7 @@ var Toolbar = function () {
 
     this.pdfButton = $("#editorFileToPDF");
     if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
-      this.pdfButton.on("click", function () {
+      this.pdfButton.off("click").on("click", function () {
         var file = app.currentFile;
         if (_this.app.hasUnsavedChanges && (file.scope === "global" && permissions.sheets.global.update === true || file.scope === "user" && permissions.sheets.update === true)) {
           // file must be save before sharing
@@ -5895,30 +5928,38 @@ var Toolbar = function () {
     // Editor Operations
     //
     this.addTextButton = $("#addTextSection");
-    this.addTextButton.on("click", function () {
-      _this.addTextButton.tooltip("hide");
-      _this.view.addMarkdown();
-    });
-    Mousetrap.bindGlobal("ctrl+t", function () {
-      _this.addTextButton.click();
-      return false;
-    });
+    if (this.app.hasModifyPermissionForCurrentFile()) {
+      this.addTextButton.off("click").on("click", function () {
+        _this.addTextButton.tooltip("hide");
+        _this.view.addMarkdown();
+      });
+      Mousetrap.bindGlobal("ctrl+t", function () {
+        _this.addTextButton.click();
+        return false;
+      });
+    } else {
+      this.addTextButton.remove();
+    }
 
     this.addBrainButton = $("#addBrainSection");
-    this.addBrainButton.on("click", function () {
-      _this.addBrainButton.tooltip("hide");
-      _this.view.addBrain();
-    });
-    Mousetrap.bindGlobal("ctrl+s", function (event) {
-      _this.addBrainButton.click();
-      return false;
-    });
+    if (this.app.hasModifyPermissionForCurrentFile()) {
+      this.addBrainButton.off("click").on("click", function () {
+        _this.addBrainButton.tooltip("hide");
+        _this.view.addBrain();
+      });
+      Mousetrap.bindGlobal("ctrl+s", function (event) {
+        _this.addBrainButton.click();
+        return false;
+      });
+    } else {
+      this.addBrainButton.remove();
+    }
 
-    $(".applicationSwitchDesigner").on("click", function () {
+    $(".applicationSwitchDesigner").off("click").on("click", function () {
       _DesignerDialog2.default.show(_configuration2.default);
     });
 
-    $(".applicationSwitchSimulator").on("click", function () {
+    $(".applicationSwitchSimulator").off("click").on("click", function () {
       _SimulatorDialog2.default.show(_configuration2.default);
     });
 
@@ -5938,6 +5979,18 @@ var Toolbar = function () {
       delay: { show: 1000, hide: 10 },
       html: true
     });
+
+    if (this.app.hasModifyPermissionForCurrentFile()) {
+
+      // must delegate event from parent DOM because of the dynamic property of the CSS selector
+      $(".toolbar").off("#editUndo").delegate("#editUndo:not(.disabled)", "click", function () {
+        _CommandStack2.default.undo();
+      }).off('#editRedo').delegate("#editRedo:not(.disabled)", "click", function () {
+        _CommandStack2.default.redo();
+      });
+    } else {
+      $("#editUndo, #editRedo").remove();
+    }
   }
 
   _createClass(Toolbar, [{
@@ -6129,13 +6182,7 @@ var View = function () {
     // inject the host for the rendered section
     this.html.html($("<div class='sections'></div>"));
 
-    _CommandStack2.default.on("change", this);
-
-    $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
-      _CommandStack2.default.undo();
-    }).delegate("#editRedo:not(.disabled)", "click", function () {
-      _CommandStack2.default.redo();
-    });
+    _CommandStack2.default.off(this).on("change", this);
 
     $(document).on("click", ".content", function () {
       _this.onUnselect();

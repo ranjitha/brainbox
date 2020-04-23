@@ -146,7 +146,7 @@ class CommandStack {
      * @returns {this}
      */
     off (listener) {
-      this.eventListeners.grep(entry => (entry === listener || entry.stackChanged === listener))
+       this.eventListeners.filter(entry => (entry === listener || entry.stackChanged === listener))
       return this
     }
 
