@@ -6,7 +6,7 @@
       "74LSXX",
       "74LS90"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "74LS90.js",
     "displayName": "74LS90",
     "basedir": "circuit/74LSXX",
@@ -21,7 +21,7 @@
       "alu",
       "FullAdder"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "FullAdder.js",
     "displayName": "FullAdder",
     "basedir": "circuit/digital/alu",
@@ -36,7 +36,7 @@
       "alu",
       "FullAdder4Bit"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "FullAdder4Bit.js",
     "displayName": "FullAdder4Bit",
     "basedir": "circuit/digital/alu",
@@ -51,7 +51,7 @@
       "buttons",
       "HighLow"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "HighLow.js",
     "displayName": "HighLow",
     "basedir": "circuit/digital/buttons",
@@ -66,7 +66,7 @@
       "buttons",
       "HighLowArray"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "HighLowArray.js",
     "displayName": "HighLowArray",
     "basedir": "circuit/digital/buttons",
@@ -81,7 +81,7 @@
       "buttons",
       "PushButton"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "PushButton.js",
     "displayName": "PushButton",
     "basedir": "circuit/digital/buttons",
@@ -96,7 +96,7 @@
       "counter",
       "BCDCounter"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "BCDCounter.js",
     "displayName": "BCDCounter",
     "basedir": "circuit/digital/counter",
@@ -111,7 +111,7 @@
       "decoder",
       "BCDto7Seg"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "BCDto7Seg.js",
     "displayName": "BCDto7Seg",
     "basedir": "circuit/digital/decoder",
@@ -126,7 +126,7 @@
       "display",
       "7Segment"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "7Segment.js",
     "displayName": "7Segment",
     "basedir": "circuit/digital/display",
@@ -141,7 +141,7 @@
       "display",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/digital/display",
@@ -156,7 +156,7 @@
       "flipflop",
       "DFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "DFlipFlop.js",
     "displayName": "DFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -171,7 +171,7 @@
       "flipflop",
       "JKFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "JKFlipFlop.js",
     "displayName": "JKFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -186,7 +186,7 @@
       "flipflop",
       "JKRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "JKRFlipFlop.js",
     "displayName": "JKRFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -201,7 +201,7 @@
       "flipflop",
       "SRFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "SRFlipFlop.js",
     "displayName": "SRFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -216,7 +216,7 @@
       "flipflop",
       "TFlipFlop"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "TFlipFlop.js",
     "displayName": "TFlipFlop",
     "basedir": "circuit/digital/flipflop",
@@ -232,7 +232,7 @@
       "DIN40700",
       "AND"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "AND.js",
     "displayName": "AND",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -248,7 +248,7 @@
       "DIN40700",
       "NAND"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "NAND.js",
     "displayName": "NAND",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -264,7 +264,7 @@
       "DIN40700",
       "NOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "NOR.js",
     "displayName": "NOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -280,7 +280,7 @@
       "DIN40700",
       "OR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "OR.js",
     "displayName": "OR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -296,7 +296,7 @@
       "DIN40700",
       "XNOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "XNOR.js",
     "displayName": "XNOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -312,7 +312,7 @@
       "DIN40700",
       "XOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "XOR.js",
     "displayName": "XOR",
     "basedir": "circuit/digital/gate/DIN40700",
@@ -329,7 +329,7 @@
       "12",
       "AND"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "AND.js",
     "displayName": "AND",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -346,7 +346,7 @@
       "12",
       "NAND"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "NAND.js",
     "displayName": "NAND",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -363,7 +363,7 @@
       "12",
       "NOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "NOR.js",
     "displayName": "NOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -380,7 +380,7 @@
       "12",
       "NOT"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "NOT.js",
     "displayName": "NOT",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -397,7 +397,7 @@
       "12",
       "OR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "OR.js",
     "displayName": "OR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -414,7 +414,7 @@
       "12",
       "XNOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "XNOR.js",
     "displayName": "XNOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -431,7 +431,7 @@
       "12",
       "XOR"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "XOR.js",
     "displayName": "XOR",
     "basedir": "circuit/digital/gate/IEC60617-12",
@@ -446,7 +446,7 @@
       "pulse",
       "10hz"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "10hz.js",
     "displayName": "10hz",
     "basedir": "circuit/digital/pulse",
@@ -461,7 +461,7 @@
       "pulse",
       "1hz"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "1hz.js",
     "displayName": "1hz",
     "basedir": "circuit/digital/pulse",
@@ -476,7 +476,7 @@
       "pulse",
       "50hz"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "50hz.js",
     "displayName": "50hz",
     "basedir": "circuit/digital/pulse",
@@ -491,7 +491,7 @@
       "pulse",
       "Delay"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Delay.js",
     "displayName": "Delay",
     "basedir": "circuit/digital/pulse",
@@ -506,7 +506,7 @@
       "signals",
       "High"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "High.js",
     "displayName": "High",
     "basedir": "circuit/digital/signals",
@@ -521,7 +521,7 @@
       "signals",
       "Low"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Low.js",
     "displayName": "Low",
     "basedir": "circuit/digital/signals",
@@ -536,7 +536,7 @@
       "signals",
       "SignalSource"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "SignalSource.js",
     "displayName": "SignalSource",
     "basedir": "circuit/digital/signals",
@@ -551,7 +551,7 @@
       "signals",
       "SignalTarget"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "SignalTarget.js",
     "displayName": "SignalTarget",
     "basedir": "circuit/digital/signals",
@@ -566,7 +566,7 @@
       "timer",
       "Delay"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Delay.js",
     "displayName": "Delay",
     "basedir": "circuit/digital/timer",
@@ -581,7 +581,7 @@
       "arduino",
       "Arduino"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Arduino.js",
     "displayName": "Arduino",
     "basedir": "circuit/hardware/arduino",
@@ -596,7 +596,7 @@
       "arduino",
       "Led"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Led.js",
     "displayName": "Led",
     "basedir": "circuit/hardware/arduino",
@@ -611,7 +611,7 @@
       "raspi",
       "GPIORead"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "GPIORead.js",
     "displayName": "GPIORead",
     "basedir": "circuit/hardware/raspi",
@@ -626,7 +626,7 @@
       "raspi",
       "GPIOWrite"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "GPIOWrite.js",
     "displayName": "GPIOWrite",
     "basedir": "circuit/hardware/raspi",
@@ -639,7 +639,7 @@
       "documentation",
       "Markdown"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Markdown.js",
     "displayName": "Markdown",
     "basedir": "documentation",
@@ -652,7 +652,7 @@
       "documentation",
       "Text"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "Text.js",
     "displayName": "Text",
     "basedir": "documentation",
@@ -665,7 +665,7 @@
       "messaging",
       "HiveMQ"
     ],
-    "version": "local-version",
+    "version": "1.0.168_309",
     "basename": "HiveMQ.js",
     "displayName": "HiveMQ",
     "basedir": "messaging",

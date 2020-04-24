@@ -30,21 +30,22 @@ const storage = require("./storage/"+program.storage)
 
 
 // Tell the bodyparser middleware to accept more data
+//
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}))
 
 
-// Determine the IP:PORT to use for the http server
+// Determine the IP-Address to use for the http server
 //
 const address = require("./network")
 
 
-// =======================================================================
-// Check how many Arduinos are connected to serial port and
-// ask to user which one to use.
+// check if we want to connect to an Arduino which is connected via USB
 //
-// =======================================================================
 if(program.arduino){
+  // Check how many Arduinos are connected to serial port and
+  // ask to user which one to use.
+  //
   const arduino = require("./comm/arduino")
   arduino.init(io, runServer)
 }
@@ -61,16 +62,14 @@ else {
 //
 // =======================================================================
 async function  runServer() {
-  // provide the  WebApp with this very simple
-  // HTTP server. Good enough for an private raspi access
-  //
+  // prepare for "certbot" HTTPS setup and letsencrypt
   app.use('/.well-known/acme-challenge', express.static(__dirname +'/../ssl/'));
+
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({extended: true}));
   app.get('/', (req, res) => res.redirect('/home/'));
 
   await storage.init(app, program)
-
 
   http.listen(program.port, function () {
     console.log('| System is up and running. Copy the URL below and open this               |');
