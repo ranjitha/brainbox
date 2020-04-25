@@ -1,4 +1,4 @@
-let inputPrompt =require("../../_common/js/InputPrompt")
+let inputPrompt = require("../../_common/js/InputPrompt")
 
 import commandStack from "./commands/CommandStack"
 import State from "./commands/State"
@@ -7,6 +7,7 @@ const shortid = require('shortid')
 const Page = require("./model/page")
 const MarkdownEditor = require("./editor/markdown/editor")
 const BrainEditor = require("./editor/brain/editor")
+const ImageEditor = require("./editor/image/editor")
 import Palette from "./palette"
 
 export default class View {
@@ -19,11 +20,12 @@ export default class View {
     this.app = app
     this.markdownEditor = new MarkdownEditor()
     this.brainEditor = new BrainEditor()
+    this.imageEditor = new ImageEditor()
     this.page = new Page()
     this.activeSection = null
     this.currentEditor = null
     this.html = $(id)
-    this.palette = new Palette(app, this, permissions,  "#paletteElements")
+    this.palette = new Palette(app, this, permissions, "#paletteElements")
 
     this.palette.render()
 
@@ -42,25 +44,25 @@ export default class View {
         this.onSelect(section)
         return false
       })
-      .on("click","#sectionMenuUp", event=>{
+      .on("click", "#sectionMenuUp", event => {
         let id = $(event.target).data("id")
         let index = this.page.index(id)
-        if(index>0) {
+        if (index > 0) {
           commandStack.push(new State(this.app))
           let prev = this.activeSection.prev()
           this.activeSection.insertBefore(prev)
-          this.page.move(index, index-1)
+          this.page.move(index, index - 1)
         }
         return false
       })
-      .on("click","#sectionMenuDown", event=>{
+      .on("click", "#sectionMenuDown", event => {
         let id = $(event.target).data("id")
         let index = this.page.index(id)
-        if(index<this.page.length-1) {
+        if (index < this.page.length - 1) {
           commandStack.push(new State(this.app))
           let prev = this.activeSection.next()
           this.activeSection.insertAfter(prev)
-          this.page.move(index, index+1)
+          this.page.move(index, index + 1)
         }
         return false
       })
@@ -70,29 +72,29 @@ export default class View {
         this.onEdit(section)
         return false
       })
-      .on("click","#sectionMenuEdit", event=>{
+      .on("click", "#sectionMenuEdit", event => {
         this.onEdit(this.page.get($(event.target).data("id")))
         return false
       })
-      .on("click","#sectionMenuDelete", event=>{
+      .on("click", "#sectionMenuDelete", event => {
         this.onDelete(this.page.get($(event.target).data("id")))
         return false
       })
-      .on("click","#sectionMenuCommitEdit", event=>{
+      .on("click", "#sectionMenuCommitEdit", event => {
         this.onCommitEdit(this.page.get($(event.target).data("id")))
         return false
       })
-      .on("click","#sectionMenuCancelEdit", event=>{
+      .on("click", "#sectionMenuCancelEdit", event => {
         this.onCancelEdit()
         return false
       })
-      .on("click","#sectionMenuInsertMarkdown", event=>{
+      .on("click", "#sectionMenuInsertMarkdown", event => {
         let section = this.addMarkdown($(event.target).data("index"))
         this.onSelect(section)
         this.onEdit(section)
         return false
       })
-      .on("click","#sectionMenuInsertBrain", event=>{
+      .on("click", "#sectionMenuInsertBrain", event => {
         let section = this.addBrain($(event.target).data("index"))
         this.onSelect(section)
         this.onEdit(section)
@@ -100,18 +102,18 @@ export default class View {
       })
   }
 
-  setPage(page){
+  setPage(page) {
     $(".pageElement").removeClass("selected")
     $(`.pageElement[data-page='${page.id}']`).addClass("selected")
     this.page = page
     this.render(this.page)
   }
 
-  getPage(){
+  getPage() {
     return this.page
   }
 
-  addPage(){
+  addPage() {
     inputPrompt.show("Add Pager", "Page name", value => {
       commandStack.push(new State(this.app))
       let page = new Page()
@@ -124,7 +126,7 @@ export default class View {
     })
   }
 
-  addMarkdown(index){
+  addMarkdown(index) {
     commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
@@ -132,16 +134,15 @@ export default class View {
       content: "## Header"
     }
     this.page.add(section, index)
-    if(typeof index === "number"){
+    if (typeof index === "number") {
       this.render(this.page)
-    }
-    else{
+    } else {
       this.renderMarkdown(section, index)
     }
     return section
   }
 
-  addBrain(index){
+  addBrain(index) {
     commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
@@ -149,41 +150,58 @@ export default class View {
       content: null
     }
     this.page.add(section, index)
-    if(typeof index === "number"){
+    if (typeof index === "number") {
       this.render(this.page)
-    }
-    else{
+    } else {
       this.renderBrain(section, index)
     }
     return section
   }
 
-  render(page){
+  addImage(index) {
+    commandStack.push(new State(this.app))
+    let section = {
+      id: shortid.generate(),
+      type: "image",
+      content: null
+    }
+    this.page.add(section, index)
+    if (typeof index === "number") {
+      this.render(this.page)
+    } else {
+      this.renderImage(section, index)
+    }
+    return section
+  }
+
+  render(page) {
     this.html.find(".sections").html("")
     this.renderSpacer(0)
-    page.forEach( (section, index) => {
-      switch(section.type){
+    page.forEach((section, index) => {
+      switch (section.type) {
         case "brain":
           this.renderBrain(section)
-              break
+          break
         case "markdown":
           this.renderMarkdown(section)
-              break
+          break
+        case "image":
+          this.renderImage(section)
+          break
         default:
           this.renderUnknown(section)
           break
       }
-      this.renderSpacer(index+1)
+      this.renderSpacer(index + 1)
     })
   }
 
-  renderMarkdown(section){
+  renderMarkdown(section) {
     let errorCSS = ""
     let markdown = section.content
     try {
       markdown = this.markdownEditor.render(section.content)
-    }
-    catch(error){
+    } catch (error) {
       console.log(error)
       errorCSS = "error"
     }
@@ -194,15 +212,14 @@ export default class View {
       `)
   }
 
-  renderBrain(section){
-    if(section.content){
+  renderBrain(section) {
+    if (section.content) {
       this.html.find(".sections").append(`
         <div data-id="${section.id}" class='section'>
             <img class="sectionContent" data-type="brain" src="${section.content.image}">
         </div>
       `)
-    }
-    else {
+    } else {
       this.html.find(".sections").append(`
         <div data-id="${section.id}" class='section'>
             <div class="sectionContent" data-type="brain">-double click to edit brain-</div>
@@ -211,7 +228,25 @@ export default class View {
     }
   }
 
-  renderSpacer(index){
+  renderImage(section) {
+    if (section.content) {
+      this.html.find(".sections").append(`
+        <div data-id="${section.id}" class='section'>
+            <div class="sectionContent" data-type="image">
+              <img data-type="image" src="${section.content}">
+            </div>
+        </div>
+      `)
+    } else {
+      this.html.find(".sections").append(`
+        <div data-id="${section.id}" class='section'>
+            <div class="sectionContent" data-type="image">-double click to edit image-</div>
+        </div>
+      `)
+    }
+  }
+
+  renderSpacer(index) {
     this.html.find(".sections").append(`
         <div class='section'>
           <div class='sectionContent ' data-type="spacer" >
@@ -222,7 +257,7 @@ export default class View {
       `)
   }
 
-  renderUnknown(section){
+  renderUnknown(section) {
     this.html.find(".sections").append(`
         <div data-id="${section.id}" class='section'>
            <div class="sectionContent" data-type="unknown">Unknown section type</div>
@@ -230,8 +265,8 @@ export default class View {
       `)
   }
 
-  onSelect(section){
-    if(this.currentEditor){
+  onSelect(section) {
+    if (this.currentEditor) {
       return
     }
     this.onUnselect()
@@ -247,11 +282,11 @@ export default class View {
   }
 
 
-  onUnselect(){
-    if(this.currentEditor){
+  onUnselect() {
+    if (this.currentEditor) {
       return
     }
-    if(this.activeSection === null){
+    if (this.activeSection === null) {
       return
     }
     $(".activeSection .tinyFlyoverMenu").remove()
@@ -260,8 +295,8 @@ export default class View {
   }
 
 
-  onEdit(section){
-    if(this.currentEditor){
+  onEdit(section) {
+    if (this.currentEditor) {
       return
     }
 
@@ -273,35 +308,42 @@ export default class View {
           <div data-id="${section.id}" id="sectionMenuCommitEdit" class='fa fa-check-square-o' ></div>
           <div data-id="${section.id}" id="sectionMenuCancelEdit" class='fa fa-minus-square-o' ></div>
         `)
-    if(type==='markdown') {
-      this.currentEditor = this.markdownEditor.inject(section)
-      $(".sections").removeClass("activeSection")
-    }
-    else if (type === "brain"){
-      this.currentEditor = this.brainEditor.inject(section)
-      $(".sections").removeClass("activeSection")
+    switch(type){
+      case 'markdown':
+        this.currentEditor = this.markdownEditor.inject(section)
+        $(".sections").removeClass("activeSection")
+        break
+      case 'markdown':
+        this.brain = this.brainEditor.inject(section)
+        $(".sections").removeClass("activeSection")
+        break
+      case 'image':
+        this.currentEditor = this.imageEditor.inject(section)
+        $(".sections").removeClass("activeSection")
+        break
     }
   }
 
-  onDelete(section){
+  onDelete(section) {
     commandStack.push(new State(this.app))
     this.page.remove(section.id)
     this.render(this.page)
   }
 
-  onCommitEdit(){
+  onCommitEdit() {
     commandStack.push(new State(this.app))
     this.currentEditor.commit()
-      .then(()=>{
+      .then(() => {
         this.currentEditor = null;
         $(".editorContainerSelector").remove()
+        console.log(this.page)
         this.render(this.page)
         this.palette.render()
       })
   }
 
-  onCancelEdit(){
-    if(this.currentEditor === null){
+  onCancelEdit() {
+    if (this.currentEditor === null) {
       return
     }
 
@@ -323,7 +365,7 @@ export default class View {
    *
    * @param {draw2d.command.CommandStackEvent} event
    **/
-  stackChanged (event) {
+  stackChanged(event) {
     $("#editUndo").addClass("disabled")
     $("#editRedo").addClass("disabled")
 

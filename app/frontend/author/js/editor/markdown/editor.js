@@ -5,7 +5,7 @@ import 'codemirror/addon/selection/active-line.js'
 let md = require('markdown-it')();
 md.use(require("markdown-it-asciimath"));
 
-export default class Toolbar {
+export default class Editor {
 
   constructor() {
   }

@@ -99,6 +99,22 @@ export default class Toolbar {
       this.addBrainButton.remove()
     }
 
+
+    this.addImageButton = $("#addImageSection")
+    if (this.app.hasModifyPermissionForCurrentFile()) {
+      this.addImageButton.off("click").on("click", () => {
+        this.addImageButton.tooltip("hide")
+        this.view.addImage()
+      })
+      Mousetrap.bindGlobal("ctrl+i", (event) => {
+        this.addImageButton.click()
+        return false
+      })
+    } else {
+      this.addImageButton.remove()
+    }
+
+
     $(".applicationSwitchDesigner").off("click").on("click", () => {
       designerDialog.show(conf)
     })

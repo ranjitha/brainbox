@@ -93,7 +93,7 @@ module.exports = {
       return
     }
     try {
-      let pngFile = file.replace(".shape",".png")
+      let pngFile = file.replace(".shape",".png").replace(".brain",".png")
       if(fs.existsSync(pngFile)) {
         fs.readFile(pngFile, (err, data) => {
           res.writeHead(200, {'Content-Type': 'image/png'})

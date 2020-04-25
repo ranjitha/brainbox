@@ -143,6 +143,9 @@ function renderMarkdown(container, section) {
 function renderBrain(container, section) {
   container.append("<div class=\"imageRendering\"><img src=\"" + section.content.image + "\"></div>");
 }
+function renderImage(container, section) {
+  container.append("<div class=\"imageRendering\"><img src=\"" + section.content + "\"></div>");
+}
 
 $(window).load(function () {
   var containerId = "#authorContent";
@@ -165,6 +168,9 @@ $(window).load(function () {
             break;
           case "markdown":
             renderMarkdown(container, section);
+            break;
+          case "image":
+            renderImage(container, section);
             break;
           default:
             break;

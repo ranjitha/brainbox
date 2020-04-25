@@ -26,8 +26,46 @@
     }
 
     .sectionContent {
+      &[data-type='image']{
+        text-align: center;
+
+
+        #editor-container {
+          display: initial;
+          &:hover {
+            box-shadow:0 0 45px rgba(0,0,0,0.1);
+            border:1px dot-dash black;
+          }
+          .drop-message{
+            margin: auto;
+          }
+          #image-preview {
+            margin-top: 20px;
+            .image-view {
+              display: inline-block;
+              position: relative;
+              margin-right: 13px;
+              margin-bottom: 13px;
+              img {
+                max-width: 90%;
+              }
+            }
+            .overlay {
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              top: 0;
+              right: 0;
+              z-index: 2;
+              background: rgba(255, 255, 255, 0.5);
+            }
+          }
+        }
+      }
+
       &[data-type='markdown']{
       }
+
       &[data-type='brain']{
         left: 50%;
         position: relative;
