@@ -2,8 +2,9 @@ import 'codemirror/lib/codemirror.css'
 import CodeMirror from 'codemirror'
 import 'codemirror/mode/gfm/gfm.js'
 import 'codemirror/addon/selection/active-line.js'
-let md = require('markdown-it')();
-md.use(require("markdown-it-asciimath"));
+let md = require('markdown-it')()
+md.use(require("markdown-it-asciimath"))
+md.use(require('markdown-it-container'), "info")
 
 export default class Editor {
 

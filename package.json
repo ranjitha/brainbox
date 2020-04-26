@@ -89,6 +89,7 @@
     "make-dir": "^3.0.2",
     "markdown-it": "^10.0.0",
     "markdown-it-asciimath": "^1.0.0",
+    "markdown-it-container": "^2.0.0",
     "mousetrap": "1.6.2",
     "mqtt": "^2.18.3",
     "n": "2.1.0",

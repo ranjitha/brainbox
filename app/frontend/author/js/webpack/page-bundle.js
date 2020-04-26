@@ -114,6 +114,7 @@ var axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 var md = __webpack_require__(/*! markdown-it */ "./node_modules/markdown-it/index.js")();
 
 md.use(__webpack_require__(/*! markdown-it-asciimath */ "./node_modules/markdown-it-asciimath/index.js"));
+md.use(__webpack_require__(/*! markdown-it-container */ "./node_modules/markdown-it-container/index.js"), "info");
 
 function getParam(name) {
   name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -2063,7 +2064,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "body {\n  font-family: 'Roboto', sans-serif !important;\n}\n.imageRendering {\n  text-align: center;\n  padding: 40px;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 100%;\n}\n.markdownRendering p {\n  font-size: 16px;\n  margin-top: 30px;\n}\n.markdownRendering table {\n  page-break-inside: avoid;\n  margin-left: auto;\n  margin-right: auto;\n  font-size: 12px;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  border-collapse: collapse;\n}\n.markdownRendering table thead tr th {\n  padding: 21px 25px 22px 25px;\n  background-color: rgba(0, 0, 0, 0.3);\n  break-inside: avoid;\n  border: 1px solid black;\n  font-weight: bolder;\n}\n.markdownRendering table tbody tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tbody tr td {\n  padding: 18px;\n  padding-top: 10px;\n  padding-bottom: 10px;\n  border: 1px solid black;\n}\n.markdownRendering table tbody tr:nth-child(odd) {\n  background: #ffffff;\n}\n.markdownRendering table tbody tr:nth-child(even) {\n  background: #f2f2f2;\n}\n.katex {\n  color: #0c1f88;\n}\n.katex-display {\n  font-size: 120%;\n}\nh1 {\n  font-weight: 400;\n  margin-bottom: 0;\n  color: #C71D3D;\n  text-decoration: underline;\n}\nh2 {\n  font-weight: 300;\n  color: #C71D3D;\n}\n", ""]);
+exports.push([module.i, "body {\n  font-family: 'Roboto', sans-serif !important;\n}\n.imageRendering {\n  text-align: center;\n  padding: 40px;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 100%;\n}\n.markdownRendering p {\n  font-size: 16px;\n  margin-top: 30px;\n}\n.markdownRendering table {\n  page-break-inside: avoid;\n  margin-left: auto;\n  margin-right: auto;\n  font-size: 12px;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  border-collapse: collapse;\n}\n.markdownRendering table thead tr th {\n  padding: 21px 25px 22px 25px;\n  background-color: rgba(0, 0, 0, 0.3);\n  break-inside: avoid;\n  border: 1px solid black;\n  font-weight: bolder;\n}\n.markdownRendering table tbody tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tbody tr td {\n  padding: 18px;\n  padding-top: 10px;\n  padding-bottom: 10px;\n  border: 1px solid black;\n}\n.markdownRendering table tbody tr:nth-child(odd) {\n  background: #ffffff;\n}\n.markdownRendering table tbody tr:nth-child(even) {\n  background: #f2f2f2;\n}\n.markdownRendering .info {\n  border: 1px solid #B4E1E4;\n  border-radius: 5px;\n  background-color: #81c7e1;\n  color: white;\n  font-weight: 400;\n  letter-spacing: 2px;\n  padding: 5px;\n  padding-left: 20px;\n  padding-right: 20px;\n}\n.markdownRendering .info p {\n  padding: 0;\n  margin: 0;\n}\n.katex {\n  color: #0c1f88;\n}\n.katex-display {\n  font-size: 120%;\n}\nh1 {\n  font-weight: 400;\n  margin-bottom: 0;\n  color: #C71D3D;\n  text-decoration: underline;\n}\nh2 {\n  font-weight: 300;\n  color: #C71D3D;\n}\n", ""]);
 
 // exports
 
@@ -13143,6 +13144,161 @@ function preprocessMath(str) {
 }
 
 module.exports = setup;
+
+
+/***/ }),
+
+/***/ "./node_modules/markdown-it-container/index.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/markdown-it-container/index.js ***!
+  \*****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+// Process block-level custom containers
+//
+
+
+
+module.exports = function container_plugin(md, name, options) {
+
+  function validateDefault(params) {
+    return params.trim().split(' ', 2)[0] === name;
+  }
+
+  function renderDefault(tokens, idx, _options, env, self) {
+
+    // add a class to the opening tag
+    if (tokens[idx].nesting === 1) {
+      tokens[idx].attrPush([ 'class', name ]);
+    }
+
+    return self.renderToken(tokens, idx, _options, env, self);
+  }
+
+  options = options || {};
+
+  var min_markers = 3,
+      marker_str  = options.marker || ':',
+      marker_char = marker_str.charCodeAt(0),
+      marker_len  = marker_str.length,
+      validate    = options.validate || validateDefault,
+      render      = options.render || renderDefault;
+
+  function container(state, startLine, endLine, silent) {
+    var pos, nextLine, marker_count, markup, params, token,
+        old_parent, old_line_max,
+        auto_closed = false,
+        start = state.bMarks[startLine] + state.tShift[startLine],
+        max = state.eMarks[startLine];
+
+    // Check out the first character quickly,
+    // this should filter out most of non-containers
+    //
+    if (marker_char !== state.src.charCodeAt(start)) { return false; }
+
+    // Check out the rest of the marker string
+    //
+    for (pos = start + 1; pos <= max; pos++) {
+      if (marker_str[(pos - start) % marker_len] !== state.src[pos]) {
+        break;
+      }
+    }
+
+    marker_count = Math.floor((pos - start) / marker_len);
+    if (marker_count < min_markers) { return false; }
+    pos -= (pos - start) % marker_len;
+
+    markup = state.src.slice(start, pos);
+    params = state.src.slice(pos, max);
+    if (!validate(params)) { return false; }
+
+    // Since start is found, we can report success here in validation mode
+    //
+    if (silent) { return true; }
+
+    // Search for the end of the block
+    //
+    nextLine = startLine;
+
+    for (;;) {
+      nextLine++;
+      if (nextLine >= endLine) {
+        // unclosed block should be autoclosed by end of document.
+        // also block seems to be autoclosed by end of parent
+        break;
+      }
+
+      start = state.bMarks[nextLine] + state.tShift[nextLine];
+      max = state.eMarks[nextLine];
+
+      if (start < max && state.sCount[nextLine] < state.blkIndent) {
+        // non-empty line with negative indent should stop the list:
+        // - ```
+        //  test
+        break;
+      }
+
+      if (marker_char !== state.src.charCodeAt(start)) { continue; }
+
+      if (state.sCount[nextLine] - state.blkIndent >= 4) {
+        // closing fence should be indented less than 4 spaces
+        continue;
+      }
+
+      for (pos = start + 1; pos <= max; pos++) {
+        if (marker_str[(pos - start) % marker_len] !== state.src[pos]) {
+          break;
+        }
+      }
+
+      // closing code fence must be at least as long as the opening one
+      if (Math.floor((pos - start) / marker_len) < marker_count) { continue; }
+
+      // make sure tail has spaces only
+      pos -= (pos - start) % marker_len;
+      pos = state.skipSpaces(pos);
+
+      if (pos < max) { continue; }
+
+      // found!
+      auto_closed = true;
+      break;
+    }
+
+    old_parent = state.parentType;
+    old_line_max = state.lineMax;
+    state.parentType = 'container';
+
+    // this will prevent lazy continuations from ever going past our end marker
+    state.lineMax = nextLine;
+
+    token        = state.push('container_' + name + '_open', 'div', 1);
+    token.markup = markup;
+    token.block  = true;
+    token.info   = params;
+    token.map    = [ startLine, nextLine ];
+
+    state.md.block.tokenize(state, startLine + 1, nextLine);
+
+    token        = state.push('container_' + name + '_close', 'div', -1);
+    token.markup = state.src.slice(start, pos);
+    token.block  = true;
+
+    state.parentType = old_parent;
+    state.lineMax = old_line_max;
+    state.line = nextLine + (auto_closed ? 1 : 0);
+
+    return true;
+  }
+
+  md.block.ruler.before('fence', 'container_' + name, container, {
+    alt: [ 'paragraph', 'reference', 'blockquote', 'list' ]
+  });
+  md.renderer.rules['container_' + name + '_open'] = render;
+  md.renderer.rules['container_' + name + '_close'] = render;
+};
 
 
 /***/ }),

@@ -2,7 +2,7 @@
   "pages": [
     {
       "id": "HDyjmXOLe",
-      "name": "Grundlagen",
+      "name": "Einführung",
       "sections": [
         {
           "id": "4JOq4ZjgZZ",
@@ -27,18 +27,18 @@
         {
           "id": "iU5UE5bzN",
           "type": "markdown",
-          "content": "Bei der **Digital-Technik** dagegen wird die Information, die bei der Analog-Technik durch den Kurvenverlauf gegeben ist Zeigerausschlag), \ndurch das Ablesen auf der Skala bestimmt. Man ordnet eben jedem Zeigerstand einen bestimmten Spannungswert zu. Das ist bei fast allen Messgeräten durch die Skala von vornherein schon gegeben. Indem man nun die Skalenstriche abzählt, setzt man das analoge Signal (Ausschlag des Zeigers) in ein digitales Signal (Anzahl der Striche) um. \n\n**Dabei hat die Digital-Technik gegenüber der Analog-Technik einen großen \nVorteil**. Während bei analogen Schaltungen der Spannungsbereich meist genau stimmen muss, braucht man in digitalen Schaltungen nur den \nrichtigen Spannungsbereich einzuhalten. Dies bringt eine **erhöhte Stabilität** der digitalen Schaltungen mit sich.\n\nDie beiden Spannungsbereiche, die in der Digital-Technik verwendet werden, heißen `L-Bereich` (von engl.: low = niedrig) und `H-Bereich` (von engl.: high = hoch). Hier werden für die Beispiele eine Versorgungsspannung `Uv = 5V` und die beiden Spannungsbereiche mit \n`0V bis +0,5V` für `L` (low) und `+2,5V bis +5V` für `H` (high) festgelegt, da diese Spannungsbereiche außerdem gerade für TTL-Schaltungen (TTL = Transistor-Transistor-Logik) oft benötigt werden.\n\nIn der mathematischen Beschreibung von digitalen Schaltungen wird der L-Bereich mit 0 und der H-Bereich mit 1 beschrieben. Dies ist unter anderem für Wahrheitstabellen und *KV-Tafeln*, die in anderen Kapiteln zur Anwendung kommen, sehr von Vorteil.\n\n\n## Das Dualsystem\nIn den digitalen Schaltungen mit seinen zwei Bereichen H und L wird das Dualsystem für die Beschreibung mathematischer Zusammenhänge\nangewendet. Dabei werden nur zwei Zahlen benötigt, nämlich 1 und 0. Eine Verdeutlichung des Dualsystems ist am einfachsten durch eine\nGegenüberstellung mit unserem üblichen Dezimalsystem zu erreichen:\n\n| Dezimalsystem\t   |    Dualsystem  |\n|:------------------:|:----------------|\n|\t0              |   0\n|\t1              |   1\n|\t2              |   10\n|\t3              |   11\n|\t4              |   100\n|\t5              |   101\n|\t6              |   110\n|\t7              |   111\n|\t8              |   1000\n|\t9              |   1001\n|\t10              |  1010\n|\t11              |  1011\n\n\nDabei spricht man die duale Zahl `1001` nicht etwa <del>Eintausendeins</del>, sondern man spricht die Zahlen einzeln von links beginnend,\nalso ***Eins, Null, Null, Eins***.\n\nDurch diese Darstellung können digitale Schaltungen (z.B. Zähler) sehr einfach und durchsichtig dargestellt werden.\n\n\n## Anmerkung zur Elektronik\n\nAlle hier behandelten Schaltungen entsprechen der sog. **Positiv-Logik**. Das heißt, dass der H-Bereich eine positive Spannung sein muss.\n\n*(Es gibt auch eine Negativ-Logik, die aber in der Technik kaum eine Bedeutung hat.)*\n\n\nWeiterhin gilt ein **offener Eingang** (nicht angeschlossener Eingang) **immer als Wert 1** (entspr. H). Dies ist durch die Bauweise der ICs\n(Integrierte Schaltungen) bedingt, die intern immer den Wert 1 an einen Ausgang legen, wenn dieser nicht angeschlossen ist. Das bringt\nvor allem beim Zusammenschalten mehrerer Verknüpfungsschaltungen enorme Vorteile.\n\n\nDer **Masseanschluss** bei digitalen Schaltungen hat **immer den Wert 0**. Dies entspricht bei der Stromversorgung dem Minuspol. Der Wert 1 ist\nalso der Pluspol der Spannungsquelle. Falls Messungen mit einem Spannungsmessgerät oder gar Oszilloskop gemacht werden, ist daher der Massepunkt immer der negative Pol der Spannungsquelle. Die kapazitive Last für digitale Schaltungen sollte 100 pF nicht\nüberschreiten, damit die Funktion gewährleistet ist und eine Überlast der Ausgänge durch zu hohe Auf- bzw. Entladeströme vermieden wird. Sind größere Kondensatoren zur Signalverzögerung\nerforderlich, so ist ein Vorwiderstand vorzusehen.\n\n\n\nDer Ausgangsstrom von TTL-Schaltungen ist sehr gering, meist bei 20 mA. Das reicht wohl für den Betrieb einer Kontroll-LED (Licht Emittierende\nDiode = Leuchtdiode), doch ist darauf zu achten, dass der Ausgang nicht überlastet wird. Notfalls muss ein Schaltverstärker dem Ausgang folgen, der das Ausgangssignal verstärkt. Bei manchen IC’s jedoch ist speziell für LED-Betrieb ein Treiber vorhanden, der einen Anschluss von mehr als einer LED erlaubt (z.B. beim 7-Segment-Decoder). Es ist ratsam, sich deshalb in einem Datenbuch über diesen Sachverhalt zu informieren.\n\n"
+          "content": "Bei der **Digital-Technik** dagegen wird die Information, die bei der Analog-Technik durch den Kurvenverlauf gegeben ist Zeigerausschlag), \ndurch das Ablesen auf der Skala bestimmt. Man ordnet eben jedem Zeigerstand einen bestimmten Spannungswert zu. Das ist bei fast allen Messgeräten durch die Skala von vornherein schon gegeben. Indem man nun die Skalenstriche abzählt, setzt man das analoge Signal (Ausschlag des Zeigers) in ein digitales Signal (Anzahl der Striche) um. \n\n**Dabei hat die Digital-Technik gegenüber der Analog-Technik einen großen \nVorteil**. Während bei analogen Schaltungen der Spannungsbereich meist genau stimmen muss, braucht man in digitalen Schaltungen nur den \nrichtigen Spannungsbereich einzuhalten. Dies bringt eine **erhöhte Stabilität** der digitalen Schaltungen mit sich.\n\nDie beiden Spannungsbereiche, die in der Digital-Technik verwendet werden, heißen `L-Bereich` (von engl.: low = niedrig) und `H-Bereich` (von engl.: high = hoch). Hier werden für die Beispiele eine Versorgungsspannung `Uv = 5V` und die beiden Spannungsbereiche mit \n`0V bis +0,5V` für `L` (low) und `+2,5V bis +5V` für `H` (high) festgelegt, da diese Spannungsbereiche außerdem gerade für TTL-Schaltungen (TTL = Transistor-Transistor-Logik) oft benötigt werden.\n\n::: info\nIn der mathematischen Beschreibung von digitalen Schaltungen wird der L-Bereich mit 0 und der H-Bereich mit 1 beschrieben. Dies ist unter anderem für Wahrheitstabellen und *KV-Tafeln*, die in anderen Kapiteln zur Anwendung kommen, sehr von Vorteil.\n:::\n\n## Das Dualsystem\nIn den digitalen Schaltungen mit seinen zwei Bereichen H und L wird das Dualsystem für die Beschreibung mathematischer Zusammenhänge\nangewendet. Dabei werden nur zwei Zahlen benötigt, nämlich 1 und 0. Eine Verdeutlichung des Dualsystems ist am einfachsten durch eine\nGegenüberstellung mit unserem üblichen Dezimalsystem zu erreichen:\n\n| Dezimalsystem\t   |    Dualsystem  |\n|:------------------:|:----------------|\n|\t0              |   0\n|\t1              |   1\n|\t2              |   10\n|\t3              |   11\n|\t4              |   100\n|\t5              |   101\n|\t6              |   110\n|\t7              |   111\n|\t8              |   1000\n|\t9              |   1001\n|\t10              |  1010\n|\t11              |  1011\n\n\nDabei spricht man die duale Zahl `1001` nicht etwa <del>Eintausendeins</del>, sondern man spricht die Zahlen einzeln von links beginnend,\nalso ***Eins, Null, Null, Eins***.\n\nDurch diese Darstellung können digitale Schaltungen (z.B. Zähler) sehr einfach und durchsichtig dargestellt werden.\n\n\n## Anmerkung zur Elektronik\n\nAlle hier behandelten Schaltungen entsprechen der sog. **Positiv-Logik**. Das heißt, dass der H-Bereich eine positive Spannung sein muss.\n\n*(Es gibt auch eine Negativ-Logik, die aber in der Technik kaum eine Bedeutung hat.)*\n\n\nWeiterhin gilt ein **offener Eingang** (nicht angeschlossener Eingang) **immer als Wert 1** (entspr. H). Dies ist durch die Bauweise der ICs\n(Integrierte Schaltungen) bedingt, die intern immer den Wert 1 an einen Ausgang legen, wenn dieser nicht angeschlossen ist. Das bringt\nvor allem beim Zusammenschalten mehrerer Verknüpfungsschaltungen enorme Vorteile.\n\n\nDer **Masseanschluss** bei digitalen Schaltungen hat **immer den Wert 0**. Dies entspricht bei der Stromversorgung dem Minuspol. Der Wert 1 ist\nalso der Pluspol der Spannungsquelle. Falls Messungen mit einem Spannungsmessgerät oder gar Oszilloskop gemacht werden, ist daher der Massepunkt immer der negative Pol der Spannungsquelle. Die kapazitive Last für digitale Schaltungen sollte 100 pF nicht\nüberschreiten, damit die Funktion gewährleistet ist und eine Überlast der Ausgänge durch zu hohe Auf- bzw. Entladeströme vermieden wird. Sind größere Kondensatoren zur Signalverzögerung\nerforderlich, so ist ein Vorwiderstand vorzusehen.\n\n\n\nDer Ausgangsstrom von TTL-Schaltungen ist sehr gering, meist bei 20 mA. Das reicht wohl für den Betrieb einer Kontroll-LED (Licht Emittierende\nDiode = Leuchtdiode), doch ist darauf zu achten, dass der Ausgang nicht überlastet wird. Notfalls muss ein Schaltverstärker dem Ausgang folgen, der das Ausgangssignal verstärkt. Bei manchen IC’s jedoch ist speziell für LED-Betrieb ein Treiber vorhanden, der einen Anschluss von mehr als einer LED erlaubt (z.B. beim 7-Segment-Decoder). Es ist ratsam, sich deshalb in einem Datenbuch über diesen Sachverhalt zu informieren.\n\n"
         }
       ]
     },
     {
       "id": "1O6kMCXVa",
-      "name": "Einführung",
+      "name": "Grundlagen - Gatter",
       "sections": [
         {
           "id": "RRbN6tlPYd",
           "type": "markdown",
-          "content": "# Einführung\nLogische Verknüpfungsschaltungen sind das Grundgerüst der digitalen \nTechnik. Mit Hilfe der 5 hier aufgeführten Verknüpfungsschaltungen,\ndie auch Gatter genannt werden, lassen sich nun alle anderen \nVerknüpfungsschaltungen realisieren.\n\nDie Wahrheitstabelle, oder auch Logik-Tafel, die bei jeder \nVerknüpfungsschaltung mit aufgeführt wird, gibt an, welches Signal am \nAusgang anliegt, nachdem die Eingänge in einer bestimmten Weise \nangeschlossen wurden. Dabei werden alle möglichen \nAnschlusskombinationen durchgespielt.\n\n\n##  AND-Gatter\n\nDie Boolesche Funktionsgleichung (mathematische Gleichung) für das\nAND-Gatter lautet:\n\n\n\n```math\n     A=E1 wedge E2\n```\n\n**Das bedeutet, dass  nur dann den Wert 1 hat**, wenn die Eingänge\n`E1` und `E2` den Wert `1` haben.\n\n**In allen anderen Fällen** hat der Ausgang `A` den Wert `0`.  Anhand der Logik-Tafel ist dies leicht zu erkennen. In der Zeile, in der `A` den Wert 1 hat, haben die beiden Eingänge ebenfalls den Wert 1.\n\n\n\n### Logiktabelle\n\n|    E1    |    E2    |     A    |\n|:--------:|:--------:|:--------:|\n| 0        |      0   |     0    |\n| 0        |      1   |     0    |\n| 1        |      0   |     0    |\n| 1        |      1   |    **1** |\n\n\n### Symbol"
+          "content": "# Grundlagen\nLogische Verknüpfungsschaltungen sind das Grundgerüst der digitalen \nTechnik. Mit Hilfe der 5 hier aufgeführten Verknüpfungsschaltungen,\ndie auch Gatter genannt werden, lassen sich nun alle anderen \nVerknüpfungsschaltungen realisieren.\n\nDie Wahrheitstabelle, oder auch Logik-Tafel, die bei jeder \nVerknüpfungsschaltung mit aufgeführt wird, gibt an, welches Signal am \nAusgang anliegt, nachdem die Eingänge in einer bestimmten Weise \nangeschlossen wurden. Dabei werden alle möglichen \nAnschlusskombinationen durchgespielt.\n\n\n##  AND-Gatter\n\nDie Boolesche Funktionsgleichung (mathematische Gleichung) für das\nAND-Gatter lautet:\n\n\n\n```math\n     A=E1 wedge E2\n```\n\n**Das bedeutet, dass  nur dann den Wert 1 hat**, wenn die Eingänge\n`E1` und `E2` den Wert `1` haben.\n\n**In allen anderen Fällen** hat der Ausgang `A` den Wert `0`.  Anhand der Logik-Tafel ist dies leicht zu erkennen. In der Zeile, in der `A` den Wert 1 hat, haben die beiden Eingänge ebenfalls den Wert 1.\n\n\n\n### Logiktabelle\n\n|    E1    |    E2    |     A    |\n|:--------:|:--------:|:--------:|\n| 0        |      0   |     0    |\n| 0        |      1   |     0    |\n| 1        |      0   |     0    |\n| 1        |      1   |    **1** |\n\n\n### Symbol"
         },
         {
           "id": "VkPHBlWn4",
@@ -74,7 +74,577 @@
         {
           "id": "84Ux21_nn",
           "type": "markdown",
-          "content": "Hier ist die einfachste **UND-Verknüpfung** gewählt worden, nämlich die\nmit 2 Eingängen. Tatsächlich gibt es jedoch auch AND-Gatter mit mehr\nals zwei Eingängen. Die mathematische Logik bleibt dabei aber\ngleich:\n\n    Nur wenn alle Eingänge den Wert 1 haben, hat der Ausgang\n    ebenfalls den Wert 1.\n\nDie UND-Verknüpfung wird auch als **Konjunktion** bezeichnet, was so\nviel heißt wie **Bindung**.\n\n"
+          "content": "Hier ist die einfachste **UND-Verknüpfung** gewählt worden, nämlich die\nmit 2 Eingängen. Tatsächlich gibt es jedoch auch AND-Gatter mit mehr\nals zwei Eingängen. Die mathematische Logik bleibt dabei aber\ngleich:\n\n    Nur wenn alle Eingänge den Wert 1 haben, hat der Ausgang\n    ebenfalls den Wert 1.\n\nDie UND-Verknüpfung wird auch als **Konjunktion** bezeichnet, was so\nviel heißt wie **Bindung**.\n\n\n\n##  OR-Gatter\n\nHier heißt die mathematischer Gleichung:\n\n```math\n     A = E1 vee E2\n\n```\n\nDabei hat A dann den Wert 1, wenn `E1` **oder** `E2` **oder** `beide` (!) Eingänge den Wert 1 haben.\n\nDieses Verhalten unterscheidet sich von dem normalen Sprachgebrauch des Wortes *oder*. Hier bedeutet es: A hat nur dann den Wert 0, wenn beide Eingänge den Wert 0 haben. Sonst hat der Ausgang den Wert 1.\n\n\n\n### Logiktabelle\n\n|    E1    |    E2    |     A    |\n|:--------:|:--------:|:--------:|\n| 0        |      0   |    0     |\n| 0        |      1   |  **1**   |\n| 1        |      0   |  **1**   |\n| 1        |      1   |  **1**   |\n\n\n### Symbol"
+        },
+        {
+          "id": "Qjy-rhc8M",
+          "type": "brain",
+          "content": {
+            "draw2d": [
+              {
+                "type": "circuit_digital_gate_IEC60617_12_OR",
+                "id": "f9ab724a-c653-1686-c015-d36e4cc4f32d",
+                "x": 2864.25,
+                "y": 3007.390625,
+                "width": 30.8125,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/OR.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_OR",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              }
+            ],
+            "image": "data:image/png;base64,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"
+          }
+        },
+        {
+          "id": "4f2HVzqDV",
+          "type": "markdown",
+          "content": "Die **ODER-Verknüpfung** gibt es ebenfalls mit mehr als zwei Eingängen, wobei sich die mathematischer Logik wie beim AND-Gatter nicht ändert. Eine andere Bezeichnung für das OR-Gatter ist die **Disjunktion**, das heißt **Trennung**.\n\n"
+        },
+        {
+          "id": "OXnEotHlr",
+          "type": "markdown",
+          "content": "\n\n##  Inverter\n\nDas Schaltsymbol des Inverters ist unten abgebildet. Dabei lässt sich die mathematische Logik durch folgende Gleichung darstellen:\n\n```math\n     A = not E \n```\n\n\n### Logiktabelle\n\n|    E1    |     A    |\n|:--------:|:--------:|\n| 0        |  **1**   |\n| 1        |    0     |\n\n\n\n### Symbol\n"
+        },
+        {
+          "id": "yWnuuj5nj",
+          "type": "brain",
+          "content": {
+            "draw2d": [
+              {
+                "type": "circuit_digital_gate_IEC60617_12_NOT",
+                "id": "903166bf-afad-0848-70ab-3763cd6f64d1",
+                "x": 2823.25,
+                "y": 3016.390625,
+                "width": 36,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/NOT.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_NOT",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              }
+            ],
+            "image": "data:image/png;base64,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"
+          }
+        },
+        {
+          "id": "B_HwC9V7a",
+          "type": "markdown",
+          "content": "Ein anderer Begriff für den Inverter ist die *Negation*. Indem man nun das AND-Gatter und das OR-Gatter negiert, erhält man zwei weitere wichtige Verknüpfungsschaltungen.\n\n"
+        },
+        {
+          "id": "uVPz8oNhf",
+          "type": "markdown",
+          "content": "\n##  NAND-Gatter\n\nGebildet aus den englischen Worten **not and**, also **nicht und**. Daraus lässt sich bereits schließen, dass die Verknüpfung negiert sein muss. Die mathematische Gleichung bestätigt dies:\n\n\n```math\n     A = not (E1 wedge E2)\n\n\n```\n\nDer Ausgang `A` hat immer den Wert 1, außer wenn beide Eingänge den Wert 1 haben. Anhand der Logik-Tafel lässt sich auch erkennen, dass die NAND-Funktion an ihrem Ausgang genau das entgegengesetzte Signal hat wie das AND-Gatter.\n\n\n\n### Logiktabelle\n\n|    E1    |    E2    |     A    |\n|:--------:|:--------:|:--------:|\n| 0        |      0   |  **1**   |\n| 0        |      1   |  **1**   |\n| 1        |      0   |  **1**   |\n| 1        |      1   |  **0**   |\n\n\n### Symbol"
+        },
+        {
+          "id": "Miex_uaeT",
+          "type": "brain",
+          "content": {
+            "draw2d": [
+              {
+                "type": "circuit_digital_gate_IEC60617_12_NAND",
+                "id": "521e3e12-10b6-1035-ae11-c2698acee030",
+                "x": 2865.75,
+                "y": 2973.390625,
+                "width": 35,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/NAND.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_NAND",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              }
+            ],
+            "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAG4AAABuCAYAAADGWyb7AAAJQUlEQVR4Xu2ca0xTWxbH1ymFYstTfANe4SrzAZBoFBMRRojYxPcHwUdmNMwwQRGIjM4UMzGCiqPOKD64JigmOo6iIVHvvWJm1AEsGkiUQCgXFLBQRogIFsrLllPsZO+MBG5BaMvpzca1vwhmd+91/r/zP3vtfVbhABuTCnBMRo1BA4Jj9CYYE1xMTIyDWq32BACe53mjUNdnNBq5wMDAj/n5+YNCzTEVxx0VXEhISIBEIlkGAAFisbif47gBIS7ezc3NqNPpnMRicZvRaCwzGAzN5eXlvBBzTbUxzcAtX77c193dPSUkJOQ3Xl5eXmKx2CQSiUxCXLhMJhvo7e11am9v19XV1eVptdozSqXyv0LMNdXGNAO3cuXKP4SFhf0pLi7u24CAAJGDg4Pg11xXVwdZWVkfampqdnV0dDypqakRxOGCX4gdJzADFx0d/ff4+PjfyeVyT3d3d7uFkpmZ2V1SUqLo6OjIKy8v19ltYkYnMgMnl8vPJSYm7o6MjPRwdXW122VduHChq7Cw8C8ajeZWZWVll90mZnQiM3CRkZFXk5KStkVHR8vsCe7EiRO9SqUyra2t7SaCG/9uGgHu/Pnzi2pray9GRESsjoqKksycORNEItH4o0xCDwRnmYhD4M6dOzcfAFIB4LdOTk5eQUFBsGTJEnBxcbFsRCt7IzjLhBsO7vccxx02mUzfkCGmTZsGa9euhfnz59vFdQjOSnBZWVl7OY47BAC+ZAipVAqRkZGwYMECEIvFlo1qRW8EZ5loQ47Lysry5zjuz0ajcatUKp0eFBTE4aPSMjHt2XtEcpKdnR1QX1+fHRoa+mu5XO7k5eVlt1jQcZZJbbYdWL16dW5ycjLZDrhMdDtgNBqhqakJWlpagPw8ffp0WLhwIU1sOG5iLyAQnJ3BEVCFhYVw//59qK6uBoPBAD4+PrBp0ybYsGEDTNS1CM7O4GprayE1NRVevXoFS5cupdmoUqmkbrt48SJERESAk5PTuFEhuHElGtHB5kfllStX4PTp0xAYGAgZGRkwd+5c2LdvHzx+/Jj+vnv3bvDw8PhiVMS1GRkZ/UVFRZffvXv34+DgoFoqlbbiYfPYstkMLjs7m5zsw7Jly+DYsWPg6+sL+/fvh7t379Lfd+7cCW5ubmNG0N7eDi9evIB79+7x5H2cyWRqUqvVP+l0uhKRSPQflUrVadm9+HX0thnc8+fP4eDBgzQxIcBIQnPp0iWqHvk3NDQUxno1pNfr4ebNm1BZWQmLFi2irjWZTOSxaygtLW3gOC7H39+/2N/fvz4uLk7/dSCZ2FXaDO7jx4+Qnp4ON27cAJlMBj09PRRCXFwcbNmyhWaYYzWVSgXEsSSRIZt9suknjTw6r1+/zjc1NbW7uro+c3R0/CfP88UKhaJnYpc19XvZDK65uRlyc3OJ0PD+/Xuq2PHjxym4L0Ej/a5evQq9vb0QExMD8+bNG1K7tbWVJjhkPOJAACgTiUSpWq32ZXp6umD1LyzhtgkcSf/z8vLg9u3b4O3tTd1G9nPEQQqFgjro9evX4OnpSR+DxJHD28mTJ+nWYf369bTP50YeneXl5RTq58Zx3DaO475PSUkxsCSwULFaDa67uxsOHz4Md+7coduA5ORk6OjooFuAhoYGSExMBEdHR3jw4AFERUVBSkoKhTu8Eaf29fWZOY6sl8+ePaOO+/TpE/lIlUgkSpgzZ86L2NhYrAYDMK+rnOjJycuXL2Hv3r00KcnJyaFvEki7fPkyXbfIRpzs34j4R48ehV27dpltC6qqqujauGbNGggPDx9a4/r7++HWrVt8S0tLq0wm+8nR0fEfer3+X2lpaVjS8P8732rHFRQUwKFDh0jRJRWfbAdI6+zshFOnTtH/02q1MGPGDAIBwsLCzF4PkfXr2rVroNFo6BGZj4/PIMdxg2q12qGgoECl1+tv+/n5fR8cHPwmISEBy/aGPa6sBldWVgZJSUnQ2NhI036yrpFTE5IRkjUvMzOTrnfktRDZiK9bt27Ul7JdXV30yCwvL89oMBjqBwcHNY2NjR3d3d2POI4rePv2rVaodYLlca0G9+HDBzhw4ABdw8hjbvv27TBr1iwgGSFxGEkwnJ2dqevIGkiOxUjK//ME5bN4R44c6Xv06FEOOTnheV7V0tJCNt50gcNmroDV4MhQT58+pWtacXExPUwmm2/iMuI8AjMkJASKioqAbNL37NlDE5jZs2ePygHPKi27PW0CR6aqqKiAhw8fwps3b2hCQrYApF5l8+bN9PirtLQU8vPzacq/atWqoQTk52EiODuD+zydTqej4EgRrUQiGREFeVyStwVfekuA4GwEh3WVlgn4S/XGuspfSnkb5x2zrpIcUZFsEOsqbVRYoI9jXaVAwgo97PDyPKyrFFrtSRzfrK6S5/mtMpkM6yonUWQhhhqRnJw5cyZAo9Fkr1ixAusqhVB7Ese0eQM+WbHgPs4yJc3ARUREXI+Pj9+6ceNG6XjVWZZN9eXepMpLqVT+tbOzM6eioqJ9MseeimOZgQsLC8vdsWPHttjYWBfy/Th7NYVCoS8pKflbT0/Pd9XV1W32mpfVeUYDlxAeHp4WGxv7jZ+fH0eOqSZaRm6NCOQNd2tr66ezZ8++V6lUCW1tbf9uaGjA8oRxxDQDFxwc7O/m5vZHuVy+ztvbe46zs7ODUN9KlUgkhoGBAa62tvZdVVVVQU9Pz9knT540W3MDfG2fGfUbGYsXL/6Vh4fHGp7nv+U4TrAvx0ml0j6e50U8zzeZTKYfSktLWwFAkL+pMtXATuyrNFPtqqfA9SA4RiEiOATHqAKMho2OQ3CMKsBo2Og4BMeoAoyGjY5DcIwqwGjY6DgEx6gCjIaNjkNwjCrAaNjoOATHqAKMho2OQ3CMKsBo2Og4BMeoAoyGjY5DcIwqwGjY6DgEx6gCjIaNjkNwjCrAaNjoOATHqAKMho2OQ3CMKsBo2Og4BMeoAoyGjY5DcIwqwGjY6DgEx6gCjIaNjkNwjCrAaNjoOATHqAKMho2OQ3CMKsBo2Og4BMeoAoyGjY5DcIwqwGjY6DgEx6gCjIaNjkNwjCrAaNjoOATHqAKMho2OQ3CMKsBo2Og4BMeoAoyGjY5DcIwqwGjY6DgEx6gCjIaNjkNwjCrAaNjoOATHqAKMhv0/xIhdq8cGyQEAAAAASUVORK5CYII="
+          }
+        },
+        {
+          "id": "-H_adXISM",
+          "type": "markdown",
+          "content": "\n\n##  NOR-Gatter\n\nGebildet aus den englischen Wörtern **not or**, was übersetzt **nicht oder** heißt. Es handelt sich also wiederum um eine Negation, nämlich die der OR-Verknüpfung. Die mathematische Gleichung lautet:\n\n\n```math\n     A = not (E1 vee E2)\n```\n\nBei dieser Verknüpfungsschaltung hat der Ausgang `A` den Wert 1, wenn beide Eingänge den Wert 0 haben. In allen anderen Fällen hat der Ausgang den Wert 0.\n\n\n\n\n### Logiktabelle\n\n|    E1    |    E2    |     A    |\n|:--------:|:--------:|:--------:|\n| 0        |      0   |  **1**   |\n| 0        |      1   |  **0**   |\n| 1        |      0   |  **0**   |\n| 1        |      1   |  **0**   |\n\n\n### Symbol\n"
+        },
+        {
+          "id": "RtaAdqLl7",
+          "type": "brain",
+          "content": {
+            "draw2d": [
+              {
+                "type": "circuit_digital_gate_IEC60617_12_NOR",
+                "id": "45506108-947c-4717-84a9-181ec3831cf5",
+                "x": 2994.75,
+                "y": 3000.390625,
+                "width": 37,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/NOR.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_NOR",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              }
+            ],
+            "image": "data:image/png;base64,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"
+          }
+        },
+        {
+          "id": "yaHj4qDWi",
+          "type": "markdown",
+          "content": "Da diese beiden letzten Gatter sehr häufig vorkommen, haben sie ein eigenes Schaltsymbol. Außerdem sind sie für den Praktiker sehr interessant, da sie gegenüber den *UND-* bzw. *ODER-Gattern* meist erheblich billiger sind. Deshalb nimmt man häufig zwei *NAND-Gatter* um ein *UND-Gatter* billig aufzubauen, oder zwei NOR-Gatter für ein OR-Gatter. Die dafür notwendigen Schaltungen werden im Folgenden erklärt.\n"
+        },
+        {
+          "id": "vHNYXqkt2",
+          "type": "brain",
+          "content": {
+            "draw2d": [
+              {
+                "type": "circuit_digital_gate_IEC60617_12_NAND",
+                "id": "ae17529e-a9a0-c649-98e9-086d91213c08",
+                "x": 2761.75,
+                "y": 2926.390625,
+                "width": 35,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/NAND.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_NAND",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              },
+              {
+                "type": "circuit_digital_gate_IEC60617_12_NAND",
+                "id": "43cc1d99-c761-f1af-bb1c-f1a587a79569",
+                "x": 2941.75,
+                "y": 2926.390625,
+                "width": 35,
+                "height": 40,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/gate/IEC60617-12/NAND.shape"
+                },
+                "cssClass": "circuit_digital_gate_IEC60617_12_NAND",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": [
+                  {
+                    "type": "draw2d.shape.basic.Label",
+                    "id": "c965e487-6944-c5c2-cd56-ac9537670cd8",
+                    "x": -49,
+                    "y": -15,
+                    "width": 20.25,
+                    "height": 19,
+                    "alpha": 1,
+                    "selectable": true,
+                    "draggable": true,
+                    "angle": 0,
+                    "userData": {},
+                    "cssClass": "draw2d_shape_basic_Label",
+                    "ports": [],
+                    "bgColor": "rgba(0,0,0,0)",
+                    "color": "rgba(27,27,27,1)",
+                    "stroke": 0,
+                    "radius": 0,
+                    "dasharray": null,
+                    "text": "E3",
+                    "outlineStroke": 0,
+                    "outlineColor": "rgba(0,0,0,0)",
+                    "fontSize": 12,
+                    "fontColor": "rgba(8,8,8,1)",
+                    "fontFamily": null,
+                    "editor": "LabelInplaceEditor",
+                    "locator": "draw2d.layout.locator.SmartDraggableLocator"
+                  }
+                ]
+              },
+              {
+                "type": "circuit_digital_signals_SignalSource",
+                "id": "e85cc0ae-803c-e65c-d0fb-096d40082f75",
+                "x": 2651,
+                "y": 2920.390625,
+                "width": 34.6875,
+                "height": 22,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/signals/SignalSource.shape",
+                  "signalId": "E1"
+                },
+                "cssClass": "circuit_digital_signals_SignalSource",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              },
+              {
+                "type": "circuit_digital_signals_SignalSource",
+                "id": "e86bc794-d54e-68a1-a049-8316ed8de0bf",
+                "x": 2651,
+                "y": 2960.390625,
+                "width": 34.6875,
+                "height": 22,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/signals/SignalSource.shape",
+                  "signalId": "E1"
+                },
+                "cssClass": "circuit_digital_signals_SignalSource",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              },
+              {
+                "type": "circuit_digital_signals_SignalTarget",
+                "id": "d04e0395-712e-a236-ba44-9c78223dc558",
+                "x": 3017,
+                "y": 2935.390625,
+                "width": 34.71875,
+                "height": 22,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/signals/SignalTarget.shape",
+                  "signalId": "A2"
+                },
+                "cssClass": "circuit_digital_signals_SignalTarget",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              },
+              {
+                "type": "circuit_digital_signals_SignalSource",
+                "id": "873e11c5-7133-f42f-7ba2-b0b0931a11cc",
+                "x": 2891,
+                "y": 2972.390625,
+                "width": 34.6875,
+                "height": 22,
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {
+                  "file": "circuit/digital/signals/SignalSource.shape",
+                  "signalId": "E4"
+                },
+                "cssClass": "circuit_digital_signals_SignalSource",
+                "bgColor": "rgba(0,0,0,0)",
+                "color": "rgba(27,27,27,1)",
+                "stroke": 0,
+                "radius": 0,
+                "dasharray": null,
+                "labels": []
+              },
+              {
+                "type": "Connection",
+                "id": "6e76ff23-f680-1fbc-b9a3-e0734a214384",
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {},
+                "cssClass": "Connection",
+                "stroke": 1.5,
+                "color": "rgba(0,0,0,1)",
+                "outlineStroke": 0,
+                "outlineColor": "rgba(0,0,0,0)",
+                "policy": "ConnectionSelectionFeedbackPolicy",
+                "vertex": [
+                  {
+                    "x": 2925.1597504533893,
+                    "y": 2982.634425
+                  },
+                  {
+                    "x": 2933.4548752266946,
+                    "y": 2982.634425
+                  },
+                  {
+                    "x": 2933.4548752266946,
+                    "y": 2958.390625
+                  },
+                  {
+                    "x": 2941.75,
+                    "y": 2958.390625
+                  }
+                ],
+                "router": "ConnectionRouter",
+                "radius": 2,
+                "routingMetaData": {
+                  "routedByUserInteraction": false,
+                  "fromDir": 1,
+                  "toDir": 3
+                },
+                "source": {
+                  "node": "873e11c5-7133-f42f-7ba2-b0b0931a11cc",
+                  "port": "Port"
+                },
+                "target": {
+                  "node": "43cc1d99-c761-f1af-bb1c-f1a587a79569",
+                  "port": "input02"
+                },
+                "labels": []
+              },
+              {
+                "type": "Connection",
+                "id": "ee724ac7-6995-30c7-c319-f019090f4b88",
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {},
+                "cssClass": "Connection",
+                "stroke": 1.5,
+                "color": "rgba(0,0,0,1)",
+                "outlineStroke": 0,
+                "outlineColor": "rgba(0,0,0,0)",
+                "policy": "ConnectionSelectionFeedbackPolicy",
+                "vertex": [
+                  {
+                    "x": 2976.75,
+                    "y": 2945.890625
+                  },
+                  {
+                    "x": 3016.352721405798,
+                    "y": 2946.140625
+                  }
+                ],
+                "router": "ConnectionRouter",
+                "radius": 2,
+                "routingMetaData": {
+                  "routedByUserInteraction": false,
+                  "fromDir": 1,
+                  "toDir": 3
+                },
+                "source": {
+                  "node": "43cc1d99-c761-f1af-bb1c-f1a587a79569",
+                  "port": "output"
+                },
+                "target": {
+                  "node": "d04e0395-712e-a236-ba44-9c78223dc558",
+                  "port": "Port"
+                },
+                "labels": []
+              },
+              {
+                "type": "Connection",
+                "id": "aee6a349-2e4b-b258-7f14-e5ee99b13ce7",
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {},
+                "cssClass": "Connection",
+                "stroke": 1.5,
+                "color": "rgba(0,0,0,1)",
+                "outlineStroke": 0,
+                "outlineColor": "rgba(0,0,0,0)",
+                "policy": "ConnectionSelectionFeedbackPolicy",
+                "vertex": [
+                  {
+                    "x": 2685.1597504533893,
+                    "y": 2930.634425
+                  },
+                  {
+                    "x": 2723.4548752266946,
+                    "y": 2930.634425
+                  },
+                  {
+                    "x": 2723.4548752266946,
+                    "y": 2934.390625
+                  },
+                  {
+                    "x": 2761.75,
+                    "y": 2934.390625
+                  }
+                ],
+                "router": "ConnectionRouter",
+                "radius": 2,
+                "routingMetaData": {
+                  "routedByUserInteraction": false,
+                  "fromDir": 1,
+                  "toDir": 3
+                },
+                "source": {
+                  "node": "e85cc0ae-803c-e65c-d0fb-096d40082f75",
+                  "port": "Port"
+                },
+                "target": {
+                  "node": "ae17529e-a9a0-c649-98e9-086d91213c08",
+                  "port": "input01"
+                },
+                "labels": []
+              },
+              {
+                "type": "Connection",
+                "id": "a163a580-a283-e0a7-9e41-423e822cee1a",
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {},
+                "cssClass": "Connection",
+                "stroke": 1.5,
+                "color": "rgba(0,0,0,1)",
+                "outlineStroke": 0,
+                "outlineColor": "rgba(0,0,0,0)",
+                "policy": "ConnectionSelectionFeedbackPolicy",
+                "vertex": [
+                  {
+                    "x": 2796.75,
+                    "y": 2945.890625
+                  },
+                  {
+                    "x": 2869.25,
+                    "y": 2945.890625
+                  },
+                  {
+                    "x": 2869.25,
+                    "y": 2934.390625
+                  },
+                  {
+                    "x": 2941.75,
+                    "y": 2934.390625
+                  }
+                ],
+                "router": "ConnectionRouter",
+                "radius": 2,
+                "routingMetaData": {
+                  "routedByUserInteraction": true,
+                  "fromDir": 1,
+                  "toDir": 3
+                },
+                "source": {
+                  "node": "ae17529e-a9a0-c649-98e9-086d91213c08",
+                  "port": "output"
+                },
+                "target": {
+                  "node": "43cc1d99-c761-f1af-bb1c-f1a587a79569",
+                  "port": "input01"
+                },
+                "labels": []
+              },
+              {
+                "type": "Connection",
+                "id": "825d3fd3-e318-37ef-32bd-01f329ef4be3",
+                "alpha": 1,
+                "selectable": true,
+                "draggable": true,
+                "angle": 0,
+                "userData": {},
+                "cssClass": "Connection",
+                "stroke": 1.5,
+                "color": "rgba(0,0,0,1)",
+                "outlineStroke": 0,
+                "outlineColor": "rgba(0,0,0,0)",
+                "policy": "ConnectionSelectionFeedbackPolicy",
+                "vertex": [
+                  {
+                    "x": 2685.1597504533893,
+                    "y": 2970.634425
+                  },
+                  {
+                    "x": 2723.4548752266946,
+                    "y": 2970.634425
+                  },
+                  {
+                    "x": 2723.4548752266946,
+                    "y": 2958.390625
+                  },
+                  {
+                    "x": 2761.75,
+                    "y": 2958.390625
+                  }
+                ],
+                "router": "ConnectionRouter",
+                "radius": 2,
+                "routingMetaData": {
+                  "routedByUserInteraction": false,
+                  "fromDir": 1,
+                  "toDir": 3
+                },
+                "source": {
+                  "node": "e86bc794-d54e-68a1-a049-8316ed8de0bf",
+                  "port": "Port"
+                },
+                "target": {
+                  "node": "ae17529e-a9a0-c649-98e9-086d91213c08",
+                  "port": "input02"
+                },
+                "labels": []
+              }
+            ],
+            "image": "data:image/png;base64,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"
+          }
+        },
+        {
+          "id": "vBJUkOe4C",
+          "type": "markdown",
+          "content": "Bei dieser Schaltung hat der Ausgang `A1` nur dann den Wert 0, wenn beide Eingänge, also `E1` und `E2` den Wert 1 haben. Der offene (nicht angeschlossene) Eingang `E4` hat generell den Wert 1. Um aber am Ausgang A2 den Wert 1 zu erreichen, muss deswegen `E3` und somit am Ausgang `A1` der Wert 0 anliegen. Dies wird, wie oben schon beschrieben, nur dadurch erreicht, dass man den Eingängen `E1` und `E2` den Wert 1 zuordnet.\n\n```math\nA1 = not (E1 wedge E2)\n\nA2 = not A1 = not (not (E1 wedge E2))\n```\n\n`not ( not (E1 wedge E2))` ist aber nichts anderes als `E1 wedge E2`; somit gilt die Funktionsgleichung der normalen UND-Verknüpfung: \n```math\nA2 = E1 wedge E2\n````\n\nDies beweist, dass die obige Schaltung einer normalen UND-Verknüpfung entspricht.\n\n"
         }
       ]
     }
