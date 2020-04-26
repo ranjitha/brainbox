@@ -103,6 +103,9 @@ export default class View {
   }
 
   setPage(page) {
+    // commit the current changes if an editor is active
+    this.onCommitEdit()
+
     $(".pageElement").removeClass("selected")
     $(`.pageElement[data-page='${page.id}']`).addClass("selected")
     this.page = page
@@ -113,7 +116,29 @@ export default class View {
     return this.page
   }
 
+  removePage(page){
+
+    // commit the current changes if an editor is active
+    if(page === this.page) {
+      let index = this.app.getDocument().index(page)
+      this.onCommitEdit()
+      if(index >0){
+        let newPage = this.app.getDocument().get(index-1)
+        this.setPage(newPage)
+      }
+      else if(this.app.getDocument().length >1 ){
+        let newPage = this.app.getDocument().get(1)
+        this.setPage(newPage)
+      }
+    }
+
+    this.app.getDocument().removePage(page)
+  }
+
   addPage() {
+    // commit the current changes if an editor is active
+    this.onCommitEdit()
+
     inputPrompt.show("Add Pager", "Page name", value => {
       commandStack.push(new State(this.app))
       let page = new Page()
@@ -127,6 +152,9 @@ export default class View {
   }
 
   addMarkdown(index) {
+    // commit the current changes if an editor is active
+    this.onCommitEdit()
+
     commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
@@ -143,6 +171,9 @@ export default class View {
   }
 
   addBrain(index) {
+    // commit the current changes if an editor is active
+    this.onCommitEdit()
+
     commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
@@ -159,6 +190,9 @@ export default class View {
   }
 
   addImage(index) {
+    // commit the current changes if an editor is active
+    this.onCommitEdit()
+
     commandStack.push(new State(this.app))
     let section = {
       id: shortid.generate(),
@@ -313,8 +347,8 @@ export default class View {
         this.currentEditor = this.markdownEditor.inject(section)
         $(".sections").removeClass("activeSection")
         break
-      case 'markdown':
-        this.brain = this.brainEditor.inject(section)
+      case 'brain':
+        this.currentEditor = this.brainEditor.inject(section)
         $(".sections").removeClass("activeSection")
         break
       case 'image':
@@ -331,12 +365,15 @@ export default class View {
   }
 
   onCommitEdit() {
+    if(this.currentEditor === null){
+      return
+    }
+
     commandStack.push(new State(this.app))
     this.currentEditor.commit()
       .then(() => {
         this.currentEditor = null;
         $(".editorContainerSelector").remove()
-        console.log(this.page)
         this.render(this.page)
         this.palette.render()
       })

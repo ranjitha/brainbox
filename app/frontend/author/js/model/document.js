@@ -44,4 +44,8 @@ export default class Document {
   clone() {
     return new Document(this.toJSON())
   }
+
+  get length() {
+    return this.pages.length
+  }
 }

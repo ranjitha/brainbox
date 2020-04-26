@@ -12,9 +12,11 @@ export default class Palette {
     this.permissions = permissions
     commandStack.off(this).on("change", this)
 
+    console.log("register")
     $(document)
       .off("click", "#documentPageAdd")
       .on("click", "#documentPageAdd", () => {
+        console.log("click")
         this.app.view.addPage()
       })
       .off("click", ".pageElement .page_edit_name")
@@ -31,7 +33,7 @@ export default class Palette {
       .on("click", ".pageElement .page_delete", (event) => {
         commandStack.push(new State(this.app))
         let page = this.app.getDocument().getPage($(event.currentTarget).data("page"))
-        this.app.getDocument().removePage(page)
+        this.view.removePage(page)
         this.stackChanged(null)
         return false
       })

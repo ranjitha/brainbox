@@ -19,7 +19,7 @@ AND-Gatter lautet:
 
 
 ```
-     A = E1 ∧ E2	   	(sprich: “E1 und E2“)
+     A = E1 ^ E2	   	(sprich: “E1 und E2“)
 ```
 
 **Das bedeutet, dass  nur dann den Wert 1 hat**, wenn die Eingänge

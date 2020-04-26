@@ -14,7 +14,7 @@ export default class Editor {
     this.section = section
     let menu = $(".activeSection .tinyFlyoverMenu")
     $(".workspace").append(`
-          <div class="content editorContainerSelector" " id="draw2dCanvasWrapper">
+          <div class="content editorCxontainerSelector" " id="draw2dCanvasWrapper">
                <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
           </div>
        `)

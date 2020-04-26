@@ -3697,7 +3697,7 @@ var Editor = function () {
 
       this.section = section;
       var menu = $(".activeSection .tinyFlyoverMenu");
-      $(".workspace").append("\n          <div class=\"content editorContainerSelector\" \" id=\"draw2dCanvasWrapper\">\n               <div class=\"canvas\" id=\"draw2dCanvas\" oncontextmenu=\"return false;\">\n          </div>\n       ");
+      $(".workspace").append("\n          <div class=\"content editorCxontainerSelector\" \" id=\"draw2dCanvasWrapper\">\n               <div class=\"canvas\" id=\"draw2dCanvas\" oncontextmenu=\"return false;\">\n          </div>\n       ");
       menu.prepend("\n          <a href=\"#\" class=\"morph_btn play\" id=\"simulationStartStop\">\n            <span>\n              <span class=\"s1\"></span>\n              <span class=\"s2\"></span>\n              <span class=\"s3\"></span>\n            </span>\n          </a>\n    ");
 
       $("#draw2dCanvasWrapper").append(menu);
@@ -5067,11 +5067,10 @@ var Editor = function () {
     key: "inject",
     value: function inject(section) {
       this.section = section;
-      this.content = section.content;
+      this.content = section.content || "";
       var _this = this;
 
-      console.log("inject");
-      $(".sections .activeSection .sectionContent").html("\n              <div class=\"editorContainerSelector\" id=\"editor-container\">\n                  <div class=\"drop-message\">\n                        Drag & Drop images or click to upload\n                  </div>\n                  <div id=\"image-preview\"></div>\n              </div>\n                ");
+      $(".sections .activeSection .sectionContent").html("\n              <div class=\"editorContainerSelector\" id=\"editor-container\">\n                  <div class=\"drop-message\">\n                        Drag & Drop images or click to upload\n                  </div>\n                  <div id=\"image-preview\">\n                    <div class=\"image-view\">\n                      <img src=\"" + this.content + "\">\n                      <div class=\"overlay\"></div>\n                    </div>\n                  </div>\n              </div>\n                ");
 
       var dropRegion = document.getElementById("editor-container");
       var imagePreviewRegion = document.getElementById("image-preview");
@@ -5727,6 +5726,11 @@ var Document = function () {
     value: function clone() {
       return new Document(this.toJSON());
     }
+  }, {
+    key: "length",
+    get: function get() {
+      return this.pages.length;
+    }
   }]);
 
   return Document;
@@ -5901,7 +5905,9 @@ var Palette = function () {
     this.permissions = permissions;
     _CommandStack2.default.off(this).on("change", this);
 
+    console.log("register");
     $(document).off("click", "#documentPageAdd").on("click", "#documentPageAdd", function () {
+      console.log("click");
       _this.app.view.addPage();
     }).off("click", ".pageElement .page_edit_name").on("click", ".pageElement .page_edit_name", function (event) {
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
@@ -5914,7 +5920,7 @@ var Palette = function () {
     }).off("click", ".pageElement .page_delete").on("click", ".pageElement .page_delete", function (event) {
       _CommandStack2.default.push(new _State2.default(_this.app));
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
-      _this.app.getDocument().removePage(page);
+      _this.view.removePage(page);
       _this.stackChanged(null);
       return false;
     }).off("click", ".pageElement").on("click", ".pageElement", function (event) {
@@ -6445,6 +6451,9 @@ var View = function () {
   _createClass(View, [{
     key: "setPage",
     value: function setPage(page) {
+      // commit the current changes if an editor is active
+      this.onCommitEdit();
+
       $(".pageElement").removeClass("selected");
       $(".pageElement[data-page='" + page.id + "']").addClass("selected");
       this.page = page;
@@ -6456,9 +6465,31 @@ var View = function () {
       return this.page;
     }
   }, {
+    key: "removePage",
+    value: function removePage(page) {
+
+      // commit the current changes if an editor is active
+      if (page === this.page) {
+        var index = this.app.getDocument().index(page);
+        this.onCommitEdit();
+        if (index > 0) {
+          var newPage = this.app.getDocument().get(index - 1);
+          this.setPage(newPage);
+        } else if (this.app.getDocument().length > 1) {
+          var _newPage = this.app.getDocument().get(1);
+          this.setPage(_newPage);
+        }
+      }
+
+      this.app.getDocument().removePage(page);
+    }
+  }, {
     key: "addPage",
     value: function addPage() {
       var _this2 = this;
+
+      // commit the current changes if an editor is active
+      this.onCommitEdit();
 
       inputPrompt.show("Add Pager", "Page name", function (value) {
         _CommandStack2.default.push(new _State2.default(_this2.app));
@@ -6474,6 +6505,9 @@ var View = function () {
   }, {
     key: "addMarkdown",
     value: function addMarkdown(index) {
+      // commit the current changes if an editor is active
+      this.onCommitEdit();
+
       _CommandStack2.default.push(new _State2.default(this.app));
       var section = {
         id: shortid.generate(),
@@ -6491,6 +6525,9 @@ var View = function () {
   }, {
     key: "addBrain",
     value: function addBrain(index) {
+      // commit the current changes if an editor is active
+      this.onCommitEdit();
+
       _CommandStack2.default.push(new _State2.default(this.app));
       var section = {
         id: shortid.generate(),
@@ -6508,6 +6545,9 @@ var View = function () {
   }, {
     key: "addImage",
     value: function addImage(index) {
+      // commit the current changes if an editor is active
+      this.onCommitEdit();
+
       _CommandStack2.default.push(new _State2.default(this.app));
       var section = {
         id: shortid.generate(),
@@ -6629,8 +6669,8 @@ var View = function () {
           this.currentEditor = this.markdownEditor.inject(section);
           $(".sections").removeClass("activeSection");
           break;
-        case 'markdown':
-          this.brain = this.brainEditor.inject(section);
+        case 'brain':
+          this.currentEditor = this.brainEditor.inject(section);
           $(".sections").removeClass("activeSection");
           break;
         case 'image':
@@ -6651,11 +6691,14 @@ var View = function () {
     value: function onCommitEdit() {
       var _this4 = this;
 
+      if (this.currentEditor === null) {
+        return;
+      }
+
       _CommandStack2.default.push(new _State2.default(this.app));
       this.currentEditor.commit().then(function () {
         _this4.currentEditor = null;
         $(".editorContainerSelector").remove();
-        console.log(_this4.page);
         _this4.render(_this4.page);
         _this4.palette.render();
       });

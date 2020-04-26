@@ -5,16 +5,20 @@ export default class Editor {
 
   inject(section) {
     this.section = section
-    this.content = section.content
+    this.content = section.content || ""
     let _this = this
 
-    console.log("inject")
     $(".sections .activeSection .sectionContent").html(`
               <div class="editorContainerSelector" id="editor-container">
                   <div class="drop-message">
                         Drag & Drop images or click to upload
                   </div>
-                  <div id="image-preview"></div>
+                  <div id="image-preview">
+                    <div class="image-view">
+                      <img src="${this.content}">
+                      <div class="overlay"></div>
+                    </div>
+                  </div>
               </div>
                 `)
 
