@@ -77,6 +77,9 @@
   text-align: left;
   cursor:pointer;
   border-left:2px solid transparent;
+  position: relative;
+  padding-right: 45px;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
   &.selected{
     background-color:#EFEFEF !important;
     border-left: 2px solid @tintColor;
@@ -92,5 +95,15 @@
       border:1px solid rgba(0,0,0,0.4);
       box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14);
     }
+  }
+  .page_delete{
+    position: absolute;
+    right: 0px;
+    top: 10px;
+  }
+  .page_edit_name{
+    position: absolute;
+    right: 20px;
+    top: 10px;
   }
 }

@@ -88,6 +88,12 @@ export default class View {
         this.onCancelEdit()
         return false
       })
+      .on("click", "#sectionMenuInsertImage", event => {
+        let section = this.addImage($(event.target).data("index"))
+        this.onSelect(section)
+        this.onEdit(section)
+        return false
+      })
       .on("click", "#sectionMenuInsertMarkdown", event => {
         let section = this.addMarkdown($(event.target).data("index"))
         this.onSelect(section)
@@ -285,7 +291,8 @@ export default class View {
         <div class='section'>
           <div class='sectionContent ' data-type="spacer" >
             <div data-index="${index}" id="sectionMenuInsertMarkdown"  class='tinyFlyoverMenu fa fa-plus-square-o' >Text</div>
-            <div data-index="${index}" id="sectionMenuInsertBrain" class='tinyFlyoverMenu fa fa-plus-square-o' >Diagram</div>
+            <div data-index="${index}" id="sectionMenuInsertBrain"     class='tinyFlyoverMenu fa fa-plus-square-o' >Diagram</div>
+            <div data-index="${index}" id="sectionMenuInsertImage"     class='tinyFlyoverMenu fa fa-plus-square-o' >Picture</div>
           </div>
         </div>
       `)
