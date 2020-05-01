@@ -117,6 +117,7 @@ class Application {
       this.currentFile.scope = "user"
     }
 
+    this.view.onCommitEdit()
     if (this.permissions.sheets.create && this.permissions.sheets.update) {
       // allow the user to enter/change the file name....
       fileSave.show(this.currentFile, this.storage, this.document, internal_callback)

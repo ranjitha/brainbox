@@ -41,7 +41,9 @@ export default class View {
       })
       .on("click", ".sections .section", event => {
         let section = this.page.get($(event.target).closest(".section").data("id"))
-        this.onSelect(section)
+        if(section) {
+          this.onSelect(section)
+        }
         return false
       })
       .on("click", "#sectionMenuUp", event => {
@@ -68,8 +70,10 @@ export default class View {
       })
       .on("dblclick", ".sections .section", event => {
         let section = this.page.get($(event.target).closest(".section").data("id"))
-        this.onSelect(section)
-        this.onEdit(section)
+        if(section) {
+          this.onSelect(section)
+          this.onEdit(section)
+        }
         return false
       })
       .on("click", "#sectionMenuEdit", event => {
@@ -90,20 +94,26 @@ export default class View {
       })
       .on("click", "#sectionMenuInsertImage", event => {
         let section = this.addImage($(event.target).data("index"))
-        this.onSelect(section)
-        this.onEdit(section)
+        if(section){
+          this.onSelect(section)
+          this.onEdit(section)
+        }
         return false
       })
       .on("click", "#sectionMenuInsertMarkdown", event => {
         let section = this.addMarkdown($(event.target).data("index"))
-        this.onSelect(section)
-        this.onEdit(section)
+        if(section){
+          this.onSelect(section)
+          this.onEdit(section)
+        }
         return false
       })
       .on("click", "#sectionMenuInsertBrain", event => {
         let section = this.addBrain($(event.target).data("index"))
-        this.onSelect(section)
-        this.onEdit(section)
+        if(section){
+          this.onSelect(section)
+          this.onEdit(section)
+        }
         return false
       })
   }
@@ -111,6 +121,9 @@ export default class View {
   setPage(page) {
     // commit the current changes if an editor is active
     this.onCommitEdit()
+
+    // scroll to top
+    $(".content").scrollTop(0)
 
     $(".pageElement").removeClass("selected")
     $(`.pageElement[data-page='${page.id}']`).addClass("selected")

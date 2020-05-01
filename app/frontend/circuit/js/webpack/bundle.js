@@ -4247,9 +4247,19 @@ exports.default = draw2d.Canvas.extend({
   onDrop: function onDrop(droppedDomNode, x, y, shiftKey, ctrlKey) {
     var type = $(droppedDomNode).data("shape");
     var file = $(droppedDomNode).data("file");
+    var figure = new draw2d.shape.basic.Label({
+      text: "Unable to load shape '" + type + "'",
+      color: "#ff0000"
+    });
+    try {
+      figure = eval("new " + type + "();"); // jshint ignore:line
 
-    var figure = eval("new " + type + "();"); // jshint ignore:line
-    figure.attr("userData.file", file);
+      // required to calculate the filepath for markdown/js/shape
+      //
+      figure.attr("userData.file", file);
+    } catch (exc) {
+      console.log(exc);
+    }
 
     // create a command for the undo/redo support
     var command = new draw2d.command.CommandAdd(this, figure, x, y);
