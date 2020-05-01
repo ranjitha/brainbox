@@ -11,7 +11,7 @@
 export default {
   fileSuffix: ".brain",
   appName: "Brainbox Simulator",
-  loginRedirect: "./circuit/",
+  loginRedirect: "circuit",
 
   backend: {
 

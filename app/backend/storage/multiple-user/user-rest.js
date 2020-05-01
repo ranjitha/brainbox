@@ -1,7 +1,7 @@
 const shortid = require('shortid')
-var sanitize = require("sanitize-filename");
+const sanitize = require("sanitize-filename")
 
-const db = require('./db')
+const classroom = require('../../classroom')
 
 function mapUser(user){
   // dont't expose passwords or other sensible data to the outer world
@@ -26,7 +26,7 @@ exports.userinfo = (req, res) => {
 }
 
 exports.list = (req, res) => {
-  db.users.all((error, users)=>{
+  classroom.users.all((error, users)=>{
     users = users
       .filter( u => u.username!==null)
       .map( u => mapUser(u))
@@ -35,24 +35,23 @@ exports.list = (req, res) => {
 }
 
 exports.get = (req, res) => {
-  db.users.findById(req.params.id, (error, user)=>{
+  classroom.users.findById(req.params.id, (error, user)=>{
     res.status(200).send(mapUser(user))
   })
 }
 
 exports.delete = (req, res) => {
-  db.users.delete(req.params.id, (error)=>{
+  classroom.users.delete(req.params.id, (error)=>{
     res.status(200).send("done")
   })
 }
-
 
 exports.put = (req, res) => {
   let user = req.body
   // it is not allowed to change the username or the id
   delete user.username
   delete user.id
-  db.users.update(req.params.id, user, (error, userUpdated)=>{
+  classroom.users.update(req.params.id, user, (error, userUpdated)=>{
     res.status(200).send(mapUser(userUpdated))
   })
 }
@@ -67,9 +66,9 @@ exports.post = (req, res) => {
 
   user.id = shortid.generate()
   user.username = sanitize(user.username).replace(/ /g,"")
-  db.users.findByUsername(user.username, (error, dublicatUser)=>{
+  classroom.users.findByUsername(user.username, (error, dublicatUser)=>{
     if(error){
-      db.users.create(user, (error, userCreated) => {
+      classroom.users.create(user, (error, userCreated) => {
         res.status(200).send(mapUser(userCreated))
       })
     }

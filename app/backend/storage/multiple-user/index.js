@@ -13,7 +13,7 @@ const sanitize = require("../../util/sanitize-filepath")
 const generic = require("../_base_")
 const update = require("../../update")
 const {thumbnail, generateShapeIndex} = require("../../converter/thumbnail")
-const db = require('./db')
+const classroom = require('./../../classroom')
 let {token_set, token_get} = require("./token-user")
 
 let permissionsAnonym = require("./permissions-anonym")
@@ -33,7 +33,7 @@ let sheetsSharedDir = null
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
   function(username, password, cb) {
-    db.users.findByUsername(username, function(err, user) {
+    classroom.users.findByUsername(username, function(err, user) {
       if (err)   { return cb(null, false) }
       if (!user) { return cb(null, false) }
       bcrypt.compare(password, user.password)
@@ -58,7 +58,7 @@ passport.serializeUser(function(user, cb) {
 });
 
 passport.deserializeUser(function(id, cb) {
-  db.users.findById(id, function (err, user) {
+  classroom.users.findById(id, function (err, user) {
     if (err) {
       return cb(null, false)
     }
@@ -125,7 +125,7 @@ module.exports = {
 
   init: function(app, args){
 
-    db.users.init(app, args)
+    classroom.db.init(app, args)
 
     // add & configure middleware
     app.use(Session({
@@ -151,13 +151,15 @@ module.exports = {
     //
     app.post('/login', passport.authenticate('local', { failureRedirect: '/login' }), this.onLoggedIn)
     app.use('/login',  (req, res, next)=>{
-      req.session.returnTo = req.query.returnTo
+      if(req.query.returnTo) {
+        req.session.returnTo = req.query.returnTo
+      }
       next()
     },express.static(__dirname + '/../../../frontend/login'))
 
     app.get('/logout', (req, res) => {
       req.logout();
-      res.redirect( req.query.returnTo || '/')
+      res.redirect( req.query.returnTo ? `../${req.query.returnTo}/` : '/')
     })
 
     // calculate the persistence folder for the brains/sheets files
@@ -352,7 +354,7 @@ module.exports = {
   createFolder: generic.createFolder,
 
   onLoggedIn(req, res){
-    let returnTo = req.session.returnTo || '/'
+    let returnTo =  req.session.returnTo ? `../${req.session.returnTo}/` : '/'
     res.redirect(returnTo)
     makeDir(sheetsHomeDir+req.user.username)
     makeDir(brainsHomeDir+req.user.username)

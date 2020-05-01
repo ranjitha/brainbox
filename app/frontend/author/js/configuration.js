@@ -1,7 +1,7 @@
 export default {
   fileSuffix: ".sheet",
   appName: "Brainbox Author",
-  loginRedirect: "./author/",
+  loginRedirect: "author",
 
   backend: {
     shared: {

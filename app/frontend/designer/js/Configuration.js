@@ -1,7 +1,7 @@
 export default {
   fileSuffix: ".shape",
   appName: "Brainbox Designer",
-  loginRedirect: "./designer/",
+  loginRedirect: "designer",
 
   backend: {
     user: {

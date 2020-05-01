@@ -3,27 +3,19 @@ const FileSync = require('lowdb/adapters/FileSync')
 const makeDir = require('make-dir')
 const path = require('path')
 const fs = require('fs')
-const bcrypt = require("bcrypt");
-
 
 let db = null
 
-let defaultUsers = [
-  { id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role:"admin", email: 'admin@example.com' },
-  { id: "2", username: 'jack',  password: 'secret', displayName: 'Jack',  role:"user",  email: 'jack@example.com' },
-  { id: "3", username: 'jill',  password: 'secret', displayName: 'Jill',  role:"user",  email: 'jill@example.com' }
-]
-
 exports.init = async function(app, args){
-  let userDBDir  = path.join(args.folder, "users", path.sep)
-  let userDBFile = path.join(userDBDir, 'db.json')
-  let initialRun = !fs.existsSync(userDBFile)
+  let DBDir  = path.join(args.folder, "classroom", path.sep)
+  let DBFile = path.join(DBDir, 'groups.json')
+  let initialRun = !fs.existsSync(DBFile)
 
   // Ensure that the required storage folder exists
   //
-  makeDir(userDBDir)
+  makeDir(DBDir)
 
-  const adapter = new FileSync(userDBFile)
+  const adapter = new FileSync(DBFile)
   db = low(adapter)
 
   // Set some defaults (required if your JSON file is empty)
@@ -33,6 +25,7 @@ exports.init = async function(app, args){
   // setup some default users if we start the first time
   //
   if(initialRun){
+    console.log("Setting up default users for the first run")
     defaultUsers.forEach( (user) => {
       bcrypt.hash(user.password, 10, function(err, hash) {
         user.password = hash

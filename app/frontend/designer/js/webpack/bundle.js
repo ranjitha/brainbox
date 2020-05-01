@@ -1823,7 +1823,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   fileSuffix: ".shape",
   appName: "Brainbox Designer",
-  loginRedirect: "./designer/",
+  loginRedirect: "designer",
 
   backend: {
     user: {

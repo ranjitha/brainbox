@@ -2560,7 +2560,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   fileSuffix: ".brain",
   appName: "Brainbox Simulator",
-  loginRedirect: "./circuit/",
+  loginRedirect: "circuit",
 
   backend: {
 

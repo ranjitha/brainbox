@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}))
 
 // Determine the IP-Address to use for the http server
 //
-const address = require("./network")
+const address = require("./util/network")
 
 
 // check if we want to connect to an Arduino which is connected via USB

@@ -1,6 +1,6 @@
 const NodeCache = require( "node-cache" )
 const uuid = require('uuid/v4')
-const db = require('./db')
+const classroom = require('../../classroom')
 const bcrypt = require("bcrypt");
 
 const passwordResetRequestCache = new NodeCache( { stdTTL: 60*30, checkperiod: 120 } )
@@ -42,7 +42,7 @@ exports.set = (req, res)=>{
   else{
     bcrypt.hash(password, 10, function(err, hash) {
       user.password = hash
-      db.users.update(user.id, user, (error, user)=>{
+      classroom.users.update(user.id, user, (error, user)=>{
         if(error){ res.status(412); return}
         res.send("done")
       })
