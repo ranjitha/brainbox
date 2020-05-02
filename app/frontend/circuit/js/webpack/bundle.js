@@ -96,10 +96,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/frontend/_common/js/AuthorDialog.js":
-/*!*************************************************!*\
-  !*** ./app/frontend/_common/js/AuthorDialog.js ***!
-  \*************************************************/
+/***/ "./app/frontend/_common/js/AppSwitch.js":
+/*!**********************************************!*\
+  !*** ./app/frontend/_common/js/AppSwitch.js ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -110,27 +110,48 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _DesignerDialog = __webpack_require__(/*! ./DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
+
+var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Dialog = function () {
-  function Dialog() {
-    _classCallCheck(this, Dialog);
+var AppSwitch = function AppSwitch(permissions, conf) {
+  _classCallCheck(this, AppSwitch);
+
+  var appSwitchButtons = $(" \n            <label class=\"dropdown\" >\n\n                <span class=\"image-button\"  data-toggle=\"dropdown\">\n                  <img  src=\"../_common/images/toolbar_app_switch.svg\"/>\n                </span>\n\n                <ul class=\"dropdown-menu\" role=\"menu\" >\n                    <form class=\"form-horizontal\" role=\"form\">\n\n                      <label class=\"applicationSwitchSimulator image-button\">\n                        <img src=\"../_common/images/app_simulator.svg\"/>\n                        <div>Circuit<br>Simulator</div>\n                      </label>\n\n                      <label class=\"applicationSwitchAuthor image-button\" >\n                        <img src=\"../_common/images/app_lessons.svg\"/>\n                        <div>Lesson<br>Author</div>\n                      </label>\n                      \n                      <label class=\"applicationSwitchUser image-button\" >\n                        <img src=\"../_common/images/app_user.svg\"/>\n                        <div>User<br>Management</div>\n                      </label>\n                      \n                      <label class=\"applicationSwitchGroups image-button\" >\n                        <img src=\"../_common/images/app_groups.svg\"/>\n                        <div>My Groups<br>&nbsp;</div>\n                      </label>\n                      \n                    </form>\n                </ul>   \n                         \n         </span>\n    ");
+  $(".applicationSwitch").prepend(appSwitchButtons);
+
+  $(".applicationSwitchDesigner").off("click").on("click", function () {
+    _DesignerDialog2.default.show(conf);
+  });
+  $(".applicationSwitchAuthor").off("click").on("click", function () {
+    window.open("../author", "author");
+  });
+  $(".applicationSwitchSimulator").off("click").on("click", function () {
+    window.open("../circuit", "circuit");
+  });
+
+  if (permissions.featureset.usermanagement === true) {
+    $(document).on("click", ".applicationSwitchUser", function () {
+      window.open("../user", "user");
+    });
+  } else {
+    $(".applicationSwitchUser").remove();
   }
 
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf) {
-      window.open(conf.author.url, "author");
-    }
-  }]);
+  if (permissions.featureset.records === true) {
+    $(document).on("click", ".applicationSwitchGroups", function () {
+      window.open("../groups", "groups");
+    });
+  } else {
+    $(".applicationSwitchGroups").remove();
+  }
+};
 
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-exports.default = dialog;
+exports.default = AppSwitch;
 module.exports = exports["default"];
 
 /***/ }),
@@ -176,7 +197,7 @@ var AuthorPage = function () {
       if (this.token) {
         additionalParam = "&token=" + this.token;
       }
-      axios.get("../backend/global/sheet/get?filePath=" + this.file + additionalParam).then(function (response) {
+      axios.get("../api/global/sheet/get?filePath=" + this.file + additionalParam).then(function (response) {
         $(_this.containerId).html("");
         var pages = response.data.pages;
         pages.forEach(function (page, index) {
@@ -1787,45 +1808,6 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/_common/js/UserAdminDialog.js":
-/*!****************************************************!*\
-  !*** ./app/frontend/_common/js/UserAdminDialog.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Dialog = function () {
-  function Dialog() {
-    _classCallCheck(this, Dialog);
-  }
-
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf) {
-      window.open(conf.useradmin.url, "user");
-    }
-  }]);
-
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-exports.default = dialog;
-module.exports = exports["default"];
-
-/***/ }),
-
 /***/ "./app/frontend/_common/js/Userinfo.js":
 /*!*********************************************!*\
   !*** ./app/frontend/_common/js/Userinfo.js ***!
@@ -2238,18 +2220,6 @@ var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/fron
 
 var _Userinfo2 = _interopRequireDefault(_Userinfo);
 
-var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
-
-var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
-
-var _UserAdminDialog = __webpack_require__(/*! ../../_common/js/UserAdminDialog */ "./app/frontend/_common/js/UserAdminDialog.js");
-
-var _UserAdminDialog2 = _interopRequireDefault(_UserAdminDialog);
-
-var _AuthorDialog = __webpack_require__(/*! ../../_common/js/AuthorDialog */ "./app/frontend/_common/js/AuthorDialog.js");
-
-var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
-
 var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
 
 var _toast2 = _interopRequireDefault(_toast);
@@ -2298,6 +2268,10 @@ var _AuthorPage = __webpack_require__(/*! ../../_common/js/AuthorPage */ "./app/
 
 var _AuthorPage2 = _interopRequireDefault(_AuthorPage);
 
+var _AppSwitch = __webpack_require__(/*! ../../_common/js/AppSwitch */ "./app/frontend/_common/js/AppSwitch.js");
+
+var _AppSwitch2 = _interopRequireDefault(_AppSwitch);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -2329,6 +2303,7 @@ var Application = function () {
       this.addonPane = new _AddonScreen2.default(permissions);
       this.userinfo = new _Userinfo2.default(permissions, _Configuration2.default);
       this.indexPane = new _AuthorPage2.default("#home", "readme/en/circuit/Readme.sheet");
+      this.appSwitch = new _AppSwitch2.default(permissions, _Configuration2.default);
 
       this.indexPane.render();
 
@@ -2339,21 +2314,6 @@ var Application = function () {
       };
 
       this.view.getCommandStack().addEventListener(this);
-
-      $(".applicationSwitchDesigner").on("click", function () {
-        _DesignerDialog2.default.show(_Configuration2.default);
-      });
-
-      $(".applicationSwitchAuthor").on("click", function () {
-        _AuthorDialog2.default.show(_Configuration2.default);
-      });
-      if (permissions.featureset.usermanagement === true) {
-        $(document).on("click", ".applicationSwitchUser", function () {
-          _UserAdminDialog2.default.show(_Configuration2.default);
-        });
-      } else {
-        $(".applicationSwitchUser").remove();
-      }
 
       if (permissions.brains.update || permissions.brains.create) {
         $("#editorFileSave").on("click", function () {
@@ -2566,63 +2526,47 @@ exports.default = {
 
     shared: {
       get: function get(file) {
-        return "../backend/shared/brain/get?filePath=" + file;
+        return "../api/shared/brain/get?filePath=" + file;
       },
-      save: "../backend/shared/brain/save"
+      save: "../api/shared/brain/save"
     },
 
     user: {
       list: function list(path) {
-        return "../backend/user/brain/list?path=" + path;
+        return "../api/user/brain/list?path=" + path;
       },
       get: function get(file) {
-        return "../backend/user/brain/get?filePath=" + file;
+        return "../api/user/brain/get?filePath=" + file;
       },
       image: function image(file) {
-        return "../backend/user/brain/image?filePath=" + file;
+        return "../api/user/brain/image?filePath=" + file;
       },
-      delete: "../backend/user/brain/delete",
-      rename: "../backend/user/brain/rename",
-      save: "../backend/user/brain/save",
-      folder: "../backend/user/brain/folder"
+      delete: "../api/user/brain/delete",
+      rename: "../api/user/brain/rename",
+      save: "../api/user/brain/save",
+      folder: "../api/user/brain/folder"
     },
 
     global: {
       list: function list(path) {
-        return "../backend/global/brain/list?path=" + path;
+        return "../api/global/brain/list?path=" + path;
       },
       get: function get(file) {
-        return "../backend/global/brain/get?filePath=" + file;
+        return "../api/global/brain/get?filePath=" + file;
       },
       image: function image(file) {
-        return "../backend/global/brain/image?filePath=" + file;
+        return "../api/global/brain/image?filePath=" + file;
       },
-      delete: "../backend/global/brain/delete",
-      rename: "../backend/global/brain/rename",
-      save: "../backend/global/brain/save",
-      folder: "../backend/global/brain/folder"
+      delete: "../api/global/brain/delete",
+      rename: "../api/global/brain/rename",
+      save: "../api/global/brain/save",
+      folder: "../api/global/brain/folder"
     }
   },
 
-  issues: {
-    url: "dddddd"
-  },
-
-  designer: {
-    url: "../designer/"
-  },
-
-  author: {
-    url: "../author/"
-  },
-
   updates: {
-    url: "../backend/updates",
-    shapes: "../backend/updates/shapes"
-  },
-
-  useradmin: {
-    url: "../user"
+    url: "../api/updates",
+    shapes: "../api/updates/shapes"
   },
 
   shapes: {

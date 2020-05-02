@@ -125,7 +125,7 @@ module.exports = {
 
   init: function(app, args){
 
-    classroom.db.init(app, args)
+    classroom.init(app, args)
 
     // add & configure middleware
     app.use(Session({
@@ -210,27 +210,37 @@ module.exports = {
     // Rest password API
     // only an admin can create a "reset password" request right now
     //
-    let passwordRest = require("./password-rest")
+    let restPassword = require("./rest-password")
     // endpoint to generate a password reset token
-    app.post("/password/token", ensureAdminLoggedIn(), passwordRest.token_post)
+    app.post("/password/token", ensureAdminLoggedIn(), restPassword.token_post)
     // endpoint to check if the token is valid
-    app.get("/password/token/:token", passwordRest.token_get)
+    app.get("/password/token/:token", restPassword.token_get)
     // endpoint to set the password
-    app.post("/password", passwordRest.set)
+    app.post("/password", restPassword.set)
     // endpoint to serve the ui for the password reset
     app.use("/password", express.static(__dirname + '/../../../frontend/resetpwd'))
     // endpoint to check if the token is valid
 
 
-    // Usermanagement API
+    // User Management API
     //
-    let userRest = require("./user-rest")
-    app.get('/backend/admin/user',        ensureAdminLoggedIn(), userRest.list)
-    app.get('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.get)
-    app.delete('/backend/admin/user/:id', ensureAdminLoggedIn(), userRest.delete)
-    app.put('/backend/admin/user/:id',    ensureAdminLoggedIn(), userRest.put)
-    app.post('/backend/admin/user',       ensureAdminLoggedIn(), userRest.post)
-    app.get('/userinfo',                                         userRest.userinfo)
+    let restUser = require("./rest-user")
+    app.get('/api/admin/user',        ensureAdminLoggedIn(), restUser.list)
+    app.get('/api/admin/user/:id',    ensureAdminLoggedIn(), restUser.get)
+    app.delete('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.delete)
+    app.put('/api/admin/user/:id',    ensureAdminLoggedIn(), restUser.put)
+    app.post('/api/admin/user',       ensureAdminLoggedIn(), restUser.post)
+    app.get('/userinfo',                                     restUser.userinfo)
+
+
+    // Group Management API
+    // User can create groups and invite people to these groups
+    let restGroup = require("./rest-group")
+    app.get('/api/user/group',        ensureLoggedIn(), restGroup.list)
+    app.get('/api/user/group/:id',    ensureLoggedIn(), restGroup.get)
+    app.delete('/api/user/group/:id', ensureLoggedIn(), restGroup.delete)
+    app.put('/api/user/group/:id',    ensureLoggedIn(), restGroup.put)
+    app.post('/api/user/group',       ensureLoggedIn(), restGroup.post)
 
 
     // Serve the static content for the three different apps of brainbox
@@ -241,30 +251,31 @@ module.exports = {
     app.use('/circuit',  express.static(__dirname + '/../../../frontend/circuit'));
     app.use('/author',   express.static(__dirname + '/../../../frontend/author'));
     app.use('/user',     ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
-    app.use('/home', express.static(__dirname + '/../../../frontend/home'));
+    app.use('/home',     express.static(__dirname + '/../../../frontend/home'));
+    app.use('/groups',   ensureLoggedIn(), express.static(__dirname + '/../../../frontend/groups'));
 
 
     // =================================================================
     // endpoints for shared circuits / sheets
     // It is even allowed for unknown users
     // =================================================================
-    app.get('/backend/shared/sheet/get',   (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
-    app.post('/backend/shared/sheet/save', (req, res) => module.exports.writeSheet(sheetsSharedDir,  shortid.generate()+".sheet", req.body.content, res))
-    app.get('/backend/shared/brain/get',   (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
-    app.post('/backend/shared/brain/save', (req, res) => module.exports.writeBrain(brainsSharedDir,  shortid.generate()+".brain", req.body.content, res))
+    app.get('/api/shared/sheet/get',   (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
+    app.post('/api/shared/sheet/save', (req, res) => module.exports.writeSheet(sheetsSharedDir,  shortid.generate()+".sheet", req.body.content, res))
+    app.get('/api/shared/brain/get',   (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
+    app.post('/api/shared/brain/save', (req, res) => module.exports.writeBrain(brainsSharedDir,  shortid.generate()+".brain", req.body.content, res))
 
 
     // =================================================================
     // Handle user Author files
     //
     // =================================================================
-    app.get('/backend/user/sheet/list',   ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(sheetsHomeDir, req),      req.query.path, res))
-    app.get('/backend/user/sheet/get',    ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(sheetsHomeDir, req),    req.query.filePath, res))
-    app.post('/backend/user/sheet/delete',ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(sheetsHomeDir, req),     req.body.filePath, res))
-    app.post('/backend/user/sheet/rename',ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req),     req.body.from, req.body.to, res))
-    app.post('/backend/user/sheet/save',  ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req),     req.body.filePath, req.body.content, res))
-    app.post('/backend/user/sheet/folder',ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(sheetsHomeDir, req),   req.body.filePath, res))
-    app.get('/backend/user/sheet/pdf',    ensureLoggedIn(), (req, res) => {
+    app.get('/api/user/sheet/list',   ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(sheetsHomeDir, req),      req.query.path, res))
+    app.get('/api/user/sheet/get',    ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(sheetsHomeDir, req),    req.query.filePath, res))
+    app.post('/api/user/sheet/delete',ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(sheetsHomeDir, req),     req.body.filePath, res))
+    app.post('/api/user/sheet/rename',ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req),     req.body.from, req.body.to, res))
+    app.post('/api/user/sheet/save',  ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req),     req.body.filePath, req.body.content, res))
+    app.post('/api/user/sheet/folder',ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(sheetsHomeDir, req),   req.body.filePath, res))
+    app.get('/api/user/sheet/pdf',    ensureLoggedIn(), (req, res) => {
         let {render} = require("../../converter/pdf")
         let id = token_set( req.user)
         render(`http://localhost:${args.port}/author/page.html?user=${req.query.file}&token=${id}`).then(pdf => {
@@ -278,38 +289,38 @@ module.exports = {
     // Handle user brain files
     //
     // =================================================================
-    app.get('/backend/user/brain/list',    ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(brainsHomeDir, req),      req.query.path, res))
-    app.get('/backend/user/brain/get',     ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(brainsHomeDir, req),    req.query.filePath, res))
-    app.get('/backend/user/brain/image',   ensureLoggedIn(), (req, res) => module.exports.getBase64Image(userFolder(brainsHomeDir, req), req.query.filePath, res))
-    app.post('/backend/user/brain/delete', ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(brainsHomeDir, req),     req.body.filePath, res))
-    app.post('/backend/user/brain/rename', ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(brainsHomeDir, req),     req.body.from, req.body.to, res))
-    app.post('/backend/user/brain/save',   ensureLoggedIn(), (req, res) => module.exports.writeBrain(userFolder(brainsHomeDir, req),     req.body.filePath, req.body.content, res))
-    app.post('/backend/user/brain/folder', ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(brainsHomeDir, req),   req.body.filePath, res))
+    app.get('/api/user/brain/list',    ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(brainsHomeDir, req),      req.query.path, res))
+    app.get('/api/user/brain/get',     ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(brainsHomeDir, req),    req.query.filePath, res))
+    app.get('/api/user/brain/image',   ensureLoggedIn(), (req, res) => module.exports.getBase64Image(userFolder(brainsHomeDir, req), req.query.filePath, res))
+    app.post('/api/user/brain/delete', ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(brainsHomeDir, req),     req.body.filePath, res))
+    app.post('/api/user/brain/rename', ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(brainsHomeDir, req),     req.body.from, req.body.to, res))
+    app.post('/api/user/brain/save',   ensureLoggedIn(), (req, res) => module.exports.writeBrain(userFolder(brainsHomeDir, req),     req.body.filePath, req.body.content, res))
+    app.post('/api/user/brain/folder', ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(brainsHomeDir, req),   req.body.filePath, res))
 
 
     // =================================================================
     // Handle pre-installed brain files
     //
     // =================================================================
-    app.get('/backend/global/brain/list',    (req, res) => module.exports.listFiles(brainsAppDir,      req.query.path, res))
-    app.get('/backend/global/brain/get',     (req, res) => module.exports.getJSONFile(brainsAppDir,    req.query.filePath, res))
-    app.get('/backend/global/brain/image',   (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
-    app.post('/backend/global/brain/delete', ensureAdminLoggedIn(), (req, res) => module.exports.deleteFile(brainsAppDir,     req.body.filePath, res))
-    app.post('/backend/global/brain/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(brainsAppDir,     req.body.from, req.body.to, res))
-    app.post('/backend/global/brain/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeBrain(brainsAppDir,     req.body.filePath, req.body.content, res))
-    app.post('/backend/global/brain/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(brainsAppDir,   req.body.filePath, res))
+    app.get('/api/global/brain/list',    (req, res) => module.exports.listFiles(brainsAppDir,      req.query.path, res))
+    app.get('/api/global/brain/get',     (req, res) => module.exports.getJSONFile(brainsAppDir,    req.query.filePath, res))
+    app.get('/api/global/brain/image',   (req, res) => module.exports.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.post('/api/global/brain/delete', ensureAdminLoggedIn(), (req, res) => module.exports.deleteFile(brainsAppDir,     req.body.filePath, res))
+    app.post('/api/global/brain/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(brainsAppDir,     req.body.from, req.body.to, res))
+    app.post('/api/global/brain/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeBrain(brainsAppDir,     req.body.filePath, req.body.content, res))
+    app.post('/api/global/brain/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(brainsAppDir,   req.body.filePath, res))
 
     // =================================================================
     // Handle pre-installed sheet files
     //
     // =================================================================
-    app.get('/backend/global/sheet/list',    (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
-    app.get('/backend/global/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsAppDir,  req.query.filePath, res))
-    app.post('/backend/global/sheet/delete', ensureAdminLoggedIn(), (req, res) => module.exports.deleteFile(sheetsAppDir,   req.body.filePath, res))
-    app.post('/backend/global/sheet/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
-    app.post('/backend/global/sheet/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))
-    app.post('/backend/global/sheet/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(sheetsAppDir, req.body.filePath, res))
-    app.get('/backend/global/sheet/pdf',     (req, res) => {
+    app.get('/api/global/sheet/list',    (req, res) => module.exports.listFiles(sheetsAppDir,    req.query.path, res))
+    app.get('/api/global/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsAppDir,  req.query.filePath, res))
+    app.post('/api/global/sheet/delete', ensureAdminLoggedIn(), (req, res) => module.exports.deleteFile(sheetsAppDir,   req.body.filePath, res))
+    app.post('/api/global/sheet/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(sheetsAppDir,   req.body.from, req.body.to, res))
+    app.post('/api/global/sheet/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeSheet(sheetsAppDir,   req.body.filePath, req.body.content, res))
+    app.post('/api/global/sheet/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(sheetsAppDir, req.body.filePath, res))
+    app.get('/api/global/sheet/pdf',     (req, res) => {
       let {render} = require("../../converter/pdf")
       render(`http://localhost:${args.port}/author/page.html?global=${req.query.file}`).then(pdf => {
         res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
@@ -322,10 +333,10 @@ module.exports = {
     //
     // =================================================================
     app.use('/shapes/global', express.static(shapesAppDir));
-    app.get('/backend/global/shape/list',    (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
-    app.get('/backend/global/shape/get',     (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
-    app.get('/backend/global/shape/image',   (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
-    app.post('/backend/global/shape/delete', ensureAdminLoggedIn(), (req, res) => {
+    app.get('/api/global/shape/list',    (req, res) => module.exports.listFiles(shapesAppDir,      req.query.path, res))
+    app.get('/api/global/shape/get',     (req, res) => module.exports.getJSONFile(shapesAppDir,    req.query.filePath, res))
+    app.get('/api/global/shape/image',   (req, res) => module.exports.getBase64Image(shapesAppDir, req.query.filePath, res))
+    app.post('/api/global/shape/delete', ensureAdminLoggedIn(), (req, res) => {
       module.exports.deleteFile(shapesAppDir, req.body.filePath)
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".js"))
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".md"))
@@ -333,16 +344,16 @@ module.exports = {
       module.exports.deleteFile(shapesAppDir, req.body.filePath.replace(".shape",".png"), res)
       generateShapeIndex()
     })
-    app.post('/backend/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,   req.body.from, req.body.to, res))
-    app.post('/backend/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,   req.body.filePath, req.body.content, req.body.commitMessage, res))
-    app.post('/backend/global/shape/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(shapesAppDir, req.body.filePath, res))
+    app.post('/api/global/shape/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(shapesAppDir,   req.body.from, req.body.to, res))
+    app.post('/api/global/shape/save',   ensureAdminLoggedIn(), (req, res) => module.exports.writeShape(shapesAppDir,   req.body.filePath, req.body.content, req.body.commitMessage, res))
+    app.post('/api/global/shape/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(shapesAppDir, req.body.filePath, res))
 
     // =================================================================
     // Handle system update files
     //
     // =================================================================
-    app.get('/backend/updates/shapes',  ensureAdminLoggedIn(), (req, res) => update.getLatestShapeRelease(res))
-    app.post('/backend/updates/shapes', ensureAdminLoggedIn(),  async (req, res) => update.upgradeTo(shapesAppDir, req.body.url, res))
+    app.get('/api/updates/shapes',  ensureAdminLoggedIn(), (req, res) => update.getLatestShapeRelease(res))
+    app.post('/api/updates/shapes', ensureAdminLoggedIn(),  async (req, res) => update.upgradeTo(shapesAppDir, req.body.url, res))
   },
 
   listFiles: generic.listFiles,
@@ -354,6 +365,7 @@ module.exports = {
   createFolder: generic.createFolder,
 
   onLoggedIn(req, res){
+    console.log(req.session.returnTo)
     let returnTo =  req.session.returnTo ? `../${req.session.returnTo}/` : '/'
     res.redirect(returnTo)
     makeDir(sheetsHomeDir+req.user.username)

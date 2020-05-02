@@ -5,9 +5,6 @@
  * @author Andreas Herz
  */
 import Userinfo from "../../_common/js/Userinfo"
-import designerDialog from "../../_common/js/DesignerDialog"
-import userAdminDialog from "../../_common/js/UserAdminDialog"
-import authorDialog from "../../_common/js/AuthorDialog"
 import toast from "../../_common/js/toast"
 import checkElement from "../../_common/js/checkElement"
 
@@ -21,6 +18,7 @@ import fileSave from "./dialog/FileSave"
 import shareDialog from "../../_common/js/LinkShareDialog";
 import writer from "./io/Writer";
 import AuthorPage from "../../_common/js/AuthorPage";
+import AppSwitch from "../../_common/js/AppSwitch";
 let storage = require('../../_common/js/BackendStorage')(conf)
 
 
@@ -44,6 +42,7 @@ class Application {
     this.addonPane = new Addons(permissions)
     this.userinfo = new Userinfo(permissions, conf)
     this.indexPane = new AuthorPage("#home", "readme/en/circuit/Readme.sheet")
+    this.appSwitch = new AppSwitch(permissions, conf)
 
     this.indexPane.render()
 
@@ -55,21 +54,6 @@ class Application {
 
     this.view.getCommandStack().addEventListener(this)
 
-    $(".applicationSwitchDesigner").on("click", () => {
-      designerDialog.show(conf)
-    })
-
-    $(".applicationSwitchAuthor").on("click", () => {
-      authorDialog.show(conf)
-    })
-    if(permissions.featureset.usermanagement===true) {
-      $(document).on("click", ".applicationSwitchUser", () => {
-        userAdminDialog.show(conf)
-      })
-    }
-    else{
-      $(".applicationSwitchUser").remove()
-    }
 
     if(permissions.brains.update || permissions.brains.create) {
       $("#editorFileSave").on("click", () => {

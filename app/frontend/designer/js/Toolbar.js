@@ -264,62 +264,6 @@ export default class Toolbar {
       new FigureMarkdownEdit().show()
     })
 
-    let appSwitchButtons = $(` 
-         <span class="group applicationSwitch">
-            <label class="dropdown" >
-
-                <span class="image-button"  data-toggle="dropdown">
-                  <img  src="../_common/images/toolbar_app_switch.svg"/>
-                </span>
-
-                <ul class="dropdown-menu" role="menu" >
-                    <form class="form-horizontal" role="form">
-
-                      <label class="applicationSwitchSimulator image-button">
-                        <img src="../_common/images/app_simulator.svg"/>
-                        <div>Circuit<br>Simulator</div>
-                      </label>
-
-                      <label class="applicationSwitchAuthor image-button" >
-                        <img src="../_common/images/app_lessons.svg"/>
-                        <div>Lesson<br>Author</div>
-                      </label>
-                      
-                      <label class="applicationSwitchUser image-button" >
-                        <img src="../_common/images/app_user.svg"/>
-                        <div>User<br>Management</div>
-                      </label>
-
-                    </form>
-                </ul>
-            </label>
-            <label class="userinfo_toggler dropdown" >
-                  <span class="image-button" data-toggle="dropdown">
-                    <img  src="../_common/images/toolbar_user.svg"/>
-                  </span>
-
-                  <div class="dropdown-menu" role="menu" >
-                  </div>
-            </label>
-         </span>
-    `)
-    buttonGroup.append(appSwitchButtons)
-    $(document).on("click", ".applicationSwitchSimulator", () => {
-      simulatorDialog.show(conf)
-    })
-    $(document).on("click", ".applicationSwitchAuthor", () => {
-      authorDialog.show(conf)
-    })
-    if(permissions.featureset.usermanagement===true) {
-      $(document).on("click", ".applicationSwitchUser", () => {
-        userAdminDialog.show(conf)
-      })
-    }
-    else{
-      $(".applicationSwitchUser").remove()
-    }
-
-
     // enable the tooltip for all buttons
     //
     $('*[data-toggle="tooltip"]').tooltip({

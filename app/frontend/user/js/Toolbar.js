@@ -1,9 +1,5 @@
-import users from "./Users"
+import recordStore from "./Records"
 import toast from "../../_common/js/toast"
-import designerDialog from "../../_common/js/DesignerDialog"
-import simulatorDialog from "../../_common/js/SimulatorDialog"
-import authorDialog from "../../_common/js/AuthorDialog"
-import conf from "./Configuration"
 
 export default class Toolbar {
 
@@ -18,7 +14,7 @@ export default class Toolbar {
           let field = element.data("id")
           user[field] = element.val()
         })
-        users.save(user)
+        recordStore.save(user)
           .then((updatedUser) => {
             toast("Saved")
             app.view.setUser(updatedUser)
@@ -36,26 +32,17 @@ export default class Toolbar {
         let user = {
           role: "user"
         }
-        app.view.setUser(user)
+        app.view.setRecord(user)
       })
       .on("click", "#editorDelete:not(.disabled)", (event) => {
         let user = {id: $("#editor .content input[data-id='id']").val()}
-        users.delete(user).then(() => {
+        recordStore.delete(user).then(() => {
           toast("Deleted")
-          app.view.setUser({
+          app.view.setRecord({
             role: "user"
           })
           app.palette.update()
         })
-      })
-      .on("click", ".applicationSwitchSimulator", () => {
-        simulatorDialog.show(conf)
-      })
-      .on("click", ".applicationSwitchAuthor", () => {
-        authorDialog.show(conf)
-      })
-      .on("click", ".applicationSwitchDesigner", () => {
-        designerDialog.show(conf)
       })
 
   }

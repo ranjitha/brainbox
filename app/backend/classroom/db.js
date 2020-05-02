@@ -9,33 +9,34 @@ const bcrypt = require("bcrypt")
 let db = null
 
 let defaultUsers = [
-  { id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role:"admin", email: 'admin@example.com' },
-  { id: "2", username: 'jack',  password: 'secret', displayName: 'Jack',  role:"user",  email: 'jack@example.com' },
-  { id: "3", username: 'jill',  password: 'secret', displayName: 'Jill',  role:"user",  email: 'jill@example.com' }
+  {id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role: "admin", email: 'admin@example.com'},
+  {id: "2", username: 'jack', password: 'secret', displayName: 'Jack', role: "user", email: 'jack@example.com'},
+  {id: "3", username: 'jill', password: 'secret', displayName: 'Jill', role: "user", email: 'jill@example.com'}
 ]
 
-exports.init = async function(app, args){
-  let DBDir  = path.join(args.folder, "classroom", path.sep)
-  let DBFile = path.join(DBDir, 'db.json')
-  let initialRun = !fs.existsSync(DBFile)
+exports.init = async function (app, args) {
+  let dbDir = path.join(args.folder, "classroom", path.sep)
+  let dbFile = path.join(dbDir, 'db.json')
+  let initialRun = !fs.existsSync(dbFile)
 
   // Ensure that the required storage folder exists
   //
-  makeDir(DBDir)
+  makeDir(dbDir)
 
-  const adapter = new FileSync(DBFile)
+  const adapter = new FileSync(dbFile)
   db = low(adapter)
 
   // Set some defaults (required if your JSON file is empty)
-  db.defaults({ users: [] })
+  //
+  db.defaults({users: [], groups: []})
     .write()
 
   // setup some default users if we start the first time
   //
-  if(initialRun){
+  if (initialRun) {
     console.log("Setting up default users for the first run")
-    defaultUsers.forEach( (user) => {
-      bcrypt.hash(user.password, 10, function(err, hash) {
+    defaultUsers.forEach((user) => {
+      bcrypt.hash(user.password, 10, function (err, hash) {
         user.password = hash
         db.get("users")
           .push(user)
@@ -45,6 +46,6 @@ exports.init = async function(app, args){
   }
 }
 
-exports.db = function (){
+exports.db = function () {
   return db
 }

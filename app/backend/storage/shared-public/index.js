@@ -73,35 +73,35 @@ module.exports = {
     // Handle Sheet files
     //
     // =================================================================
-    app.get('/backend/user/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
-    app.post('/backend/user/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,      req.body.filePath, req.body.content, res))
+    app.get('/api/user/sheet/get',     (req, res) => module.exports.getJSONFile(sheetsHomeDir,    req.query.filePath, res))
+    app.post('/api/user/sheet/save',   (req, res) => module.exports.writeSheet(sheetsHomeDir,      req.body.filePath, req.body.content, res))
 
 
     // =================================================================
     // Handle brain files
     //
     // =================================================================
-    app.get('/backend/user/brain/get',     (req, res) => module.exports.getJSONFile(brainsHomeDir,    req.query.filePath, res))
-    app.get('/backend/user/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
-    app.post('/backend/user/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
+    app.get('/api/user/brain/get',     (req, res) => module.exports.getJSONFile(brainsHomeDir,    req.query.filePath, res))
+    app.get('/api/user/brain/image',   (req, res) => module.exports.getBase64Image(brainsHomeDir, req.query.filePath, res))
+    app.post('/api/user/brain/save',   (req, res) => module.exports.writeBrain(brainsHomeDir,      req.body.filePath, req.body.content, res))
 
 
     // =================================================================
     // Handle pre-installed brain files
     // (processed by the "_base_" filesystem based implementation
     // =================================================================
-    app.get('/backend/global/brain/list',  (req, res) => _base_.listFiles(brainsAppDir, req.query.path, res))
-    app.get('/backend/global/brain/get',   (req, res) => _base_.getJSONFile(brainsAppDir, req.query.filePath, res))
-    app.get('/backend/global/brain/image', (req, res) => _base_.getBase64Image(brainsAppDir, req.query.filePath, res))
+    app.get('/api/global/brain/list',  (req, res) => _base_.listFiles(brainsAppDir, req.query.path, res))
+    app.get('/api/global/brain/get',   (req, res) => _base_.getJSONFile(brainsAppDir, req.query.filePath, res))
+    app.get('/api/global/brain/image', (req, res) => _base_.getBase64Image(brainsAppDir, req.query.filePath, res))
 
 
     // =================================================================
     // Handle pre-installed sheet files
     // (processed by the "_base_" filesystem based implementation
     // =================================================================
-    app.get('/backend/global/sheet/list',  (req, res) => _base_.listFiles(sheetsAppDir, req.query.path, res))
-    app.get('/backend/global/sheet/get',   (req, res) => _base_.getJSONFile(sheetsAppDir, req.query.filePath, res))
-    app.get('/backend/global/sheet/image', (req, res) => _base_.getBase64Image(sheetsAppDir, req.query.filePath, res))
+    app.get('/api/global/sheet/list',  (req, res) => _base_.listFiles(sheetsAppDir, req.query.path, res))
+    app.get('/api/global/sheet/get',   (req, res) => _base_.getJSONFile(sheetsAppDir, req.query.filePath, res))
+    app.get('/api/global/sheet/image', (req, res) => _base_.getBase64Image(sheetsAppDir, req.query.filePath, res))
 
 
     // =================================================================
@@ -109,9 +109,9 @@ module.exports = {
     // (processed by the "_base_" filesystem based implementation
     // =================================================================
     app.use('/shapes/global', express.static(shapeAppDir));
-    app.get('/backend/global/shape/list',  (req, res) => _base_.listFiles(shapeAppDir, req.query.path, res))
-    app.get('/backend/global/shape/get',   (req, res) => _base_.getJSONFile(shapeAppDir, req.query.filePath, res))
-    app.get('/backend/global/shape/image', (req, res) => _base_.getBase64Image(shapeAppDir, req.query.filePath, res))
+    app.get('/api/global/shape/list',  (req, res) => _base_.listFiles(shapeAppDir, req.query.path, res))
+    app.get('/api/global/shape/get',   (req, res) => _base_.getJSONFile(shapeAppDir, req.query.filePath, res))
+    app.get('/api/global/shape/image', (req, res) => _base_.getBase64Image(shapeAppDir, req.query.filePath, res))
   },
 
 

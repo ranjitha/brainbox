@@ -16,7 +16,7 @@ export default class AuthorPage {
     if(this.token){
       additionalParam = "&token="+this.token
     }
-    axios.get(`../backend/global/sheet/get?filePath=${this.file}${additionalParam}`)
+    axios.get(`../api/global/sheet/get?filePath=${this.file}${additionalParam}`)
       .then((response => {
         $(this.containerId).html("")
         let pages = response.data.pages

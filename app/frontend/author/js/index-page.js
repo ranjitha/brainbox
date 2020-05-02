@@ -45,7 +45,7 @@ $(window).load(function () {
   let token = getParam("token")
   let globalSheet = getParam("global")
   let userSheet = getParam("user")
-  let url = userSheet ? `../backend/user/sheet/get?filePath=${userSheet}&token=${token}` : `../backend/global/sheet/get?filePath=${globalSheet}&token=${token}`
+  let url = userSheet ? `../api/user/sheet/get?filePath=${userSheet}&token=${token}` : `../api/global/sheet/get?filePath=${globalSheet}&token=${token}`
 
   axios.get(url)
     .then((response => {

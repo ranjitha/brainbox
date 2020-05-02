@@ -5,27 +5,27 @@ export default {
 
   backend: {
     shared: {
-      get:    file  => `../backend/shared/sheet/get?filePath=${file}`,
-      save:            `../backend/shared/sheet/save`,
+      get:    file  => `../api/shared/sheet/get?filePath=${file}`,
+      save:            `../api/shared/sheet/save`,
     },
     user: {
-      list:   path  => `../backend/user/sheet/list?path=${path}`,
-      get:    file  => `../backend/user/sheet/get?filePath=${file}`,
+      list:   path  => `../api/user/sheet/list?path=${path}`,
+      get:    file  => `../api/user/sheet/get?filePath=${file}`,
       image:  file  => `../_common/images/files_markdown.svg`,
-      delete:          `../backend/user/sheet/delete`,
-      rename:          `../backend/user/sheet/rename`,
-      save:            `../backend/user/sheet/save`,
-      folder:          `../backend/user/sheet/folder`
+      delete:          `../api/user/sheet/delete`,
+      rename:          `../api/user/sheet/rename`,
+      save:            `../api/user/sheet/save`,
+      folder:          `../api/user/sheet/folder`
     },
 
     global:{
-      list:   path  => `../backend/global/sheet/list?path=${path}`,
-      get:    file  => `../backend/global/sheet/get?filePath=${file}`,
+      list:   path  => `../api/global/sheet/list?path=${path}`,
+      get:    file  => `../api/global/sheet/get?filePath=${file}`,
       image:  file  => `../_common/images/files_markdown.svg`,
-      delete:          `../backend/global/sheet/delete`,
-      rename:          `../backend/global/sheet/rename`,
-      save:            `../backend/global/sheet/save`,
-      folder:          `../backend/global/sheet/folder`
+      delete:          `../api/global/sheet/delete`,
+      rename:          `../api/global/sheet/rename`,
+      save:            `../api/global/sheet/save`,
+      folder:          `../api/global/sheet/folder`
     }
   },
 
@@ -37,18 +37,6 @@ export default {
   color: {
     high: "#C21B7A",
     low:  "#0078F2"
-  },
-
-  useradmin: {
-    url: "../user"
-  },
-
-  designer: {
-    url: "../designer/"
-  },
-
-  simulator: {
-    url: "../circuit/"
   }
 
 }

@@ -96,10 +96,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ({
 
-/***/ "./app/frontend/_common/js/AuthorDialog.js":
-/*!*************************************************!*\
-  !*** ./app/frontend/_common/js/AuthorDialog.js ***!
-  \*************************************************/
+/***/ "./app/frontend/_common/js/AppSwitch.js":
+/*!**********************************************!*\
+  !*** ./app/frontend/_common/js/AppSwitch.js ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -110,27 +110,48 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _DesignerDialog = __webpack_require__(/*! ./DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
+
+var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Dialog = function () {
-  function Dialog() {
-    _classCallCheck(this, Dialog);
+var AppSwitch = function AppSwitch(permissions, conf) {
+  _classCallCheck(this, AppSwitch);
+
+  var appSwitchButtons = $(" \n            <label class=\"dropdown\" >\n\n                <span class=\"image-button\"  data-toggle=\"dropdown\">\n                  <img  src=\"../_common/images/toolbar_app_switch.svg\"/>\n                </span>\n\n                <ul class=\"dropdown-menu\" role=\"menu\" >\n                    <form class=\"form-horizontal\" role=\"form\">\n\n                      <label class=\"applicationSwitchSimulator image-button\">\n                        <img src=\"../_common/images/app_simulator.svg\"/>\n                        <div>Circuit<br>Simulator</div>\n                      </label>\n\n                      <label class=\"applicationSwitchAuthor image-button\" >\n                        <img src=\"../_common/images/app_lessons.svg\"/>\n                        <div>Lesson<br>Author</div>\n                      </label>\n                      \n                      <label class=\"applicationSwitchUser image-button\" >\n                        <img src=\"../_common/images/app_user.svg\"/>\n                        <div>User<br>Management</div>\n                      </label>\n                      \n                      <label class=\"applicationSwitchGroups image-button\" >\n                        <img src=\"../_common/images/app_groups.svg\"/>\n                        <div>My Groups<br>&nbsp;</div>\n                      </label>\n                      \n                    </form>\n                </ul>   \n                         \n         </span>\n    ");
+  $(".applicationSwitch").prepend(appSwitchButtons);
+
+  $(".applicationSwitchDesigner").off("click").on("click", function () {
+    _DesignerDialog2.default.show(conf);
+  });
+  $(".applicationSwitchAuthor").off("click").on("click", function () {
+    window.open("../author", "author");
+  });
+  $(".applicationSwitchSimulator").off("click").on("click", function () {
+    window.open("../circuit", "circuit");
+  });
+
+  if (permissions.featureset.usermanagement === true) {
+    $(document).on("click", ".applicationSwitchUser", function () {
+      window.open("../user", "user");
+    });
+  } else {
+    $(".applicationSwitchUser").remove();
   }
 
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf) {
-      window.open(conf.author.url, "author");
-    }
-  }]);
+  if (permissions.featureset.records === true) {
+    $(document).on("click", ".applicationSwitchGroups", function () {
+      window.open("../groups", "groups");
+    });
+  } else {
+    $(".applicationSwitchGroups").remove();
+  }
+};
 
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-exports.default = dialog;
+exports.default = AppSwitch;
 module.exports = exports["default"];
 
 /***/ }),
@@ -171,45 +192,6 @@ var Dialog = function () {
         var _pathToDesign = conf.designer.url;
         window.open(_pathToDesign, "designer");
       }
-    }
-  }]);
-
-  return Dialog;
-}();
-
-var dialog = new Dialog();
-exports.default = dialog;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/_common/js/SimulatorDialog.js":
-/*!****************************************************!*\
-  !*** ./app/frontend/_common/js/SimulatorDialog.js ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Dialog = function () {
-  function Dialog() {
-    _classCallCheck(this, Dialog);
-  }
-
-  _createClass(Dialog, [{
-    key: "show",
-    value: function show(conf) {
-      window.open(conf.simulator.url, "circuit");
     }
   }]);
 
@@ -558,12 +540,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _AppSwitch = __webpack_require__(/*! ../../_common/js/AppSwitch */ "./app/frontend/_common/js/AppSwitch.js");
+
+var _AppSwitch2 = _interopRequireDefault(_AppSwitch);
+
+var _Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
+
+var _Userinfo2 = _interopRequireDefault(_Userinfo);
+
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/user/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Palette = __webpack_require__(/*! ./Palette */ "./app/frontend/user/js/Palette.js");
 var View = __webpack_require__(/*! ./View */ "./app/frontend/user/js/View.js");
 var Toolbar = __webpack_require__(/*! ./Toolbar */ "./app/frontend/user/js/Toolbar.js");
-var Userinfo = __webpack_require__(/*! ../../_common/js/Userinfo */ "./app/frontend/_common/js/Userinfo.js");
 
 var App = function () {
   function App() {
@@ -576,7 +571,8 @@ var App = function () {
       this.palette = new Palette(this);
       this.view = new View(this);
       this.toolbar = new Toolbar(this);
-      this.userinfo = new Userinfo(permissions, conf);
+      this.userinfo = new _Userinfo2.default(permissions, _Configuration2.default);
+      this.appSwitch = new _AppSwitch2.default(permissions, _Configuration2.default);
     }
   }]);
 
@@ -604,54 +600,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   appName: "Brainbox Admin",
-  loginRedirect: "./user/",
-
-  backend: {
-    admin: {
-      list: function list(path) {
-        return "../backend/user/sheet/list?path=" + path;
-      },
-      get: function get(file) {
-        return "../backend/user/sheet/get?filePath=" + file;
-      },
-      image: function image(file) {
-        return "../_common/images/files_markdown.svg";
-      },
-      delete: "../backend/user/sheet/delete",
-      rename: "../backend/user/sheet/rename",
-      save: "../backend/user/sheet/save",
-      folder: "../backend/user/sheet/folder"
-    },
-
-    global: {
-      list: function list(path) {
-        return "../backend/global/sheet/list?path=" + path;
-      },
-      get: function get(file) {
-        return "../backend/global/sheet/get?filePath=" + file;
-      },
-      image: function image(file) {
-        return "../_common/images/files_markdown.svg";
-      },
-      delete: "../backend/global/sheet/delete",
-      rename: "../backend/global/sheet/rename",
-      save: "../backend/global/sheet/save",
-      folder: "../backend/global/sheet/folder"
-    }
-  },
-
-  designer: {
-    url: "../designer"
-  },
-
-  simulator: {
-    url: "../circuit/"
-  },
-
-  author: {
-    url: "../author/"
-  }
-
+  loginRedirect: "user"
 };
 module.exports = exports["default"];
 
@@ -681,7 +630,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var userDb = __webpack_require__(/*! ./Users */ "./app/frontend/user/js/Users.js");
+var recordStore = __webpack_require__(/*! ./Records */ "./app/frontend/user/js/Records.js");
 
 var Palette = function () {
   function Palette(app) {
@@ -690,10 +639,10 @@ var Palette = function () {
     $(document).on("click", "#paletteElements .paletteItem", function (event) {
       var element = $(event.target);
       var id = "" + element.data("id");
-      userDb.findById(id).then(function (user) {
+      recordStore.findById(id).then(function (user) {
         $(".paletteItem").removeClass("selected");
         element.addClass("selected");
-        app.view.setUser(user);
+        app.view.setRecord(user);
       });
     });
 
@@ -703,10 +652,10 @@ var Palette = function () {
   _createClass(Palette, [{
     key: "update",
     value: function update() {
-      userDb.list().then(function (users) {
-        var tmpl = _hogan2.default.compile($("#userlistTemplate").html());
+      recordStore.list().then(function (records) {
+        var tmpl = _hogan2.default.compile($("#recordsTemplate").html());
         var html = tmpl.render({
-          users: users
+          records: records
         });
         $("#paletteElements").html(html);
       });
@@ -721,102 +670,10 @@ module.exports = exports["default"];
 
 /***/ }),
 
-/***/ "./app/frontend/user/js/Toolbar.js":
+/***/ "./app/frontend/user/js/Records.js":
 /*!*****************************************!*\
-  !*** ./app/frontend/user/js/Toolbar.js ***!
+  !*** ./app/frontend/user/js/Records.js ***!
   \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Users = __webpack_require__(/*! ./Users */ "./app/frontend/user/js/Users.js");
-
-var _Users2 = _interopRequireDefault(_Users);
-
-var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
-
-var _toast2 = _interopRequireDefault(_toast);
-
-var _DesignerDialog = __webpack_require__(/*! ../../_common/js/DesignerDialog */ "./app/frontend/_common/js/DesignerDialog.js");
-
-var _DesignerDialog2 = _interopRequireDefault(_DesignerDialog);
-
-var _SimulatorDialog = __webpack_require__(/*! ../../_common/js/SimulatorDialog */ "./app/frontend/_common/js/SimulatorDialog.js");
-
-var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
-
-var _AuthorDialog = __webpack_require__(/*! ../../_common/js/AuthorDialog */ "./app/frontend/_common/js/AuthorDialog.js");
-
-var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
-
-var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/user/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Toolbar = function Toolbar(app) {
-  _classCallCheck(this, Toolbar);
-
-  $(document).on("click", "#editorFileSave:not(.disabled)", function (event) {
-    $("small.error").removeClass("error");
-    var user = {};
-    $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
-      var element = $(e);
-      var field = element.data("id");
-      user[field] = element.val();
-    });
-    _Users2.default.save(user).then(function (updatedUser) {
-      (0, _toast2.default)("Saved");
-      app.view.setUser(updatedUser);
-      app.palette.update();
-    }).catch(function (error) {
-      var status = error.response.status;
-      if (status === 400) {
-        var field = error.response.data;
-        $("#" + field + "Help").html("required").addClass("error");
-      }
-    });
-  }).on("click", "#editorAdd:not(.disabled)", function (event) {
-    var user = {
-      role: "user"
-    };
-    app.view.setUser(user);
-  }).on("click", "#editorDelete:not(.disabled)", function (event) {
-    var user = { id: $("#editor .content input[data-id='id']").val() };
-    _Users2.default.delete(user).then(function () {
-      (0, _toast2.default)("Deleted");
-      app.view.setUser({
-        role: "user"
-      });
-      app.palette.update();
-    });
-  }).on("click", ".applicationSwitchSimulator", function () {
-    _SimulatorDialog2.default.show(_Configuration2.default);
-  }).on("click", ".applicationSwitchAuthor", function () {
-    _AuthorDialog2.default.show(_Configuration2.default);
-  }).on("click", ".applicationSwitchDesigner", function () {
-    _DesignerDialog2.default.show(_Configuration2.default);
-  });
-};
-
-exports.default = Toolbar;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/user/js/Users.js":
-/*!***************************************!*\
-  !*** ./app/frontend/user/js/Users.js ***!
-  \***************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -837,19 +694,22 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Users = function () {
-  function Users() {
-    _classCallCheck(this, Users);
+var restEndpoint = "../api/admin/user/";
+var sortField = "username";
 
-    this.users = null;
+var RecordStore = function () {
+  function RecordStore() {
+    _classCallCheck(this, RecordStore);
+
+    this.records = null;
   }
 
-  _createClass(Users, [{
+  _createClass(RecordStore, [{
     key: "findById",
     value: function findById(id) {
-      return this.list().then(function (users) {
-        var candidates = users.filter(function (user) {
-          return user.id === id;
+      return this.list().then(function (records) {
+        var candidates = records.filter(function (record) {
+          return record.id === id;
         });
         if (candidates.length > 0) {
           return candidates[0];
@@ -862,36 +722,36 @@ var Users = function () {
     value: function list() {
       var _this = this;
 
-      if (this.users !== null) {
-        return Promise.resolve(this.users);
+      if (this.records !== null) {
+        return Promise.resolve(this.records);
       }
 
-      return _axios2.default.get("../backend/admin/user").then(function (response) {
-        _this.users = response.data;
-        _this.users = _this.users.sort(function (a, b) {
-          return a.username.localeCompare(b.username);
+      return _axios2.default.get(restEndpoint).then(function (response) {
+        _this.records = response.data;
+        _this.records = _this.records.sort(function (a, b) {
+          return a[sortField].localeCompare(b[sortField]);
         });
-        return _this.users;
+        return _this.records;
       });
     }
   }, {
     key: "save",
-    value: function save(user) {
+    value: function save(record) {
       var _this2 = this;
 
-      if (user.id) {
-        return _axios2.default.put("../backend/admin/user/" + user.id, user).then(function (response) {
-          var internalUser = _this2.users.filter(function (u) {
-            return u.id === user.id;
+      if (record.id) {
+        return _axios2.default.put(restEndpoint + record.id, record).then(function (response) {
+          var internalRecord = _this2.records.filter(function (u) {
+            return u.id === record.id;
           })[0];
-          Object.assign(internalUser, response.data);
-          return internalUser;
+          Object.assign(internalRecord, response.data);
+          return internalRecord;
         });
       } else {
-        return _axios2.default.post("../backend/admin/user/", user).then(function (response) {
-          _this2.users.push(response.data);
-          _this2.users = _this2.users.sort(function (a, b) {
-            return a.username.localeCompare(b.username);
+        return _axios2.default.post(restEndpoint, record).then(function (response) {
+          _this2.records.push(response.data);
+          _this2.records = _this2.records.sort(function (a, b) {
+            return a[sortField].localeCompare(b[sortField]);
           });
           return response.data;
         });
@@ -899,23 +759,93 @@ var Users = function () {
     }
   }, {
     key: "delete",
-    value: function _delete(user) {
+    value: function _delete(record) {
       var _this3 = this;
 
-      return _axios2.default.delete("../backend/admin/user/" + user.id).then(function (response) {
-        _this3.users = _this3.users.filter(function (u) {
-          return u.id !== user.id;
+      return _axios2.default.delete(restEndpoint + record.id).then(function (response) {
+        _this3.records = _this3.records.filter(function (u) {
+          return u.id !== record.id;
         });
         return response.data;
       });
     }
   }]);
 
-  return Users;
+  return RecordStore;
 }();
 
-var users = new Users();
-exports.default = users;
+var store = new RecordStore();
+exports.default = store;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/user/js/Toolbar.js":
+/*!*****************************************!*\
+  !*** ./app/frontend/user/js/Toolbar.js ***!
+  \*****************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Records = __webpack_require__(/*! ./Records */ "./app/frontend/user/js/Records.js");
+
+var _Records2 = _interopRequireDefault(_Records);
+
+var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
+
+var _toast2 = _interopRequireDefault(_toast);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Toolbar = function Toolbar(app) {
+  _classCallCheck(this, Toolbar);
+
+  $(document).on("click", "#editorFileSave:not(.disabled)", function (event) {
+    $("small.error").removeClass("error");
+    var user = {};
+    $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
+      var element = $(e);
+      var field = element.data("id");
+      user[field] = element.val();
+    });
+    _Records2.default.save(user).then(function (updatedUser) {
+      (0, _toast2.default)("Saved");
+      app.view.setUser(updatedUser);
+      app.palette.update();
+    }).catch(function (error) {
+      var status = error.response.status;
+      if (status === 400) {
+        var field = error.response.data;
+        $("#" + field + "Help").html("required").addClass("error");
+      }
+    });
+  }).on("click", "#editorAdd:not(.disabled)", function (event) {
+    var user = {
+      role: "user"
+    };
+    app.view.setRecord(user);
+  }).on("click", "#editorDelete:not(.disabled)", function (event) {
+    var user = { id: $("#editor .content input[data-id='id']").val() };
+    _Records2.default.delete(user).then(function () {
+      (0, _toast2.default)("Deleted");
+      app.view.setRecord({
+        role: "user"
+      });
+      app.palette.update();
+    });
+  });
+};
+
+exports.default = Toolbar;
 module.exports = exports["default"];
 
 /***/ }),
@@ -953,53 +883,52 @@ var View = function () {
     _classCallCheck(this, View);
 
     this.app = app;
+    $(document).off("click", "#passwordReset").on("click", "#passwordReset", function () {
+      var record = {};
+      $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
+        var element = $(e);
+        var field = element.data("id");
+        record[field] = element.val();
+      });
+      _axios2.default.post("../password/token", record).then(function (response) {
+        var email = $("#userEmail").val();
+        var currentUrl = window.location.href.split('?')[0];
+        var segments = currentUrl.split("/");
+        segments.pop();
+        if (currentUrl.endsWith("/")) {
+          segments.pop();
+        }
+        var url = segments.join("/");
+        var username = $("#userDisplayName").val();
+        var subject = encodeURIComponent('Password reset request for BrainBox');
+        var emailBody = encodeURIComponent("Hi " + username + ", \n\n\nYou recently requested to reset your password for your BrainBox \naccount. Click the link to reset it.\n\n" + url + "/password?token=" + response.data + "\n\nIf you did not request a password reset, please ignore it or reply to let us know.\nThis password reset link is only valid for the next 30 minutes.\n\nThanks \n\n\nYou Brainbox Administrator\n");
+        window.open("mailto:" + email + "?subject=" + subject + "&body=" + emailBody);
+      });
+    });
   }
 
   _createClass(View, [{
-    key: "setUser",
-    value: function setUser(user) {
-      if (user === null) {
+    key: "setRecord",
+    value: function setRecord(record) {
+      if (record === null) {
         $("#editorFileSave").addClass("disabled");
         $("#editorDelete").addClass("disabled");
       } else {
         $("#editorFileSave").removeClass("disabled");
 
-        if (user.id && user.id !== this.app.userinfo.getUser().id) {
+        if (record.id && record.id !== this.app.userinfo.getUser().id) {
           $("#editorDelete").removeClass("disabled");
         } else {
           $("#editorDelete").addClass("disabled");
         }
       }
 
-      $(document).on("click", "#passwordReset", function () {
-        var user = {};
-        $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
-          var element = $(e);
-          var field = element.data("id");
-          user[field] = element.val();
-        });
-        _axios2.default.post("../password/token", user).then(function (response) {
-          var email = $("#userEmail").val();
-          var currentUrl = window.location.href.split('?')[0];
-          var segments = currentUrl.split("/");
-          segments.pop();
-          if (currentUrl.endsWith("/")) {
-            segments.pop();
-          }
-          var url = segments.join("/");
-          var username = $("#userDisplayName").val();
-          var subject = encodeURIComponent('Password reset request for BrainBox');
-          var emailBody = encodeURIComponent("Hi " + username + ", \n\n\nYou recently requested to reset your password for your BrainBox \naccount. Click the link to reset it.\n\n" + url + "/password?token=" + response.data + "\n\nIf you did not request a password reset, please ignore it or reply to let us know.\nThis password reset link is only valid for the next 30 minutes.\n\nThanks \n\n\nYou Brainbox Administrator\n");
-          window.open("mailto:" + email + "?subject=" + subject + "&body=" + emailBody);
-        });
-      });
-
-      var tmpl = _hogan2.default.compile($("#userformTemplate").html());
+      var tmpl = _hogan2.default.compile($("#recordTemplate").html());
       var html = tmpl.render({
-        user: user,
+        record: record,
         options: [{ val: "admin", label: 'Administrator' }, { val: "user", label: 'User' }],
         selected: function selected() {
-          if (this.val === user.role) return "selected";
+          if (this.val === record.role) return "selected";
           return "";
         }
       });

@@ -16,50 +16,34 @@ export default {
   backend: {
 
     shared: {
-      get:    file  => `../backend/shared/brain/get?filePath=${file}`,
-      save:            `../backend/shared/brain/save`,
+      get:    file  => `../api/shared/brain/get?filePath=${file}`,
+      save:            `../api/shared/brain/save`,
     },
 
     user: {
-      list:   path => `../backend/user/brain/list?path=${path}`,
-      get:    file => `../backend/user/brain/get?filePath=${file}`,
-      image:  file => `../backend/user/brain/image?filePath=${file}`,
-      delete:         `../backend/user/brain/delete`,
-      rename:         `../backend/user/brain/rename`,
-      save:           `../backend/user/brain/save`,
-      folder:         `../backend/user/brain/folder`
+      list:   path => `../api/user/brain/list?path=${path}`,
+      get:    file => `../api/user/brain/get?filePath=${file}`,
+      image:  file => `../api/user/brain/image?filePath=${file}`,
+      delete:         `../api/user/brain/delete`,
+      rename:         `../api/user/brain/rename`,
+      save:           `../api/user/brain/save`,
+      folder:         `../api/user/brain/folder`
     },
 
     global:{
-      list:   path => `../backend/global/brain/list?path=${path}`,
-      get:    file => `../backend/global/brain/get?filePath=${file}`,
-      image:  file => `../backend/global/brain/image?filePath=${file}`,
-      delete:         `../backend/global/brain/delete`,
-      rename:         `../backend/global/brain/rename`,
-      save:           `../backend/global/brain/save`,
-      folder:         `../backend/global/brain/folder`
+      list:   path => `../api/global/brain/list?path=${path}`,
+      get:    file => `../api/global/brain/get?filePath=${file}`,
+      image:  file => `../api/global/brain/image?filePath=${file}`,
+      delete:         `../api/global/brain/delete`,
+      rename:         `../api/global/brain/rename`,
+      save:           `../api/global/brain/save`,
+      folder:         `../api/global/brain/folder`
     }
   },
 
-  issues: {
-    url:"dddddd"
-  },
-
-  designer: {
-    url: "../designer/"
-  },
-
-  author: {
-    url: "../author/"
-  },
-
   updates: {
-    url: "../backend/updates",
-    shapes: "../backend/updates/shapes"
-  },
-
-  useradmin: {
-    url: "../user"
+    url: "../api/updates",
+    shapes: "../api/updates/shapes"
   },
 
   shapes: {

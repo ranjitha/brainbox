@@ -5,7 +5,8 @@
     "simulator": true,
     "designer": true,
     "author": true,
-    "usermanagement": false
+    "usermanagement": false,
+    "records": false
   },
   "updates": {
     "update": false,

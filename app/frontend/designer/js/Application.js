@@ -1,6 +1,7 @@
 import Files from "../../_common/js/FilesScreen"
-import Userinfo from "../../_common/js/Userinfo";
-import AuthorPage from "../../_common/js/AuthorPage";
+import Userinfo from "../../_common/js/Userinfo"
+import AuthorPage from "../../_common/js/AuthorPage"
+import AppSwitch from "../../_common/js/AppSwitch"
 import toast from "../../_common/js/toast"
 
 import View from "./View"
@@ -87,6 +88,7 @@ class Application {
     this.userinfo = new Userinfo(permissions, conf)
     this.filePane = new Files(this, conf, permissions.shapes)
     this.indexPane = new AuthorPage("#home", "readme/en/designer/Readme.sheet")
+    this.appSwitch = new AppSwitch(permissions, conf)
 
     this.indexPane.render()
     this.view.installEditPolicy(new SelectionToolPolicy())

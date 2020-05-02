@@ -3,8 +3,11 @@ const sanitize = require("sanitize-filename")
 
 const classroom = require('../../classroom')
 
+// dont't expose passwords or other sensible data to the outer world
 function mapUser(user){
-  // dont't expose passwords or other sensible data to the outer world
+  if(Array.isArray(user) ){
+    return user.map( data =>  mapUser(data) )
+  }
   return {
     id: user.id,
     username: user.username,

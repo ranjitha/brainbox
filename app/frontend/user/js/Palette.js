@@ -1,6 +1,6 @@
 import Hogan from "hogan.js";
 
-let userDb = require("./Users")
+let recordStore = require("./Records")
 
 export default class Palette {
 
@@ -8,10 +8,10 @@ export default class Palette {
     $(document).on("click", "#paletteElements .paletteItem", (event) => {
       let element = $(event.target)
       let id = "" + element.data("id")
-      userDb.findById(id).then( (user)=>{
+      recordStore.findById(id).then( (user)=>{
         $(".paletteItem").removeClass("selected")
         element.addClass("selected")
-        app.view.setUser(user)
+        app.view.setRecord(user)
       })
     })
 
@@ -19,10 +19,10 @@ export default class Palette {
   }
 
   update(){
-    userDb.list().then((users) => {
-      let tmpl = Hogan.compile($("#userlistTemplate").html());
+    recordStore.list().then((records) => {
+      let tmpl = Hogan.compile($("#recordsTemplate").html());
       let html = tmpl.render({
-        users: users
+        records: records
       })
       $("#paletteElements").html(html)
     })

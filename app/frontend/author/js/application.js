@@ -2,7 +2,8 @@ import shareDialog from "../../_common/js/LinkShareDialog"
 import AuthorPage from "../../_common/js/AuthorPage"
 import Files from "../../_common/js/FilesScreen"
 import Userinfo from "../../_common/js/Userinfo"
-import toast from "../../_common/js/toast";
+import AppSwitch from "../../_common/js/AppSwitch"
+import toast from "../../_common/js/toast"
 
 import Toolbar from "./toolbar"
 import View from "./view"
@@ -41,6 +42,8 @@ class Application {
     this.indexPane = new AuthorPage("#home", "/readme/en/author/README.sheet")
     this.toolbar = new Toolbar(this, this.view, ".toolbar", permissions)
     this.userinfo = new Userinfo(permissions, conf)
+    this.appSwitch = new AppSwitch(permissions, conf)
+
     commandStack.on("change", this)
 
     this.indexPane.render()

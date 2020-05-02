@@ -1,83 +1,94 @@
 let db = require("./db").db
 
-exports.findById = function(id, cb) {
-  process.nextTick(function() {
-    let user = db()
-      .get('users')
-      .find({ id })
+
+let type = "user"
+let entity = "users"
+
+exports.findById = function (id, cb) {
+  process.nextTick(function () {
+    let data = db()
+      .get(entity)
+      .find({id})
       .value()
-    if (user) {
-      cb(null, user)
+    if (data) {
+      cb(null, data)
     } else {
-      cb(new Error('User ' + id + ' does not exist'))
+      cb(new Error(type + ' ' + id + ' does not exist'))
     }
   })
 }
 
-exports.findByUsername = function(username, cb) {
-  process.nextTick(function() {
-    let user = db()
-      .get('users')
-      .find({ username })
+exports.findByUsername = function (username, cb) {
+  process.nextTick(function () {
+    let data = db()
+      .get(entity)
+      .find({username})
       .value()
-    if(user) {
-      return cb(null, user)
-    }
-    else{
+    if (data) {
+      return cb(null, data)
+    } else {
       return cb(new Error("not found"))
     }
   })
 }
 
-exports.all = function(cb) {
-  process.nextTick(function() {
-    let users = db()
-      .get('users')
+exports.all = function (cb) {
+  process.nextTick(function () {
+    let data = db()
+      .get(entity)
       .value()
-    return cb(null, users)
+    if (data) {
+      if(Array.isArray(data)){
+        return cb(null, data)
+      }
+      else{
+        return cb(null, [data])
+      }
+    } else {
+      return cb(null, [])
+    }
   })
 }
 
-exports.delete = function(id, cb) {
-  process.nextTick(function() {
+exports.delete = function (id, cb) {
+  process.nextTick(function () {
     db()
-      .get('users')
-      .remove({ id })
+      .get(entity)
+      .remove({id})
       .write()
     return cb(null)
   })
 }
 
-exports.update = function(id, user, cb) {
-  process.nextTick(function() {
-    let currentUser = db()
-      .get('users')
-      .find({ id })
+exports.update = function (id, data, cb) {
+  process.nextTick(function () {
+    let currentData = db()
+      .get(entity)
+      .find({id})
       .value()
-    if(currentUser) {
-      Object.assign(currentUser, user)
+    if (currentData) {
+      Object.assign(currentData, data)
       db()
-        .get('users')
+        .get(entity)
         .find({id})
-        .assign(currentUser)
+        .assign(currentData)
         .write()
-      return cb(null, currentUser)
-    }
-    else{
-      return cp(new Error("unknown user"), null)
+      return cb(null, currentData)
+    } else {
+      return cp(new Error("unknown " + type), null)
     }
   })
 }
 
 
-exports.create = function(user, cb) {
-  process.nextTick(function() {
-    bcrypt.hash(user.password, 10, function(err, hash) {
-      user.password = hash
-      db().get("users")
-        .push(user)
+exports.create = function (data, cb) {
+  process.nextTick(function () {
+    bcrypt.hash(data.password, 10, function (err, hash) {
+      data.password = hash
+      db().get(entity)
+        .push(data)
         .write()
-      return cb(null, user)
+      return cb(null, data)
     })
   })
 }

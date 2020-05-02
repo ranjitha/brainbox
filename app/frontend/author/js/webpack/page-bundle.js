@@ -153,7 +153,7 @@ $(window).load(function () {
   var token = getParam("token");
   var globalSheet = getParam("global");
   var userSheet = getParam("user");
-  var url = userSheet ? "../backend/user/sheet/get?filePath=" + userSheet + "&token=" + token : "../backend/global/sheet/get?filePath=" + globalSheet + "&token=" + token;
+  var url = userSheet ? "../api/user/sheet/get?filePath=" + userSheet + "&token=" + token : "../api/global/sheet/get?filePath=" + globalSheet + "&token=" + token;
 
   axios.get(url).then(function (response) {
     $(containerId).html("");

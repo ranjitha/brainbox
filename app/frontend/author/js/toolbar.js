@@ -1,10 +1,4 @@
-import designerDialog from "../../_common/js/DesignerDialog"
-import simulatorDialog from "../../_common/js/SimulatorDialog"
-
 import commandStack from "./commands/CommandStack"
-import conf from "./configuration"
-import userAdminDialog from "../../_common/js/UserAdminDialog";
-
 
 export default class Toolbar {
 
@@ -57,10 +51,10 @@ export default class Toolbar {
             (file.scope === "user" && permissions.sheets.update === true))) {
           // file must be save before sharing
           app.fileSave(() => {
-            window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
+            window.open(`../api/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
           })
         } else {
-          window.open(`../backend/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
+          window.open(`../api/${file.scope}/sheet/pdf?file=${file.name}`, "__blank")
         }
       })
     } else {
@@ -112,23 +106,6 @@ export default class Toolbar {
       })
     } else {
       this.addImageButton.remove()
-    }
-
-
-    $(".applicationSwitchDesigner").off("click").on("click", () => {
-      designerDialog.show(conf)
-    })
-
-    $(".applicationSwitchSimulator").off("click").on("click", () => {
-      simulatorDialog.show(conf)
-    })
-
-    if (permissions.featureset.usermanagement === true) {
-      $(document).on("click", ".applicationSwitchUser", () => {
-        userAdminDialog.show(conf)
-      })
-    } else {
-      $(".applicationSwitchUser").remove()
     }
 
     // enable the tooltip for all buttons
