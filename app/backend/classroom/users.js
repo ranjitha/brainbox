@@ -1,3 +1,5 @@
+const bcrypt = require("bcrypt");
+
 let db = require("./db").db
 
 

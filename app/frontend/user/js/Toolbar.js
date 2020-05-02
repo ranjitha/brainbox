@@ -17,7 +17,7 @@ export default class Toolbar {
         recordStore.save(user)
           .then((updatedUser) => {
             toast("Saved")
-            app.view.setUser(updatedUser)
+            app.view.setRecord(updatedUser)
             app.palette.update()
           })
           .catch((error) => {
@@ -29,18 +29,13 @@ export default class Toolbar {
           })
       })
       .on("click", "#editorAdd:not(.disabled)", (event) => {
-        let user = {
-          role: "user"
-        }
-        app.view.setRecord(user)
+        app.view.setRecord({ role: "user" })
       })
       .on("click", "#editorDelete:not(.disabled)", (event) => {
         let user = {id: $("#editor .content input[data-id='id']").val()}
         recordStore.delete(user).then(() => {
           toast("Deleted")
-          app.view.setRecord({
-            role: "user"
-          })
+          app.view.setRecord(null)
           app.palette.update()
         })
       })

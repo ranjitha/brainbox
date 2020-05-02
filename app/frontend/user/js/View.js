@@ -5,6 +5,7 @@ export default class View{
 
   constructor(app){
     this.app = app
+    this.displayInfo()
     $(document)
       .off("click", "#passwordReset")
       .on("click", "#passwordReset", ()=>{
@@ -52,6 +53,7 @@ You Brainbox Administrator
     if(record===null){
       $("#editorFileSave").addClass("disabled")
       $("#editorDelete").addClass("disabled")
+      this.displayInfo()
     }
     else{
       $("#editorFileSave").removeClass("disabled")
@@ -62,22 +64,28 @@ You Brainbox Administrator
       else{
         $("#editorDelete").addClass("disabled")
       }
+
+      let tmpl = Hogan.compile($("#recordTemplate").html());
+      let html = tmpl.render({
+        record: record,
+        options: [
+          {val: "admin", label: 'Administrator'},
+          {val: "user", label: 'User'}
+        ],
+        selected: function() {
+          if (this.val===record.role) return "selected";
+          return "";
+        }
+      })
+      $("#editor .content").html(html)
     }
 
+  }
 
-    let tmpl = Hogan.compile($("#recordTemplate").html());
-    let html = tmpl.render({
-      record: record,
-      options: [
-        {val: "admin", label: 'Administrator'},
-        {val: "user", label: 'User'}
-      ],
-      selected: function() {
-        if (this.val===record.role) return "selected";
-        return "";
-      }
-    })
-    $("#editor .content").html(html)
+
+  displayInfo(){
+    let tmpl = $("#userinfoTemplate").html()
+    $("#editor .content").html(tmpl)
   }
 }
 

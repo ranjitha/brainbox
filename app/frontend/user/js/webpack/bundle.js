@@ -766,6 +766,7 @@ var RecordStore = function () {
         _this3.records = _this3.records.filter(function (u) {
           return u.id !== record.id;
         });
+        console.log(_this3.records);
         return response.data;
       });
     }
@@ -819,7 +820,7 @@ var Toolbar = function Toolbar(app) {
     });
     _Records2.default.save(user).then(function (updatedUser) {
       (0, _toast2.default)("Saved");
-      app.view.setUser(updatedUser);
+      app.view.setRecord(updatedUser);
       app.palette.update();
     }).catch(function (error) {
       var status = error.response.status;
@@ -829,17 +830,12 @@ var Toolbar = function Toolbar(app) {
       }
     });
   }).on("click", "#editorAdd:not(.disabled)", function (event) {
-    var user = {
-      role: "user"
-    };
-    app.view.setRecord(user);
+    app.view.setRecord({ role: "user" });
   }).on("click", "#editorDelete:not(.disabled)", function (event) {
     var user = { id: $("#editor .content input[data-id='id']").val() };
     _Records2.default.delete(user).then(function () {
       (0, _toast2.default)("Deleted");
-      app.view.setRecord({
-        role: "user"
-      });
+      app.view.setRecord(null);
       app.palette.update();
     });
   });
@@ -883,6 +879,7 @@ var View = function () {
     _classCallCheck(this, View);
 
     this.app = app;
+    this.displayInfo();
     $(document).off("click", "#passwordReset").on("click", "#passwordReset", function () {
       var record = {};
       $("#editor .content input[data-id], #editor .content select[data-id]").each(function (i, e) {
@@ -913,6 +910,7 @@ var View = function () {
       if (record === null) {
         $("#editorFileSave").addClass("disabled");
         $("#editorDelete").addClass("disabled");
+        this.displayInfo();
       } else {
         $("#editorFileSave").removeClass("disabled");
 
@@ -921,18 +919,24 @@ var View = function () {
         } else {
           $("#editorDelete").addClass("disabled");
         }
-      }
 
-      var tmpl = _hogan2.default.compile($("#recordTemplate").html());
-      var html = tmpl.render({
-        record: record,
-        options: [{ val: "admin", label: 'Administrator' }, { val: "user", label: 'User' }],
-        selected: function selected() {
-          if (this.val === record.role) return "selected";
-          return "";
-        }
-      });
-      $("#editor .content").html(html);
+        var tmpl = _hogan2.default.compile($("#recordTemplate").html());
+        var html = tmpl.render({
+          record: record,
+          options: [{ val: "admin", label: 'Administrator' }, { val: "user", label: 'User' }],
+          selected: function selected() {
+            if (this.val === record.role) return "selected";
+            return "";
+          }
+        });
+        $("#editor .content").html(html);
+      }
+    }
+  }, {
+    key: "displayInfo",
+    value: function displayInfo() {
+      var tmpl = $("#userinfoTemplate").html();
+      $("#editor .content").html(tmpl);
     }
   }]);
 

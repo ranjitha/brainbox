@@ -1,7 +1,7 @@
 const NodeCache = require( "node-cache" )
 const uuid = require('uuid/v4')
 const classroom = require('../../classroom')
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt")
 
 const passwordResetRequestCache = new NodeCache( { stdTTL: 60*30, checkperiod: 120 } )
 
