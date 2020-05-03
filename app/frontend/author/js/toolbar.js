@@ -11,35 +11,23 @@ export default class Toolbar {
     commandStack.off(this).on("change", this)
 
     this.saveButton = $("#editorFileSave")
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      this.saveButton.off("click").on("click", () => {
-        this.saveButton.tooltip("hide")
-        app.fileSave()
-      })
-      Mousetrap.bindGlobal("ctrl+s", () => {
-        this.saveButton.click()
-        return false
-      })
-    } else {
-      this.saveButton.remove()
-    }
+    this.saveButton.off("click").on("click", () => {
+      this.saveButton.tooltip("hide")
+      app.fileSave()
+    })
 
     this.shareButton = $("#editorFileShare")
-    if (permissions.featureset.share) {
-      this.shareButton.off("click").on("click", () => {
-        this.shareButton.tooltip("hide")
-        if (this.app.hasUnsavedChanges) {
-          // file must be save before sharing
-          app.fileSave(() => {
-            app.fileShare()
-          })
-        } else {
+    this.shareButton.off("click").on("click", () => {
+      this.shareButton.tooltip("hide")
+      if (this.app.hasUnsavedChanges) {
+        // file must be save before sharing
+        app.fileSave(() => {
           app.fileShare()
-        }
-      })
-    } else {
-      this.shareButton.remove()
-    }
+        })
+      } else {
+        app.fileShare()
+      }
+    })
 
     this.pdfButton = $("#editorFileToPDF")
     if (permissions.sheets.pdf || permissions.sheets.global.pdf) {
@@ -58,55 +46,29 @@ export default class Toolbar {
         }
       })
     } else {
-      this.pdfButton.remove()
+      this.pdfButton.hide()
     }
-
 
     /////////////////////////////////////////////
     // Editor Operations
     //
     this.addTextButton = $("#addTextSection")
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      this.addTextButton.off("click").on("click", () => {
-        this.addTextButton.tooltip("hide")
-        this.view.addMarkdown()
-      })
-      Mousetrap.bindGlobal("ctrl+t", () => {
-        this.addTextButton.click()
-        return false
-      })
-    } else {
-      this.addTextButton.remove()
-    }
+    this.addTextButton.off("click").on("click", () => {
+      this.addTextButton.tooltip("hide")
+      this.view.addMarkdown()
+    })
 
     this.addBrainButton = $("#addBrainSection")
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      this.addBrainButton.off("click").on("click", () => {
-        this.addBrainButton.tooltip("hide")
-        this.view.addBrain()
-      })
-      Mousetrap.bindGlobal("ctrl+s", (event) => {
-        this.addBrainButton.click()
-        return false
-      })
-    } else {
-      this.addBrainButton.remove()
-    }
-
+    this.addBrainButton.off("click").on("click", () => {
+      this.addBrainButton.tooltip("hide")
+      this.view.addBrain()
+    })
 
     this.addImageButton = $("#addImageSection")
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      this.addImageButton.off("click").on("click", () => {
-        this.addImageButton.tooltip("hide")
-        this.view.addImage()
-      })
-      Mousetrap.bindGlobal("ctrl+i", (event) => {
-        this.addImageButton.click()
-        return false
-      })
-    } else {
-      this.addImageButton.remove()
-    }
+    this.addImageButton.off("click").on("click", () => {
+      this.addImageButton.tooltip("hide")
+      this.view.addImage()
+    })
 
     // enable the tooltip for all buttons
     //
@@ -117,35 +79,55 @@ export default class Toolbar {
       html: true
     })
 
-    if (this.app.hasModifyPermissionForCurrentFile()) {
+    // must delegate event from parent DOM because of the dynamic property of the CSS selector
+    $(".toolbar")
+      .off("#editUndo")
+      .delegate("#editUndo:not(.disabled)","click", () => {
+        commandStack.undo()
+      })
+      .off('#editRedo')
+      .delegate("#editRedo:not(.disabled)", "click", () => {
+        commandStack.redo()
+      })
 
-      // must delegate event from parent DOM because of the dynamic property of the CSS selector
-      $(".toolbar")
-        .off("#editUndo")
-        .delegate("#editUndo:not(.disabled)","click", () => {
-          commandStack.undo()
-        })
-        .off('#editRedo')
-        .delegate("#editRedo:not(.disabled)", "click", () => {
-          commandStack.redo()
-        })
-    } else {
-      $("#editUndo, #editRedo").remove()
-    }
-
+    this.stackChanged()
   }
 
   stackChanged(event) {
     this.pdfButton.hide()
+    this.shareButton.hide()
     // check the permission if the current file is "user" scope
-    if (this.app.currentFile.scope === "user") {
-      if (this.permissions.sheets.pdf === true) {
-        this.pdfButton.show()
+    if(this.app.getDocument() !==null) {
+      if (this.app.currentFile.scope === "user") {
+        if (this.permissions.sheets.pdf === true) {
+          this.pdfButton.show()
+        }
+      } else if (this.app.currentFile.scope === "global") {
+        if (this.permissions.sheets.global.pdf === true) {
+          this.pdfButton.show()
+        }
       }
-    } else if (this.app.currentFile.scope === "global") {
-      if (this.permissions.sheets.global.pdf === true) {
-        this.pdfButton.show()
+
+      if (this.permissions.featureset.share) {
+        this.shareButton.show()
       }
+    }
+
+    if(this.app.hasModifyPermissionForCurrentFile()){
+      $("#editUndo, #editRedo").show()
+      this.addImageButton.show()
+      this.addBrainButton.show()
+      this.addTextButton.show()
+      this.pdfButton.show()
+      this.saveButton.show()
+    }
+    else{
+      $("#editUndo, #editRedo").hide()
+      this.addImageButton.hide()
+      this.addBrainButton.hide()
+      this.addTextButton.hide()
+      this.pdfButton.hide()
+      this.saveButton.hide()
     }
   }
 

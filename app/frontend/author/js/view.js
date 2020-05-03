@@ -29,11 +29,9 @@ export default class View {
 
     this.palette.render()
 
-    // inject the host for the rendered section
-    this.html.html($("<div class='sections'></div>"))
-
     commandStack.off(this).on("change", this)
 
+    this.showWelcomeMessage()
 
     $(document)
       .on("click", ".content", () => {
@@ -228,7 +226,9 @@ export default class View {
   }
 
   render(page) {
-    this.html.find(".sections").html("")
+
+    // inject the host for the rendered section
+    this.html.html($("<div class='sections'></div>"))
     this.renderSpacer(0)
     page.forEach((section, index) => {
       switch (section.type) {
@@ -411,6 +411,15 @@ export default class View {
         this.render(this.page)
         this.palette.render()
       })
+  }
+
+  showWelcomeMessage(){
+    let tmpl = $("#welcomeTemplate").html()
+    $("#editor .content").html(tmpl)
+
+    $("#welcomeNewDocument").on("click", ()=>{
+      this.app.fileNew("NewDocument","user")
+    })
   }
 
   /**

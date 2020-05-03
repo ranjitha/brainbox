@@ -52,9 +52,7 @@ export default class Palette {
   render() {
     // restore all classes from the other editors
     $("#paletteElementsScroll, #paletteFilter").addClass("pages")
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>")
-    }
+    $("#paletteFilter").html("<button id='documentPageAdd'>+ Page</button>")
     this.stackChanged(null)
   }
 
@@ -70,16 +68,20 @@ export default class Palette {
   stackChanged(event) {
 
     if (this.sourceIsSortEvent) {
-      return // silently}
+      return // silently
     }
 
     this.html.html('')
-    let pages = this.app.getDocument().getPages()
-    let currentPage = this.view.getPage()
+    let document = this.app.getDocument()
+    if(document !==null) {
+      let pages = document.getPages()
+      let currentPage = this.view.getPage()
 
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      pages.forEach((page) => {
-        this.html.append(`
+      if (this.app.hasModifyPermissionForCurrentFile()) {
+        console.log("show...")
+        $("#documentPageAdd").show()
+        pages.forEach((page) => {
+          this.html.append(`
           <div class="pageElement"  data-page="${page.id}"  id="layerElement_${page.id}" >
             ${page.name}
             <span data-page="${page.id}"  data-toggle="tooltip" title="Delete the page" class="page_delete pull-right" >
@@ -89,44 +91,47 @@ export default class Palette {
                 <span class="fa fa-edit"/>
             </span>
           </div>`)
-      }, true)
-    } else {
-      pages.forEach((page) => {
-        this.html.append(`
+        }, true)
+      } else {
+        $("#documentPageAdd").hide()
+        pages.forEach((page) => {
+          this.html.append(`
           <div class="pageElement"  data-page="${page.id}"  id="layerElement_${page.id}" >
             ${page.name}
           </div>`)
-      }, true)
-    }
+        }, true)
+      }
 
 
-    $(`.pageElement[data-page=${currentPage.id}]`).addClass("selected")
+      $(`.pageElement[data-page=${currentPage.id}]`).addClass("selected")
 
 
-    // Allow only the drag&drop of the pages if the user has the permission
-    //
-    if (this.app.hasModifyPermissionForCurrentFile()) {
-      this.html.sortable({
-        axis: "y",
-        update: (event, dd) => {
-          this.sourceIsSortEvent = true
-          try {
-            commandStack.push(new State(this.app))
-            // fetch the state of the new order
-            let pageDivs = $(".pageElement").toArray()
-            let document = this.app.getDocument()
-            //
-            let newPageOrder = []
-            pageDivs.forEach((page) => {
-              let id = $(page).data("page")
-              newPageOrder.push(document.getPage(id))
-            })
-            document.setPages(newPageOrder)
-          } finally {
-            this.sourceIsSortEvent = false
+      // Allow only the drag&drop of the pages if the user has the permission
+      //
+      if (this.app.hasModifyPermissionForCurrentFile()) {
+        this.html.sortable({
+          axis: "y",
+          update: (event, dd) => {
+            this.sourceIsSortEvent = true
+            try {
+              commandStack.push(new State(this.app))
+              // fetch the state of the new order
+              let pageDivs = $(".pageElement").toArray()
+              let newPageOrder = []
+              pageDivs.forEach((page) => {
+                let id = $(page).data("page")
+                newPageOrder.push(document.getPage(id))
+              })
+              document.setPages(newPageOrder)
+            } finally {
+              this.sourceIsSortEvent = false
+            }
           }
-        }
-      })
+        })
+      }
+    }
+    else{
+      $("#documentPageAdd").hide()
     }
   }
 

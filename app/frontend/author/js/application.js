@@ -34,7 +34,7 @@ class Application {
 
     this.hasUnsavedChanges = false
     this.permissions = permissions
-    this.document = new Document()
+    this.document = null
     this.currentFile = { name:"NewDocument"+conf.fileSuffix, scope:"user"}
     this.storage = storage
     this.view = new View(this, "#editor .content", permissions)
@@ -68,9 +68,6 @@ class Application {
     }
     else if (shared) {
       this.load(shared, "shared")
-    }
-    else {
-      this.fileNew("NewDocument","user")
     }
 
     // listen on the history object to load files
@@ -185,9 +182,15 @@ class Application {
 
   hasModifyPermissionForCurrentFile(){
     let scope = this.currentFile.scope
+    let document = this.getDocument()
 
-    return ((scope === "global" && (this.permissions.sheets.global.update || this.permissions.sheets.global.create))
-      || (scope === "user" && (this.permissions.sheets.update || this.permissions.sheets.create)))
+    return (
+      document !== null
+      &&
+      (    (scope === "global" && (this.permissions.sheets.global.update || this.permissions.sheets.global.create))
+        || (scope === "user"   && (this.permissions.sheets.update        || this.permissions.sheets.create       ))
+      )
+    )
   }
 }
 
