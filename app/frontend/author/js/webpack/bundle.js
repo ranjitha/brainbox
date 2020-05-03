@@ -6705,6 +6705,9 @@ var View = function () {
       $("#welcomeNewDocument").on("click", function () {
         _this6.app.fileNew("NewDocument", "user");
       });
+      $("#welcomeOpenExample").on("click", function () {
+        _this6.app.load("/basic/math/binary-addition.sheet", "global");
+      });
     }
 
     /**

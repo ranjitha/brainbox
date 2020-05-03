@@ -420,6 +420,9 @@ export default class View {
     $("#welcomeNewDocument").on("click", ()=>{
       this.app.fileNew("NewDocument","user")
     })
+    $("#welcomeOpenExample").on("click", ()=>{
+      this.app.load("/basic/math/binary-addition.sheet","global")
+    })
   }
 
   /**
