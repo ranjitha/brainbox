@@ -45,7 +45,7 @@
               </span>
               <span class="image-button" id="editorAdd">
                 <img  src="../_common/images/toolbar_insert.svg"/>
-                <div>Add</div>
+                <div>New User</div>
               </span>
            </span>
 
@@ -105,18 +105,24 @@
 {{/records}}
 </script>
 
-<script id="userinfoTemplate" type="text/x-jsrender">
+<script id="welcomeTemplate" type="text/x-jsrender">
 
-  <div class="form">
-    <img src="../_common/images/app_user.svg" width="200px">
-    <h2>Easy user management</h2>
-    <p>
-      Admins can create, modify, search and view user accounts using Brainbox built-in user management.
+  <div class="welcomeMessage">
+    <div class="teaser">
+      <h2>User Management</h2>
+      <p>
+          Admins can create, modify, search and view user accounts using Brainbox built-in user management.
+      </p>
+    </div>
+    <div class="description">
       <ul>
-         <li>Select a user on the left side panel to edit or delete them</li>
-         <li>Press on the [+] icon n the toolbar to create a new user</li>
+         <li>Select a user on the left side panel to edit or delete them.</li>
+         <li>Press on the [+] icon in the toolbar to create a new user.</li>
       </ul>
-    </p>
+      <button id="welcomeAddUser">Create User</button>
+    </div>
+    <img src="../_common/images/app_user.svg" width="200px">
+
   </div>
 </script>
 

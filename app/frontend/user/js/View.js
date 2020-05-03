@@ -5,7 +5,7 @@ export default class View{
 
   constructor(app){
     this.app = app
-    this.displayInfo()
+    this.showWelcomeMessage()
     $(document)
       .off("click", "#passwordReset")
       .on("click", "#passwordReset", ()=>{
@@ -53,7 +53,7 @@ You Brainbox Administrator
     if(record===null){
       $("#editorFileSave").addClass("disabled")
       $("#editorDelete").addClass("disabled")
-      this.displayInfo()
+      this.showWelcomeMessage()
     }
     else{
       $("#editorFileSave").removeClass("disabled")
@@ -83,9 +83,12 @@ You Brainbox Administrator
   }
 
 
-  displayInfo(){
-    let tmpl = $("#userinfoTemplate").html()
+  showWelcomeMessage(){
+    let tmpl = $("#welcomeTemplate").html()
     $("#editor .content").html(tmpl)
+    $("#welcomeAddUser").on("click", ()=>{
+      this.app.view.setRecord({ role: "user" })
+    })
   }
 }
 
