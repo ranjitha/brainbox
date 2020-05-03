@@ -2269,18 +2269,6 @@ var _FigureTest = __webpack_require__(/*! ./dialog/FigureTest */ "./app/frontend
 
 var _FigureTest2 = _interopRequireDefault(_FigureTest);
 
-var _SimulatorDialog = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module '../../_common/js/SimulatorDialog'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
-
-var _SimulatorDialog2 = _interopRequireDefault(_SimulatorDialog);
-
-var _AuthorDialog = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module '../../_common/js/AuthorDialog'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
-
-var _AuthorDialog2 = _interopRequireDefault(_AuthorDialog);
-
-var _UserAdminDialog = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module '../../_common/js/UserAdminDialog'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
-
-var _UserAdminDialog2 = _interopRequireDefault(_UserAdminDialog);
-
 var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_common/js/toast.js");
 
 var _toast2 = _interopRequireDefault(_toast);
