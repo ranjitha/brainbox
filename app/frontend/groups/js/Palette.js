@@ -20,8 +20,8 @@ export default class Palette {
 
   update(){
     recordStore.list().then((records) => {
+      records = records.map( record => {return {...record, icon: record.role==="owner"?"fa-university":"fa-graduation-cap"}})
       let tmpl = Hogan.compile($("#recordsTemplate").html())
-      console.log(records)
       let html = tmpl.render({
         records: records
       })

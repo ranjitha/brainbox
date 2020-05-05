@@ -6,78 +6,99 @@ let db = require("./db").db
 let type = "user"
 let entity = "users"
 
-exports.findById = function (id, cb) {
-  let data = db()
-    .get(entity)
-    .find({id})
-    .value()
-  if (data) {
-    cb(null, data)
-  } else {
-    cb(new Error(type + ' ' + id + ' does not exist'))
-  }
-}
 
-exports.findByUsername = function (username, cb) {
-  let data = db()
-    .get(entity)
-    .find({username})
-    .value()
-  if (data) {
-    return cb(null, data)
-  } else {
-    return cb(new Error("not found"))
-  }
-}
-
-exports.all = function (cb) {
-  let data = db()
-    .get(entity)
-    .value()
-  if (data) {
-    if (Array.isArray(data)) {
-      return cb(null, data)
-    } else {
-      return cb(null, [data])
-    }
-  } else {
-    return cb(null, [])
-  }
-}
-
-exports.delete = function (id, cb) {
-  db()
-    .get(entity)
-    .remove({id})
-    .write()
-  return cb(null)
-}
-
-exports.update = function (id, data, cb) {
-  let currentData = db()
-    .get(entity)
-    .find({id})
-    .value()
-  if (currentData) {
-    Object.assign(currentData, data)
-    db()
+exports.findById = async function (id, mergeWith) {
+  mergeWith = mergeWith || {}
+  return new Promise((resolve, reject) => {
+    let result = db()
       .get(entity)
       .find({id})
-      .assign(currentData)
-      .write()
-    return cb(null, currentData)
-  } else {
-    return cp(new Error("unknown " + type), null)
-  }
+      .value()
+    if (result) {
+      resolve({...mergeWith, ...result})
+    } else {
+      reject(type + ' ' + id + ' does not exist')
+    }
+  })
 }
 
 
-exports.create = function (data, cb) {
-  bcrypt.hash(data.password, 10, function (err, hash) {
-    data.password = hash
-    db().get(entity)
-      .push(data)
+exports.findByUsername = async function (username, mergeWith) {
+  mergeWith = mergeWith || {}
+  return new Promise((resolve, reject) => {
+    let result = db()
+      .get(entity)
+      .find({username})
+      .value()
+    if (result) {
+      resolve({...mergeWith, ...result})
+    } else {
+      reject(type + ' ' + id + ' does not exist')
+    }
+  })
+}
+
+
+exports.all = async function () {
+  debugger
+  return new Promise((resolve, reject) => {
+    let result = db()
+      .get(entity)
+      .value()
+    if (result) {
+      if (Array.isArray(result)) {
+        resolve(result)
+      } else {
+        resolve([result])
+      }
+    } else {
+      reject(type + ' ' + id + ' does not exist')
+    }
+  })
+}
+
+
+exports.del = async function (id) {
+  return new Promise((resolve, reject) => {
+    db()
+      .get(entity)
+      .remove({id})
       .write()
-    return cb(null, data)
+    resolve()
+  })
+}
+
+
+exports.update = async function (id, data) {
+  return new Promise((resolve, reject) => {
+    let current = db()
+      .get(entity)
+      .find({id})
+      .value()
+
+    if (current) {
+      Object.assign(current, data)
+      db()
+        .get(entity)
+        .find({id})
+        .assign(current)
+        .write()
+      resolve(current)
+    } else {
+      reject("unknown " + type)
+    }
+  })
+}
+
+
+exports.create = async function (data) {
+  return new Promise((resolve, reject) => {
+    bcrypt.hash(data.password, 10, function (err, hash) {
+      data.password = hash
+      db().get(entity)
+        .push(data)
+        .write()
+      resolve(data)
+    })
   })
 }

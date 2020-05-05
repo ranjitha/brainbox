@@ -4,24 +4,6 @@ let type = "group"
 let entity = "groups"
 
 
-exports.findByUser = async function (user) {
-  return new Promise((resolve, reject) => {
-    let result = db()
-      .get(entity)
-      .find({ownerId: user.id})
-      .value()
-    if (result) {
-      if (Array.isArray(data)) {
-        resolve(result)
-      } else {
-        resolve([result])
-      }
-    } else {
-      reject(new Error(type + ' for user "' + user.id + '" does not exist'))
-    }
-  })
-}
-
 exports.findById = async function (id, mergeWith) {
   mergeWith = mergeWith || {}
   return new Promise((resolve, reject) => {

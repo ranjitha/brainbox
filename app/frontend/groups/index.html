@@ -131,19 +131,40 @@
 <script id="recordsTemplate" type="text/x-jsrender">
 {{#records}}
     <div class="paletteItem {{role}}" data-id="{{id}}">
-      {{name}}
+       <div class="icon fa {{icon}}"> </div>{{name}}
     </div>
 {{/records}}
 </script>
 
 
-<script id="recordTemplate" type="text/x-jsrender">
+<script id="recordOwnerTemplate" type="text/x-jsrender">
 
   <div class="form">
       <div class="groupHeader">
         <h1>{{record.name}}</h1>
         <h2>Group join code: <span class="joinToken">{{record.joinToken}}</span> <div class="showJoinToken fa fa-eye" ></div></h2>
       </div>
+      <div class="role">
+          <img src="./images/teacher.svg">
+          <h2>You are Mentor of this group</h2>
+      </div>
+
+      <input type="hidden" id="recordId" value="{{record.id}}" data-id="id">
+
+  </div>
+</script>
+
+<script id="recordMemberTemplate" type="text/x-jsrender">
+
+  <div class="form">
+      <div class="groupHeader">
+        <h1>{{record.name}}</h1>
+      </div>
+      <div class="role">
+          <img src="./images/student.svg">
+          <h2>You are Student in this group</h2>
+      </div>
+
       <input type="hidden" id="recordId" value="{{record.id}}" data-id="id">
 
   </div>

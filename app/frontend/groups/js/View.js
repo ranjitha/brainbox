@@ -19,7 +19,7 @@ export default class View{
       $("#editorSave").removeClass("disabled")
       $("#editorDelete").removeClass("disabled")
 
-      let tmpl = Hogan.compile($("#recordTemplate").html());
+      let tmpl = Hogan.compile(record.role==="owner"?$("#recordOwnerTemplate").html():$("#recordMemberTemplate").html());
       let html = tmpl.render({
         record: record
       })

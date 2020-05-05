@@ -1,4 +1,5 @@
 const shortid = require('shortid')
+const {mapUser} = require("./rest-user")
 
 const classroom = require('../../classroom')
 
@@ -43,15 +44,30 @@ exports.list = (req, res) => {
 
 exports.get = (req, res) => {
   classroom.groups.findById(req.params.id)
-    .then((data) => {
-      res.status(200).send(mapData(data))
+    .then((group) => {
+      return Promise.all([
+        // get all users of the group
+        classroom.graph.get({ predicate: "member", object: ""+group.id})
+          .then((groupSPOs) => {
+            return Promise.all(groupSPOs.map(spo => classroom.users.findById(spo.subject)))
+          }),
+        // the group itself
+        Promise.resolve(group)
+
+        // in the future we collect the assignment as well
+        // TODO
+      ])
+    })
+    .then( (data)=>{
+      group = { members: map(data[0]), ...data[1] }
+      res.status(200).send(mapData(group))
     })
     .catch((error) => {
       res.status(500).send(error)
     })
 }
 
-exports.delete = (req, res) => {
+exports.del = (req, res) => {
   // ensure that the calling user is the owner of the group before we delete them
   //
   classroom.graph.get({subject: req.user.id, predicate: "owner", object: req.params.id})
