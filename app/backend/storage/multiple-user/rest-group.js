@@ -1,20 +1,31 @@
 const shortid = require('shortid')
-const {mapUser} = require("./rest-user")
 
 const classroom = require('../../classroom')
 
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#@')
 
+function mapUser(user) {
+  if (Array.isArray(user)) {
+    return user.map(data => mapUser(data))
+  }
+  return {
+    id: user.id,
+    username: user.username,
+    displayName: user.displayName
+  }
+}
+
 // dont't expose sensitive data per accident. Add a
 // mapping layer in between before expose the object
-function mapData(group) {
+function mapGroup(group) {
   if (Array.isArray(group)) {
-    return group.map(data => mapData(data))
+    return group.map(data => mapGroup(data))
   }
   return {
     id: group.id,
     role: group.role,
     joinToken: group.joinToken,
+    members: group.members,
     name: group.name
   }
 }
@@ -26,15 +37,15 @@ exports.list = (req, res) => {
     Promise.all([
       classroom.graph.get({subject: "" + req.user.id, predicate: "owner"})
         .then((groupSPOs) => {
-          return Promise.all(groupSPOs.map(spo =>  classroom.groups.findById(spo.object, { role: "owner" })))
+          return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "owner"})))
         }),
       classroom.graph.get({subject: "" + req.user.id, predicate: "member"})
         .then((groupSPOs) => {
-          return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, { role: "member" })))
+          return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "member"})))
         })
     ])
       .then((groups) => {
-        res.status(200).send(mapData(groups.flat()))
+        res.status(200).send(mapGroup(groups.flat()))
       })
       .catch(error => {
         res.status(500).send(error)
@@ -43,24 +54,31 @@ exports.list = (req, res) => {
 }
 
 exports.get = (req, res) => {
-  classroom.groups.findById(req.params.id)
-    .then((group) => {
-      return Promise.all([
-        // get all users of the group
-        classroom.graph.get({ predicate: "member", object: ""+group.id})
-          .then((groupSPOs) => {
-            return Promise.all(groupSPOs.map(spo => classroom.users.findById(spo.subject)))
-          }),
-        // the group itself
-        Promise.resolve(group)
+  Promise.all([
+    // get all users of the group
+    classroom.graph.get({predicate: "member", object: "" + req.params.id})
+      .then((groupSPOs) => {
+        return Promise.all(groupSPOs.map(spo => classroom.users.findById(spo.subject)))
+      }),
+    // the group itself
+    classroom.graph.get({subject: "" + req.user.id, predicate: "owner", object: req.params.id})
+      .then((groupSPOs) => {
+        return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "owner"})))
+      }),
+    classroom.graph.get({subject: "" + req.user.id, predicate: "member", object: req.params.id})
+      .then((groupSPOs) => {
+        return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "member"})))
+      })
 
-        // in the future we collect the assignment as well
-        // TODO
-      ])
-    })
-    .then( (data)=>{
-      group = { members: map(data[0]), ...data[1] }
-      res.status(200).send(mapData(group))
+    // in the future we collect the assignment as well
+    // TODO
+  ])
+    .then((data) => {
+      // either you are "owner" (data[1]) or "member" (data[2])
+      // we merge the and use the first element....anyhow - the array contains only ONE element.
+      //
+      let group = {members: mapUser(data[0]), ...data[1].concat(data[2])[0]}
+      res.status(200).send(mapGroup(group))
     })
     .catch((error) => {
       res.status(500).send(error)
@@ -98,7 +116,7 @@ exports.put = (req, res) => {
 
   classroom.groups.update(req.params.id, data)
     .then((dataUpdated) => {
-      res.status(200).send(mapData(dataUpdated))
+      res.status(200).send(mapGroup(dataUpdated))
     })
     .catch((error) => {
       res.status(500).send(error)
@@ -118,7 +136,7 @@ exports.join = (req, res) => {
       classroom.graph.put([
         {subject: req.user.id, predicate: "member", object: data.id}
       ])
-      res.status(200).send(mapData(data))
+      res.status(200).send(mapGroup(data))
     })
     .catch((error) => {
       res.status(500).send(error)
@@ -143,7 +161,7 @@ exports.post = (req, res) => {
       return classroom.graph.put([{subject: req.user.id, predicate: "owner", object: data.id}])
     })
     .then(() => {
-      res.status(200).send(mapData(data))
+      res.status(200).send(mapGroup(data))
     })
     .catch((error) => {
       res.status(500).send(error)

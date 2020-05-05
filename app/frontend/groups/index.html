@@ -148,8 +148,15 @@
           <img src="./images/teacher.svg">
           <h2>You are Mentor of this group</h2>
       </div>
-
       <input type="hidden" id="recordId" value="{{record.id}}" data-id="id">
+      <div class="members">
+        <h3>Members</h3>
+        {{#record.members}}
+            <div>
+               {{displayName}}
+            </div>
+        {{/record.members}}
+      </div>
 
   </div>
 </script>
@@ -162,11 +169,17 @@
       </div>
       <div class="role">
           <img src="./images/student.svg">
-          <h2>You are Student in this group</h2>
+          <h2>You are a Student in this group</h2>
       </div>
-
       <input type="hidden" id="recordId" value="{{record.id}}" data-id="id">
-
+      <div class="members">
+        <h3>Members</h3>
+        {{#record.members}}
+            <div>
+               {{displayName}}
+            </div>
+        {{/record.members}}
+      </div>
   </div>
 </script>
 

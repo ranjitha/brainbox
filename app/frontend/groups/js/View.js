@@ -16,6 +16,7 @@ export default class View{
       this.showWelcomeMessage()
     }
     else if(record.id){
+
       $("#editorSave").removeClass("disabled")
       $("#editorDelete").removeClass("disabled")
 

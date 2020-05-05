@@ -9,12 +9,8 @@ class RecordStore {
   }
 
   findById(id) {
-    return this.list().then((records) => {
-      let candidates = records.filter((record) => record.id === id)
-      if (candidates.length > 0) {
-        return candidates[0]
-      }
-      throw "element not found"
+    return axios.get(restEndpoint+id).then((response) =>{
+      return response.data
     })
   }
 

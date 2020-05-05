@@ -244,6 +244,7 @@ module.exports = {
     app.put('/api/user/group/:id', ensureLoggedIn(), restGroup.put)
     app.post('/api/user/group', ensureLoggedIn(), restGroup.post)
     app.post('/api/user/group/join', ensureLoggedIn(), restGroup.join)
+    //app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.leave)
 
 
     // Serve the static content for the three different apps of brainbox
