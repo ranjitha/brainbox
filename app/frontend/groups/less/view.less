@@ -3,7 +3,6 @@
   .form{
     margin-top:40px;
     margin-left:40px;
-
     input{
       max-width: 250px;
     }
@@ -14,6 +13,32 @@
 
     .error{
       color:red;
+    }
+
+    .groupHeader{
+      h1{
+        color: @tintColor;
+        font-size: 2.25rem;
+        font-weight: 500;
+        line-height: 2.75rem;
+      }
+
+      h2{
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+        font-weight: 400;
+        .joinToken{
+          font-weight: 300;
+        }
+          .showJoinToken{
+          padding:10px;
+          cursor:pointer;
+          &:hover {
+            border-radius: 50%;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+          }
+        }
+      }
     }
   }
 }

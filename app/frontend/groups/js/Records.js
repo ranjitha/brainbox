@@ -30,6 +30,15 @@ class RecordStore {
     })
   }
 
+  join(joinToken) {
+    return axios.post(restEndpoint+"join/", {joinToken}).then((response) => {
+      this.records.push(response.data)
+      this.records = this.records.sort((a, b) => a[sortField].localeCompare(b[sortField]))
+      return response.data
+    })
+  }
+
+
   save(record) {
     if (record.id) {
       return axios.put(restEndpoint + record.id, record).then((response) => {

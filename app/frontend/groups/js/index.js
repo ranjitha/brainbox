@@ -59,6 +59,12 @@ $(window).load(function () {
       path: '/socket.io'
     })
 
+  // export all required classes for deserialize JSON with "eval"
+  // "eval" code didn't sees imported class or code
+  //
+  let global = require("./global")
+  for (let k in global) window[k] = global[k];
+
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
   //

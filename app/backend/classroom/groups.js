@@ -4,55 +4,71 @@ let type = "group"
 let entity = "groups"
 
 
-exports.findByUser = function (user, cb) {
-  process.nextTick(function () {
-    let data = db()
+exports.findByUser = async function (user) {
+  return new Promise((resolve, reject) => {
+    let result = db()
       .get(entity)
       .find({ownerId: user.id})
       .value()
-    if (data) {
-      if(Array.isArray(data)){
-        return cb(null, data)
-      }
-      else{
-        return cb(null, [data])
+    if (result) {
+      if (Array.isArray(data)) {
+        resolve(result)
+      } else {
+        resolve([result])
       }
     } else {
-      return cb(null, [])
+      reject(new Error(type + ' for user "' + user.id + '" does not exist'))
     }
   })
 }
 
-exports.findById = function (id, cb) {
-  process.nextTick(function () {
+exports.findById = async function (id, mergeWith) {
+  mergeWith = mergeWith || {}
+  return new Promise((resolve, reject) => {
     let result = db()
       .get(entity)
       .find({id})
       .value()
     if (result) {
-      cb(null, result)
+      resolve( {...mergeWith, ...result } )
     } else {
-      cb(new Error(type + ' ' + id + ' does not exist'))
+      reject(new Error(type + ' ' + id + ' does not exist'))
     }
   })
 }
 
-exports.delete = function (id, cb) {
-  process.nextTick(function () {
+
+exports.findByJoinToken = async function (joinToken) {
+  return new Promise((resolve, reject) => {
+    let result = db()
+      .get(entity)
+      .find({joinToken})
+      .value()
+    if (result) {
+      resolve(result)
+    } else {
+      reject(new Error(type + ' ' + id + ' does not exist'))
+    }
+  })
+}
+
+exports.del = async function (id) {
+  return new Promise((resolve, reject) => {
     db()
       .get(entity)
       .remove({id})
       .write()
-    return cb(null)
+    resolve()
   })
 }
 
-exports.update = function (id, data, cb) {
-  process.nextTick(function () {
+exports.update = async function (id, data) {
+  return new Promise((resolve, reject) => {
     let current = db()
       .get(entity)
       .find({id})
       .value()
+
     if (current) {
       Object.assign(current, data)
       db()
@@ -60,18 +76,18 @@ exports.update = function (id, data, cb) {
         .find({id})
         .assign(current)
         .write()
-      return cb(null, current)
+      resolve(current)
     } else {
-      return cp(new Error("unknown " + type), null)
+      reject(new Error("unknown " + type))
     }
   })
 }
 
-exports.create = function (data, cb) {
-  process.nextTick(function () {
+exports.create = async function (data) {
+  return new Promise((resolve, reject) => {
     db().get(entity)
       .push(data)
       .write()
-    return cb(null, data)
+    return resolve(data)
   })
 }

@@ -1,36 +1,22 @@
+const path = require('path')
+
 let levelup = require('levelup')
 let leveldown = require('leveldown')
 let levelgraph = require('levelgraph')
 
-db = levelgraph(levelup(leveldown("graph")))
+let dir = process.env.HOME + "/.brainbox/"
+let file = path.join(dir, "classroom", "graph", path.sep)
 
-db.put([{
-  subject: "karl",
-  predicate: "memberOf",
-  object: "group1"
-}, {
-  subject: "mark",
-  predicate: "memberOf",
-  object: "group1"
-}, {
-  subject: "daniele",
-  predicate: "memberOf",
-  object: "group2"
-}, {
-  subject: "sheet1",
-  predicate: "assignedTo",
-  object: "group1"
-}, {
-  subject: "marco",
-  predicate: "owner",
-  object: "group1"
-}], function () {
+db = levelgraph(levelup(leveldown(file)))
 
+
+new Promise ((resolve, reject) => {
   db.get({
-    predicate: "owner",
-    subject: "marco"
-  }, function(err, rv) {
-    if (err) throw err;
-    console.log("["+new String(rv).toString()+"]");
-  });
-});
+    subject: "1"
+  }, function(error, rv){
+    if(error) reject(error)
+    else resolve(JSON.parse("["+new String(rv).toString()+"]"))
+  })
+}).then( (data)=>{
+  console.log(data)
+})

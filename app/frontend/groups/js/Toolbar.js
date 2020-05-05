@@ -1,4 +1,5 @@
 import toast from "../../_common/js/toast"
+import inputPrompt from "../../_common/js/InputPrompt"
 
 import recordStore from "./Records"
 
@@ -29,7 +30,13 @@ export default class Toolbar {
             }
           })
       })
-      .on("click", "#editorAdd:not(.disabled)", (event) => {
+      .on("click", "#joinGroupButton, #editorAdd:not(.disabled)", (event) => {
+        inputPrompt.show("Join a group","Enter the Join Code you received from the group owner","",(value) => {
+          recordStore.join(value)
+        })
+        $("#inputPromptDialog .okButton").html("Join")
+      })
+      .on("click", "#createGroupButton, #editorAdd:not(.disabled)", (event) => {
         app.view.setRecord({})
       })
       .on("click", "#editorDelete:not(.disabled)", (event) => {

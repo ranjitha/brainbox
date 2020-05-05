@@ -8,14 +8,6 @@ let levelgraph = require('levelgraph')
 
 let db = null
 
-function spo(subject, predicate, object){
-  return db.put([{
-    subject,
-    predicate,
-    object
-  }])
-}
-
 exports.init = function (app, args) {
   let dbDir = path.join(args.folder, "classroom", "graph", path.sep)
   let initialRun = !fs.existsSync(dbDir)
@@ -27,7 +19,43 @@ exports.init = function (app, args) {
   db = levelgraph(levelup(leveldown(dbDir)))
 }
 
+exports.put = function(data) {
+  return new Promise((resolve, reject) => {
+    db.put(data, (error) => {
+      if(error) reject(error)
+      else resolve(data)
+    })
+  })
+}
 
-exports.setOwner = function(group, user){
-  return spo(user.id, "owner", group.id)
+
+exports.del = function(data) {
+  return new Promise((resolve, reject) => {
+    db.del(data, (error) => {
+      if(error) reject(error)
+      else resolve(data)
+    })
+  })
+}
+
+exports.get = function(data) {
+  return new Promise((resolve, reject) => {
+    db.get(data,(error, result) => {
+      if(error) reject(error)
+      else resolve( JSON.parse("[" + new String(result).toString() + "]"))
+    })
+  })
+}
+
+exports.search = function(data) {
+  return new Promise((resolve, reject) => {
+    db.search(data,(error, result) => {
+      if(error) reject(error)
+      else resolve(JSON.parse("[" + new String(result).toString() + "]"))
+    })
+  })
+}
+
+exports.v = function(data) {
+  return db.v(data)
 }

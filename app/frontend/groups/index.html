@@ -79,7 +79,9 @@
                 <h2>My Groups</h2>
               </div>
             </div>
-            <div id="paletteFilter">Your Groups</div>
+            <div id="paletteFilter">
+              <button id="createGroupButton">Create Group</button>
+              <button id="joinGroupButton">Join Group</button></div>
           </div>
           <div id="paletteElementsScroll">
             <div id="paletteElements" class="row">
@@ -138,8 +140,19 @@
 <script id="recordTemplate" type="text/x-jsrender">
 
   <div class="form">
+      <div class="groupHeader">
+        <h1>{{record.name}}</h1>
+        <h2>Group join code: <span class="joinToken">{{record.joinToken}}</span> <div class="showJoinToken fa fa-eye" ></div></h2>
+      </div>
       <input type="hidden" id="recordId" value="{{record.id}}" data-id="id">
 
+  </div>
+</script>
+
+<script id="recordCreateTemplate" type="text/x-jsrender">
+
+  <div class="form">
+      Create Group
       <div class="form-group">
         <label for="recordName">Name</label>
         <input class="form-control" id="recordName" placeholder="name" value="{{record.name}}" data-id="name">

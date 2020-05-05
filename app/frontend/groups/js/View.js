@@ -1,3 +1,5 @@
+import textPrompt from "../../_common/js/TextPrompt"
+
 import Hogan from "hogan.js";
 
 export default class View{
@@ -13,7 +15,7 @@ export default class View{
       $("#editorDelete").addClass("disabled")
       this.showWelcomeMessage()
     }
-    else{
+    else if(record.id){
       $("#editorSave").removeClass("disabled")
       $("#editorDelete").removeClass("disabled")
 
@@ -22,6 +24,21 @@ export default class View{
         record: record
       })
       $("#editor .content").html(html)
+
+      $(".showJoinToken").on("click",()=>{
+        textPrompt.show(record.joinToken)
+      })
+    }
+    else {
+      $("#editorSave").removeClass("disabled")
+      $("#editorDelete").removeClass("disabled")
+
+      let tmpl = Hogan.compile($("#recordCreateTemplate").html());
+      let html = tmpl.render({
+        record: record
+      })
+      $("#editor .content").html(html)
+
     }
   }
 

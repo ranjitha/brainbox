@@ -14,10 +14,10 @@ class Dialog {
                 </div>
                 <div class="modal-body">
                   <div class="media">
-                    <div class="promptValueLabel">Value:</div>
                     <fieldset>
                       <div class="form-group">
                         <div class="col-lg-12">
+                          <div class="promptValueLabel">Value:</div>
                           <input type="text" class="form-control floating-label inputPromptValue" value="" >
                         </div>
                       </div>
@@ -25,8 +25,8 @@ class Dialog {
                   </div>
                 </div>
                 <div class="modal-footer">
-                  <button class="btn" data-dismiss="modal">Close</button>
-                  <button class="btn btn-primary okButton"><span>Create</span></button>
+                  <button class="btn" data-dismiss="modal">Cancel</button>
+                  <button class="btn btn-primary okButton">Create</button>
                 </div>
               </div>
             </div>
