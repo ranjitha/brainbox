@@ -98,7 +98,7 @@ function ensureLoggedIn(options) {
       if (setReturnTo && req.session) {
         req.session.returnTo = req.originalUrl || req.url
       }
-      return res.redirect(trim(url, "/"))
+      return res.redirect(url)
     }
     next()
   }
@@ -116,7 +116,7 @@ function ensureAdminLoggedIn(options) {
       if (setReturnTo && req.session) {
         req.session.returnTo = req.originalUrl || req.url
       }
-      return res.redirect(trim(url, "/"))
+      return res.redirect(url)
     }
     next();
   }
@@ -244,7 +244,7 @@ module.exports = {
     app.put('/api/user/group/:id', ensureLoggedIn(), restGroup.put)
     app.post('/api/user/group', ensureLoggedIn(), restGroup.post)
     app.post('/api/user/group/join', ensureLoggedIn(), restGroup.join)
-    //app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.leave)
+    app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.unjoin)
 
 
     // Serve the static content for the three different apps of brainbox
@@ -370,7 +370,7 @@ module.exports = {
 
   onLoggedIn(req, res) {
     console.log(req.session.returnTo)
-    let returnTo = req.session.returnTo ? `../${req.session.returnTo}/` : '/'
+    let returnTo = req.session.returnTo ? `../${trim(req.session.returnTo)}/` : '/'
     res.redirect(returnTo)
     makeDir(sheetsHomeDir + req.user.username)
     makeDir(brainsHomeDir + req.user.username)

@@ -9,7 +9,6 @@ export default class Palette {
       let element = $(event.target)
       let id = "" + element.data("id")
       recordStore.findById(id).then( (record)=>{
-        console.log(record)
         $(".paletteItem").removeClass("selected")
         element.addClass("selected")
         app.view.setRecord(record)

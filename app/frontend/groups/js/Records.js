@@ -52,10 +52,19 @@ class RecordStore {
   }
 
   delete(record) {
-    return axios.delete(restEndpoint + record.id).then((response) => {
-      this.records = this.records.filter((u) => u.id !== record.id)
-      return response.data
-    })
+    console.log(record)
+    if(record.role === "member"){
+      return axios.delete(restEndpoint+ "join/" + record.id).then((response) => {
+        this.records = this.records.filter((u) => u.id !== record.id)
+        return response.data
+      })
+    }
+    else {
+      return axios.delete(restEndpoint + record.id).then((response) => {
+        this.records = this.records.filter((u) => u.id !== record.id)
+        return response.data
+      })
+    }
   }
 
 }

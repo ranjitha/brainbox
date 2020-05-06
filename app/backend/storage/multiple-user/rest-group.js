@@ -25,6 +25,7 @@ function mapGroup(group) {
     id: group.id,
     role: group.role,
     joinToken: group.joinToken,
+    owner: group.owner,
     members: group.members,
     name: group.name
   }
@@ -60,24 +61,27 @@ exports.get = (req, res) => {
       .then((groupSPOs) => {
         return Promise.all(groupSPOs.map(spo => classroom.users.findById(spo.subject)))
       }),
-    // the group itself
+    // get the owner of the group
+    classroom.graph.get({predicate: "owner", object: "" + req.params.id})
+      .then((groupSPOs) => {
+        return Promise.all(groupSPOs.map(spo => classroom.users.findById(spo.subject)))
+      }),
+    // the group itself either as as owner
     classroom.graph.get({subject: "" + req.user.id, predicate: "owner", object: req.params.id})
       .then((groupSPOs) => {
         return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "owner"})))
       }),
+    // or as member.
     classroom.graph.get({subject: "" + req.user.id, predicate: "member", object: req.params.id})
       .then((groupSPOs) => {
         return Promise.all(groupSPOs.map(spo => classroom.groups.findById(spo.object, {role: "member"})))
       })
-
-    // in the future we collect the assignment as well
-    // TODO
   ])
     .then((data) => {
-      // either you are "owner" (data[1]) or "member" (data[2])
+      // either you are "owner" (data[2]) or "member" (data[3])
       // we merge the and use the first element....anyhow - the array contains only ONE element.
       //
-      let group = {members: mapUser(data[0]), ...data[1].concat(data[2])[0]}
+      let group = {members: mapUser(data[0]), owner: mapUser(data[1][0]), ...data[2].concat(data[3])[0]}
       res.status(200).send(mapGroup(group))
     })
     .catch((error) => {
@@ -90,6 +94,9 @@ exports.del = (req, res) => {
   //
   classroom.graph.get({subject: req.user.id, predicate: "owner", object: req.params.id})
     .then((rv) => {
+      if(rv.length===0){
+        return Promise.reject("not owner of group")
+      }
       rv.forEach(r => {
         // get ALL relations to the named group
         classroom.graph.get({object: r.object})
@@ -105,7 +112,7 @@ exports.del = (req, res) => {
       res.status(200).send("done")
     })
     .catch((error) => {
-      res.status(500).send(error)
+      res.status(403).send(error)
     })
 }
 
@@ -132,17 +139,31 @@ exports.join = (req, res) => {
   }
 
   classroom.groups.findByJoinToken(data.joinToken)
-    .then((data) => {
-      classroom.graph.put([
-        {subject: req.user.id, predicate: "member", object: data.id}
-      ])
-      res.status(200).send(mapGroup(data))
+    .then((group) => {
+      classroom.graph.get({subject: req.user.id, predicate: "owner", object: group.id})
+        .then((rv) => {
+          if(rv.length>0){
+            return Promise.reject("conflict. user is owner of group. join not possible")
+          }
+          classroom.graph.put([{subject: req.user.id, predicate: "member", object: group.id}])
+          res.status(200).send(mapGroup(group))
+        })
     })
     .catch((error) => {
-      res.status(500).send(error)
+      res.status(403).send(error)
     })
 }
 
+
+exports.unjoin = (req, res) => {
+  classroom.graph.del({subject: req.user.id, predicate: "member", object: req.params.id})
+    .then(() => {
+      res.status(200).send("done")
+    })
+    .catch((error) => {
+      res.status(403).send(error)
+    })
+}
 
 exports.post = (req, res) => {
   let data = req.body
@@ -156,7 +177,7 @@ exports.post = (req, res) => {
   data.joinToken = shortid.generate()
 
   classroom.groups.create(data)
-    .then((dataCreated) => {
+    .then(() => {
       // generate the triple in the graph DB to indicate, that I'm the owner
       return classroom.graph.put([{subject: req.user.id, predicate: "owner", object: data.id}])
     })

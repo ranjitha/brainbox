@@ -26,7 +26,7 @@ export default class View{
       })
       $("#editor .content").html(html)
 
-      $(".showJoinToken").on("click",()=>{
+      $(".showJoinToken").off("click").on("click",()=>{
         textPrompt.show(record.joinToken)
       })
     }

@@ -30,7 +30,7 @@ export default class Toolbar {
             }
           })
       })
-      .on("click", "#joinGroupButton, #editorAdd:not(.disabled)", (event) => {
+      .on("click", "#joinGroupButton", (event) => {
         inputPrompt.show("Join a group","Enter the Join Code you received from the group owner","",(value) => {
           recordStore.join(value)
         })
@@ -40,12 +40,15 @@ export default class Toolbar {
         app.view.setRecord({})
       })
       .on("click", "#editorDelete:not(.disabled)", (event) => {
-        let record = {id: $("#editor .content input[data-id='id']").val()}
-        recordStore.delete(record).then(() => {
-          toast("Deleted")
-          app.view.setRecord({})
-          app.palette.update()
+        let id = $("#editor .content input[data-id='id']").val()
+        recordStore.findById(id).then(record => {
+          recordStore.delete(record).then(() => {
+            toast("Deleted")
+            app.view.setRecord({})
+            app.palette.update()
+          })
         })
+
       })
   }
 }

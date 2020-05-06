@@ -32,6 +32,7 @@ exports.put = function(data) {
 exports.del = function(data) {
   return new Promise((resolve, reject) => {
     db.del(data, (error) => {
+      debugger
       if(error) reject(error)
       else resolve(data)
     })
