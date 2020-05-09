@@ -102,7 +102,7 @@ $(window, document, undefined).ready(function () {
   })
 
   let token = getParam("token")
-  axios.get("../password/token/" + token)
+  axios.get("../password/token/" + encodeURIComponent(token))
     .then(() => {
       $("#password1Input").focus()
     })

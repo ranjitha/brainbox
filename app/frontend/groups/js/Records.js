@@ -9,7 +9,7 @@ class RecordStore {
   }
 
   findById(id) {
-    return axios.get(restEndpoint+id).then((response) =>{
+    return axios.get(restEndpoint+encodeURIComponent(id)).then((response) =>{
       return response.data
     })
   }
@@ -37,7 +37,7 @@ class RecordStore {
 
   save(record) {
     if (record.id) {
-      return axios.put(restEndpoint + record.id, record).then((response) => {
+      return axios.put(restEndpoint + encodeURIComponent(record.id), record).then((response) => {
         let internalRecord = this.records.filter((u) => u.id === record.id)[0]
         Object.assign(internalRecord, response.data)
         return internalRecord
@@ -52,9 +52,8 @@ class RecordStore {
   }
 
   delete(record) {
-    console.log(record)
     if(record.role === "member"){
-      return axios.delete(restEndpoint+ "join/" + record.id).then((response) => {
+      return axios.delete(restEndpoint+ "join/" + encodeURIComponent(record.id)).then((response) => {
         this.records = this.records.filter((u) => u.id !== record.id)
         return response.data
       })
@@ -66,7 +65,6 @@ class RecordStore {
       })
     }
   }
-
 }
 
 

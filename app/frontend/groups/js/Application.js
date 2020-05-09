@@ -13,9 +13,9 @@ class App {
   }
 
   init(permissions) {
-    this.palette = new Palette(this)
-    this.view = new View(this)
-    this.toolbar = new Toolbar(this)
+    this.palette = new Palette(this, permissions)
+    this.view = new View(this, permissions)
+    this.toolbar = new Toolbar(this, permissions)
     this.userinfo = new Userinfo(permissions, conf)
     this.appSwitch = new AppSwitch(permissions, conf)
   }

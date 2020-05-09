@@ -7,7 +7,7 @@ let type = "user"
 let entity = "users"
 
 
-exports.findById = async function (id, mergeWith) {
+exports.get = async function (id, mergeWith) {
   mergeWith = mergeWith || {}
   return new Promise((resolve, reject) => {
     let result = db()

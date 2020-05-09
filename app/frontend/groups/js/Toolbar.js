@@ -1,11 +1,10 @@
 import toast from "../../_common/js/toast"
-import inputPrompt from "../../_common/js/InputPrompt"
 
 import recordStore from "./Records"
 
 export default class Toolbar {
 
-  constructor(app) {
+  constructor(app, permissions) {
 
     $(document)
       .on("click", "#editorSave:not(.disabled)", (event) => {
@@ -19,8 +18,9 @@ export default class Toolbar {
         recordStore.save(record)
           .then((updatedRecord) => {
             toast("Saved")
-            app.view.setRecord(updatedRecord)
-            app.palette.update()
+            app.palette.update().then(()=>{
+              $(".paletteItem[data-id='" + updatedRecord.id + "']").click()
+            })
           })
           .catch((error) => {
             let status = error.response.status
@@ -29,15 +29,6 @@ export default class Toolbar {
               $("#" + field + "Help").html("required").addClass("error")
             }
           })
-      })
-      .on("click", "#joinGroupButton", (event) => {
-        inputPrompt.show("Join a group","Enter the Join Code you received from the group owner","",(value) => {
-          recordStore.join(value)
-        })
-        $("#inputPromptDialog .okButton").html("Join")
-      })
-      .on("click", "#createGroupButton, #editorAdd:not(.disabled)", (event) => {
-        app.view.setRecord({})
       })
       .on("click", "#editorDelete:not(.disabled)", (event) => {
         let id = $("#editor .content input[data-id='id']").val()

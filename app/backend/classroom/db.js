@@ -10,8 +10,8 @@ let db = null
 
 let defaultUsers = [
   {id: "1", username: 'admin', password: 'secret', displayName: 'Admin', role: "admin", email: 'admin@example.com'},
-  {id: "2", username: 'jack', password: 'secret', displayName: 'Jack', role: "user", email: 'jack@example.com'},
-  {id: "3", username: 'jill', password: 'secret', displayName: 'Jill', role: "user", email: 'jill@example.com'}
+  {id: "2", username: 'jack',  password: 'secret', displayName: 'Jack',  role: "user",  email: 'jack@example.com'},
+  {id: "3", username: 'jill',  password: 'secret', displayName: 'Jill',  role: "user",  email: 'jill@example.com'}
 ]
 
 exports.init = async function (app, args) {
@@ -28,7 +28,7 @@ exports.init = async function (app, args) {
 
   // Set some defaults (required if your JSON file is empty)
   //
-  db.defaults({users: [], groups: []})
+  db.defaults({users: [], groups: [], attachments: [], assignments: []})
     .write()
 
   // setup some default users if we start the first time

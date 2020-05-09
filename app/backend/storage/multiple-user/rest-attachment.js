@@ -35,18 +35,23 @@ exports.list = (req, res) => {
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     res.status(403).send("user not logged in")
   } else {
+    let groupId = req.params.groupId
+    let userId = "" + req.user.id
     Promise.all([
-      classroom.graph.get({subject: "" + req.user.id, predicate: "owner"})
-        .then((groupSPOs) => {
-          return Promise.all(groupSPOs.map(spo => classroom.groups.get(spo.object, {role: "owner"})))
-        }),
-      classroom.graph.get({subject: "" + req.user.id, predicate: "member"})
-        .then((groupSPOs) => {
-          return Promise.all(groupSPOs.map(spo => classroom.groups.get(spo.object, {role: "member"})))
-        })
+      classroom.graph.get({subject: userId, predicate: "owner", object: groupId}),
+      classroom.graph.get({subject: userId, predicate: "member", object: groupId})
     ])
       .then((groups) => {
-        res.status(200).send(mapGroup(groups.flat()))
+        if(groups.length===0) {
+          throw "user is not member of the requested group"
+        }
+        return classroom.graph.get({subject:groupId, predicate:"hasAttachment"})
+          .then((spos)=>{
+            return Promise.all(spos.map(spo => classroom.attachment.get(spo.object)))
+          })
+      })
+      .then( attachments => {
+        res.status(200).send(attachments)
       })
       .catch(error => {
         res.status(500).send(error)
@@ -116,70 +121,38 @@ exports.del = (req, res) => {
     })
 }
 
-exports.put = (req, res) => {
-  let data = req.body
-  // it is not allowed to change the id
-  delete data.id
-
-  classroom.groups.update(req.params.id, data)
-    .then((dataUpdated) => {
-      res.status(200).send(mapGroup(dataUpdated))
-    })
-    .catch((error) => {
-      res.status(500).send(error)
-    })
-}
-
-
-exports.join = (req, res) => {
-  let data = req.body
-  if (!data.joinToken) {
-    res.status(400).send("joinToken")
-    return
-  }
-
-  classroom.groups.findByJoinToken(data.joinToken)
-    .then((group) => {
-      classroom.graph.get({subject: req.user.id, predicate: "owner", object: group.id})
-        .then((rv) => {
-          if(rv.length>0){
-            return Promise.reject("conflict. user is owner of group. join not possible")
-          }
-          classroom.graph.put([{subject: req.user.id, predicate: "member", object: group.id}])
-          res.status(200).send(mapGroup(group))
-        })
-    })
-    .catch((error) => {
-      res.status(403).send(error)
-    })
-}
-
-
-exports.unjoin = (req, res) => {
-  classroom.graph.del({subject: req.user.id, predicate: "member", object: req.params.id})
-    .then(() => {
-      res.status(200).send("done")
-    })
-    .catch((error) => {
-      res.status(403).send(error)
-    })
-}
 
 exports.post = (req, res) => {
   let data = req.body
 
-  if (!data.name) {
-    res.status(400).send("data");
+  if (!data.file) {
+    res.status(400).send("file");
+    return
+  }
+
+  if (!data.group) {
+    res.status(400).send("group");
+    return
+  }
+
+  if (!data.type) {
+    res.status(400).send("type");
     return
   }
 
   data.id = shortid.generate()
-  data.joinToken = shortid.generate()
 
-  classroom.groups.create(data)
+  // allow only that we set the logged in user as reference. Otherwise it is null
+  //
+  if(data.user !== req.user.id) {
+    data.user = null
+  }
+
+  classroom.attachments.create({id:data.id, user:data.user, file: data.file, type: data.type})
     .then(() => {
-      // generate the triple in the graph DB to indicate, that I'm the owner
-      return classroom.graph.put({subject: req.user.id, predicate: "owner", object: data.id})
+      // generate the triple in the graph DB to indicate, that the user has assigned a document to the group
+      //
+      return classroom.graph.put({subject: data.group, predicate: "hasAttachment", object: data.id})
     })
     .then(() => {
       req.params.id = data.id

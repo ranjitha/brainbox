@@ -218,7 +218,7 @@ $(window, document, undefined).ready(function () {
   });
 
   var token = getParam("token");
-  _axios2.default.get("../password/token/" + token).then(function () {
+  _axios2.default.get("../password/token/" + encodeURIComponent(token)).then(function () {
     $("#password1Input").focus();
   }).catch(function () {
     $(".form").append("<div class='overlay'><div>Your password reset link has expired<a class='button' href='../'>Back</a></div></div>");

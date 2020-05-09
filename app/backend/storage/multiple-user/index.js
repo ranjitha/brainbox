@@ -61,7 +61,7 @@ passport.serializeUser(function (user, cb) {
 });
 
 passport.deserializeUser(function (id, cb) {
-  classroom.users.findById(id)
+  classroom.users.get(id)
     .then( user => {
       cb(null, user)
     })
@@ -246,6 +246,12 @@ module.exports = {
     app.post('/api/user/group/join', ensureLoggedIn(), restGroup.join)
     app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.unjoin)
 
+    let restAttachment = require("./rest-attachment")
+    app.get('/api/user/group/:groupId/attachment', ensureLoggedIn(), restAttachment.list)
+    app.get('/api/user/group/:groupId/attachment/:id', ensureLoggedIn(), restAttachment.get)
+    app.post('/api/user/group/:groupId/attachment', ensureLoggedIn(), restAttachment.post)
+    app.delete('/api/user/group/:groupId/attachment/:id', ensureLoggedIn(), restAttachment.del)
+
 
     // Serve the static content for the three different apps of brainbox
     // (designer, simulator, author)
@@ -369,8 +375,7 @@ module.exports = {
   createFolder: generic.createFolder,
 
   onLoggedIn(req, res) {
-    console.log(req.session.returnTo)
-    let returnTo = req.session.returnTo ? `../${trim(req.session.returnTo)}/` : '/'
+    let returnTo = req.session.returnTo ? `../${trim(req.session.returnTo,'/')}/` : '/'
     res.redirect(returnTo)
     makeDir(sheetsHomeDir + req.user.username)
     makeDir(brainsHomeDir + req.user.username)

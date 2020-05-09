@@ -1,7 +1,7 @@
 let db = require("./db").db
 
-let type = "group"
-let entity = "groups"
+let type = "Attachment"
+let entity = "attachments"
 
 
 exports.get = async function (id, mergeWith) {
@@ -19,20 +19,6 @@ exports.get = async function (id, mergeWith) {
   })
 }
 
-
-exports.findByJoinToken = async function (joinToken) {
-  return new Promise((resolve, reject) => {
-    let result = db()
-      .get(entity)
-      .find({joinToken})
-      .value()
-    if (result) {
-      resolve(result)
-    } else {
-      reject(type + ' ' + id + ' does not exist')
-    }
-  })
-}
 
 exports.del = async function (id) {
   return new Promise((resolve, reject) => {

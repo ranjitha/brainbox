@@ -148,15 +148,20 @@
       <div class="owner">
         <h3>Tutor: <span>YOU</span></h3>
       </div>
-      <div class="members">
-        <h3>Members</h3>
+      <div class="groupContent">
+        <h3>Members  <i class="addGroupMember fa fa-plus-square-o"></i></h3>
         {{#record.members}}
             <div>
                {{displayName}}
             </div>
         {{/record.members}}
+        <h3>Attachments  <i class="addGroupAttachment fa fa-plus-square-o"></i></h3>
+        {{#record.attachments}}
+            <div>
+               {{displayName}}
+            </div>
+        {{/record.attachments}}
       </div>
-
   </div>
 </script>
 
@@ -175,14 +180,22 @@
       <div class="owner">
         <h3>Tutor: <span>{{record.owner.displayName}}</span></h3>
       </div>
-      <div class="members">
+
+      <div class="groupContent">
         <h3>Members</h3>
         {{#record.members}}
             <div>
                {{displayName}}
             </div>
         {{/record.members}}
+        <h3>Attachments</h3>
+        {{#record.attachments}}
+            <div>
+               {{displayName}}
+            </div>
+        {{/record.attachments}}
       </div>
+
   </div>
 </script>
 

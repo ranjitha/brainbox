@@ -1,11 +1,14 @@
 import textPrompt from "../../_common/js/TextPrompt"
+import fileSelectDialog from "./FileSelectDialog"
 
 import Hogan from "hogan.js";
 
 export default class View{
 
-  constructor(app){
+  constructor(app, permissions){
     this.app = app
+    this.permissions = permissions
+
     this.showWelcomeMessage()
   }
 
@@ -46,6 +49,8 @@ export default class View{
   showWelcomeMessage(){
     let tmpl = $("#welcomeTemplate").html()
     $("#editor .content").html(tmpl)
+
+    fileSelectDialog.show(this.permissions.sheets)
   }
 }
 

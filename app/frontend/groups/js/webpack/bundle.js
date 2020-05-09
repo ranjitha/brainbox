@@ -709,9 +709,9 @@ var App = function () {
   _createClass(App, [{
     key: "init",
     value: function init(permissions) {
-      this.palette = new Palette(this);
-      this.view = new View(this);
-      this.toolbar = new Toolbar(this);
+      this.palette = new Palette(this, permissions);
+      this.view = new View(this, permissions);
+      this.toolbar = new Toolbar(this, permissions);
       this.userinfo = new _Userinfo2.default(permissions, _Configuration2.default);
       this.appSwitch = new _AppSwitch2.default(permissions, _Configuration2.default);
     }
@@ -722,6 +722,78 @@ var App = function () {
 
 var app = new App();
 exports.default = app;
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/groups/js/BackendStorage.js":
+/*!**************************************************!*\
+  !*** ./app/frontend/groups/js/BackendStorage.js ***!
+  \**************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/groups/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BackendStorage = function () {
+
+  /**
+   * @constructor
+   *
+   */
+  function BackendStorage() {
+    _classCallCheck(this, BackendStorage);
+  }
+
+  _createClass(BackendStorage, [{
+    key: "getFiles",
+    value: function getFiles(path, type, scope) {
+      return _axios2.default.get(_Configuration2.default[type][scope].list(path)).then(function (response) {
+        var files = response.data.files;
+
+        // sort the result
+        // Directories are always on top
+        //
+        files.sort(function (a, b) {
+          if (a.type === b.type) {
+            if (a.name.toLowerCase() < b.name.toLowerCase()) return -1;
+            if (a.name.toLowerCase() > b.name.toLowerCase()) return 1;
+            return 0;
+          }
+          if (a.type === "dir") {
+            return -1;
+          }
+          return 1;
+        });
+        return files;
+      });
+    }
+  }]);
+
+  return BackendStorage;
+}();
+
+var storage = new BackendStorage();
+exports.default = storage;
 module.exports = exports["default"];
 
 /***/ }),
@@ -741,8 +813,160 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   appName: "Brainbox Groups",
-  loginRedirect: "groups"
+  loginRedirect: "groups",
+
+  sheet: {
+    user: {
+      list: function list(path) {
+        return "../api/user/sheet/list?path=" + path;
+      },
+      image: function image(file) {
+        return "../_common/images/files_markdown.svg";
+      },
+      folder: "../api/user/sheet/folder"
+    },
+
+    global: {
+      list: function list(path) {
+        return "../api/global/sheet/list?path=" + path;
+      },
+      image: function image(file) {
+        return "../_common/images/files_markdown.svg";
+      },
+      folder: "../api/global/sheet/folder"
+    }
+  }
 };
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/groups/js/FileSelectDialog.js":
+/*!****************************************************!*\
+  !*** ./app/frontend/groups/js/FileSelectDialog.js ***!
+  \****************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
+
+var _hogan2 = _interopRequireDefault(_hogan);
+
+var _path = __webpack_require__(/*! path */ "./node_modules/node-libs-browser/node_modules/path-browserify/index.js");
+
+var _path2 = _interopRequireDefault(_path);
+
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/groups/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Dialog = function () {
+
+  /**
+   * @constructor
+   */
+  function Dialog() {
+    _classCallCheck(this, Dialog);
+
+    this.filesSelectTemplate = " \n        <ul class=\"list-group\">\n        {{#files}}\n          <li class=\"list-group-item\"  \n                  data-scope=\"{{scope}}\"  \n                  data-type=\"{{type}}\"  \n                  data-folder=\"{{folder}}\" \n                  data-title=\"{{title}}\" \n                  data-name=\"{{folder}}{{name}}\"\n                  >\n            <div class=\"media thumb\">\n               {{#dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width:24px; height:24px\">\n                    <img style=\"width:100%; height:100%; object-fit:contain\"  src=\"../_common/images/files_folder{{back}}.svg\">\n                  </div>\n                  </a>\n               {{/dir}}\n               {{^dir}}\n                  <a class=\"media-left\">\n                  <div style=\"width:24px;height:24px\">\n                    <img style=\"width:100%;height:100%; object-fit:contain\" src=\"{{image}}\">\n                  </div>\n                  </a>\n               {{/dir}}\n              <div class=\"media-body\">\n                <h4 class=\"media-heading\">{{title}}</h4>\n              </div>\n            </div>\n          </li>\n        {{/files}}\n        </ul>\n    ";
+
+    $("body").append(" \n      <div id=\"fileSelectDialog\" class=\"modal fade genericDialog\" tabindex=\"-1\">\n        <div class=\"modal-dialog \">\n          <div class=\"modal-content\">\n            <div class=\"modal-header\">\n                  <h4 class=\"media-heading\">Input Prompt</h4>\n            </div>\n            <div class=\"container\">\n              <header>\n                <ul class=\"nav nav-tabs\"></ul>\n              </header>\n    \n              <div class=\"file-select-content\"></div>\n            </div>\n\n            <div class=\"modal-footer\">\n              <button class=\"btn\" data-dismiss=\"modal\">Close</button>\n            </div>\n          </div>\n        </div>\n      </div>\n    ");
+  }
+
+  _createClass(Dialog, [{
+    key: "show",
+    value: function show(permissions) {
+      $("#fileSelectDialog .nav-tabs").html("");
+      $("#fileSelectDialog .file-select-content").html("");
+
+      this.initPane("sheet", "user", _Configuration2.default.sheet.user, permissions, "");
+      this.initPane("sheet", "global", _Configuration2.default.sheet.global, permissions.global, "");
+
+      $("#fileSelectDialog").modal("show");
+      $("#fileSelectDialog .nav-tabs li:first-child a").click();
+    }
+  }, {
+    key: "initPane",
+    value: function initPane(type, scope, backendConf, permissions, initialPath) {
+      var paneId = type + "_" + scope + "_files";
+      var paneSelector = "#" + paneId;
+      $("#fileSelectDialog .nav-tabs").append("<li><a data-toggle=\"tab\" href=\"" + paneSelector + "\">" + paneId + "</a></li>");
+      $("#fileSelectDialog .file-select-content").append("<div id=\"" + paneId + "\" class=\"tab-pane fade\"></div>");
+
+      var storage = __webpack_require__(/*! ./BackendStorage */ "./app/frontend/groups/js/BackendStorage.js");
+
+      var _this = this;
+      // load files
+      //
+      function loadPane(path) {
+        storage.getFiles(path, type, scope).then(function (files) {
+          files = files.map(function (file) {
+            return _extends({}, file, {
+              scope: scope,
+              title: file.name,
+              image: backendConf.image(file.filePath)
+            });
+          });
+
+          if (path.length !== 0) {
+            files.unshift({
+              name: _path2.default.dirname(path),
+              folder: "", // important. Otherwise Hogan makes a lookup fallback to the root element
+              type: "dir",
+              dir: true,
+              scope: scope,
+              back: "_back",
+              title: ".."
+            });
+          }
+          if (files.length > 0) {
+            var compiled = _hogan2.default.compile(_this.filesSelectTemplate);
+            var output = compiled.render({ folder: path, files: files });
+            $(paneSelector).html($(output));
+          } else {
+            $(paneSelector).html('<ul class="list-group"><li class="list-group-item">No Files Found</li></ul>');
+          }
+
+          $(paneSelector + " .list-group-item[data-type='dir']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            if (name !== "" && !name.endsWith("/")) {
+              name = name + "/";
+            }
+            loadPane(name);
+          });
+
+          $(paneSelector + " .list-group-item[data-type='file']").on("click", function (event) {
+            var $el = $(event.currentTarget);
+            var name = $el.data("name");
+            alert(name);
+          });
+        });
+      }
+      loadPane(initialPath);
+    }
+  }]);
+
+  return Dialog;
+}();
+
+var dialog = new Dialog();
+exports.default = dialog;
 module.exports = exports["default"];
 
 /***/ }),
@@ -769,6 +993,10 @@ var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/ho
 
 var _hogan2 = _interopRequireDefault(_hogan);
 
+var _InputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
+
+var _InputPrompt2 = _interopRequireDefault(_InputPrompt);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -776,10 +1004,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var recordStore = __webpack_require__(/*! ./Records */ "./app/frontend/groups/js/Records.js");
 
 var Palette = function () {
-  function Palette(app) {
+  function Palette(app, permissions) {
+    var _this = this;
+
     _classCallCheck(this, Palette);
 
-    $(document).on("click", "#paletteElements .paletteItem", function (event) {
+    $(document).off("click", "#paletteElements .paletteItem").on("click", "#paletteElements .paletteItem", function (event) {
       var element = $(event.target);
       var id = "" + element.data("id");
       recordStore.findById(id).then(function (record) {
@@ -787,6 +1017,17 @@ var Palette = function () {
         element.addClass("selected");
         app.view.setRecord(record);
       });
+    }).off("click", "#joinGroupButton").on("click", "#joinGroupButton", function () {
+      _InputPrompt2.default.show("Join a group", "Enter the Join Code you received from the group owner", "", function (value) {
+        recordStore.join(value).then(function (record) {
+          _this.update().then(function () {
+            $(".paletteItem[data-id='" + record.id + "']").click();
+          });
+        });
+      });
+      $("#inputPromptDialog .okButton").html("Join");
+    }).on("click", "#createGroupButton, #editorAdd:not(.disabled)", function () {
+      app.view.setRecord({});
     });
 
     this.update();
@@ -795,7 +1036,7 @@ var Palette = function () {
   _createClass(Palette, [{
     key: "update",
     value: function update() {
-      recordStore.list().then(function (records) {
+      return recordStore.list().then(function (records) {
         records = records.map(function (record) {
           return _extends({}, record, { icon: record.role === "owner" ? "fa-university" : "fa-graduation-cap" });
         });
@@ -853,7 +1094,7 @@ var RecordStore = function () {
   _createClass(RecordStore, [{
     key: "findById",
     value: function findById(id) {
-      return _axios2.default.get(restEndpoint + id).then(function (response) {
+      return _axios2.default.get(restEndpoint + encodeURIComponent(id)).then(function (response) {
         return response.data;
       });
     }
@@ -893,7 +1134,7 @@ var RecordStore = function () {
       var _this3 = this;
 
       if (record.id) {
-        return _axios2.default.put(restEndpoint + record.id, record).then(function (response) {
+        return _axios2.default.put(restEndpoint + encodeURIComponent(record.id), record).then(function (response) {
           var internalRecord = _this3.records.filter(function (u) {
             return u.id === record.id;
           })[0];
@@ -915,9 +1156,8 @@ var RecordStore = function () {
     value: function _delete(record) {
       var _this4 = this;
 
-      console.log(record);
       if (record.role === "member") {
-        return _axios2.default.delete(restEndpoint + "join/" + record.id).then(function (response) {
+        return _axios2.default.delete(restEndpoint + "join/" + encodeURIComponent(record.id)).then(function (response) {
           _this4.records = _this4.records.filter(function (u) {
             return u.id !== record.id;
           });
@@ -961,10 +1201,6 @@ var _toast = __webpack_require__(/*! ../../_common/js/toast */ "./app/frontend/_
 
 var _toast2 = _interopRequireDefault(_toast);
 
-var _InputPrompt = __webpack_require__(/*! ../../_common/js/InputPrompt */ "./app/frontend/_common/js/InputPrompt.js");
-
-var _InputPrompt2 = _interopRequireDefault(_InputPrompt);
-
 var _Records = __webpack_require__(/*! ./Records */ "./app/frontend/groups/js/Records.js");
 
 var _Records2 = _interopRequireDefault(_Records);
@@ -973,7 +1209,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Toolbar = function Toolbar(app) {
+var Toolbar = function Toolbar(app, permissions) {
   _classCallCheck(this, Toolbar);
 
   $(document).on("click", "#editorSave:not(.disabled)", function (event) {
@@ -986,8 +1222,9 @@ var Toolbar = function Toolbar(app) {
     });
     _Records2.default.save(record).then(function (updatedRecord) {
       (0, _toast2.default)("Saved");
-      app.view.setRecord(updatedRecord);
-      app.palette.update();
+      app.palette.update().then(function () {
+        $(".paletteItem[data-id='" + updatedRecord.id + "']").click();
+      });
     }).catch(function (error) {
       var status = error.response.status;
       if (status === 400) {
@@ -995,13 +1232,6 @@ var Toolbar = function Toolbar(app) {
         $("#" + field + "Help").html("required").addClass("error");
       }
     });
-  }).on("click", "#joinGroupButton", function (event) {
-    _InputPrompt2.default.show("Join a group", "Enter the Join Code you received from the group owner", "", function (value) {
-      _Records2.default.join(value);
-    });
-    $("#inputPromptDialog .okButton").html("Join");
-  }).on("click", "#createGroupButton, #editorAdd:not(.disabled)", function (event) {
-    app.view.setRecord({});
   }).on("click", "#editorDelete:not(.disabled)", function (event) {
     var id = $("#editor .content input[data-id='id']").val();
     _Records2.default.findById(id).then(function (record) {
@@ -1039,6 +1269,10 @@ var _TextPrompt = __webpack_require__(/*! ../../_common/js/TextPrompt */ "./app/
 
 var _TextPrompt2 = _interopRequireDefault(_TextPrompt);
 
+var _FileSelectDialog = __webpack_require__(/*! ./FileSelectDialog */ "./app/frontend/groups/js/FileSelectDialog.js");
+
+var _FileSelectDialog2 = _interopRequireDefault(_FileSelectDialog);
+
 var _hogan = __webpack_require__(/*! hogan.js */ "./node_modules/hogan.js/lib/hogan.js");
 
 var _hogan2 = _interopRequireDefault(_hogan);
@@ -1048,10 +1282,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var View = function () {
-  function View(app) {
+  function View(app, permissions) {
     _classCallCheck(this, View);
 
     this.app = app;
+    this.permissions = permissions;
+
     this.showWelcomeMessage();
   }
 
@@ -1092,6 +1328,8 @@ var View = function () {
     value: function showWelcomeMessage() {
       var tmpl = $("#welcomeTemplate").html();
       $("#editor .content").html(tmpl);
+
+      _FileSelectDialog2.default.show(this.permissions.sheets);
     }
   }]);
 
@@ -3230,7 +3468,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: rgba(0, 0, 0, 0.4);\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 100%;\n}\n.markdownRendering p {\n  font-size: 16px;\n  margin-top: 30px;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.markdownRendering .info {\n  border: 1px solid #B4E1E4;\n  border-radius: 5px;\n  background-color: #81c7e1;\n  color: white;\n  font-weight: 400;\n  letter-spacing: 2px;\n  padding: 5px;\n  padding-left: 20px;\n  padding-right: 20px;\n}\n.markdownRendering .info p {\n  padding: 0;\n  margin: 0;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n  z-index: 1;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n.activeSection .tinyFlyoverMenu {\n  position: sticky;\n  float: right;\n  top: 10px;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .toolbar {\n  background-color: transparent;\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n.userinfo_toggler .userContainer {\n  text-align: center;\n}\n.userinfo_toggler .userContainer img {\n  width: 90px;\n}\n.userinfo_toggler .userContainer button {\n  margin-top: 20px;\n  background-color: white;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  color: black;\n}\n.userinfo_toggler .loginButton {\n  top: 3px;\n  position: relative;\n  background-color: #C71D3D;\n  color: white;\n  font-weight: 600;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  cursor: pointer;\n  letter-spacing: 4px;\n  padding-left: 15px;\n  padding-right: 10px;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: #C71D3D;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n  min-width: 190px;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  display: block;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  height: 110px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n  text-align: left;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: absolute;\n  width: 218px;\n  margin: 0;\n  padding: 0;\n  top: 100px;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 110px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: auto;\n}\n#layout .tab-content .tab-pane .workspace .content .form {\n  padding: 10px;\n}\n#layout .tab-content .active {\n  display: block;\n}\n.welcomeMessage {\n  background: url(" + escape(__webpack_require__(/*! ../images/background.png */ "./app/frontend/groups/images/background.png")) + ") no-repeat;\n  background-position: center top;\n  background-size: 100% 50%;\n  min-height: 100%;\n}\n.welcomeMessage img {\n  transform: translateX(-50%);\n  background-color: white;\n  padding: 0px;\n  width: 20vw;\n  position: absolute;\n  right: 20px;\n  top: 110px;\n  border-radius: 5px;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n}\n.welcomeMessage .description {\n  position: absolute;\n  top: 280px;\n  left: 59px;\n  font-size: 18px;\n  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  text-align: left;\n}\n.welcomeMessage .teaser {\n  background-color: white;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  display: inline-block;\n  top: 30px;\n  position: absolute;\n  left: 40px;\n  padding: 23px;\n  max-width: 40%;\n  border-radius: 5px;\n}\n.welcomeMessage .teaser h2 {\n  margin-top: 0;\n  font-weight: 300;\n  font-size: 2vw;\n  text-align: right;\n  color: #C71D3D;\n}\n.welcomeMessage .teaser p {\n  text-align: right;\n}\n.welcomeMessage button {\n  background-color: #C71D3D;\n  color: white;\n  border: 0;\n  border-radius: 2px;\n}\n@media (min-width: 1050px) {\n  /* Breite beträgt mindestens 50em */\n  .welcomeMessage .description {\n    position: absolute;\n    top: 214px;\n    left: 59px;\n    font-size: 1.4vw;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n    text-align: left;\n  }\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\nhtml {\n  font-size: 16px !important;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.paletteContainer {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.paletteContainer .paletteItem {\n  text-align: left;\n  padding: 10px;\n  cursor: pointer;\n}\n.paletteContainer .paletteItem:hover {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.paletteContainer .paletteItem .icon {\n  margin-right: 10px;\n}\n.paletteContainer .paletteItem.selected {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n.paletteContainer .paletteItem.admin {\n  font-weight: bold;\n}\n#editor .form {\n  margin-top: 40px;\n  margin-left: 40px;\n}\n#editor .form input {\n  max-width: 250px;\n}\n#editor .form #userEmail {\n  max-width: 300px;\n}\n#editor .form .error {\n  color: red;\n}\n#editor .form .role {\n  position: absolute;\n  right: 20px;\n  top: 20px;\n  text-align: center;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  padding: 20px;\n}\n#editor .form .role h2 {\n  font-size: 0.875rem;\n  line-height: 1.25rem;\n  font-weight: 400;\n  text-align: center;\n}\n#editor .form .role img {\n  height: 100px;\n  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n}\n#editor .form .groupHeader h1 {\n  color: #C71D3D;\n  font-size: 2.25rem;\n  font-weight: 500;\n  line-height: 2.75rem;\n}\n#editor .form .groupHeader h2 {\n  font-size: 0.875rem;\n  line-height: 1.25rem;\n  font-weight: 400;\n}\n#editor .form .groupHeader h2 .joinToken {\n  font-weight: 300;\n}\n#editor .form .groupHeader h2 .showJoinToken {\n  padding: 10px;\n  cursor: pointer;\n}\n#editor .form .groupHeader h2 .showJoinToken:hover {\n  border-radius: 50%;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n}\n#editor .form .owner {\n  position: absolute;\n  top: 220px;\n}\n#editor .form .owner h3 {\n  min-width: 420px;\n  font-size: 1rem;\n  color: #C71D3D;\n}\n#editor .form .owner h3 span {\n  color: #333;\n  font-weight: 300;\n}\n#editor .form .members {\n  position: absolute;\n  top: 280px;\n}\n#editor .form .members h3 {\n  min-width: 420px;\n  border-bottom: 1px solid #C71D3D;\n  font-size: 1rem;\n  color: #C71D3D;\n}\n@media (min-width: 1100px) {\n  #editor .form .role {\n    position: absolute;\n    right: 20px;\n    top: 20px;\n    text-align: center;\n    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n    padding: 20px;\n  }\n  #editor .form .role h2 {\n    font-size: 0.875rem;\n    line-height: 1.25rem;\n    font-weight: 400;\n    text-align: center;\n  }\n  #editor .form .role img {\n    height: 200px;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  }\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Admin\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg polyline[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg polyline[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
+exports.push([module.i, ".toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  right: 0;\n  left: 220px;\n  height: 60px;\n  overflow: visible;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n.toolbar * {\n  outline: none;\n}\n.toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.toolbar .group .image-button {\n  display: inline-block;\n}\n.toolbar .group .image-button img {\n  margin: 5px;\n  margin-bottom: 0;\n  padding: 0;\n  width: 40px;\n  height: 40px;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n  transition: all 0.5s;\n}\n.toolbar .group .image-button div {\n  color: rgba(0, 0, 0, 0.5);\n  text-align: center;\n  font-size: 10px;\n}\n.toolbar .group .image-button div.highlight {\n  animation: highlight 3s infinite;\n}\n.toolbar .group .image-button.disabled {\n  opacity: 0.2;\n}\n.toolbar .group .image-button:not(.disabled) img,\n.toolbar .group .image-button:not(.disabled) svg {\n  cursor: pointer;\n}\n.toolbar .group .image-button:not(.disabled) img:hover,\n.toolbar .group .image-button:not(.disabled) svg:hover {\n  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);\n}\n@keyframes highlight {\n  0% {\n    color: #C71D3D;\n  }\n  50% {\n    color: rgba(0, 0, 0, 0.4);\n  }\n  100% {\n    color: #C71D3D;\n  }\n}\n.modal-backdrop.in {\n  opacity: 0.7;\n  background-color: black;\n  transition: opacity 0.4s linear;\n}\n.genericDialog .modal-content {\n  border-radius: 4px;\n  box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);\n  background-color: #ffffff;\n}\n.genericDialog .modal-content .modal-header {\n  border-bottom: 0;\n  font-weight: 400;\n  box-shadow: 0 3px 5px rgba(57, 63, 72, 0.3);\n}\n.genericDialog .modal-content .modal-body {\n  min-height: 120px;\n}\n.genericDialog .modal-content .modal-body .form-control {\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  box-sizing: border-box;\n  border-radius: 4px;\n  margin: 0;\n  padding: 0;\n  color: #4D4D4D;\n  display: inline-block;\n  font: inherit;\n  border: 1px solid #DFDFDF;\n  box-shadow: none;\n  height: 24px;\n  padding: 0 3px;\n}\n.genericDialog .modal-content .modal-body .form-control:focus {\n  background-color: #f5f5f5;\n}\n.genericDialog .modal-content .modal-body .list-group {\n  overflow-y: auto;\n  overflow-x: auto;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .glyphicon,\n.genericDialog .modal-content .modal-body .list-group .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C71D3D;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item {\n  background-color: transparent;\n  font-weight: 300;\n}\n.genericDialog .modal-content .modal-body .list-group .list-group-item:hover {\n  text-decoration: underline;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.genericDialog .modal-content .modal-body .list-group *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n.genericDialog .modal-content .modal-footer {\n  background-color: transparent;\n  border-top: 0;\n}\n.genericDialog .modal-content .modal-footer .btn,\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn:hover,\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group {\n  border: 0;\n  text-transform: uppercase;\n  background-color: transparent;\n  color: #C71D3D;\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-group .btn:hover {\n  background-color: transparent;\n}\n.genericDialog .modal-content .modal-footer .btn-group .dropdown-toggle .caret {\n  margin-top: 7px;\n}\n.genericDialog .modal-content .modal-footer .btn-group:hover {\n  background-color: rgba(199, 29, 61, 0.04);\n  transition: all 0.5s;\n}\n.genericDialog .modal-content .modal-footer .btn-primary {\n  font-weight: bold;\n}\n#fileOpenDialog .list-group {\n  height: 60%;\n}\n#fileSaveDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#fileSaveDialog .modal-body .media {\n  padding: 20px;\n}\n#githubFileSaveAsDialog .filePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .list-group {\n  height: 250px;\n}\n.markdownRendering {\n  padding: 20px;\n}\n.markdownRendering img {\n  max-width: 100%;\n}\n.markdownRendering p {\n  font-size: 16px;\n  margin-top: 30px;\n}\n.markdownRendering table {\n  margin-left: auto;\n  margin-right: auto;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n.markdownRendering table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n.markdownRendering table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n.markdownRendering table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n.markdownRendering table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n.markdownRendering table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n.markdownRendering table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n.markdownRendering table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n.markdownRendering tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n.markdownRendering tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n.markdownRendering table tr:last-child td {\n  border-bottom: 0;\n}\n.markdownRendering table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n.markdownRendering table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.markdownRendering .info {\n  border: 1px solid #B4E1E4;\n  border-radius: 5px;\n  background-color: #81c7e1;\n  color: white;\n  font-weight: 400;\n  letter-spacing: 2px;\n  padding: 5px;\n  padding-left: 20px;\n  padding-right: 20px;\n}\n.markdownRendering .info p {\n  padding: 0;\n  margin: 0;\n}\n.tinyFlyoverMenu {\n  box-shadow: 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.4);\n  border: 1px solid lightgray;\n  position: absolute;\n  top: -15px;\n  right: 20px;\n  background-color: white;\n  padding-left: 5px;\n  padding-right: 5px;\n  border-radius: 3px;\n  font-size: 20px;\n  z-index: 1;\n}\n.tinyFlyoverMenu div {\n  margin-left: 3px;\n  margin-right: 3px;\n  border: 1px solid transparent;\n}\n.tinyFlyoverMenu div:hover {\n  border: 1px solid lightgray;\n  cursor: pointer;\n}\n.activeSection .tinyFlyoverMenu {\n  position: sticky;\n  float: right;\n  top: 10px;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .toolbar {\n  background-color: transparent;\n}\n#files .teaser {\n  margin-bottom: 0;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#files .teaser .title {\n  color: #C71D3D;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#files .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#files .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  top: 25px;\n  cursor: pointer;\n  font-size: 25px;\n  padding: 4px;\n  border-radius: 2px;\n}\n#files .deleteIcon:hover {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n#files .list-group-item {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .thumbnail {\n  cursor: pointer;\n}\n#files .list-group-item .thumb .media-body {\n  padding-top: 14px;\n  padding-left: 20px;\n}\n#files .list-group-item .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #C71D3D;\n  margin-top: -5px;\n}\n#files .list-group-item .thumb h4 {\n  font-size: 18px;\n  color: #C71D3D;\n}\n#files .thumbAdd {\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .fileOperations {\n  border-bottom: 1px solid #e0e0e0;\n  padding-bottom: 9px;\n}\n#files .fileOperations div {\n  border: 1px solid lightgray;\n  padding: 4px;\n  border-radius: 5px;\n  cursor: pointer;\n}\n#files .container {\n  width: 100%;\n}\n#files header {\n  position: relative;\n  margin-bottom: 10px;\n}\n#files #material-tabs {\n  position: relative;\n  display: block;\n  padding: 0;\n  border-bottom: 1px solid #e0e0e0;\n}\n#files #material-tabs > a {\n  position: relative;\n  display: inline-block;\n  text-decoration: none;\n  padding: 22px;\n  text-transform: uppercase;\n  font-size: 14px;\n  font-weight: 600;\n  color: #424f5a;\n  text-align: center;\n}\n#files #material-tabs > a.active {\n  font-weight: 700;\n  outline: none;\n}\n#files #material-tabs > a:not(.active):hover {\n  background-color: inherit;\n  color: #7c848a;\n}\n#files .yellow-bar {\n  position: absolute;\n  z-index: 10;\n  bottom: 0;\n  height: 3px;\n  background: #458CFF;\n  display: block;\n  left: 0;\n  transition: left 0.2s ease;\n  -webkit-transition: left 0.2s ease;\n}\n.userinfo_toggler .userContainer {\n  text-align: center;\n}\n.userinfo_toggler .userContainer img {\n  width: 90px;\n}\n.userinfo_toggler .userContainer button {\n  margin-top: 20px;\n  background-color: white;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  color: black;\n}\n.userinfo_toggler .loginButton {\n  top: 3px;\n  position: relative;\n  background-color: #C71D3D;\n  color: white;\n  font-weight: 600;\n  border-radius: 4px;\n  border: 1px solid lightgray;\n  cursor: pointer;\n  letter-spacing: 4px;\n  padding-left: 15px;\n  padding-right: 10px;\n}\n#notificationToast {\n  position: absolute;\n  top: -20px;\n  left: 50%;\n  transform: translateX(-50%);\n  background-color: #C71D3D;\n  padding-left: 20px;\n  padding-right: 20px;\n  color: white;\n  border-radius: 0 0 8px 8px;\n  font-weight: 100;\n  z-index: 30000;\n}\n.applicationSwitch {\n  float: right;\n}\n.applicationSwitch .dropdown-menu {\n  z-index: 10000;\n  right: 0;\n  left: initial;\n  min-width: 190px;\n}\n.applicationSwitch .form-horizontal .image-button {\n  padding: 15px;\n  font-weight: 400;\n}\n/* ONLY layout information...no color border, or something else */\n#layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\n#layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\n#layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\n#layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\n#layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\n#layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\n#layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\n#layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer {\n  position: absolute;\n  height: 100%;\n  width: 220px;\n  padding: 0;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader {\n  position: relative;\n  display: block;\n  margin: 0;\n  padding: 0;\n  top: 0;\n  height: 110px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 3.5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader .paletteTitle div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter {\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n  padding: 10px;\n  overflow-x: hidden;\n  position: absolute;\n  top: 64px;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  overflow-y: scroll;\n  text-align: left;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteHeader #paletteFilter::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll {\n  position: absolute;\n  width: 218px;\n  margin: 0;\n  padding: 0;\n  top: 100px;\n  bottom: 0;\n  overflow: auto;\n  box-shadow: inset 0 5px 5px -5px rgba(0, 0, 0, 0.26);\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar {\n  width: 5px;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll::-webkit-scrollbar-thumb {\n  background: #666;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\n#layout .tab-content .tab-pane .workspace .paletteContainer #paletteElementsScroll #paletteElements .mix {\n  height: 110px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\n#layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0;\n  top: 60px;\n  bottom: 0;\n  left: 220px;\n  overflow: auto;\n}\n#layout .tab-content .tab-pane .workspace .content .form {\n  padding: 10px;\n}\n#layout .tab-content .active {\n  display: block;\n}\n.welcomeMessage {\n  background: url(" + escape(__webpack_require__(/*! ../images/background.png */ "./app/frontend/groups/images/background.png")) + ") no-repeat;\n  background-position: center top;\n  background-size: 100% 50%;\n  min-height: 100%;\n}\n.welcomeMessage img {\n  transform: translateX(-50%);\n  background-color: white;\n  padding: 0px;\n  width: 20vw;\n  position: absolute;\n  right: 20px;\n  top: 110px;\n  border-radius: 5px;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n}\n.welcomeMessage .description {\n  position: absolute;\n  top: 280px;\n  left: 59px;\n  font-size: 18px;\n  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  text-align: left;\n}\n.welcomeMessage .teaser {\n  background-color: white;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  display: inline-block;\n  top: 30px;\n  position: absolute;\n  left: 40px;\n  padding: 23px;\n  max-width: 40%;\n  border-radius: 5px;\n}\n.welcomeMessage .teaser h2 {\n  margin-top: 0;\n  font-weight: 300;\n  font-size: 2vw;\n  text-align: right;\n  color: #C71D3D;\n}\n.welcomeMessage .teaser p {\n  text-align: right;\n}\n.welcomeMessage button {\n  background-color: #C71D3D;\n  color: white;\n  border: 0;\n  border-radius: 2px;\n}\n@media (min-width: 1050px) {\n  /* Breite beträgt mindestens 50em */\n  .welcomeMessage .description {\n    position: absolute;\n    top: 214px;\n    left: 59px;\n    font-size: 1.4vw;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n    text-align: left;\n  }\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0 !important;\n}\n.tooltip-inner {\n  border-radius: 0 !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\nhtml {\n  font-size: 16px !important;\n}\n.tooltip {\n  z-index: 1000000;\n}\n.paletteContainer {\n  border: 0;\n  background-color: #ffffff;\n  text-align: center;\n  z-index: 1;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.paletteContainer .paletteItem {\n  text-align: left;\n  padding: 10px;\n  cursor: pointer;\n}\n.paletteContainer .paletteItem:hover {\n  background-color: rgba(0, 0, 0, 0.05);\n}\n.paletteContainer .paletteItem .icon {\n  margin-right: 10px;\n}\n.paletteContainer .paletteItem.selected {\n  background-color: rgba(0, 0, 0, 0.03);\n}\n.paletteContainer .paletteItem.admin {\n  font-weight: bold;\n}\n#fileSelectDialog .modal-content {\n  position: relative;\n  display: inline-block;\n  width: 100%;\n}\n#fileSelectDialog .modal-content .container {\n  width: 100%;\n  margin-top: 20px;\n}\n#fileSelectDialog .modal-content .container .file-select-content {\n  position: relative;\n  height: 300px;\n}\n#fileSelectDialog .modal-content .container .file-select-content .tab-pane {\n  padding-top: 5px;\n  height: 300px;\n  width: 100%;\n  overflow: scroll;\n  position: absolute;\n  top: 0;\n}\n#fileSelectDialog .modal-content .container .file-select-content .tab-pane .list-group-item {\n  padding: 0;\n  cursor: pointer;\n}\n#fileSelectDialog .modal-content .container .file-select-content .tab-pane .list-group-item .media-heading {\n  font-weight: 300;\n  font-size: 16px;\n  padding-top: 3px;\n}\n#fileSelectDialog .modal-content .container .file-select-content .tab-pane .list-group-item .media-heading:hover {\n  text-decoration: underline;\n}\n#editor .form {\n  margin-top: 40px;\n  margin-left: 40px;\n  min-width: 450px;\n  position: relative;\n}\n#editor .form input {\n  max-width: 250px;\n}\n#editor .form #userEmail {\n  max-width: 300px;\n}\n#editor .form .error {\n  color: red;\n}\n#editor .form .role {\n  position: absolute;\n  right: 20px;\n  top: 20px;\n  text-align: center;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n  padding: 20px;\n  border-radius: 3px;\n}\n#editor .form .role h2 {\n  font-size: 0.875rem;\n  line-height: 1.25rem;\n  font-weight: 400;\n  text-align: center;\n}\n#editor .form .role img {\n  height: 100px;\n  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n}\n#editor .form .groupHeader h1 {\n  color: #C71D3D;\n  font-size: 2.25rem;\n  font-weight: 500;\n  line-height: 2.75rem;\n}\n#editor .form .groupHeader h2 {\n  font-size: 0.875rem;\n  line-height: 1.25rem;\n  font-weight: 400;\n}\n#editor .form .groupHeader h2 .joinToken {\n  font-weight: 300;\n}\n#editor .form .groupHeader h2 .showJoinToken {\n  padding: 10px;\n  cursor: pointer;\n}\n#editor .form .groupHeader h2 .showJoinToken:hover {\n  border-radius: 50%;\n  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n}\n#editor .form .owner {\n  position: absolute;\n  top: 220px;\n}\n#editor .form .owner h3 {\n  min-width: 420px;\n  font-size: 1rem;\n  color: #C71D3D;\n}\n#editor .form .owner h3 span {\n  color: #333;\n  font-weight: 300;\n}\n#editor .form .groupContent {\n  position: absolute;\n  top: 280px;\n}\n#editor .form .groupContent h3 {\n  min-width: 420px;\n  border-bottom: 1px solid #C71D3D;\n  font-size: 1rem;\n  color: #C71D3D;\n}\n@media (min-width: 1100px) {\n  #editor .form .role {\n    border-radius: 4px;\n    position: absolute;\n    right: 20px;\n    top: 20px;\n    text-align: center;\n    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);\n    padding: 20px;\n  }\n  #editor .form .role h2 {\n    font-size: 0.875rem;\n    line-height: 1.25rem;\n    font-weight: 400;\n    text-align: center;\n  }\n  #editor .form .role img {\n    height: 200px;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  }\n}\n@media (max-width: 800px) {\n  #editor .form .role {\n    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2);\n    border-radius: 2px;\n  }\n  #editor .form .role img {\n    height: 50px;\n    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  }\n  #editor .form .role h2 {\n    display: none;\n  }\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"Admin\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -40px);\n  -moz-transform: rotate(-90deg) translate(-90px, -40px);\n  -ms-transform: rotate(-90deg) translate(-90px, -40px);\n  transform: rotate(-90deg) translate(-90px, -40px);\n  font-size: 55px;\n  white-space: nowrap;\n  color: #B2E2F2;\n  font-weight: 200;\n  letter-spacing: 3px;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg polyline[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg line[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg polyline[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg line[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg circle[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #C71D3D;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n  top: 10px;\n  height: 40px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 60px;\n  top: 10px;\n}\n.workspace .palette .title div h1 {\n  font-size: 15px;\n  font-weight: 200;\n  line-height: 25px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 2px;\n}\n.workspace .palette .title div h2 {\n  font-size: 10px;\n  font-weight: 600;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n  color: #C71D3D;\n}\n.workspace .palette .pallette_item {\n  padding: 0;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n", ""]);
 
 // exports
 
@@ -5350,6 +5588,320 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
     }
 }) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
 
+
+/***/ }),
+
+/***/ "./node_modules/node-libs-browser/node_modules/path-browserify/index.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/node-libs-browser/node_modules/path-browserify/index.js ***!
+  \******************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(process) {// .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
+// backported and transplited with Babel, with backwards-compat fixes
+
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+// resolves . and .. elements in a path array with directory names there
+// must be no slashes, empty elements, or device names (c:\) in the array
+// (so also no leading and trailing slashes - it does not distinguish
+// relative and absolute paths)
+function normalizeArray(parts, allowAboveRoot) {
+  // if the path tries to go above the root, `up` ends up > 0
+  var up = 0;
+  for (var i = parts.length - 1; i >= 0; i--) {
+    var last = parts[i];
+    if (last === '.') {
+      parts.splice(i, 1);
+    } else if (last === '..') {
+      parts.splice(i, 1);
+      up++;
+    } else if (up) {
+      parts.splice(i, 1);
+      up--;
+    }
+  }
+
+  // if the path is allowed to go above the root, restore leading ..s
+  if (allowAboveRoot) {
+    for (; up--; up) {
+      parts.unshift('..');
+    }
+  }
+
+  return parts;
+}
+
+// path.resolve([from ...], to)
+// posix version
+exports.resolve = function() {
+  var resolvedPath = '',
+      resolvedAbsolute = false;
+
+  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+    var path = (i >= 0) ? arguments[i] : process.cwd();
+
+    // Skip empty and invalid entries
+    if (typeof path !== 'string') {
+      throw new TypeError('Arguments to path.resolve must be strings');
+    } else if (!path) {
+      continue;
+    }
+
+    resolvedPath = path + '/' + resolvedPath;
+    resolvedAbsolute = path.charAt(0) === '/';
+  }
+
+  // At this point the path should be resolved to a full absolute path, but
+  // handle relative paths to be safe (might happen when process.cwd() fails)
+
+  // Normalize the path
+  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
+    return !!p;
+  }), !resolvedAbsolute).join('/');
+
+  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
+};
+
+// path.normalize(path)
+// posix version
+exports.normalize = function(path) {
+  var isAbsolute = exports.isAbsolute(path),
+      trailingSlash = substr(path, -1) === '/';
+
+  // Normalize the path
+  path = normalizeArray(filter(path.split('/'), function(p) {
+    return !!p;
+  }), !isAbsolute).join('/');
+
+  if (!path && !isAbsolute) {
+    path = '.';
+  }
+  if (path && trailingSlash) {
+    path += '/';
+  }
+
+  return (isAbsolute ? '/' : '') + path;
+};
+
+// posix version
+exports.isAbsolute = function(path) {
+  return path.charAt(0) === '/';
+};
+
+// posix version
+exports.join = function() {
+  var paths = Array.prototype.slice.call(arguments, 0);
+  return exports.normalize(filter(paths, function(p, index) {
+    if (typeof p !== 'string') {
+      throw new TypeError('Arguments to path.join must be strings');
+    }
+    return p;
+  }).join('/'));
+};
+
+
+// path.relative(from, to)
+// posix version
+exports.relative = function(from, to) {
+  from = exports.resolve(from).substr(1);
+  to = exports.resolve(to).substr(1);
+
+  function trim(arr) {
+    var start = 0;
+    for (; start < arr.length; start++) {
+      if (arr[start] !== '') break;
+    }
+
+    var end = arr.length - 1;
+    for (; end >= 0; end--) {
+      if (arr[end] !== '') break;
+    }
+
+    if (start > end) return [];
+    return arr.slice(start, end - start + 1);
+  }
+
+  var fromParts = trim(from.split('/'));
+  var toParts = trim(to.split('/'));
+
+  var length = Math.min(fromParts.length, toParts.length);
+  var samePartsLength = length;
+  for (var i = 0; i < length; i++) {
+    if (fromParts[i] !== toParts[i]) {
+      samePartsLength = i;
+      break;
+    }
+  }
+
+  var outputParts = [];
+  for (var i = samePartsLength; i < fromParts.length; i++) {
+    outputParts.push('..');
+  }
+
+  outputParts = outputParts.concat(toParts.slice(samePartsLength));
+
+  return outputParts.join('/');
+};
+
+exports.sep = '/';
+exports.delimiter = ':';
+
+exports.dirname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  if (path.length === 0) return '.';
+  var code = path.charCodeAt(0);
+  var hasRoot = code === 47 /*/*/;
+  var end = -1;
+  var matchedSlash = true;
+  for (var i = path.length - 1; i >= 1; --i) {
+    code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+      // We saw the first non-path separator
+      matchedSlash = false;
+    }
+  }
+
+  if (end === -1) return hasRoot ? '/' : '.';
+  if (hasRoot && end === 1) {
+    // return '//';
+    // Backwards-compat fix:
+    return '/';
+  }
+  return path.slice(0, end);
+};
+
+function basename(path) {
+  if (typeof path !== 'string') path = path + '';
+
+  var start = 0;
+  var end = -1;
+  var matchedSlash = true;
+  var i;
+
+  for (i = path.length - 1; i >= 0; --i) {
+    if (path.charCodeAt(i) === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          start = i + 1;
+          break;
+        }
+      } else if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // path component
+      matchedSlash = false;
+      end = i + 1;
+    }
+  }
+
+  if (end === -1) return '';
+  return path.slice(start, end);
+}
+
+// Uses a mixed approach for backwards-compatibility, as ext behavior changed
+// in new Node.js versions, so only basename() above is backported here
+exports.basename = function (path, ext) {
+  var f = basename(path);
+  if (ext && f.substr(-1 * ext.length) === ext) {
+    f = f.substr(0, f.length - ext.length);
+  }
+  return f;
+};
+
+exports.extname = function (path) {
+  if (typeof path !== 'string') path = path + '';
+  var startDot = -1;
+  var startPart = 0;
+  var end = -1;
+  var matchedSlash = true;
+  // Track the state of characters (if any) we see before our first dot and
+  // after any path separator we find
+  var preDotState = 0;
+  for (var i = path.length - 1; i >= 0; --i) {
+    var code = path.charCodeAt(i);
+    if (code === 47 /*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+    if (end === -1) {
+      // We saw the first non-path separator, mark this as the end of our
+      // extension
+      matchedSlash = false;
+      end = i + 1;
+    }
+    if (code === 46 /*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+    } else if (startDot !== -1) {
+      // We saw a non-dot and non-path separator before our dot, so we should
+      // have a good chance at having a non-empty extension
+      preDotState = -1;
+    }
+  }
+
+  if (startDot === -1 || end === -1 ||
+      // We saw a non-dot character immediately before the dot
+      preDotState === 0 ||
+      // The (right-most) trimmed path component is exactly '..'
+      preDotState === 1 && startDot === end - 1 && startDot === startPart + 1) {
+    return '';
+  }
+  return path.slice(startDot, end);
+};
+
+function filter (xs, f) {
+    if (xs.filter) return xs.filter(f);
+    var res = [];
+    for (var i = 0; i < xs.length; i++) {
+        if (f(xs[i], i, xs)) res.push(xs[i]);
+    }
+    return res;
+}
+
+// String.prototype.substr - negative index don't work in IE8
+var substr = 'ab'.substr(-1) === 'b'
+    ? function (str, start, len) { return str.substr(start, len) }
+    : function (str, start, len) {
+        if (start < 0) start = str.length + start;
+        return str.substr(start, len);
+    }
+;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../process/browser.js */ "./node_modules/process/browser.js")))
 
 /***/ }),
 

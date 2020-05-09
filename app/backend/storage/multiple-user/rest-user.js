@@ -41,7 +41,7 @@ exports.list = (req, res) => {
 }
 
 exports.get = (req, res) => {
-  classroom.users.findById(req.params.id)
+  classroom.users.get(req.params.id)
     .then((user) => {
       res.status(200).send(mapUser(user))
     })
@@ -62,9 +62,11 @@ exports.del = (req, res) => {
 
 exports.put = (req, res) => {
   let user = req.body
+
   // it is not allowed to change the username or the id
   delete user.username
   delete user.id
+
   classroom.users.update(req.params.id, user)
     .then((userUpdated) => {
       res.status(200).send(mapUser(userUpdated))
@@ -94,12 +96,12 @@ exports.post = (req, res) => {
   user.id = shortid.generate()
   user.username = sanitize(user.username).replace(/ /g, "")
   classroom.users.findByUsername(user.username)
-    .then((dublicatUser) => {
+    .then( dublicatUser => {
       res.status(422).send("username")
     })
-    .catch(error => {
+    .catch( error => {
       classroom.users.create(user)
-        .then((userCreated) => {
+        .then( userCreated => {
           res.status(200).send(mapUser(userCreated))
         })
     })
