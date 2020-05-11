@@ -9,6 +9,6 @@ exports.init = function(app, args){
 
 exports.users = require('./users')
 exports.groups = require('./groups')
-exports.attachments = require('./attachments')
+exports.assignments = require('./assignments')
 
 exports.graph = require('./graph')

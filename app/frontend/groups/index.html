@@ -138,7 +138,7 @@
   <div class="form">
       <div class="groupHeader">
         <h1>{{record.name}}</h1>
-        <h2>Group join code: <span class="joinToken">{{record.joinToken}}</span> <div class="showJoinToken fa fa-eye" ></div></h2>
+        <h2>Group join code: <span class="joinToken">{{record.joinToken}}</span> <i class="showJoinToken fa fa-eye" ></i></h2>
       </div>
       <div class="role">
           <img src="./images/teacher.svg">
@@ -149,18 +149,24 @@
         <h3>Tutor: <span>YOU</span></h3>
       </div>
       <div class="groupContent">
-        <h3>Members  <i class="addGroupMember fa fa-plus-square-o"></i></h3>
+        <h3>Members  <i class="inviteGroupMember fa fa-plus-square-o"></i></h3>
+        <table>
         {{#record.members}}
-            <div>
-               {{displayName}}
-            </div>
+            <tr>
+              <td>{{displayName}}</td>
+              <td><i class="deleteGroupMember fa fa-trash"></i></td>
+            </tr>
         {{/record.members}}
-        <h3>Attachments  <i class="addGroupAttachment fa fa-plus-square-o"></i></h3>
-        {{#record.attachments}}
-            <div>
-               {{displayName}}
-            </div>
-        {{/record.attachments}}
+        </table>
+        <h3>Assignments  <i class="addGroupAssignment fa fa-plus-square-o"></i></h3>
+        <table>
+        {{#record.assignments}}
+            <tr>
+              <td><a href="../author?shared={{shared}}" target="author">{{name}}</a></td>
+              <td><i class="deleteGroupAssignment fa fa-trash" data-id="{{id}}"></i></td>
+            </tr>
+        {{/record.assignments}}
+        </table>
       </div>
   </div>
 </script>
@@ -188,12 +194,12 @@
                {{displayName}}
             </div>
         {{/record.members}}
-        <h3>Attachments</h3>
-        {{#record.attachments}}
+        <h3>Assignments</h3>
+        {{#record.assignments}}
             <div>
-               {{displayName}}
+               {{id}}
             </div>
-        {{/record.attachments}}
+        {{/record.assignments}}
       </div>
 
   </div>
@@ -214,7 +220,7 @@
 
 
 <div class="loader">
-  <div class="title">Loading the Admin Console...</div>
+  <div class="title">Loading the Classroom...</div>
   <div class="gooey">
     <span class="dot"></span>
     <div class="dots">

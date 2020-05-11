@@ -6,6 +6,10 @@ const bcrypt = require("bcrypt")
 const passwordResetRequestCache = new NodeCache( { stdTTL: 60*30, checkperiod: 120 } )
 
 
+exports.init = (app, args)=>{
+
+}
+
 exports.token_post = (req, res)=>{
   let user = req.body
   let id = uuid()

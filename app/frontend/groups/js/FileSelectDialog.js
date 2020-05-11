@@ -48,8 +48,9 @@ class Dialog {
         <div class="modal-dialog ">
           <div class="modal-content">
             <div class="modal-header">
-                  <h4 class="media-heading">Input Prompt</h4>
+                  <h4 class="media-heading">Select Document</h4>
             </div>
+            
             <div class="container">
               <header>
                 <ul class="nav nav-tabs"></ul>
@@ -67,18 +68,19 @@ class Dialog {
     `)
   }
 
-  show(permissions) {
+  show(type, callback) {
+    this.callback = callback
     $("#fileSelectDialog .nav-tabs").html("")
     $("#fileSelectDialog .file-select-content").html("")
 
-    this.initPane("sheet", "user",   conf.sheet.user,   permissions       , "")
-    this.initPane("sheet", "global", conf.sheet.global, permissions.global, "")
+    this.initPane(type, "user",   conf[type].user,   "")
+    this.initPane(type, "global", conf[type].global, "")
 
     $("#fileSelectDialog").modal("show")
     $("#fileSelectDialog .nav-tabs li:first-child a").click()
   }
 
-  initPane(type, scope, backendConf, permissions, initialPath) {
+  initPane(type, scope, backendConf, initialPath) {
     let paneId = type+"_"+scope+"_files"
     let paneSelector = "#"+paneId
     $("#fileSelectDialog .nav-tabs").append(`<li><a data-toggle="tab" href="${paneSelector}">${paneId}</a></li>`)
@@ -131,8 +133,10 @@ class Dialog {
 
         $(paneSelector + " .list-group-item[data-type='file']").on("click", (event) => {
           let $el = $(event.currentTarget)
+          let scope = $el.data("scope")
           let name = $el.data("name")
-          alert(name)
+          _this.callback(scope, name)
+          $("#fileSelectDialog").modal("hide")
         })
       })
     }

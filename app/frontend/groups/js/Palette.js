@@ -42,9 +42,7 @@ export default class Palette {
         return {...record, icon: record.role === "owner" ? "fa-university" : "fa-graduation-cap"}
       })
       let tmpl = Hogan.compile($("#recordsTemplate").html())
-      let html = tmpl.render({
-        records: records
-      })
+      let html = tmpl.render({records: records})
       $("#paletteElements").html(html)
     })
   }

@@ -777,7 +777,6 @@ var RecordStore = function () {
         _this3.records = _this3.records.filter(function (u) {
           return u.id !== record.id;
         });
-        console.log(_this3.records);
         return response.data;
       });
     }

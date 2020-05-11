@@ -6065,7 +6065,6 @@ var Writer = draw2d.io.json.Writer.extend({
   marshal: function marshal(canvas, callback) {
     new draw2d.io.png.Writer().marshal(canvas, function (imageDataUrl) {
       var writer = new draw2d.io.json.Writer();
-      console.log(imageDataUrl);
       writer.marshal(canvas, function (json) {
         var data = {
           draw2d: json,
@@ -50140,7 +50139,6 @@ function setup(md, options) {
     options = defaults;
   }
   var useKeyword = options.useKeyword;
-  console.log(useKeyword);
 
 
   //var options = assign({}, defaults, options);
@@ -50164,13 +50162,10 @@ function setup(md, options) {
   md.renderer.rules.code_inline = function(tokens, idx, options, env, self) {
     var token = tokens[idx];
 
-    console.log(useKeyword);
 
     if(!useKeyword) {
-      console.log("1");
       return renderInline(token.content.trim(), false);
     } else {
-      console.log("2");
       if(token.content.substr(0,4) === "math") {
         return renderInline(token.content.substr(4).trim(), false);
       } else if(token.content.substr(0,5) === "latex") {

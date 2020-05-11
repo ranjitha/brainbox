@@ -13,7 +13,6 @@ let Writer = draw2d.io.json.Writer.extend({
     {
       new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
         let writer = new draw2d.io.json.Writer()
-        console.log(imageDataUrl)
         writer.marshal(canvas, json => {
           let data = {
             draw2d: json,

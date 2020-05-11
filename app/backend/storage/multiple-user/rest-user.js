@@ -1,4 +1,4 @@
-const shortid = require('shortid')
+const shortid = require('../../util/shortid')
 const sanitize = require("sanitize-filename")
 
 const classroom = require('../../classroom')
@@ -17,7 +17,9 @@ function mapUser(user) {
   }
 }
 
-exports.mapUser = mapUser
+
+exports.init = (app, args)=>{
+}
 
 // each backend storage with authentication MUST have an "userinfo" endpoint
 //

@@ -1,7 +1,7 @@
 let db = require("./db").db
 
-let type = "Attachment"
-let entity = "attachments"
+let type = "Assignment"
+let entity = "assignments"
 
 
 exports.get = async function (id, mergeWith) {

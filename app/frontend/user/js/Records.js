@@ -49,7 +49,6 @@ class RecordStore {
   delete(record) {
     return axios.delete(restEndpoint + record.id).then((response) => {
       this.records = this.records.filter((u) => u.id !== record.id)
-      console.log(this.records)
       return response.data
     })
   }

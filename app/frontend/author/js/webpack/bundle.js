@@ -5192,7 +5192,7 @@ var Editor = function () {
 
       return new Promise(function (resolve, reject) {
         _this2.section.content = _this2.getValue();
-        console.log(_this2.section);
+
         resolve(_this2.section);
       });
     }
@@ -5208,7 +5208,6 @@ var Editor = function () {
   }, {
     key: "getValue",
     value: function getValue() {
-      console.log(this.content);
       return this.content;
     }
   }]);
@@ -5906,9 +5905,7 @@ var Palette = function () {
     this.permissions = permissions;
     _CommandStack2.default.off(this).on("change", this);
 
-    console.log("register");
     $(document).off("click", "#documentPageAdd").on("click", "#documentPageAdd", function () {
-      console.log("click");
       _this.app.view.addPage();
     }).off("click", ".pageElement .page_edit_name").on("click", ".pageElement .page_edit_name", function (event) {
       var page = _this.app.getDocument().getPage($(event.currentTarget).data("page"));
@@ -5969,7 +5966,6 @@ var Palette = function () {
         var currentPage = this.view.getPage();
 
         if (this.app.hasModifyPermissionForCurrentFile()) {
-          console.log("show...");
           $("#documentPageAdd").show();
           pages.forEach(function (page) {
             _this2.html.append("\n          <div class=\"pageElement\"  data-page=\"" + page.id + "\"  id=\"layerElement_" + page.id + "\" >\n            " + page.name + "\n            <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Delete the page\" class=\"page_delete pull-right\" >\n                <span class=\"fa fa-trash\"/>\n            </span>\n            <span data-page=\"" + page.id + "\"  data-toggle=\"tooltip\" title=\"Edit Name of Page\" class=\"page_edit_name pull-right\" >\n                <span class=\"fa fa-edit\"/>\n            </span>\n          </div>");
@@ -32464,7 +32460,6 @@ function setup(md, options) {
     options = defaults;
   }
   var useKeyword = options.useKeyword;
-  console.log(useKeyword);
 
 
   //var options = assign({}, defaults, options);
@@ -32488,13 +32483,10 @@ function setup(md, options) {
   md.renderer.rules.code_inline = function(tokens, idx, options, env, self) {
     var token = tokens[idx];
 
-    console.log(useKeyword);
 
     if(!useKeyword) {
-      console.log("1");
       return renderInline(token.content.trim(), false);
     } else {
-      console.log("2");
       if(token.content.substr(0,4) === "math") {
         return renderInline(token.content.substr(4).trim(), false);
       } else if(token.content.substr(0,5) === "latex") {

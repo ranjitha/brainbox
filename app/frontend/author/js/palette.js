@@ -12,11 +12,10 @@ export default class Palette {
     this.permissions = permissions
     commandStack.off(this).on("change", this)
 
-    console.log("register")
+
     $(document)
       .off("click", "#documentPageAdd")
       .on("click", "#documentPageAdd", () => {
-        console.log("click")
         this.app.view.addPage()
       })
       .off("click", ".pageElement .page_edit_name")
@@ -78,7 +77,6 @@ export default class Palette {
       let currentPage = this.view.getPage()
 
       if (this.app.hasModifyPermissionForCurrentFile()) {
-        console.log("show...")
         $("#documentPageAdd").show()
         pages.forEach((page) => {
           this.html.append(`

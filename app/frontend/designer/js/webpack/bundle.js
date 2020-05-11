@@ -51380,7 +51380,6 @@ function setup(md, options) {
     options = defaults;
   }
   var useKeyword = options.useKeyword;
-  console.log(useKeyword);
 
 
   //var options = assign({}, defaults, options);
@@ -51404,13 +51403,10 @@ function setup(md, options) {
   md.renderer.rules.code_inline = function(tokens, idx, options, env, self) {
     var token = tokens[idx];
 
-    console.log(useKeyword);
 
     if(!useKeyword) {
-      console.log("1");
       return renderInline(token.content.trim(), false);
     } else {
-      console.log("2");
       if(token.content.substr(0,4) === "math") {
         return renderInline(token.content.substr(4).trim(), false);
       } else if(token.content.substr(0,5) === "latex") {

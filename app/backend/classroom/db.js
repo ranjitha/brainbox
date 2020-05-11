@@ -28,7 +28,7 @@ exports.init = async function (app, args) {
 
   // Set some defaults (required if your JSON file is empty)
   //
-  db.defaults({users: [], groups: [], attachments: [], assignments: []})
+  db.defaults({users: [], groups: [], assignments: []})
     .write()
 
   // setup some default users if we start the first time

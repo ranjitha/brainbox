@@ -4,16 +4,22 @@ export default {
 
 
   sheet: {
+      shared: {
+        get:    file  => `../api/shared/sheet/get?filePath=${file}`,
+        save:            `../api/shared/sheet/save`,
+      },
       user: {
-        list: path => `../api/user/sheet/list?path=${path}`,
+        list:  path => `../api/user/sheet/list?path=${path}`,
+        get:   file => `../api/user/sheet/get?filePath=${file}`,
         image: file => `../_common/images/files_markdown.svg`,
-        folder: `../api/user/sheet/folder`
+        folder:        `../api/user/sheet/folder`
       },
 
       global: {
-        list: path => `../api/global/sheet/list?path=${path}`,
+        list:  path => `../api/global/sheet/list?path=${path}`,
+        get:   file => `../api/global/sheet/get?filePath=${file}`,
         image: file => `../_common/images/files_markdown.svg`,
-        folder: `../api/global/sheet/folder`
+        folder:        `../api/global/sheet/folder`
       }
   }
 }

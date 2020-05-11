@@ -1,8 +1,7 @@
-const shortid = require('shortid')
+const shortid = require('../../util/shortid')
 
 const classroom = require('../../classroom')
 
-shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#@')
 
 function mapUser(user) {
   if (Array.isArray(user)) {
@@ -27,8 +26,13 @@ function mapGroup(group) {
     joinToken: group.joinToken,
     owner: group.owner,
     members: group.members,
+    assignments: group.assignments,
     name: group.name
   }
+}
+
+exports.init = (app, args)=>{
+
 }
 
 exports.list = (req, res) => {
@@ -67,21 +71,32 @@ exports.get = (req, res) => {
         return Promise.all(groupSPOs.map(spo => classroom.users.get(spo.subject)))
       }),
     // the group itself either as as owner
-    classroom.graph.get({subject: "" + req.user.id, predicate: "owner", object: req.params.id})
+    classroom.graph.get({subject: "" + req.user.id,  predicate: "owner", object: req.params.id})
       .then((groupSPOs) => {
         return Promise.all(groupSPOs.map(spo => classroom.groups.get(spo.object, {role: "owner"})))
       }),
     // or as member.
-    classroom.graph.get({subject: "" + req.user.id, predicate: "member", object: req.params.id})
+    classroom.graph.get({subject: "" + req.user.id,  predicate: "member", object: req.params.id})
       .then((groupSPOs) => {
         return Promise.all(groupSPOs.map(spo => classroom.groups.get(spo.object, {role: "member"})))
+      }),
+    // get all assignments
+    classroom.graph.get({subject: "" + req.params.id, predicate: "hasAssignment"})
+      .then((assignmentSPOs) => {
+        return Promise.all(assignmentSPOs.map(spo => classroom.assignments.get(spo.object)))
       })
   ])
     .then((data) => {
       // either you are "owner" (data[2]) or "member" (data[3])
       // we merge the and use the first element....anyhow - the array contains only ONE element.
       //
-      let group = {members: mapUser(data[0]), owner: mapUser(data[1][0]), ...data[2].concat(data[3])[0]}
+      let group = {
+        members: mapUser(data[0]),
+        owner: mapUser(data[1][0]),
+        assignments: data[4],
+        ...data[2].concat(data[3])[0]
+
+      }
       res.status(200).send(mapGroup(group))
     })
     .catch((error) => {

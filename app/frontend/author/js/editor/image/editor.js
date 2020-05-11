@@ -140,7 +140,7 @@ export default class Editor {
   commit() {
     return new Promise((resolve, reject) => {
       this.section.content = this.getValue()
-      console.log(this.section)
+
       resolve(this.section)
     })
   }
@@ -152,7 +152,6 @@ export default class Editor {
   }
 
   getValue() {
-    console.log(this.content)
     return this.content
   }
 }

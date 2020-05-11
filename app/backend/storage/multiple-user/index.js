@@ -3,7 +3,7 @@ const path = require('path')
 const express = require('express')
 const makeDir = require('make-dir')
 const uuid = require('uuid/v4')
-const shortid = require('shortid')
+const shortid = require('../../util/shortid')
 const passport = require('passport')
 const Strategy = require('passport-local').Strategy
 const Session = require('express-session')
@@ -16,6 +16,11 @@ const {thumbnail, generateShapeIndex} = require("../../converter/thumbnail")
 const classroom = require('./../../classroom')
 let {token_set, token_get} = require("./token-user")
 const {trim} = require("../../util/string")
+
+let restUser = require("./rest-user")
+let restPassword = require("./rest-password")
+let restGroup = require("./rest-group")
+let restAssignment = require("./rest-assignment")
 
 let permissionsAnonym = require("./permissions-anonym")
 let permissionsUser = require("./permissions-user")
@@ -128,8 +133,28 @@ function ensureAdminLoggedIn(options) {
 module.exports = {
 
   init: function (app, args) {
+    // calculate the persistence folder for the brains/sheets files
+    //
+    brainsHomeDir = path.join(args.folder, "brains", path.sep)
+    sheetsHomeDir = path.join(args.folder, "sheets", path.sep)
+    brainsSharedDir = path.join(args.folder, "shared", "brains", path.sep)
+    sheetsSharedDir = path.join(args.folder, "shared", "sheets", path.sep)
+    const sheetsAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'sheets') + path.sep)
+    const shapesAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'shapes') + path.sep)
+    const brainsAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'brains') + path.sep)
+
+    // Ensure that the required storage folder exists
+    //
+    makeDir(brainsSharedDir)
+    makeDir(sheetsSharedDir)
+    makeDir(sheetsHomeDir)
+    makeDir(brainsHomeDir)
 
     classroom.init(app, args)
+    restUser.init(app, args)
+    restPassword.init(app, args)
+    restGroup.init(app, args)
+    restAssignment.init(app, args, sheetsSharedDir, brainsSharedDir)
 
     // add & configure middleware
     app.use(Session({
@@ -166,22 +191,6 @@ module.exports = {
       res.redirect(req.query.returnTo ? `../${req.query.returnTo}/` : '/')
     })
 
-    // calculate the persistence folder for the brains/sheets files
-    //
-    brainsHomeDir = path.join(args.folder, "brains", path.sep)
-    sheetsHomeDir = path.join(args.folder, "sheets", path.sep)
-    brainsSharedDir = path.join(args.folder, "shared", "brains", path.sep)
-    sheetsSharedDir = path.join(args.folder, "shared", "sheets", path.sep)
-    const sheetsAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'sheets') + path.sep)
-    const shapesAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'shapes') + path.sep)
-    const brainsAppDir = path.normalize(path.join(__dirname, '..', '..', '..', 'repository', 'brains') + path.sep)
-
-    // Ensure that the required storage folder exists
-    //
-    makeDir(brainsSharedDir)
-    makeDir(sheetsSharedDir)
-    makeDir(sheetsHomeDir)
-    makeDir(brainsHomeDir)
 
     console.log("| You are using the " + "'multiple-user'".bold.green + " file storage engine.                   |")
     console.log("| This kind of storage is perfect for small or medium user groups.         |")
@@ -212,7 +221,6 @@ module.exports = {
     // Rest password API
     // only an admin can create a "reset password" request right now
     //
-    let restPassword = require("./rest-password")
     // endpoint to generate a password reset token
     app.post("/password/token", ensureAdminLoggedIn(), restPassword.token_post)
     // endpoint to check if the token is valid
@@ -226,7 +234,6 @@ module.exports = {
 
     // User Management API
     //
-    let restUser = require("./rest-user")
     app.get('/api/admin/user', ensureAdminLoggedIn(), restUser.list)
     app.get('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.get)
     app.delete('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.del)
@@ -237,7 +244,6 @@ module.exports = {
 
     // Group Management API
     // User can create groups and invite people to these groups
-    let restGroup = require("./rest-group")
     app.get('/api/user/group', ensureLoggedIn(), restGroup.list)
     app.get('/api/user/group/:id', ensureLoggedIn(), restGroup.get)
     app.delete('/api/user/group/:id', ensureLoggedIn(), restGroup.del)
@@ -246,11 +252,9 @@ module.exports = {
     app.post('/api/user/group/join', ensureLoggedIn(), restGroup.join)
     app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.unjoin)
 
-    let restAttachment = require("./rest-attachment")
-    app.get('/api/user/group/:groupId/attachment', ensureLoggedIn(), restAttachment.list)
-    app.get('/api/user/group/:groupId/attachment/:id', ensureLoggedIn(), restAttachment.get)
-    app.post('/api/user/group/:groupId/attachment', ensureLoggedIn(), restAttachment.post)
-    app.delete('/api/user/group/:groupId/attachment/:id', ensureLoggedIn(), restAttachment.del)
+
+    app.post('/api/user/group/:groupId/assignment', ensureLoggedIn(), restAssignment.post)
+    app.delete('/api/user/group/:groupId/assignment/:id', ensureLoggedIn(), restAssignment.del)
 
 
     // Serve the static content for the three different apps of brainbox
@@ -423,6 +427,5 @@ module.exports = {
   writeSheet: function (baseDir, subDir, content, res) {
     module.exports.writeFile(baseDir, subDir, content, res)
   }
-
 }
 

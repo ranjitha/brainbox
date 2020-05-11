@@ -1,7 +1,7 @@
 const _base_ = require("../_base_")
 const path = require('path')
 const express = require('express')
-const shortid = require('shortid')
+const shortid = require('../../util/shortid')
 const colors = require('colors')
 const makeDir = require('make-dir')
 

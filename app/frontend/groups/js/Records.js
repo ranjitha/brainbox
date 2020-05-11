@@ -51,6 +51,14 @@ class RecordStore {
     }
   }
 
+  addAssignment(group, data) {
+      return axios.post(restEndpoint + encodeURIComponent(group.id)+"/assignment", data)
+  }
+
+  delAssignment(group, id){
+    return axios.delete(restEndpoint + encodeURIComponent(group.id)+"/assignment/"+ encodeURIComponent(id))
+  }
+
   delete(record) {
     if(record.role === "member"){
       return axios.delete(restEndpoint+ "join/" + encodeURIComponent(record.id)).then((response) => {

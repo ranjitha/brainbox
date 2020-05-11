@@ -70,7 +70,7 @@ module.exports = {
       path: path.join('shapes',githubPath)
     }
 
-    console.log(repoData)
+
     octo.repos.getContents(repoData)
       .then( (res) => {
         octo.repos.createOrUpdateFile(Object.assign(repoData, {
