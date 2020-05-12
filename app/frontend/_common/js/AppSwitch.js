@@ -1,4 +1,4 @@
-import designerDialog from "./DesignerDialog";
+import designerDialog from "./DesignerDialog"
 
 
 export default class AppSwitch {
@@ -14,6 +14,11 @@ export default class AppSwitch {
 
                 <ul class="dropdown-menu" role="menu" >
                     <form class="form-horizontal" role="form">
+
+                      <label class="applicationSwitchHome image-button">
+                        <img src="../_common/images/app_home.svg"/>
+                        <div>Information<br>&nbsp;</div>
+                      </label>
 
                       <label class="applicationSwitchSimulator image-button">
                         <img src="../_common/images/app_simulator.svg"/>
@@ -50,6 +55,9 @@ export default class AppSwitch {
     })
     $(".applicationSwitchSimulator").off("click").on("click", () => {
       window.open("../circuit", "circuit")
+    })
+    $(".applicationSwitchHome").off("click").on("click", () => {
+      window.open("../home", "home")
     })
 
     if (permissions.featureset.usermanagement === true) {
