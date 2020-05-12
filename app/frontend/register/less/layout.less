@@ -3,7 +3,6 @@
 body {
   font-family: Helvetica;
   background: #eee;
-  background-image: url(../images/background.png);
   background-size: cover;
 }
 
@@ -28,17 +27,17 @@ hgroup {
   }
 }
 
+#successPane{
+  .username{
+    font-weight: 500;
+  }
 
-#backButton{
-  font-size: 7vw;
-  position: absolute;
-  top:10px;
-  left:10px;
-  color: black;
-  cursor:pointer;
+  .password{
+    font-weight: 500;
+  }
 }
 
-form {
+.registrationPane {
   width: 380px;
   margin: 4em auto;
   padding: 3em 2em 2em 2em;
@@ -46,8 +45,12 @@ form {
   border: 1px solid #ebebeb;
   box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
 
+  .group{
+    margin-bottom: 25px;
+  }
 
-  .button {
+
+  button {
     position: relative;
     display: inline-block;
     padding: 12px 24px;
@@ -67,20 +70,19 @@ form {
     transition: all 0.15s ease;
     background: @tintColor;
     text-shadow: 2px 2px 0 darken(@tintColor, 5%);
-    &:hover {
-      background: lighten(@tintColor, 10%);
+    &:not([disabled]){
+      &:hover {
+        background: lighten(@tintColor, 10%);
+      }
+      &:focus {
+        outline: 0;
+      }
     }
-    &:focus {
-      outline: 0;
+    &:disabled{
+      opacity: 0.5;
     }
-  }
 
-  .testLink{
-    float:right;
-    color:@tintColor;
-    text-decoration: none;
   }
-
 }
 
 .group {
@@ -99,9 +101,10 @@ input {
   border: none;
   border-radius: 0;
   border-bottom: 1px solid #757575;
+  &:focus {
+    outline: none;
+  }
 }
-
-input:focus { outline: none; }
 
 
 /* Label */

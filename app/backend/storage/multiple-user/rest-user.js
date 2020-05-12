@@ -97,7 +97,7 @@ exports.post = (req, res) => {
 
   user.id = shortid.generate()
   user.username = sanitize(user.username).replace(/ /g, "")
-  classroom.users.findByUsername(user.username)
+  classroom.users.getByUsername(user.username)
     .then( dublicatUser => {
       res.status(422).send("username")
     })

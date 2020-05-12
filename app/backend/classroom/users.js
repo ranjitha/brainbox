@@ -23,7 +23,7 @@ exports.get = async function (id, mergeWith) {
 }
 
 
-exports.findByUsername = async function (username, mergeWith) {
+exports.getByUsername = async function (username, mergeWith) {
   mergeWith = mergeWith || {}
   return new Promise((resolve, reject) => {
     let result = db()
@@ -33,7 +33,7 @@ exports.findByUsername = async function (username, mergeWith) {
     if (result) {
       resolve({...mergeWith, ...result})
     } else {
-      reject(type + ' ' + id + ' does not exist')
+      reject(type + ' ' + username + ' does not exist')
     }
   })
 }

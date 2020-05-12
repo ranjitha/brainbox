@@ -7,6 +7,7 @@ module.exports =[
   require('./webpack/designer.config'),
   require('./webpack/user.config'),
   require('./webpack/groups.config'),
+  require('./webpack/register.config'),
   require('./webpack/login.config'),
   require('./webpack/resetpwd.config')
 ];

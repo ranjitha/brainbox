@@ -21,6 +21,7 @@ let restUser = require("./rest-user")
 let restPassword = require("./rest-password")
 let restGroup = require("./rest-group")
 let restAssignment = require("./rest-assignment")
+let restRegistration = require("./rest-registration")
 
 let permissionsAnonym = require("./permissions-anonym")
 let permissionsUser = require("./permissions-user")
@@ -39,7 +40,7 @@ let sheetsSharedDir = null
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
   function (username, password, cb) {
-    classroom.users.findByUsername(username)
+    classroom.users.getByUsername(username)
       .then((user) => {
         bcrypt.compare(password, user.password)
           .then((result) => {
@@ -155,6 +156,7 @@ module.exports = {
     restPassword.init(app, args)
     restGroup.init(app, args)
     restAssignment.init(app, args, sheetsSharedDir, brainsSharedDir)
+    restRegistration.init(app, args)
 
     // add & configure middleware
     app.use(Session({
@@ -165,14 +167,10 @@ module.exports = {
       saveUninitialized: true
     }))
 
-    // Configure view engine to render EJS templates for the login page
-    //
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'ejs');
-    app.use(require('express-session')({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
 
     // Initialize Passport and restore authentication state, if any, from the
     // session.
+    app.use(require('express-session')({secret: 'keyboard cat', resave: false, saveUninitialized: false}));
     app.use(passport.initialize())
     app.use(passport.session())
 
@@ -218,64 +216,65 @@ module.exports = {
       }
     })
 
-    // Rest password API
-    // only an admin can create a "reset password" request right now
+    // Rest API for Password handling
     //
+    // only an admin can create a "reset password" request right now
     // endpoint to generate a password reset token
-    app.post("/password/token", ensureAdminLoggedIn(), restPassword.token_post)
+    app.use ("/password",       express.static(__dirname + '/../../../frontend/resetpwd'))
+    app.post("/password/token",        ensureAdminLoggedIn(), restPassword.token_post)
     // endpoint to check if the token is valid
-    app.get("/password/token/:token", restPassword.token_get)
-    // endpoint to set the password
-    app.post("/password", restPassword.set)
-    // endpoint to serve the ui for the password reset
-    app.use("/password", express.static(__dirname + '/../../../frontend/resetpwd'))
-    // endpoint to check if the token is valid
+    app.get ("/password/token/:token",                        restPassword.token_get)
+    // endpoint to set the password. requires a valid token and the new password
+    app.post("/password",                                     restPassword.set)
 
+
+    // Self Registration
+    //
+    app.use ('/register', express.static(__dirname + '/../../../frontend/register'));
+    app.get ('/api/register/validate/:name', restRegistration.validate)
+    app.post('/api/register/',               restRegistration.post)
 
     // User Management API
     //
-    app.get('/api/admin/user', ensureAdminLoggedIn(), restUser.list)
-    app.get('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.get)
+    app.use   ('/user',               ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
+    app.get   ('/api/admin/user',     ensureAdminLoggedIn(), restUser.list)
+    app.get   ('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.get)
     app.delete('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.del)
-    app.put('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.put)
-    app.post('/api/admin/user', ensureAdminLoggedIn(), restUser.post)
-    app.get('/userinfo', restUser.userinfo)
-
+    app.put   ('/api/admin/user/:id', ensureAdminLoggedIn(), restUser.put)
+    app.post  ('/api/admin/user',     ensureAdminLoggedIn(), restUser.post)
+    app.get   ('/userinfo',                                  restUser.userinfo)
 
     // Group Management API
     // User can create groups and invite people to these groups
-    app.get('/api/user/group', ensureLoggedIn(), restGroup.list)
-    app.get('/api/user/group/:id', ensureLoggedIn(), restGroup.get)
-    app.delete('/api/user/group/:id', ensureLoggedIn(), restGroup.del)
-    app.put('/api/user/group/:id', ensureLoggedIn(), restGroup.put)
-    app.post('/api/user/group', ensureLoggedIn(), restGroup.post)
-    app.post('/api/user/group/join', ensureLoggedIn(), restGroup.join)
+    //
+    app.use   ('/groups',                  ensureLoggedIn(), express.static(__dirname + '/../../../frontend/groups'));
+    app.get   ('/api/user/group',          ensureLoggedIn(), restGroup.list)
+    app.get   ('/api/user/group/:id',      ensureLoggedIn(), restGroup.get)
+    app.delete('/api/user/group/:id',      ensureLoggedIn(), restGroup.del)
+    app.put   ('/api/user/group/:id',      ensureLoggedIn(), restGroup.put)
+    app.post  ('/api/user/group',          ensureLoggedIn(), restGroup.post)
+    app.post  ('/api/user/group/join',     ensureLoggedIn(), restGroup.join)
     app.delete('/api/user/group/join/:id', ensureLoggedIn(), restGroup.unjoin)
-
-
-    app.post('/api/user/group/:groupId/assignment', ensureLoggedIn(), restAssignment.post)
+    // group assignment
+    app.post  ('/api/user/group/:groupId/assignment',     ensureLoggedIn(), restAssignment.post)
     app.delete('/api/user/group/:groupId/assignment/:id', ensureLoggedIn(), restAssignment.del)
 
 
-    // Serve the static content for the three different apps of brainbox
-    // (designer, simulator, author)
+    // Serve the static content for the different modules of brainbox
     //
-    app.use('/_common', express.static(__dirname + '/../../../frontend/_common'));
+    app.use('/_common',  express.static(__dirname + '/../../../frontend/_common'));
     app.use('/designer', express.static(__dirname + '/../../../frontend/designer'));
-    app.use('/circuit', express.static(__dirname + '/../../../frontend/circuit'));
-    app.use('/author', express.static(__dirname + '/../../../frontend/author'));
-    app.use('/user', ensureAdminLoggedIn(), express.static(__dirname + '/../../../frontend/user'));
-    app.use('/home', express.static(__dirname + '/../../../frontend/home'));
-    app.use('/groups', ensureLoggedIn(), express.static(__dirname + '/../../../frontend/groups'));
-
+    app.use('/circuit',  express.static(__dirname + '/../../../frontend/circuit'));
+    app.use('/author',   express.static(__dirname + '/../../../frontend/author'));
+    app.use('/home',     express.static(__dirname + '/../../../frontend/home'));
 
     // =================================================================
     // endpoints for shared circuits / sheets
-    // It is even allowed for unknown users
+    // It is even accessible for unknown users
     // =================================================================
-    app.get('/api/shared/sheet/get', (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
+    app.get ('/api/shared/sheet/get',  (req, res) => module.exports.getJSONFile(sheetsSharedDir, req.query.filePath, res))
     app.post('/api/shared/sheet/save', (req, res) => module.exports.writeSheet(sheetsSharedDir, shortid.generate() + ".sheet", req.body.content, res))
-    app.get('/api/shared/brain/get', (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
+    app.get ('/api/shared/brain/get',  (req, res) => module.exports.getJSONFile(brainsSharedDir, req.query.filePath, res))
     app.post('/api/shared/brain/save', (req, res) => module.exports.writeBrain(brainsSharedDir, shortid.generate() + ".brain", req.body.content, res))
 
 
@@ -283,14 +282,15 @@ module.exports = {
     // Handle user Author files
     //
     // =================================================================
-    app.get('/api/user/sheet/list', ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(sheetsHomeDir, req), req.query.path, res))
-    app.get('/api/user/sheet/get', ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(sheetsHomeDir, req), req.query.filePath, res))
+    app.get ('/api/user/sheet/list',   ensureLoggedIn(), (req, res) => module.exports.listFiles(userFolder(sheetsHomeDir, req), req.query.path, res))
+    app.get ('/api/user/sheet/get',    ensureLoggedIn(), (req, res) => module.exports.getJSONFile(userFolder(sheetsHomeDir, req), req.query.filePath, res))
     app.post('/api/user/sheet/delete', ensureLoggedIn(), (req, res) => module.exports.deleteFile(userFolder(sheetsHomeDir, req), req.body.filePath, res))
     app.post('/api/user/sheet/rename', ensureLoggedIn(), (req, res) => module.exports.renameFile(userFolder(sheetsHomeDir, req), req.body.from, req.body.to, res))
-    app.post('/api/user/sheet/save', ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req), req.body.filePath, req.body.content, res))
+    app.post('/api/user/sheet/save',   ensureLoggedIn(), (req, res) => module.exports.writeSheet(userFolder(sheetsHomeDir, req), req.body.filePath, req.body.content, res))
     app.post('/api/user/sheet/folder', ensureLoggedIn(), (req, res) => module.exports.createFolder(userFolder(sheetsHomeDir, req), req.body.filePath, res))
-    app.get('/api/user/sheet/pdf', ensureLoggedIn(), (req, res) => {
+    app.get ('/api/user/sheet/pdf',    ensureLoggedIn(), (req, res) => {
       let {render} = require("../../converter/pdf")
+      // inject a session token to ensure that "puppeteer" can access the user page without login.
       let id = token_set(req.user)
       render(`http://localhost:${args.port}/author/page.html?user=${req.query.file}&token=${id}`).then(pdf => {
         res.set({'Content-Type': 'application/pdf', 'Content-Length': pdf.length})
@@ -323,6 +323,7 @@ module.exports = {
     app.post('/api/global/brain/rename', ensureAdminLoggedIn(), (req, res) => module.exports.renameFile(brainsAppDir, req.body.from, req.body.to, res))
     app.post('/api/global/brain/save', ensureAdminLoggedIn(), (req, res) => module.exports.writeBrain(brainsAppDir, req.body.filePath, req.body.content, res))
     app.post('/api/global/brain/folder', ensureAdminLoggedIn(), (req, res) => module.exports.createFolder(brainsAppDir, req.body.filePath, res))
+
 
     // =================================================================
     // Handle pre-installed sheet files

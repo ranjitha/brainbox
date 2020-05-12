@@ -1,0 +1,108 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title>Brainbox</title>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+  <link rel="icon" type="image/png" href="../_common/images/favicon_64x64.png" sizes="64x64">
+  <link rel="icon" type="image/png" href="../_common/images/favicon_48x48.png" sizes="48x48">
+  <link rel="icon" type="image/png" href="../_common/images/favicon_32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="../_common/images/favicon_16x16.png" sizes="16x16">
+  <link href="../_common/css/loader.css" rel='stylesheet' type='text/css'/>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Roboto, sans-serif;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+    }
+
+
+  </style>
+</head>
+
+<body>
+<hgroup>
+  <h1>Brainbox Registration</h1>
+  <br>
+  <h3>the beginning of something awesome</h3>
+</hgroup>
+<div class="registrationPane" >
+
+  <div id="roleSelector">
+    <div class="group">
+      I am a ...
+    </div>
+
+    <button id="studentButton">Student
+      <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+    </button>
+
+
+    <button id="teacherButton">Teacher
+      <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+    </button>
+  </div>
+
+  <div id="nicknameSelector" style="display:none">
+    <div class="group">
+      Choose a login name
+    </div>
+
+    <div class="group">
+      <input id="usernameInput" type="text" name="username"><span class="highlight"></span><span class="bar"></span>
+      <label>User</label>
+      <span id="usernameHint">enter a valid login name</span>
+    </div>
+
+
+    <button  id="registerButton" disabled>Register
+      <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+    </button>
+  </div>
+
+
+  <div id="successPane" style="display:none">
+    <div class="group">
+      Welcome <span class="username"></span>!
+      <div>
+        Have fun with Brainbox
+      </div>
+    </div>
+    <div class="group password" style="text-align: center">
+
+    </div>
+
+    <div class="group">
+      This is your login password. Since we do not have your email address, you will need help from
+      the administrator or teacher to reset your password. Remember it well.
+    </div>
+
+    <button  id="gotoLoginButton" >Go to Login
+      <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+    </button>
+  </div>
+
+</div>
+<footer>
+  <p>Coded with ♥ and the powerful <a href="http://www.draw2d.org" target="_blank">Draw2D</a> library by
+    Andreas Herz</p>
+</footer>
+
+</body>
+
+<link href='//fonts.googleapis.com/css?family=Roboto:400,300,400italic,500,700,100,900' rel='stylesheet' type='text/css'>
+<link href='../_common/js/bootstrap/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+
+<script src="../_common/js/jquery/jquery.js"></script>
+<script src="../_common/js/jquery/jquery-ui.js"></script>
+
+<script src="../_common/js/bootstrap/js/bootstrap.min.js"></script>
+<script src="../_common/js/bootbox/bootbox.min.js"></script>
+<SCRIPT src="./js/webpack/bundle.js"></SCRIPT>
+
+</html>
