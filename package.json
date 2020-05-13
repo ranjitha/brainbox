@@ -92,7 +92,7 @@
     "markdown-it-container": "^2.0.0",
     "mousetrap": "1.6.2",
     "mqtt": "^2.18.3",
-    "n": "2.1.0",
+    "n": "2.1.12",
     "node-cache": "^5.1.0",
     "node-ttl": "0.0.5",
     "onoff": "^5.0.1",
