@@ -78,7 +78,7 @@
     "js-treeview": "^1.1.5",
     "jsdom": "9.0.0",
     "jsts": "1.6.0",
-    "less": "3.7.1",
+    "less": "3.11.1",
     "level": "^6.0.1",
     "leveldown": "^5.5.1",
     "levelgraph": "^2.1.1",
