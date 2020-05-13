@@ -3,6 +3,25 @@ import "../less/index.less"
 import axios from "axios"
 
 $(window, document, undefined).ready(function() {
+  function getParam(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]")
+    let regexS = "[\\?&]" + name + "=([^&#]*)"
+    let regex = new RegExp(regexS)
+    let results = regex.exec(window.location.href)
+    // the param isn't part of the normal URL pattern...
+    //
+    if (results === null) {
+      // maybe it is part in the hash.
+      //
+      regexS = "[\\#]" + name + "=([^&#]*)"
+      regex = new RegExp(regexS)
+      results = regex.exec(window.location.hash)
+      if (results === null) {
+        return null
+      }
+    }
+    return results[1]
+  }
 
   let userData={
     stereotype:"student",
@@ -48,12 +67,14 @@ $(window, document, undefined).ready(function() {
     userData.stereotype = "student"
     $("#roleSelector").hide()
     $("#nicknameSelector").show()
+    $("#usernameInput").focus()
   })
 
   $("#teacherButton").on("click", ()=>{
     userData.stereotype = "teacher"
     $("#roleSelector").hide()
     $("#nicknameSelector").show()
+    $("#usernameInput").focus()
   })
 
   $("#usernameInput").on("keyup", (event)=>{
@@ -83,6 +104,16 @@ $(window, document, undefined).ready(function() {
 
   $("#gotoLoginButton").on("click", ()=>{
     location.href ="../login"
+  })
+
+  $("#backButton").on("click", ()=>{
+    let back = getParam("returnTo")
+    if(back){
+      location.href = "../"+back
+    }
+    else{
+      location.href = "../login"
+    }
   })
 
 });
