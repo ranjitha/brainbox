@@ -64,7 +64,7 @@
     "bcrypt": "^4.0.1",
     "body-parser": "1.18.3",
     "bootstrap-toggle": "^2.2.2",
-    "codemirror": "^5.26.0",
+    "codemirror": "^5.54.0",
     "colors": "^1.4.0",
     "commander": "^5.0.0",
     "connect-ensure-login": "^0.1.1",
