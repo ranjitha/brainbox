@@ -83,7 +83,7 @@
     "leveldown": "^5.5.1",
     "levelgraph": "^2.1.1",
     "levelup": "^4.3.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "lodash.assign": "^4.2.0",
     "lowdb": "^1.0.0",
     "make-dir": "^3.0.2",
